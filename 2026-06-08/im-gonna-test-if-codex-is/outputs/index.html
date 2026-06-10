@@ -210,11 +210,17 @@
   <script>
     const VIEW_W = 640;
     const VIEW_H = 360;
-    const WORLD_W = 1344;
-    const WORLD_H = 896;
+    const WORLD_W = 3200;
+    const WORLD_H = 2400;
     const INTERIOR_W = 640;
     const INTERIOR_H = 360;
     const TILE = 16;
+    
+    // Biome definitions
+    const BIOME_FARM = 0;
+    const BIOME_PINE_FOREST = 1;
+    const BIOME_SPRUCE_FOREST = 2;
+    const BIOME_DARK_FOREST = 3;
     const MOVE_SPEED = 112;
     const CHARACTER_WORLD_SCALE = 0.72;
     const DIRECTIONS = ["front", "back", "left", "right"];
@@ -355,18 +361,77 @@
     const FARM_GRID = 28;
     const FARM_CROP_SIZE = 32;
     const CROP_GROW_MS = 28000;
+
+    function spawnForestTrees() {
+      const treesByBiome = {
+        [BIOME_PINE_FOREST]: ["plant_tiny_spruce_tree_green", "plant_pico_pine_tree_teal", "plant_small_pine_tree_green", "plant_triangle_spruce_tree_yellow"],
+        [BIOME_SPRUCE_FOREST]: ["plant_spruce_tree_green_teal", "plant_bubble_pine_tree_green", "plant_slim_spruce_tree_cold", "plant_thick_spruce_tree_green_teal"],
+        [BIOME_DARK_FOREST]: ["plant_sprout_tall_box_tree", "plant_sprout_round_box_tree", "plant_sprout_flower_box_tree"]
+      };
+      
+      const centerX = WORLD_W / 2;
+      const centerY = WORLD_H / 2;
+      
+      // Generate trees in each biome
+      for (let biome in treesByBiome) {
+        const biomeNum = parseInt(biome);
+        const trees = treesByBiome[biomeNum];
+        let count = biomeNum === BIOME_DARK_FOREST ? 120 : 80; // More trees in dark forest
+        
+        for (let i = 0; i < count; i++) {
+          const treeInfo = plantSprites.find(t => t.name === trees[Math.floor(Math.random() * trees.length)]);
+          if (!treeInfo) continue;
+          
+          let x, y, dist;
+          
+          // Distribute trees based on biome
+          if (biomeNum === BIOME_PINE_FOREST) {
+            x = centerX + 300 + Math.random() * 600;
+            y = centerY - 400 + Math.random() * 800;
+          } else if (biomeNum === BIOME_SPRUCE_FOREST) {
+            x = centerX - 900 + Math.random() * 600;
+            y = centerY - 400 + Math.random() * 800;
+          } else {
+            x = Math.random() * WORLD_W;
+            y = Math.random() * WORLD_H;
+            dist = Math.hypot(x - centerX, y - centerY);
+            if (dist < 800) continue; // Skip if too close to center
+          }
+          
+          // Clamp to world bounds
+          x = Math.max(treeInfo.w / 2, Math.min(WORLD_W - treeInfo.w / 2, x));
+          y = Math.max(treeInfo.h, Math.min(WORLD_H - treeInfo.h, y));
+          
+          placedSprites.push({
+            ...treeInfo,
+            x,
+            y,
+            scene: "outside",
+            buildId: null
+          });
+        }
+      }
+    }
+
     const plantSprites = [
-      { name: "plant_tiny_spruce_tree_green", count: 12, fps: 9, w: 40, h: 68, x: 328, y: 390, solid: { x: -7, y: -15, w: 14, h: 16 } },
-      { name: "plant_spruce_tree_green_teal", count: 12, fps: 9, w: 51, h: 87, x: 390, y: 390, solid: { x: -8, y: -16, w: 16, h: 18 } },
-      { name: "plant_bubble_pine_tree_green", count: 12, fps: 9, w: 51, h: 91, x: 460, y: 392, solid: { x: -9, y: -18, w: 18, h: 20 } },
-      { name: "plant_pico_pine_tree_teal", count: 12, fps: 9, w: 40, h: 54, x: 530, y: 386, solid: { x: -6, y: -12, w: 12, h: 14 } },
-      { name: "plant_small_pine_tree_green", count: 12, fps: 9, w: 51, h: 85, x: 600, y: 390, solid: { x: -8, y: -16, w: 16, h: 18 } },
-      { name: "plant_triangle_spruce_tree_yellow", count: 12, fps: 9, w: 45, h: 76, x: 670, y: 388, solid: { x: -7, y: -15, w: 14, h: 16 } },
-      { name: "plant_slim_spruce_tree_cold", count: 12, fps: 9, w: 48, h: 92, x: 740, y: 394, solid: { x: -7, y: -17, w: 14, h: 18 } },
-      { name: "plant_thick_spruce_tree_green_teal", count: 12, fps: 9, w: 64, h: 104, x: 820, y: 402, solid: { x: -10, y: -19, w: 20, h: 21 } },
-      { name: "plant_sprout_tall_box_tree", count: 8, fps: 7, w: 40, h: 70, x: 318, y: 530, solid: { x: -8, y: -18, w: 16, h: 20 } },
-      { name: "plant_sprout_round_box_tree", count: 8, fps: 7, w: 66, h: 66, x: 386, y: 530, solid: { x: -9, y: -18, w: 18, h: 20 } },
-      { name: "plant_sprout_flower_box_tree", count: 8, fps: 7, w: 66, h: 66, x: 472, y: 530, solid: { x: -9, y: -18, w: 18, h: 20 } },
+      // Pine trees - right forest
+      { name: "plant_tiny_spruce_tree_green", count: 12, fps: 9, w: 40, h: 68, x: 328, y: 390, solid: { x: -7, y: -15, w: 14, h: 16 }, biome: BIOME_PINE_FOREST },
+      { name: "plant_pico_pine_tree_teal", count: 12, fps: 9, w: 40, h: 54, x: 530, y: 386, solid: { x: -6, y: -12, w: 12, h: 14 }, biome: BIOME_PINE_FOREST },
+      { name: "plant_small_pine_tree_green", count: 12, fps: 9, w: 51, h: 85, x: 600, y: 390, solid: { x: -8, y: -16, w: 16, h: 18 }, biome: BIOME_PINE_FOREST },
+      { name: "plant_triangle_spruce_tree_yellow", count: 12, fps: 9, w: 45, h: 76, x: 670, y: 388, solid: { x: -7, y: -15, w: 14, h: 16 }, biome: BIOME_PINE_FOREST },
+      
+      // Spruce trees - left forest
+      { name: "plant_spruce_tree_green_teal", count: 12, fps: 9, w: 51, h: 87, x: 390, y: 390, solid: { x: -8, y: -16, w: 16, h: 18 }, biome: BIOME_SPRUCE_FOREST },
+      { name: "plant_bubble_pine_tree_green", count: 12, fps: 9, w: 51, h: 91, x: 460, y: 392, solid: { x: -9, y: -18, w: 18, h: 20 }, biome: BIOME_SPRUCE_FOREST },
+      { name: "plant_slim_spruce_tree_cold", count: 12, fps: 9, w: 48, h: 92, x: 740, y: 394, solid: { x: -7, y: -17, w: 14, h: 18 }, biome: BIOME_SPRUCE_FOREST },
+      { name: "plant_thick_spruce_tree_green_teal", count: 12, fps: 9, w: 64, h: 104, x: 820, y: 402, solid: { x: -10, y: -19, w: 20, h: 21 }, biome: BIOME_SPRUCE_FOREST },
+      
+      // Box trees - dark forest
+      { name: "plant_sprout_tall_box_tree", count: 8, fps: 7, w: 40, h: 70, x: 318, y: 530, solid: { x: -8, y: -18, w: 16, h: 20 }, biome: BIOME_DARK_FOREST },
+      { name: "plant_sprout_round_box_tree", count: 8, fps: 7, w: 66, h: 66, x: 386, y: 530, solid: { x: -9, y: -18, w: 18, h: 20 }, biome: BIOME_DARK_FOREST },
+      { name: "plant_sprout_flower_box_tree", count: 8, fps: 7, w: 66, h: 66, x: 472, y: 530, solid: { x: -9, y: -18, w: 18, h: 20 }, biome: BIOME_DARK_FOREST },
+      
+      // Shared/farm plants
       { name: "plant_sprout_cube_berry_bush", count: 8, fps: 5, w: 66, h: 34, x: 558, y: 536 },
       { name: "plant_sprout_cube_plain_bush", count: 8, fps: 5, w: 66, h: 34, x: 638, y: 536 },
       { name: "plant_sprout_blue_box_flower", count: 8, fps: 5, w: 34, h: 34, x: 712, y: 536 },
@@ -469,11 +534,11 @@
     let staticMap;
     const placedSprites = [];
     const farmPlots = [];
-    const ASSET_REV = "farm-crop-round-fix";
+    const ASSET_REV = "farm-growth-v1";
 
     const state = {
-      x: 540,
-      y: 424,
+      x: 1600,
+      y: 1200,
       dir: "front",
       mode: "idle",
       current: "fox",
@@ -548,6 +613,28 @@
       target.drawImage(img, sx, sy, TILE, TILE, x, y, TILE, TILE);
     }
 
+    function getBiomeAtTile(tileX, tileY) {
+      const x = tileX * TILE;
+      const y = tileY * TILE;
+      const centerX = WORLD_W / 2;
+      const centerY = WORLD_H / 2;
+      const dx = x - centerX;
+      const dy = y - centerY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      
+      // Farm biome in center
+      if (dist < 400) return BIOME_FARM;
+      
+      // Pine forest to the right
+      if (x > centerX + 300 && dist < 1200) return BIOME_PINE_FOREST;
+      
+      // Spruce forest to the left
+      if (x < centerX - 300 && dist < 1200) return BIOME_SPRUCE_FOREST;
+      
+      // Dark forest everywhere else (top/bottom)
+      return BIOME_DARK_FOREST;
+    }
+
     function buildStaticMap() {
       staticMap = document.createElement("canvas");
       staticMap.width = WORLD_W;
@@ -558,7 +645,40 @@
 
       for (let y = 0; y < WORLD_H; y += TILE) {
         for (let x = 0; x < WORLD_W; x += TILE) {
-          drawGrassTile(m, grass, x, y, (x / TILE) * 5 + (y / TILE) * 3);
+          const tileX = x / TILE;
+          const tileY = y / TILE;
+          const biome = getBiomeAtTile(tileX, tileY);
+          const hash = (tileX * 5 + tileY * 3);
+          
+          // Base tile for all biomes
+          drawGrassTile(m, grass, x, y, hash);
+          
+          // Apply color filters and fog
+          if (biome === BIOME_FARM) {
+            // Farm: slightly warmer, no filter
+            m.fillStyle = "rgba(180, 140, 40, 0.05)";
+            m.fillRect(x, y, TILE, TILE);
+          } else if (biome === BIOME_PINE_FOREST) {
+            // Pine forest: medium green tint with slight fog
+            m.fillStyle = "rgba(100, 140, 80, 0.15)";
+            m.fillRect(x, y, TILE, TILE);
+            m.fillStyle = "rgba(200, 200, 180, 0.08)";
+            m.fillRect(x, y, TILE, TILE);
+          } else if (biome === BIOME_SPRUCE_FOREST) {
+            // Spruce forest: teal-green with more fog
+            m.fillStyle = "rgba(80, 120, 100, 0.18)";
+            m.fillRect(x, y, TILE, TILE);
+            m.fillStyle = "rgba(200, 210, 190, 0.12)";
+            m.fillRect(x, y, TILE, TILE);
+          } else {
+            // Dark forest: Don't Starve vibes - brown/dark overlay with heavy fog
+            m.fillStyle = "rgba(60, 50, 40, 0.35)";
+            m.fillRect(x, y, TILE, TILE);
+            m.fillStyle = "rgba(80, 70, 60, 0.25)";
+            m.fillRect(x, y, TILE, TILE);
+            m.fillStyle = "rgba(180, 170, 150, 0.15)";
+            m.fillRect(x, y, TILE, TILE);
+          }
         }
       }
     }
@@ -955,15 +1075,15 @@
 
     function exitHouse() {
       state.scene = "outside";
-      state.x = 1180;
-      state.y = 738;
+      state.x = 1620;
+      state.y = 1280;
       state.demo = false;
       startTransition("Outside");
     }
 
     function maybeTeleport() {
       if (performance.now() - state.transitionStarted < 650) return;
-      if (state.scene === "outside" && aabb(state.x - 8, state.y - 8, 16, 12, 1148, 692, 64, 46)) {
+      if (state.scene === "outside" && aabb(state.x - 8, state.y - 8, 16, 12, 1148, 650, 64, 46)) {
         enterHouse();
       } else if (state.scene === "interior" && aabb(state.x - 8, state.y - 8, 16, 12, 286, 312, 68, 34)) {
         exitHouse();
@@ -1183,6 +1303,7 @@
       renderPicker();
       renderBuildbar();
       buildStaticMap();
+      spawnForestTrees();
       seedDemoFarm();
       await setCurrent("fox");
       requestAnimationFrame(update);
