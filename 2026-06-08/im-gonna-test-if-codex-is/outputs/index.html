@@ -364,9 +364,10 @@
 
     function spawnForestTrees() {
       const treesByBiome = {
+        [BIOME_FARM]: ["plant_sprout_tall_box_tree", "plant_sprout_round_box_tree", "plant_sprout_flower_box_tree"],
         [BIOME_PINE_FOREST]: ["plant_tiny_spruce_tree_green", "plant_pico_pine_tree_teal", "plant_small_pine_tree_green", "plant_triangle_spruce_tree_yellow"],
         [BIOME_SPRUCE_FOREST]: ["plant_spruce_tree_green_teal", "plant_bubble_pine_tree_green", "plant_slim_spruce_tree_cold", "plant_thick_spruce_tree_green_teal"],
-        [BIOME_DARK_FOREST]: ["plant_sprout_tall_box_tree", "plant_sprout_round_box_tree", "plant_sprout_flower_box_tree"]
+        [BIOME_DARK_FOREST]: ["plant_thick_spruce_tree_green_teal", "plant_slim_spruce_tree_cold", "plant_bubble_pine_tree_green"]
       };
       
       const centerX = WORLD_W / 2;
@@ -376,7 +377,7 @@
       for (let biome in treesByBiome) {
         const biomeNum = parseInt(biome);
         const trees = treesByBiome[biomeNum];
-        let count = biomeNum === BIOME_DARK_FOREST ? 120 : 80; // More trees in dark forest
+        let count = biomeNum === BIOME_DARK_FOREST ? 140 : (biomeNum === BIOME_FARM ? 40 : 80);
         
         for (let i = 0; i < count; i++) {
           const treeInfo = plantSprites.find(t => t.name === trees[Math.floor(Math.random() * trees.length)]);
@@ -391,11 +392,18 @@
           } else if (biomeNum === BIOME_SPRUCE_FOREST) {
             x = centerX - 900 + Math.random() * 600;
             y = centerY - 400 + Math.random() * 800;
+          } else if (biomeNum === BIOME_FARM) {
+            // Farm: place boxy trees near the center farm area
+            const angle = Math.random() * Math.PI * 2;
+            const r = 80 + Math.random() * 220;
+            x = centerX + Math.cos(angle) * r;
+            y = centerY + Math.sin(angle) * r;
           } else {
+            // Dark forest: spread across world but avoid center
             x = Math.random() * WORLD_W;
             y = Math.random() * WORLD_H;
             dist = Math.hypot(x - centerX, y - centerY);
-            if (dist < 800) continue; // Skip if too close to center
+            if (dist < 900) continue; // Keep dark forest away from farm center
           }
           
           // Clamp to world bounds
@@ -426,10 +434,10 @@
       { name: "plant_slim_spruce_tree_cold", count: 12, fps: 9, w: 48, h: 92, x: 740, y: 394, solid: { x: -7, y: -17, w: 14, h: 18 }, biome: BIOME_SPRUCE_FOREST },
       { name: "plant_thick_spruce_tree_green_teal", count: 12, fps: 9, w: 64, h: 104, x: 820, y: 402, solid: { x: -10, y: -19, w: 20, h: 21 }, biome: BIOME_SPRUCE_FOREST },
       
-      // Box trees - dark forest
-      { name: "plant_sprout_tall_box_tree", count: 8, fps: 7, w: 40, h: 70, x: 318, y: 530, solid: { x: -8, y: -18, w: 16, h: 20 }, biome: BIOME_DARK_FOREST },
-      { name: "plant_sprout_round_box_tree", count: 8, fps: 7, w: 66, h: 66, x: 386, y: 530, solid: { x: -9, y: -18, w: 18, h: 20 }, biome: BIOME_DARK_FOREST },
-      { name: "plant_sprout_flower_box_tree", count: 8, fps: 7, w: 66, h: 66, x: 472, y: 530, solid: { x: -9, y: -18, w: 18, h: 20 }, biome: BIOME_DARK_FOREST },
+      // Box trees - farm biome (cute boxy trees restricted to farm)
+      { name: "plant_sprout_tall_box_tree", count: 8, fps: 7, w: 40, h: 70, x: 318, y: 530, solid: { x: -8, y: -18, w: 16, h: 20 }, biome: BIOME_FARM },
+      { name: "plant_sprout_round_box_tree", count: 8, fps: 7, w: 66, h: 66, x: 386, y: 530, solid: { x: -9, y: -18, w: 18, h: 20 }, biome: BIOME_FARM },
+      { name: "plant_sprout_flower_box_tree", count: 8, fps: 7, w: 66, h: 66, x: 472, y: 530, solid: { x: -9, y: -18, w: 18, h: 20 }, biome: BIOME_FARM },
       
       // Shared/farm plants
       { name: "plant_sprout_cube_berry_bush", count: 8, fps: 5, w: 66, h: 34, x: 558, y: 536 },
@@ -671,12 +679,15 @@
             m.fillStyle = "rgba(200, 210, 190, 0.12)";
             m.fillRect(x, y, TILE, TILE);
           } else {
-            // Dark forest: Don't Starve vibes - brown/dark overlay with heavy fog
-            m.fillStyle = "rgba(60, 50, 40, 0.35)";
+            // Dark forest: stronger Don't Starve grading (sepia/desat + heavy fog)
+            // Base sepia tint
+            m.fillStyle = "rgba(80,50,25,0.62)";
             m.fillRect(x, y, TILE, TILE);
-            m.fillStyle = "rgba(80, 70, 60, 0.25)";
+            // Low saturation wash
+            m.fillStyle = "rgba(90,80,70,0.20)";
             m.fillRect(x, y, TILE, TILE);
-            m.fillStyle = "rgba(180, 170, 150, 0.15)";
+            // Dense fog/mist layer
+            m.fillStyle = "rgba(15,10,8,0.45)";
             m.fillRect(x, y, TILE, TILE);
           }
         }
