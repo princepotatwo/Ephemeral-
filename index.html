@@ -210,11 +210,17 @@
   <script>
     const VIEW_W = 640;
     const VIEW_H = 360;
-    const WORLD_W = 1344;
-    const WORLD_H = 896;
+    const WORLD_W = 3200;
+    const WORLD_H = 2400;
     const INTERIOR_W = 640;
     const INTERIOR_H = 360;
     const TILE = 16;
+    
+    // Biome definitions
+    const BIOME_FARM = 0;
+    const BIOME_PINE_FOREST = 1;
+    const BIOME_SPRUCE_FOREST = 2;
+    const BIOME_DARK_FOREST = 3;
     const MOVE_SPEED = 112;
     const CHARACTER_WORLD_SCALE = 0.72;
     const DIRECTIONS = ["front", "back", "left", "right"];
@@ -469,11 +475,11 @@
     let staticMap;
     const placedSprites = [];
     const farmPlots = [];
-    const ASSET_REV = "farm-crop-round-fix";
+    const ASSET_REV = "farm-growth-v1";
 
     const state = {
-      x: 540,
-      y: 424,
+      x: 1600,
+      y: 1200,
       dir: "front",
       mode: "idle",
       current: "fox",
@@ -548,6 +554,28 @@
       target.drawImage(img, sx, sy, TILE, TILE, x, y, TILE, TILE);
     }
 
+    function getBiomeAtTile(tileX, tileY) {
+      const x = tileX * TILE;
+      const y = tileY * TILE;
+      const centerX = WORLD_W / 2;
+      const centerY = WORLD_H / 2;
+      const dx = x - centerX;
+      const dy = y - centerY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      
+      // Farm biome in center
+      if (dist < 400) return BIOME_FARM;
+      
+      // Pine forest to the right
+      if (x > centerX + 300 && dist < 1200) return BIOME_PINE_FOREST;
+      
+      // Spruce forest to the left
+      if (x < centerX - 300 && dist < 1200) return BIOME_SPRUCE_FOREST;
+      
+      // Dark forest everywhere else (top/bottom)
+      return BIOME_DARK_FOREST;
+    }
+
     function buildStaticMap() {
       staticMap = document.createElement("canvas");
       staticMap.width = WORLD_W;
@@ -558,7 +586,40 @@
 
       for (let y = 0; y < WORLD_H; y += TILE) {
         for (let x = 0; x < WORLD_W; x += TILE) {
-          drawGrassTile(m, grass, x, y, (x / TILE) * 5 + (y / TILE) * 3);
+          const tileX = x / TILE;
+          const tileY = y / TILE;
+          const biome = getBiomeAtTile(tileX, tileY);
+          const hash = (tileX * 5 + tileY * 3);
+          
+          // Base tile for all biomes
+          drawGrassTile(m, grass, x, y, hash);
+          
+          // Apply color filters and fog
+          if (biome === BIOME_FARM) {
+            // Farm: slightly warmer, no filter
+            m.fillStyle = "rgba(180, 140, 40, 0.05)";
+            m.fillRect(x, y, TILE, TILE);
+          } else if (biome === BIOME_PINE_FOREST) {
+            // Pine forest: medium green tint with slight fog
+            m.fillStyle = "rgba(100, 140, 80, 0.15)";
+            m.fillRect(x, y, TILE, TILE);
+            m.fillStyle = "rgba(200, 200, 180, 0.08)";
+            m.fillRect(x, y, TILE, TILE);
+          } else if (biome === BIOME_SPRUCE_FOREST) {
+            // Spruce forest: teal-green with more fog
+            m.fillStyle = "rgba(80, 120, 100, 0.18)";
+            m.fillRect(x, y, TILE, TILE);
+            m.fillStyle = "rgba(200, 210, 190, 0.12)";
+            m.fillRect(x, y, TILE, TILE);
+          } else {
+            // Dark forest: Don't Starve vibes - brown/dark overlay with heavy fog
+            m.fillStyle = "rgba(60, 50, 40, 0.35)";
+            m.fillRect(x, y, TILE, TILE);
+            m.fillStyle = "rgba(80, 70, 60, 0.25)";
+            m.fillRect(x, y, TILE, TILE);
+            m.fillStyle = "rgba(180, 170, 150, 0.15)";
+            m.fillRect(x, y, TILE, TILE);
+          }
         }
       }
     }
