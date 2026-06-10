@@ -210,17 +210,13 @@
   <script>
     const VIEW_W = 640;
     const VIEW_H = 360;
-    const WORLD_W = 3200;
-    const WORLD_H = 2400;
+    const WORLD_W = 2200;
+    const WORLD_H = 896;
     const INTERIOR_W = 640;
     const INTERIOR_H = 360;
     const TILE = 16;
-    
-    // Biome definitions
-    const BIOME_FARM = 0;
-    const BIOME_PINE_FOREST = 1;
-    const BIOME_SPRUCE_FOREST = 2;
-    const BIOME_DARK_FOREST = 3;
+    const DARK_FOREST_START = 1248;
+    const DARK_FOREST_FULL = 1504;
     const MOVE_SPEED = 112;
     const CHARACTER_WORLD_SCALE = 0.72;
     const DIRECTIONS = ["front", "back", "left", "right"];
@@ -361,6 +357,11 @@
     const FARM_GRID = 28;
     const FARM_CROP_SIZE = 32;
     const CROP_GROW_MS = 28000;
+    const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+    const hash01 = (x, y, salt = 0) => {
+      const n = Math.sin((x + 31) * 12.9898 + (y + 17) * 78.233 + salt * 37.719) * 43758.5453;
+      return n - Math.floor(n);
+    };
     const plantSprites = [
       { name: "plant_tiny_spruce_tree_green", count: 12, fps: 9, w: 40, h: 68, x: 328, y: 390, solid: { x: -7, y: -15, w: 14, h: 16 } },
       { name: "plant_spruce_tree_green_teal", count: 12, fps: 9, w: 51, h: 87, x: 390, y: 390, solid: { x: -8, y: -16, w: 16, h: 18 } },
@@ -370,9 +371,9 @@
       { name: "plant_triangle_spruce_tree_yellow", count: 12, fps: 9, w: 45, h: 76, x: 670, y: 388, solid: { x: -7, y: -15, w: 14, h: 16 } },
       { name: "plant_slim_spruce_tree_cold", count: 12, fps: 9, w: 48, h: 92, x: 740, y: 394, solid: { x: -7, y: -17, w: 14, h: 18 } },
       { name: "plant_thick_spruce_tree_green_teal", count: 12, fps: 9, w: 64, h: 104, x: 820, y: 402, solid: { x: -10, y: -19, w: 20, h: 21 } },
-      { name: "plant_sprout_tall_box_tree", count: 8, fps: 7, w: 40, h: 70, x: 318, y: 530, solid: { x: -8, y: -18, w: 16, h: 20 }, biome: BIOME_FARM },
-      { name: "plant_sprout_round_box_tree", count: 8, fps: 7, w: 66, h: 66, x: 386, y: 530, solid: { x: -9, y: -18, w: 18, h: 20 }, biome: BIOME_FARM },
-      { name: "plant_sprout_flower_box_tree", count: 8, fps: 7, w: 66, h: 66, x: 472, y: 530, solid: { x: -9, y: -18, w: 18, h: 20 }, biome: BIOME_FARM },
+      { name: "plant_sprout_tall_box_tree", count: 8, fps: 7, w: 40, h: 70, x: 318, y: 530, solid: { x: -8, y: -18, w: 16, h: 20 } },
+      { name: "plant_sprout_round_box_tree", count: 8, fps: 7, w: 66, h: 66, x: 386, y: 530, solid: { x: -9, y: -18, w: 18, h: 20 } },
+      { name: "plant_sprout_flower_box_tree", count: 8, fps: 7, w: 66, h: 66, x: 472, y: 530, solid: { x: -9, y: -18, w: 18, h: 20 } },
       { name: "plant_sprout_cube_berry_bush", count: 8, fps: 5, w: 66, h: 34, x: 558, y: 536 },
       { name: "plant_sprout_cube_plain_bush", count: 8, fps: 5, w: 66, h: 34, x: 638, y: 536 },
       { name: "plant_sprout_blue_box_flower", count: 8, fps: 5, w: 34, h: 34, x: 712, y: 536 },
@@ -417,106 +418,24 @@
       { name: "prop_sprout_tables", count: 1, fps: 1, w: 104, h: 56, x: 880, y: 850 },
       { name: "prop_sprout_rugs", count: 1, fps: 1, w: 128, h: 34, x: 1010, y: 840 }
     ];
-    
-    function spawnForestTrees() {
-      const treesByBiome = {
-        [BIOME_FARM]: ["plant_sprout_tall_box_tree", "plant_sprout_round_box_tree", "plant_sprout_flower_box_tree"],
-        [BIOME_PINE_FOREST]: ["plant_tiny_spruce_tree_green", "plant_pico_pine_tree_teal", "plant_small_pine_tree_green", "plant_triangle_spruce_tree_yellow"],
-        [BIOME_SPRUCE_FOREST]: ["plant_spruce_tree_green_teal", "plant_bubble_pine_tree_green", "plant_slim_spruce_tree_cold", "plant_thick_spruce_tree_green_teal"],
-        [BIOME_DARK_FOREST]: ["plant_thick_spruce_tree_green_teal", "plant_slim_spruce_tree_cold", "plant_bubble_pine_tree_green"]
+    const darkForestTrees = Array.from({ length: 88 }, (_, i) => {
+      const x = 1328 + hash01(i, 4, 2) * 780;
+      const y = 72 + hash01(i, 9, 4) * 760;
+      const leafy = hash01(i, 17, 6) > 0.44;
+      const scale = 0.92 + hash01(i, 22, 8) * 0.42;
+      const baseW = leafy ? 76 : 62;
+      const baseH = leafy ? 94 : 92;
+      return {
+        name: leafy ? "dark_tree_leafy" : "dark_tree_pine",
+        count: 1,
+        fps: 1,
+        w: Math.round(baseW * scale),
+        h: Math.round(baseH * scale),
+        x: Math.round(x),
+        y: Math.round(y),
+        solid: { x: Math.round(-7 * scale), y: Math.round(-16 * scale), w: Math.round(14 * scale), h: Math.round(18 * scale) }
       };
-
-      const centerX = WORLD_W / 2;
-      const centerY = WORLD_H / 2;
-
-      for (let biome in treesByBiome) {
-        const biomeNum = parseInt(biome);
-        const trees = treesByBiome[biomeNum];
-        let count = biomeNum === BIOME_DARK_FOREST ? 140 : (biomeNum === BIOME_FARM ? 40 : 80);
-
-        for (let i = 0; i < count; i++) {
-          const treeInfo = plantSprites.find(t => t.name === trees[Math.floor(Math.random() * trees.length)]);
-          if (!treeInfo) continue;
-
-          let x, y, dist;
-
-          if (biomeNum === BIOME_PINE_FOREST) {
-            x = centerX + 300 + Math.random() * 600;
-            y = centerY - 400 + Math.random() * 800;
-          } else if (biomeNum === BIOME_SPRUCE_FOREST) {
-            x = centerX - 900 + Math.random() * 600;
-            y = centerY - 400 + Math.random() * 800;
-          } else if (biomeNum === BIOME_FARM) {
-            const angle = Math.random() * Math.PI * 2;
-            const r = 80 + Math.random() * 220;
-            x = centerX + Math.cos(angle) * r;
-            y = centerY + Math.sin(angle) * r;
-          } else {
-            x = Math.random() * WORLD_W;
-            y = Math.random() * WORLD_H;
-            dist = Math.hypot(x - centerX, y - centerY);
-            if (dist < 900) continue;
-          }
-
-          x = Math.max(treeInfo.w / 2, Math.min(WORLD_W - treeInfo.w / 2, x));
-          y = Math.max(treeInfo.h, Math.min(WORLD_H - treeInfo.h, y));
-
-          placedSprites.push({
-            ...treeInfo,
-            x,
-            y,
-            scene: "outside",
-            buildId: null
-          });
-        }
-      }
-    }
-
-    // Fog canvas and patches (separate from tile coloring so fog can be round/organic)
-    let fogMap = null;
-    const fogPatches = [];
-
-    function buildFogMap() {
-      fogMap = document.createElement('canvas');
-      fogMap.width = WORLD_W;
-      fogMap.height = WORLD_H;
-      const f = fogMap.getContext('2d');
-      f.clearRect(0, 0, WORLD_W, WORLD_H);
-
-      const centerX = WORLD_W / 2;
-      const centerY = WORLD_H / 2;
-
-      function addPatch(x, y, r, innerAlpha, outerAlpha, color) {
-        const g = f.createRadialGradient(x, y, r * 0.15, x, y, r);
-        g.addColorStop(0, `rgba(${color[0]},${color[1]},${color[2]},${innerAlpha})`);
-        g.addColorStop(1, `rgba(${color[0]},${color[1]},${color[2]},${outerAlpha})`);
-        f.fillStyle = g;
-        f.beginPath();
-        f.arc(x, y, r, 0, Math.PI * 2);
-        f.fill();
-      }
-
-      for (let i = 0; i < 6; i++) {
-        const a = Math.random() * Math.PI * 2;
-        const r = 90 + Math.random() * 200;
-        addPatch(centerX + Math.cos(a) * (60 + Math.random() * 120), centerY + Math.sin(a) * (20 + Math.random() * 160), 160 + Math.random() * 180, 0.14, 0.0, [200, 170, 110]);
-      }
-
-      for (let i = 0; i < 18; i++) {
-        const bx = centerX + (Math.random() * 1.8 - 0.2) * WORLD_W;
-        const by = centerY + (Math.random() - 0.5) * WORLD_H;
-        addPatch(bx, by, 140 + Math.random() * 220, 0.12, 0.0, [120, 140, 120]);
-      }
-
-      for (let i = 0; i < 40; i++) {
-        const angle = Math.random() * Math.PI * 2;
-        const radiusFromCenter = 900 + Math.random() * (Math.max(WORLD_W, WORLD_H) / 2);
-        const x = centerX + Math.cos(angle) * radiusFromCenter;
-        const y = centerY + Math.sin(angle) * radiusFromCenter;
-        addPatch(x, y, 220 + Math.random() * 300, 0.28 + Math.random() * 0.18, 0.0, [60, 40, 30]);
-      }
-    }
-
+    });
     const interiorSprites = [
       { name: "prop_sprout_furniture_top", count: 1, fps: 1, w: 128, h: 48, x: 318, y: 90, solid: { x: -56, y: -34, w: 112, h: 32 } },
       { name: "prop_sprout_beds", count: 1, fps: 1, w: 96, h: 56, x: 144, y: 132, solid: { x: -42, y: -38, w: 84, h: 36 } },
@@ -575,16 +494,17 @@
     let staticMap;
     const placedSprites = [];
     const farmPlots = [];
-    const ASSET_REV = "farm-growth-v1";
+    const ASSET_REV = "dark-forest-rollback";
+    const startInDarkForest = new URLSearchParams(location.search).get("biome") === "dark";
 
     const state = {
-      x: 1600,
-      y: 1200,
+      x: startInDarkForest ? 1660 : 540,
+      y: startInDarkForest ? 430 : 424,
       dir: "front",
       mode: "idle",
       current: "fox",
-      cameraX: 0,
-      cameraY: 0,
+      cameraX: startInDarkForest ? 1340 : 0,
+      cameraY: startInDarkForest ? 250 : 0,
       t: 0,
       last: performance.now(),
       demo: true,
@@ -599,10 +519,7 @@
       toolActionDir: "front",
       toolActionStarted: 0,
       toolActionUntil: 0,
-      buildHover: { x: 320, y: 220, active: false },
-      currentBiome: -1,
-      biomeNotifyText: "",
-      biomeNotifyUntil: 0
+      buildHover: { x: 320, y: 220, active: false }
     };
     window.demoState = state;
 
@@ -648,35 +565,35 @@
       return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
     }
 
+    function darkForestAmountAt(x) {
+      return clamp((x - DARK_FOREST_START) / (DARK_FOREST_FULL - DARK_FOREST_START), 0, 1);
+    }
+
     function drawGrassTile(target, img, x, y, variant) {
       const plainTiles = [[16, 16], [0, 80], [16, 80], [32, 80], [0, 96], [16, 96], [32, 96]];
       const detailTiles = [[80, 80], [80, 96]];
-      const hash = Math.abs(Math.sin((x + 31) * 12.9898 + (y + 17) * 78.233) * 43758.5453);
+      const hash = hash01(x, y, 1);
       let [sx, sy] = plainTiles[variant % plainTiles.length];
-      if (hash % 1 > 0.84) [sx, sy] = detailTiles[Math.floor(hash * 11) % detailTiles.length];
+      if (hash > 0.84) [sx, sy] = detailTiles[Math.floor(hash * 11) % detailTiles.length];
       target.drawImage(img, sx, sy, TILE, TILE, x, y, TILE, TILE);
-    }
-
-    function getBiomeAtTile(tileX, tileY) {
-      const x = tileX * TILE;
-      const y = tileY * TILE;
-      const centerX = WORLD_W / 2;
-      const centerY = WORLD_H / 2;
-      const dx = x - centerX;
-      const dy = y - centerY;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      
-      // Farm biome in center
-      if (dist < 400) return BIOME_FARM;
-      
-      // Pine forest to the right
-      if (x > centerX + 300 && dist < 1200) return BIOME_PINE_FOREST;
-      
-      // Spruce forest to the left
-      if (x < centerX - 300 && dist < 1200) return BIOME_SPRUCE_FOREST;
-      
-      // Dark forest everywhere else (top/bottom)
-      return BIOME_DARK_FOREST;
+      const dark = darkForestAmountAt(x + TILE / 2);
+      if (!dark) return;
+      target.fillStyle = `rgba(77, 53, 31, ${0.42 * dark})`;
+      target.fillRect(x, y, TILE, TILE);
+      target.fillStyle = `rgba(22, 19, 17, ${0.18 * dark})`;
+      target.fillRect(x, y, TILE, TILE);
+      if (hash01(x, y, 5) > 0.34) {
+        target.strokeStyle = `rgba(36, 28, 20, ${0.36 * dark})`;
+        target.lineWidth = 1;
+        target.beginPath();
+        for (let i = 0; i < 3; i++) {
+          const ox = Math.floor(hash01(x, y, 10 + i) * 12) + 2;
+          const oy = Math.floor(hash01(x, y, 20 + i) * 12) + 2;
+          target.moveTo(x + ox, y + oy);
+          target.lineTo(x + ox + 5, y + oy + 2);
+        }
+        target.stroke();
+      }
     }
 
     function buildStaticMap() {
@@ -689,41 +606,7 @@
 
       for (let y = 0; y < WORLD_H; y += TILE) {
         for (let x = 0; x < WORLD_W; x += TILE) {
-          const tileX = x / TILE;
-          const tileY = y / TILE;
-          const biome = getBiomeAtTile(tileX, tileY);
-          const hash = (tileX * 5 + tileY * 3);
-          
-          // Base tile for all biomes
-          drawGrassTile(m, grass, x, y, hash);
-          
-          // Apply color filters and fog
-          if (biome === BIOME_FARM) {
-            // Farm: slightly warmer, no filter
-            m.fillStyle = "rgba(180, 140, 40, 0.05)";
-            m.fillRect(x, y, TILE, TILE);
-          } else if (biome === BIOME_PINE_FOREST) {
-            // Pine forest: medium green tint with slight fog
-            m.fillStyle = "rgba(100, 140, 80, 0.15)";
-            m.fillRect(x, y, TILE, TILE);
-            m.fillStyle = "rgba(200, 200, 180, 0.08)";
-            m.fillRect(x, y, TILE, TILE);
-          } else if (biome === BIOME_SPRUCE_FOREST) {
-            // Spruce forest: teal-green with more fog
-            m.fillStyle = "rgba(80, 120, 100, 0.18)";
-            m.fillRect(x, y, TILE, TILE);
-            m.fillStyle = "rgba(200, 210, 190, 0.12)";
-            m.fillRect(x, y, TILE, TILE);
-          } else {
-            // Dark forest: stronger Don't Starve grading (sepia/desat + heavy fog)
-            // Base sepia tint
-            m.fillStyle = "rgba(80,50,25,0.62)";
-            m.fillRect(x, y, TILE, TILE);
-            // Low saturation wash
-            m.fillStyle = "rgba(90,80,70,0.20)";
-            m.fillRect(x, y, TILE, TILE);
-            // (Fog moved to fog canvas for shaped fog patches)
-          }
+          drawGrassTile(m, grass, x, y, (x / TILE) * 5 + (y / TILE) * 3);
         }
       }
     }
@@ -774,7 +657,7 @@
     }
 
     async function loadPlants() {
-      const allPlants = [...plantSprites, ...interiorSprites, ...buildPalette.filter(item => !item.erase), ...buildConnectionSprites];
+      const allPlants = [...plantSprites, ...darkForestTrees, ...interiorSprites, ...buildPalette.filter(item => !item.erase), ...buildConnectionSprites];
       const cropFrames = Object.values(farmCrops).flatMap(crop =>
         Array.from({ length: crop.stages }, (_, i) => `assets/plants/${crop.name}/frame_${i}.png`)
       );
@@ -874,7 +757,7 @@
     }
 
     function activeSprites() {
-      return state.scene === "interior" ? [...interiorSprites, ...placedSprites.filter(item => item.scene === "interior")] : [...plantSprites, ...placedSprites.filter(item => item.scene === "outside")];
+      return state.scene === "interior" ? [...interiorSprites, ...placedSprites.filter(item => item.scene === "interior")] : [...plantSprites, ...darkForestTrees, ...placedSprites.filter(item => item.scene === "outside")];
     }
 
     function drawDepthSortedActors() {
@@ -893,6 +776,54 @@
       });
       actors.sort((a, b) => a.y - b.y);
       actors.forEach(actor => actor.draw());
+    }
+
+    function drawDarkForestFog() {
+      const left = state.cameraX - 80;
+      const right = state.cameraX + VIEW_W + 80;
+      if (right < DARK_FOREST_START) return;
+      const x0 = Math.max(DARK_FOREST_START, left);
+      const x1 = Math.min(WORLD_W, right);
+      if (x1 <= x0) return;
+
+      ctx.save();
+      ctx.globalCompositeOperation = "multiply";
+      ctx.fillStyle = "rgba(78, 55, 32, .24)";
+      ctx.fillRect(x0, state.cameraY - 40, x1 - x0, VIEW_H + 80);
+      ctx.restore();
+
+      ctx.save();
+      for (let i = 0; i < 16; i++) {
+        const baseX = DARK_FOREST_START + hash01(i, 2, 31) * (WORLD_W - DARK_FOREST_START);
+        const drift = Math.sin(state.t * 0.35 + i * 1.9) * 18;
+        const x = baseX + drift;
+        const y = 40 + hash01(i, 7, 32) * (WORLD_H - 80);
+        if (x < left - 120 || x > right + 120 || y < state.cameraY - 90 || y > state.cameraY + VIEW_H + 90) continue;
+        const amount = darkForestAmountAt(x);
+        const rx = 84 + hash01(i, 3, 33) * 84;
+        const ry = 18 + hash01(i, 5, 34) * 28;
+        ctx.fillStyle = `rgba(196, 178, 132, ${0.07 * amount})`;
+        ctx.beginPath();
+        ctx.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    function drawDarkForestScreenFilter() {
+      const amount = darkForestAmountAt(state.cameraX + VIEW_W * 0.58);
+      if (!amount || state.scene !== "outside") return;
+      ctx.save();
+      ctx.globalCompositeOperation = "multiply";
+      ctx.fillStyle = `rgba(72, 51, 30, ${0.18 * amount})`;
+      ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+      ctx.globalCompositeOperation = "source-over";
+      const vignette = ctx.createRadialGradient(VIEW_W / 2, VIEW_H / 2, 80, VIEW_W / 2, VIEW_H / 2, 380);
+      vignette.addColorStop(0, `rgba(0,0,0,0)`);
+      vignette.addColorStop(1, `rgba(0,0,0,${0.46 * amount})`);
+      ctx.fillStyle = vignette;
+      ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+      ctx.restore();
     }
 
     function currentBuildItem() {
@@ -1287,17 +1218,6 @@
       state.mode = attacking ? "attack" : moving ? "run" : "idle";
 
       updateCamera();
-
-      // Biome enter notification
-      const currentTileX = Math.floor(state.x / TILE);
-      const currentTileY = Math.floor(state.y / TILE);
-      const currentBiome = getBiomeAtTile(currentTileX, currentTileY);
-      if (state.currentBiome !== currentBiome) {
-        state.currentBiome = currentBiome;
-        const names = ["Farm", "Pine Forest", "Spruce Forest", "Dark Forest"];
-        state.biomeNotifyText = names[currentBiome] || "Unknown";
-        state.biomeNotifyUntil = performance.now() + 2200;
-      }
       draw();
       requestAnimationFrame(update);
     }
@@ -1322,37 +1242,14 @@
       } else {
         ctx.translate(-Math.round(state.cameraX), -Math.round(state.cameraY));
         ctx.drawImage(staticMap, 0, 0);
-        if (fogMap) {
-          ctx.globalAlpha = 0.9;
-          ctx.drawImage(fogMap, 0, 0);
-          ctx.globalAlpha = 1;
-        }
         drawFarmPatch();
         drawDepthSortedActors();
         drawBuildGhost();
-        if (fogMap) {
-          ctx.save();
-          ctx.globalAlpha = 0.22;
-          ctx.drawImage(fogMap, 0, 0);
-          ctx.restore();
-        }
+        drawDarkForestFog();
       }
       ctx.restore();
+      drawDarkForestScreenFilter();
       drawTransition();
-      if (state.biomeNotifyUntil && performance.now() < state.biomeNotifyUntil) {
-        const p = (state.biomeNotifyUntil - performance.now()) / 2200;
-        ctx.save();
-        ctx.font = "bold 18px monospace";
-        ctx.imageSmoothingEnabled = false;
-        ctx.textAlign = "center";
-        const alpha = Math.min(1, Math.max(0, 1 - (1 - p)));
-        ctx.fillStyle = `rgba(16,12,10,${alpha})`;
-        ctx.fillRect(VIEW_W/2 - 140, VIEW_H/2 - 44, 280, 36);
-        ctx.fillStyle = `rgba(255,240,210,${alpha})`;
-        ctx.font = "bold 14px monospace";
-        ctx.fillText(state.biomeNotifyText, VIEW_W / 2, VIEW_H / 2 - 18);
-        ctx.restore();
-      }
     }
 
     function drawTransition() {
@@ -1384,8 +1281,6 @@
       renderPicker();
       renderBuildbar();
       buildStaticMap();
-      spawnForestTrees();
-      buildFogMap();
       seedDemoFarm();
       await setCurrent("fox");
       requestAnimationFrame(update);
