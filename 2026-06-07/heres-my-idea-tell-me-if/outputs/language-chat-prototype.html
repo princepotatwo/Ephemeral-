@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Language Chat Prototype</title>
+  <style>
+    :root {
+      --bg: #f6f7f4;
+      --ink: #17201b;
+      --muted: #647067;
+      --line: #dfe5dc;
+      --you: #0f6b4f;
+      --them: #ffffff;
+      --accent: #d96b3b;
+      --soft: #eef3ea;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 320px;
+    }
+
+    .chat {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      border-right: 1px solid var(--line);
+    }
+
+    header {
+      padding: 16px;
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    select {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 8px;
+      background: #fff;
+    }
+
+    .messages {
+      flex: 1;
+      padding: 18px;
+      overflow: auto;
+    }
+
+    .row {
+      display: flex;
+      margin: 0 0 14px;
+    }
+
+    .row.you { justify-content: flex-end; }
+
+    .bubble {
+      width: min(560px, 88%);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--them);
+    }
+
+    .you .bubble {
+      background: var(--you);
+      color: #fff;
+      border-color: var(--you);
+    }
+
+    .text {
+      padding: 12px 14px;
+      font-size: 15px;
+      line-height: 1.35;
+    }
+
+    .lesson {
+      background: #fff;
+      color: var(--ink);
+      border-top: 1px solid var(--line);
+      padding: 12px 14px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .label {
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+
+    .translation {
+      font-weight: 700;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .chip {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 5px 8px;
+      font-size: 12px;
+      background: var(--soft);
+    }
+
+    .actions {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 8px 10px;
+      background: #fff;
+      color: var(--ink);
+      cursor: pointer;
+    }
+
+    button.primary {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      font-weight: 700;
+    }
+
+    form {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      padding: 14px;
+      background: #fff;
+      border-top: 1px solid var(--line);
+    }
+
+    input {
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 12px;
+      font-size: 15px;
+    }
+
+    aside {
+      padding: 16px;
+      background: #fff;
+    }
+
+    h2 {
+      margin: 0 0 10px;
+      font-size: 15px;
+    }
+
+    .panel {
+      border-top: 1px solid var(--line);
+      padding: 14px 0;
+    }
+
+    .words {
+      display: grid;
+      gap: 8px;
+    }
+
+    .word {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    @media (max-width: 820px) {
+      .app { grid-template-columns: 1fr; }
+      aside { border-top: 1px solid var(--line); }
+      .chat { min-height: 76vh; border-right: 0; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <section class="chat">
+      <header>
+        <div>
+          <h1>Private Language Chat</h1>
+          <div class="hint">Prototype for two people learning through normal messages</div>
+        </div>
+        <select id="language">
+          <option value="id">English -> Indonesian</option>
+          <option value="en">Indonesian -> English</option>
+        </select>
+      </header>
+
+      <div class="messages" id="messages"></div>
+
+      <form id="composer">
+        <input id="messageInput" autocomplete="off" placeholder="Type a message...">
+        <button class="primary">Send</button>
+      </form>
+    </section>
+
+    <aside>
+      <div class="panel">
+        <h2>Saved Words</h2>
+        <div class="words" id="savedWords"></div>
+      </div>
+      <div class="panel">
+        <h2>How The Real App Works</h2>
+        <p class="hint">
+          In the real version, each sent message goes to a free translation API.
+          The app saves the original, translation, simple meaning, and useful words.
+        </p>
+      </div>
+      <div class="panel">
+        <h2>Next Features</h2>
+        <p class="hint">
+          Add login for you two, chat history, MySQL storage, and a free translator
+          like MyMemory for the first live version.
+        </p>
+      </div>
+    </aside>
+  </main>
+
+  <script>
+    const dictionary = {
+      "i miss you today": {
+        translation: "Aku kangen kamu hari ini.",
+        meaning: "You are saying you miss her today.",
+        words: [["aku", "I"], ["kangen", "miss someone"], ["kamu", "you"], ["hari ini", "today"]],
+        reply: "Aku juga kangen kamu."
+      },
+      "what are you doing now": {
+        translation: "Kamu sedang apa sekarang?",
+        meaning: "You are asking what she is doing right now.",
+        words: [["sedang apa", "doing what"], ["sekarang", "now"], ["kamu", "you"]],
+        reply: "Aku lagi makan."
+      },
+      "aku juga kangen kamu": {
+        translation: "I miss you too.",
+        meaning: "She is saying she misses you too.",
+        words: [["juga", "also / too"], ["kangen kamu", "miss you"]],
+        reply: "I miss you more."
+      }
+    };
+
+    const fallback = {
+      translation: "Demo translation would appear here.",
+      meaning: "This is where the app explains the sentence in simple words.",
+      words: [["word", "meaning"], ["phrase", "natural usage"]],
+      reply: "Suggested reply appears here."
+    };
+
+    const messages = [
+      { who: "you", text: "I miss you today" },
+      { who: "them", text: "Aku juga kangen kamu" },
+      { who: "you", text: "What are you doing now" }
+    ];
+
+    const saved = new Map();
+    const messagesEl = document.querySelector("#messages");
+    const savedWordsEl = document.querySelector("#savedWords");
+    const input = document.querySelector("#messageInput");
+
+    function escapeHtml(value) {
+      return value
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function lessonFor(text) {
+      return dictionary[text.toLowerCase().replace(/[?.!]/g, "")] || fallback;
+    }
+
+    function render() {
+      messagesEl.innerHTML = "";
+      messages.forEach((message) => {
+        const lesson = lessonFor(message.text);
+        const row = document.createElement("article");
+        row.className = `row ${message.who}`;
+        row.innerHTML = `
+          <div class="bubble">
+            <div class="text">${escapeHtml(message.text)}</div>
+            <div class="lesson">
+              <div>
+                <div class="label">Translation</div>
+                <div class="translation">${escapeHtml(lesson.translation)}</div>
+              </div>
+              <div>
+                <div class="label">Meaning</div>
+                <div>${escapeHtml(lesson.meaning)}</div>
+              </div>
+              <div>
+                <div class="label">Words</div>
+                <div class="chips">
+                  ${lesson.words.map(([word, meaning]) => `<span class="chip">${escapeHtml(word)} = ${escapeHtml(meaning)}</span>`).join("")}
+                </div>
+              </div>
+              <div class="actions">
+                <button type="button" data-save="${escapeHtml(message.text)}">Save words</button>
+                <button type="button" data-reply="${escapeHtml(lesson.reply)}">Practice reply</button>
+              </div>
+            </div>
+          </div>
+        `;
+        messagesEl.append(row);
+      });
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    function renderSaved() {
+      savedWordsEl.innerHTML = "";
+      if (!saved.size) {
+        savedWordsEl.innerHTML = `<p class="hint">Tap "Save words" under a message.</p>`;
+        return;
+      }
+      saved.forEach((meaning, word) => {
+        const item = document.createElement("div");
+        item.className = "word";
+        item.innerHTML = `<strong>${escapeHtml(word)}</strong><span>${escapeHtml(meaning)}</span>`;
+        savedWordsEl.append(item);
+      });
+    }
+
+    document.querySelector("#composer").addEventListener("submit", (event) => {
+      event.preventDefault();
+      const text = input.value.trim();
+      if (!text) return;
+      messages.push({ who: "you", text });
+      input.value = "";
+      render();
+    });
+
+    messagesEl.addEventListener("click", (event) => {
+      const saveText = event.target.dataset.save;
+      const replyText = event.target.dataset.reply;
+
+      if (saveText) {
+        lessonFor(saveText).words.forEach(([word, meaning]) => saved.set(word, meaning));
+        renderSaved();
+      }
+
+      if (replyText) {
+        input.value = replyText;
+        input.focus();
+      }
+    });
+
+    render();
+    renderSaved();
+  </script>
+</body>
+</html>

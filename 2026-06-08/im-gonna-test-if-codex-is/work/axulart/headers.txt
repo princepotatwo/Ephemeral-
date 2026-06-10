@@ -1,0 +1,35 @@
+HTTP/2 302 
+date: Tue, 09 Jun 2026 10:50:09 GMT
+content-type: text/html
+location: https://axulart.itch.io/small-8-direction-characters
+nel: {"report_to":"cf-nel","success_fraction":0.0,"max_age":604800}
+set-cookie: itchio_token=WyIxWlBzIiwxNzgxMDAyMjA5LCJ2dGpUOEZ4N2NjTFlHVFkiXQ%3d%3d%2eiPkQ8NFck%2b7ueWXxHEcqcyc5IvE%3d; Path=/; Domain=.itch.io; HttpOnly; Secure
+x-robots-tag: noindex
+x-frame-options: SAMEORIGIN
+x-xss-protection: 1; mode=block
+x-content-type-options: nosniff
+referrer-policy: no-referrer-when-downgrade
+server: cloudflare
+origin-trial: A9azuaRpqOjPXfu0DURc1+bILm/7sKO5qlvUCb24V4KYmOicIKEcxdJgsw6F6O21eeV3JIqWelrbDjovdUOZlLQAAABieyJvcmlnaW4iOiJodHRwczovL2l0Y2guaW8iLCJmZWF0dXJlIjoiQ29lcENyZWRlbnRpYWxsZXNzIiwiZXhwaXJ5IjoxNzA0MDYzNjAwLCJpc1N1YmRvbWFpbiI6dHJ1ZX0=
+x-cache-status: MISS
+cf-cache-status: DYNAMIC
+report-to: {"group":"cf-nel","max_age":604800,"endpoints":[{"url":"https://a.nel.cloudflare.com/report/v4?s=lFXKGloYdBh1Vt0vVuN%2BjpQ1sQs7L%2F3pT1QdC39y%2FuH6kJjd3%2FsdJjPoB9PiyYooZm7H6RBgHgboNgUtD9aDM6ystQErDZJBTP7yZ5sYGpGJztvjDehRlm4W6xqzANa4i3PzEe5p9AaaCjIPzg%3D%3D"}]}
+cf-ray: a08f92e34f7c55ec-SIN
+
+HTTP/2 200 
+date: Tue, 09 Jun 2026 10:50:10 GMT
+content-type: text/html
+nel: {"report_to":"cf-nel","success_fraction":0.0,"max_age":604800}
+set-cookie: itchio_token=WyJUM3UzIiwxNzgxMDAyMjEwLCJ0RzUwYmRLRXhCZUpIYlYiXQ%3d%3d%2ekpyW6y8%2fQzBqALYeDF5NJVv43Eg%3d; Path=/; Domain=.itch.io; HttpOnly; Secure
+content-security-policy: frame-ancestors 'self' https://itch.io
+x-xss-protection: 1; mode=block
+x-content-type-options: nosniff
+referrer-policy: no-referrer-when-downgrade
+server: cloudflare
+origin-trial: A9azuaRpqOjPXfu0DURc1+bILm/7sKO5qlvUCb24V4KYmOicIKEcxdJgsw6F6O21eeV3JIqWelrbDjovdUOZlLQAAABieyJvcmlnaW4iOiJodHRwczovL2l0Y2guaW8iLCJmZWF0dXJlIjoiQ29lcENyZWRlbnRpYWxsZXNzIiwiZXhwaXJ5IjoxNzA0MDYzNjAwLCJpc1N1YmRvbWFpbiI6dHJ1ZX0=
+x-cache-status: MISS
+report-to: {"group":"cf-nel","max_age":604800,"endpoints":[{"url":"https://a.nel.cloudflare.com/report/v4?s=wN8lRQu4QioZNI9o0cbHZd6DcPDrE0U1VYCyj9HBiuIGKnOJooErDG%2FhUkhaJybq4AFoTa2yhz2ChqUAvf4ZvPYLT4uYE%2FdP6n8bG17VfgBDvOb8q0q8KomhFUQ%2B7kryJMHM0Iz9qb%2FcaUXBtQ%3D%3D"}]}
+vary: accept-encoding
+cf-cache-status: DYNAMIC
+cf-ray: a08f92e4dbbe55ec-SIN
+

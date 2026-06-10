@@ -1,0 +1,1051 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Codex Lumen Engine</title>
+  <style>
+    :root {
+      --ink: #f7f1e6;
+      --muted: rgba(247, 241, 230, .68);
+      --faint: rgba(247, 241, 230, .18);
+      --panel: rgba(19, 24, 28, .72);
+      --panel-strong: rgba(11, 15, 18, .86);
+      --line: rgba(247, 241, 230, .16);
+      --hot: #ff7d54;
+      --cool: #57d6c9;
+      --gold: #e7c260;
+      --blue: #7bb7ff;
+      --shadow: rgba(0, 0, 0, .34);
+      color-scheme: dark;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      overflow: hidden;
+      background: #0b0f12;
+      color: var(--ink);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      letter-spacing: 0;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    .app {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      min-height: 560px;
+      isolation: isolate;
+      background:
+        linear-gradient(135deg, rgba(30, 39, 43, .86), rgba(8, 12, 15, .96) 54%, rgba(42, 22, 25, .88)),
+        #0b0f12;
+    }
+
+    #field {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      touch-action: none;
+    }
+
+    .grain {
+      pointer-events: none;
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      opacity: .17;
+      mix-blend-mode: soft-light;
+      background-image:
+        repeating-linear-gradient(0deg, rgba(255,255,255,.18) 0 1px, transparent 1px 3px),
+        repeating-linear-gradient(90deg, rgba(255,255,255,.08) 0 1px, transparent 1px 5px);
+    }
+
+    .scan {
+      pointer-events: none;
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      background:
+        linear-gradient(180deg, transparent, rgba(255,255,255,.05) 49%, transparent 52%);
+      background-size: 100% 180px;
+      animation: scan 7s linear infinite;
+      opacity: .28;
+    }
+
+    @keyframes scan {
+      from { background-position: 0 -180px; }
+      to { background-position: 0 100vh; }
+    }
+
+    .chrome {
+      position: relative;
+      z-index: 3;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      width: 100%;
+      height: 100%;
+      padding: 18px;
+      gap: 16px;
+      pointer-events: none;
+    }
+
+    .topbar,
+    .dock,
+    .readout {
+      pointer-events: auto;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      min-height: 58px;
+      padding: 10px 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: linear-gradient(180deg, rgba(20, 26, 30, .82), rgba(12, 17, 20, .72));
+      box-shadow: 0 18px 45px var(--shadow);
+      backdrop-filter: blur(16px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      min-width: 0;
+      gap: 12px;
+    }
+
+    .mark {
+      position: relative;
+      flex: 0 0 auto;
+      width: 38px;
+      height: 38px;
+      border: 1px solid rgba(255, 255, 255, .28);
+      border-radius: 8px;
+      background:
+        linear-gradient(135deg, rgba(255, 125, 84, .74), transparent 48%),
+        linear-gradient(315deg, rgba(87, 214, 201, .72), transparent 52%),
+        #10161a;
+      box-shadow: inset 0 0 22px rgba(255,255,255,.12), 0 10px 22px rgba(0,0,0,.22);
+    }
+
+    .mark::before,
+    .mark::after {
+      content: "";
+      position: absolute;
+      inset: 9px;
+      border: 1px solid rgba(255,255,255,.7);
+      transform: rotate(45deg);
+    }
+
+    .mark::after {
+      inset: 14px;
+      border-color: rgba(11,15,18,.95);
+      background: rgba(247,241,230,.86);
+    }
+
+    h1 {
+      margin: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: clamp(20px, 3.2vw, 42px);
+      line-height: 1;
+      font-weight: 780;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.2;
+      white-space: nowrap;
+    }
+
+    .actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .icon-btn {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      border: 1px solid rgba(255,255,255,.18);
+      border-radius: 8px;
+      color: var(--ink);
+      background: rgba(255,255,255,.08);
+      cursor: pointer;
+      box-shadow: inset 0 -1px rgba(255,255,255,.08);
+    }
+
+    .icon-btn:hover,
+    .seg button:hover,
+    .swatch:hover {
+      border-color: rgba(255,255,255,.38);
+      background-color: rgba(255,255,255,.13);
+    }
+
+    .icon-btn:active {
+      transform: translateY(1px);
+    }
+
+    .seg {
+      display: flex;
+      padding: 3px;
+      border: 1px solid rgba(255,255,255,.16);
+      border-radius: 8px;
+      background: rgba(255,255,255,.07);
+    }
+
+    .seg button {
+      min-width: 70px;
+      height: 36px;
+      padding: 0 12px;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      color: var(--muted);
+      background: transparent;
+      cursor: pointer;
+      font-size: 12px;
+      line-height: 1;
+    }
+
+    .seg button.active {
+      color: #11171a;
+      background: var(--ink);
+      border-color: rgba(255,255,255,.72);
+    }
+
+    .center {
+      align-self: stretch;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      min-height: 0;
+    }
+
+    .readout {
+      width: min(322px, 32vw);
+      max-height: 100%;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: linear-gradient(180deg, var(--panel), rgba(13, 18, 21, .52));
+      box-shadow: 0 22px 55px var(--shadow);
+      backdrop-filter: blur(16px);
+    }
+
+    .readout-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+    }
+
+    .signature {
+      color: var(--gold);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .meter {
+      display: grid;
+      grid-template-columns: 86px 1fr 42px;
+      align-items: center;
+      gap: 10px;
+      margin: 11px 0;
+      font-size: 12px;
+      color: rgba(247,241,230,.84);
+    }
+
+    .bar {
+      height: 7px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: rgba(255,255,255,.1);
+    }
+
+    .bar > i {
+      display: block;
+      width: 50%;
+      height: 100%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, var(--cool), var(--gold), var(--hot));
+    }
+
+    .meter b {
+      font-weight: 650;
+      color: var(--muted);
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .fragments {
+      display: grid;
+      gap: 8px;
+      margin-top: 15px;
+    }
+
+    .fragment {
+      min-height: 36px;
+      padding: 8px 10px;
+      border: 1px solid rgba(255,255,255,.12);
+      border-radius: 7px;
+      background: rgba(255,255,255,.06);
+      color: rgba(247,241,230,.78);
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: 11px;
+      line-height: 1.45;
+    }
+
+    .dock {
+      display: grid;
+      grid-template-columns: minmax(280px, 1fr) auto;
+      align-items: end;
+      gap: 14px;
+    }
+
+    .sliders,
+    .palette {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel-strong);
+      box-shadow: 0 18px 45px var(--shadow);
+      backdrop-filter: blur(16px);
+    }
+
+    .sliders {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(130px, 1fr));
+      gap: 10px;
+      padding: 12px;
+    }
+
+    .field {
+      display: grid;
+      gap: 7px;
+      min-width: 0;
+    }
+
+    .field label {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .field span {
+      color: var(--ink);
+      font-variant-numeric: tabular-nums;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--cool);
+    }
+
+    .palette {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      padding: 12px;
+    }
+
+    .swatch {
+      width: 34px;
+      height: 34px;
+      border: 1px solid rgba(255,255,255,.2);
+      border-radius: 8px;
+      background: var(--a);
+      cursor: pointer;
+      box-shadow: inset 0 0 0 4px rgba(0,0,0,.12);
+    }
+
+    .swatch.active {
+      outline: 2px solid var(--ink);
+      outline-offset: 2px;
+    }
+
+    .status {
+      position: absolute;
+      left: 50%;
+      bottom: 92px;
+      z-index: 4;
+      transform: translateX(-50%);
+      min-width: 220px;
+      padding: 9px 12px;
+      border: 1px solid rgba(255,255,255,.16);
+      border-radius: 8px;
+      background: rgba(11, 15, 18, .76);
+      color: rgba(247,241,230,.82);
+      text-align: center;
+      font-size: 12px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .22s ease;
+      backdrop-filter: blur(14px);
+    }
+
+    .status.show {
+      opacity: 1;
+    }
+
+    @media (max-width: 850px) {
+      .app {
+        min-height: 680px;
+      }
+
+      .chrome {
+        padding: 12px;
+        gap: 10px;
+      }
+
+      .topbar {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .actions {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .seg {
+        order: 3;
+        width: 100%;
+      }
+
+      .seg button {
+        min-width: 0;
+        flex: 1 1 auto;
+      }
+
+      .center {
+        align-items: end;
+      }
+
+      .readout {
+        width: 100%;
+        max-height: 235px;
+        overflow: auto;
+      }
+
+      .dock {
+        grid-template-columns: 1fr;
+      }
+
+      .sliders {
+        grid-template-columns: 1fr;
+      }
+
+      .palette {
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <canvas id="field" aria-label="Codex Lumen Engine"></canvas>
+    <div class="grain"></div>
+    <div class="scan"></div>
+
+    <section class="chrome" aria-label="Codex Lumen Engine controls">
+      <header class="topbar">
+        <div class="brand">
+          <div class="mark" aria-hidden="true"></div>
+          <div>
+            <h1>Codex Lumen Engine</h1>
+            <div class="subtitle">live artifact compositor</div>
+          </div>
+        </div>
+        <div class="actions">
+          <div class="seg" role="tablist" aria-label="Modes">
+            <button class="active" data-mode="flux" role="tab" aria-selected="true">Flux</button>
+            <button data-mode="glass" role="tab" aria-selected="false">Glass</button>
+            <button data-mode="pulse" role="tab" aria-selected="false">Pulse</button>
+            <button data-mode="thread" role="tab" aria-selected="false">Thread</button>
+          </div>
+          <button class="icon-btn" id="remix" title="Remix" aria-label="Remix">&#8635;</button>
+          <button class="icon-btn" id="freeze" title="Pause" aria-label="Pause">&#9646;&#9646;</button>
+          <button class="icon-btn" id="snapshot" title="Snapshot" aria-label="Snapshot">&#9678;</button>
+        </div>
+      </header>
+
+      <div class="center">
+        <aside class="readout" aria-label="Signal readout">
+          <div class="readout-head">
+            <span>Signal</span>
+            <span class="signature" id="signature">cx-000000</span>
+          </div>
+          <div class="meter">
+            <span>Complexity</span>
+            <div class="bar"><i id="complexityBar"></i></div>
+            <b id="complexityOut">62</b>
+          </div>
+          <div class="meter">
+            <span>Tempo</span>
+            <div class="bar"><i id="tempoBar"></i></div>
+            <b id="tempoOut">48</b>
+          </div>
+          <div class="meter">
+            <span>Gravity</span>
+            <div class="bar"><i id="gravityBar"></i></div>
+            <b id="gravityOut">44</b>
+          </div>
+          <div class="fragments" id="fragments" aria-label="Generated fragments"></div>
+        </aside>
+      </div>
+
+      <footer class="dock">
+        <div class="sliders">
+          <div class="field">
+            <label for="complexity">Complexity <span id="complexityValue">62</span></label>
+            <input id="complexity" type="range" min="16" max="100" value="62">
+          </div>
+          <div class="field">
+            <label for="tempo">Tempo <span id="tempoValue">48</span></label>
+            <input id="tempo" type="range" min="8" max="100" value="48">
+          </div>
+          <div class="field">
+            <label for="gravity">Gravity <span id="gravityValue">44</span></label>
+            <input id="gravity" type="range" min="0" max="100" value="44">
+          </div>
+        </div>
+        <div class="palette" aria-label="Palette">
+          <button class="swatch active" style="--a: linear-gradient(135deg, #ff7d54, #57d6c9, #e7c260)" data-palette="0" aria-label="Palette 1"></button>
+          <button class="swatch" style="--a: linear-gradient(135deg, #ff4f8b, #76e2ff, #f6ec78)" data-palette="1" aria-label="Palette 2"></button>
+          <button class="swatch" style="--a: linear-gradient(135deg, #92ff9c, #8c6cff, #ffb15c)" data-palette="2" aria-label="Palette 3"></button>
+          <button class="swatch" style="--a: linear-gradient(135deg, #f2f0e6, #3dd8a4, #cf6a4c)" data-palette="3" aria-label="Palette 4"></button>
+        </div>
+      </footer>
+    </section>
+    <div class="status" id="status">Snapshot prepared</div>
+  </main>
+
+  <script>
+    const canvas = document.getElementById("field");
+    const ctx = canvas.getContext("2d", { alpha: false });
+    const modeButtons = [...document.querySelectorAll("[data-mode]")];
+    const swatches = [...document.querySelectorAll("[data-palette]")];
+    const controls = {
+      complexity: document.getElementById("complexity"),
+      tempo: document.getElementById("tempo"),
+      gravity: document.getElementById("gravity")
+    };
+    const labels = {
+      complexity: document.getElementById("complexityValue"),
+      tempo: document.getElementById("tempoValue"),
+      gravity: document.getElementById("gravityValue")
+    };
+    const bars = {
+      complexity: document.getElementById("complexityBar"),
+      tempo: document.getElementById("tempoBar"),
+      gravity: document.getElementById("gravityBar")
+    };
+    const outs = {
+      complexity: document.getElementById("complexityOut"),
+      tempo: document.getElementById("tempoOut"),
+      gravity: document.getElementById("gravityOut")
+    };
+    const signature = document.getElementById("signature");
+    const fragments = document.getElementById("fragments");
+    const status = document.getElementById("status");
+
+    const palettes = [
+      ["#ff7d54", "#57d6c9", "#e7c260", "#7bb7ff", "#f7f1e6"],
+      ["#ff4f8b", "#76e2ff", "#f6ec78", "#b98cff", "#fff5ed"],
+      ["#92ff9c", "#8c6cff", "#ffb15c", "#4fe2dc", "#f3fff4"],
+      ["#f2f0e6", "#3dd8a4", "#cf6a4c", "#8fb8ff", "#f8f6ef"]
+    ];
+    const wordsA = ["latent", "copper", "recursive", "frosted", "tidal", "velvet", "atomic", "hollow"];
+    const wordsB = ["lattice", "cipher", "syntax", "signal", "prism", "kernel", "orbit", "index"];
+    const glyphs = ["fn", "await", "fold", "delta", "node", "return", "type", "hash", "view", "bind"];
+
+    const state = {
+      width: 0,
+      height: 0,
+      dpr: 1,
+      seed: Math.floor(Math.random() * 999999),
+      mode: "flux",
+      palette: 0,
+      paused: false,
+      time: 0,
+      last: performance.now(),
+      pointer: { x: 0, y: 0, px: 0, py: 0, active: false, force: 0 },
+      nodes: [],
+      sparks: [],
+      plates: [],
+      rings: []
+    };
+
+    function mulberry32(seed) {
+      return function random() {
+        let t = seed += 0x6D2B79F5;
+        t = Math.imul(t ^ t >>> 15, t | 1);
+        t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+        return ((t ^ t >>> 14) >>> 0) / 4294967296;
+      };
+    }
+
+    let rand = mulberry32(state.seed);
+
+    function resize() {
+      const rect = canvas.getBoundingClientRect();
+      state.dpr = Math.min(window.devicePixelRatio || 1, 2);
+      state.width = Math.max(1, Math.floor(rect.width));
+      state.height = Math.max(1, Math.floor(rect.height));
+      canvas.width = Math.floor(state.width * state.dpr);
+      canvas.height = Math.floor(state.height * state.dpr);
+      ctx.setTransform(state.dpr, 0, 0, state.dpr, 0, 0);
+      state.pointer.x = state.pointer.x || state.width * .5;
+      state.pointer.y = state.pointer.y || state.height * .5;
+      rebuild();
+    }
+
+    function rebuild() {
+      rand = mulberry32(state.seed);
+      state.nodes = [];
+      state.plates = [];
+      state.rings = [];
+      const count = Math.round(90 + Number(controls.complexity.value) * 2.7);
+      const radius = Math.min(state.width, state.height) * .34;
+      for (let i = 0; i < count; i++) {
+        const theta = rand() * Math.PI * 2;
+        const phi = Math.acos(rand() * 2 - 1);
+        const band = Math.sin(i * .79 + rand() * 2) * .18;
+        state.nodes.push({
+          x: Math.sin(phi) * Math.cos(theta) * radius * (1 + band),
+          y: Math.sin(phi) * Math.sin(theta) * radius * (1 - band * .5),
+          z: Math.cos(phi) * radius,
+          vx: (rand() - .5) * .5,
+          vy: (rand() - .5) * .5,
+          size: 1.2 + rand() * 3.6,
+          spin: rand() * Math.PI * 2,
+          hue: Math.floor(rand() * 4),
+          glyph: glyphs[Math.floor(rand() * glyphs.length)]
+        });
+      }
+
+      for (let i = 0; i < 22; i++) {
+        state.plates.push({
+          x: rand() * state.width,
+          y: rand() * state.height,
+          w: 46 + rand() * 130,
+          h: 10 + rand() * 36,
+          a: rand() * Math.PI,
+          speed: .08 + rand() * .28,
+          hue: Math.floor(rand() * 4)
+        });
+      }
+
+      for (let i = 0; i < 9; i++) {
+        state.rings.push({
+          r: radius * (.32 + i * .068),
+          tilt: (rand() - .5) * .9,
+          spin: rand() * Math.PI * 2,
+          width: 1 + rand() * 2.5,
+          hue: Math.floor(rand() * 4)
+        });
+      }
+
+      signature.textContent = `cx-${String(state.seed).padStart(6, "0")}`;
+      renderFragments();
+    }
+
+    function renderFragments() {
+      const local = mulberry32(state.seed + 2048);
+      fragments.innerHTML = Array.from({ length: 4 }, () => {
+        const left = wordsA[Math.floor(local() * wordsA.length)];
+        const mid = wordsB[Math.floor(local() * wordsB.length)];
+        const hex = Math.floor(local() * 16777215).toString(16).padStart(6, "0");
+        const value = (local() * 9 + 1).toFixed(3);
+        return `<div class="fragment">${left}.${mid}<br>0x${hex} / ${value}</div>`;
+      }).join("");
+    }
+
+    function syncControls() {
+      for (const key of Object.keys(controls)) {
+        const value = controls[key].value;
+        labels[key].textContent = value;
+        outs[key].textContent = value;
+        bars[key].style.width = `${value}%`;
+      }
+    }
+
+    function project(node, t) {
+      const tempo = Number(controls.tempo.value) / 100;
+      const rotY = t * (.16 + tempo * .34);
+      const rotX = Math.sin(t * .18) * .35;
+      const cy = Math.cos(rotY);
+      const sy = Math.sin(rotY);
+      const cx = Math.cos(rotX);
+      const sx = Math.sin(rotX);
+      let x = node.x * cy - node.z * sy;
+      let z = node.x * sy + node.z * cy;
+      let y = node.y * cx - z * sx;
+      z = node.y * sx + z * cx;
+      const scale = 620 / (620 + z);
+      const px = state.width * .5 + x * scale;
+      const py = state.height * .5 + y * scale;
+      return { x: px, y: py, z, scale };
+    }
+
+    function drawBackground(colors, t) {
+      const bg = ctx.createLinearGradient(0, 0, state.width, state.height);
+      bg.addColorStop(0, "#090d10");
+      bg.addColorStop(.48, "#12191c");
+      bg.addColorStop(1, "#211417");
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, state.width, state.height);
+
+      ctx.save();
+      ctx.globalAlpha = .18;
+      ctx.strokeStyle = colors[3];
+      ctx.lineWidth = 1;
+      const gap = Math.max(28, Math.min(64, state.width / 18));
+      const offset = (t * 18) % gap;
+      for (let x = -gap; x < state.width + gap; x += gap) {
+        ctx.beginPath();
+        ctx.moveTo(x + offset, 0);
+        ctx.lineTo(x - state.height * .24 + offset, state.height);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = .13;
+      ctx.strokeStyle = colors[2];
+      for (let y = -gap; y < state.height + gap; y += gap) {
+        ctx.beginPath();
+        ctx.moveTo(0, y - offset);
+        ctx.lineTo(state.width, y + state.width * .18 - offset);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    function drawPlates(colors, t) {
+      ctx.save();
+      for (const plate of state.plates) {
+        const drift = Math.sin(t * plate.speed + plate.a) * 28;
+        const x = (plate.x + drift + state.width) % state.width;
+        const y = (plate.y + Math.cos(t * plate.speed + plate.a) * 18 + state.height) % state.height;
+        ctx.translate(x, y);
+        ctx.rotate(plate.a + Math.sin(t * .12) * .05);
+        ctx.globalAlpha = .1 + .08 * Math.sin(t + plate.a);
+        ctx.fillStyle = colors[plate.hue];
+        ctx.fillRect(-plate.w / 2, -plate.h / 2, plate.w, plate.h);
+        ctx.globalAlpha = .28;
+        ctx.strokeStyle = colors[(plate.hue + 2) % 4];
+        ctx.strokeRect(-plate.w / 2, -plate.h / 2, plate.w, plate.h);
+        ctx.setTransform(state.dpr, 0, 0, state.dpr, 0, 0);
+      }
+      ctx.restore();
+    }
+
+    function drawRings(colors, t) {
+      const cx = state.width * .5;
+      const cy = state.height * .5;
+      ctx.save();
+      ctx.translate(cx, cy);
+      for (const ring of state.rings) {
+        ctx.save();
+        ctx.rotate(ring.spin + t * (.1 + ring.width * .018));
+        ctx.scale(1, .34 + Math.abs(Math.sin(ring.tilt + t * .11)) * .26);
+        ctx.globalAlpha = state.mode === "glass" ? .34 : .18;
+        ctx.strokeStyle = colors[ring.hue];
+        ctx.lineWidth = ring.width;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, ring.r, ring.r, 0, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      }
+      ctx.restore();
+    }
+
+    function drawLinks(points, colors, t) {
+      const maxDist = state.mode === "thread" ? 126 : 92;
+      ctx.save();
+      ctx.lineWidth = state.mode === "glass" ? 1.15 : .8;
+      for (let i = 0; i < points.length; i += 1) {
+        const a = points[i];
+        for (let j = i + 1; j < Math.min(points.length, i + 14); j += 1) {
+          const b = points[j];
+          const dx = a.x - b.x;
+          const dy = a.y - b.y;
+          const d = Math.hypot(dx, dy);
+          if (d > maxDist) continue;
+          const fade = 1 - d / maxDist;
+          ctx.globalAlpha = fade * (state.mode === "thread" ? .34 : .18);
+          ctx.strokeStyle = colors[(i + j) % 4];
+          ctx.beginPath();
+          if (state.mode === "flux") {
+            const mx = (a.x + b.x) * .5 + Math.sin(t + i) * 16;
+            const my = (a.y + b.y) * .5 + Math.cos(t + j) * 16;
+            ctx.moveTo(a.x, a.y);
+            ctx.quadraticCurveTo(mx, my, b.x, b.y);
+          } else {
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
+          }
+          ctx.stroke();
+        }
+      }
+      ctx.restore();
+    }
+
+    function drawNodes(points, colors, t) {
+      ctx.save();
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.font = "10px SFMono-Regular, Consolas, monospace";
+      for (let i = 0; i < points.length; i++) {
+        const p = points[i];
+        const node = state.nodes[i];
+        const pulse = .7 + Math.sin(t * 2.2 + node.spin) * .3;
+        const size = node.size * p.scale * (state.mode === "pulse" ? 1.55 * pulse : 1);
+        ctx.globalAlpha = Math.max(.15, Math.min(.92, p.scale));
+        ctx.fillStyle = colors[node.hue];
+        ctx.strokeStyle = colors[(node.hue + 1) % 4];
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        if (i % 3 === 0) {
+          ctx.rect(p.x - size, p.y - size, size * 2, size * 2);
+        } else {
+          ctx.moveTo(p.x, p.y - size * 1.25);
+          ctx.lineTo(p.x + size * 1.15, p.y + size);
+          ctx.lineTo(p.x - size * 1.15, p.y + size);
+          ctx.closePath();
+        }
+        ctx.fill();
+        if (state.mode === "glass") ctx.stroke();
+
+        if (i % 17 === 0 && p.scale > .72) {
+          ctx.globalAlpha = .44;
+          ctx.fillStyle = colors[4];
+          ctx.fillText(node.glyph, p.x, p.y - 18 * p.scale);
+        }
+      }
+      ctx.restore();
+    }
+
+    function drawSparks(colors, dt) {
+      ctx.save();
+      for (let i = state.sparks.length - 1; i >= 0; i--) {
+        const spark = state.sparks[i];
+        spark.life -= dt;
+        spark.x += spark.vx * dt;
+        spark.y += spark.vy * dt;
+        spark.vx *= .985;
+        spark.vy *= .985;
+        const alpha = Math.max(0, spark.life / spark.max);
+        ctx.globalAlpha = alpha;
+        ctx.strokeStyle = colors[spark.hue];
+        ctx.lineWidth = 1.2 + alpha * 2;
+        ctx.beginPath();
+        ctx.moveTo(spark.x, spark.y);
+        ctx.lineTo(spark.x - spark.vx * .055, spark.y - spark.vy * .055);
+        ctx.stroke();
+        if (spark.life <= 0) state.sparks.splice(i, 1);
+      }
+      ctx.restore();
+    }
+
+    function drawPointer(colors) {
+      const p = state.pointer;
+      const speed = Math.hypot(p.x - p.px, p.y - p.py);
+      const radius = 18 + Math.min(90, speed * 1.8) + p.force * 36;
+      ctx.save();
+      ctx.globalAlpha = p.active ? .48 : .2;
+      ctx.strokeStyle = colors[1];
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.rect(p.x - radius * .5, p.y - radius * .5, radius, radius);
+      ctx.stroke();
+      ctx.globalAlpha = p.active ? .26 : .12;
+      ctx.strokeStyle = colors[0];
+      ctx.beginPath();
+      ctx.moveTo(p.x - radius, p.y);
+      ctx.lineTo(p.x + radius, p.y);
+      ctx.moveTo(p.x, p.y - radius);
+      ctx.lineTo(p.x, p.y + radius);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function updateNodes(dt, t) {
+      const gravity = Number(controls.gravity.value) / 100;
+      const p = state.pointer;
+      const influence = p.active ? 1.3 : .34;
+      for (const node of state.nodes) {
+        const wave = Math.sin(t * .8 + node.spin) * .18;
+        node.x += Math.cos(node.spin + t * .4) * wave;
+        node.y += Math.sin(node.spin + t * .31) * wave;
+        node.z += Math.cos(node.spin + t * .23) * wave * .6;
+        const pull = gravity * .004;
+        node.x -= node.x * pull;
+        node.y -= node.y * pull;
+        node.z -= node.z * pull;
+        if (p.force > .01) {
+          const cx = state.width * .5;
+          const cy = state.height * .5;
+          const dx = (p.x - cx) * .006;
+          const dy = (p.y - cy) * .006;
+          node.x += dx * influence;
+          node.y += dy * influence;
+        }
+      }
+      p.force *= Math.pow(.82, dt * 60);
+      p.px = p.x;
+      p.py = p.y;
+    }
+
+    function burst(x, y, amount = 44) {
+      const colors = palettes[state.palette];
+      for (let i = 0; i < amount; i++) {
+        const angle = rand() * Math.PI * 2;
+        const speed = 80 + rand() * 360;
+        state.sparks.push({
+          x,
+          y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          life: .55 + rand() * .7,
+          max: 1.1,
+          hue: Math.floor(rand() * (colors.length - 1))
+        });
+      }
+    }
+
+    function frame(now) {
+      const dt = Math.min((now - state.last) / 1000, .05);
+      state.last = now;
+      if (!state.paused) state.time += dt * (.45 + Number(controls.tempo.value) / 70);
+      const t = state.time;
+      const colors = palettes[state.palette];
+
+      updateNodes(dt, t);
+      drawBackground(colors, t);
+      drawPlates(colors, t);
+      drawRings(colors, t);
+
+      const points = state.nodes.map(node => project(node, t)).sort((a, b) => a.z - b.z);
+      drawLinks(points, colors, t);
+      drawNodes(points, colors, t);
+      drawSparks(colors, dt);
+      drawPointer(colors);
+      requestAnimationFrame(frame);
+    }
+
+    function showStatus(text) {
+      status.textContent = text;
+      status.classList.add("show");
+      clearTimeout(showStatus.timer);
+      showStatus.timer = setTimeout(() => status.classList.remove("show"), 1500);
+    }
+
+    function remix() {
+      state.seed = Math.floor(Math.random() * 999999);
+      state.sparks.length = 0;
+      rebuild();
+      burst(state.width * .5, state.height * .5, 96);
+      showStatus("Remixed");
+    }
+
+    function snapshot() {
+      const link = document.createElement("a");
+      link.download = `codex-lumen-${state.seed}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+      showStatus("Snapshot prepared");
+    }
+
+    function setMode(mode) {
+      state.mode = mode;
+      modeButtons.forEach(button => {
+        const active = button.dataset.mode === mode;
+        button.classList.toggle("active", active);
+        button.setAttribute("aria-selected", String(active));
+      });
+      burst(state.pointer.x || state.width * .5, state.pointer.y || state.height * .5, 28);
+    }
+
+    function setPalette(index) {
+      state.palette = index;
+      swatches.forEach(button => button.classList.toggle("active", Number(button.dataset.palette) === index));
+      burst(state.width * .5, state.height * .5, 52);
+    }
+
+    function setPointer(event, active) {
+      const rect = canvas.getBoundingClientRect();
+      state.pointer.x = event.clientX - rect.left;
+      state.pointer.y = event.clientY - rect.top;
+      state.pointer.active = active;
+      state.pointer.force = Math.min(1, state.pointer.force + .08);
+    }
+
+    for (const input of Object.values(controls)) {
+      input.addEventListener("input", () => {
+        syncControls();
+        if (input.id === "complexity") rebuild();
+      });
+    }
+
+    modeButtons.forEach(button => button.addEventListener("click", () => setMode(button.dataset.mode)));
+    swatches.forEach(button => button.addEventListener("click", () => setPalette(Number(button.dataset.palette))));
+    document.getElementById("remix").addEventListener("click", remix);
+    document.getElementById("snapshot").addEventListener("click", snapshot);
+    document.getElementById("freeze").addEventListener("click", event => {
+      state.paused = !state.paused;
+      event.currentTarget.innerHTML = state.paused ? "&#9658;" : "&#9646;&#9646;";
+      event.currentTarget.setAttribute("aria-label", state.paused ? "Play" : "Pause");
+      event.currentTarget.title = state.paused ? "Play" : "Pause";
+      showStatus(state.paused ? "Paused" : "Live");
+    });
+
+    canvas.addEventListener("pointermove", event => setPointer(event, state.pointer.active));
+    canvas.addEventListener("pointerdown", event => {
+      canvas.setPointerCapture(event.pointerId);
+      setPointer(event, true);
+      burst(state.pointer.x, state.pointer.y, 68);
+    });
+    canvas.addEventListener("pointerup", event => {
+      setPointer(event, false);
+      canvas.releasePointerCapture(event.pointerId);
+    });
+    canvas.addEventListener("pointerleave", () => {
+      state.pointer.active = false;
+    });
+
+    window.addEventListener("resize", resize);
+    syncControls();
+    resize();
+    burst(window.innerWidth * .5, window.innerHeight * .5, 90);
+    requestAnimationFrame(frame);
+  </script>
+</body>
+</html>

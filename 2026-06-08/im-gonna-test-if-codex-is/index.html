@@ -1,0 +1,1220 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Grass Animal Tester</title>
+  <style>
+    :root {
+      --paper: #fff8ec;
+      --ink: #534c41;
+      --panel: rgba(255, 250, 241, 0.92);
+      --edge: #decfb6;
+      --active: #90d39f;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: start center;
+      padding: 12px 0;
+      background:
+        radial-gradient(circle at 18% 16%, rgba(255,255,255,.75), transparent 22%),
+        radial-gradient(circle at 82% 8%, rgba(255,245,194,.7), transparent 18%),
+        linear-gradient(180deg, #dff4ff 0%, #f8f5e8 36%, #e7f4cc 100%);
+      color: var(--ink);
+      font-family: Georgia, "Times New Roman", serif;
+    }
+    .shell {
+      width: min(96vw, 1120px);
+      display: grid;
+      gap: 10px;
+    }
+    .stage {
+      position: relative;
+      overflow: hidden;
+      border: 4px solid #b8d9e5;
+      border-radius: 16px;
+      background: var(--paper);
+      box-shadow: 0 18px 42px rgba(83, 107, 101, .18);
+    }
+    #scene {
+      display: block;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      image-rendering: pixelated;
+      background: #9fca65;
+    }
+    .hud {
+      position: absolute;
+      left: 12px;
+      top: 12px;
+      max-width: 214px;
+      padding: 9px 11px;
+      border: 1px solid var(--edge);
+      border-radius: 10px;
+      background: var(--panel);
+      font-size: 13px;
+      line-height: 1.35;
+      backdrop-filter: blur(5px);
+    }
+    .picker {
+      width: 100%;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 9px;
+      border: 1px solid var(--edge);
+      border-radius: 12px;
+      background: rgba(255, 250, 241, .9);
+      box-shadow: 0 6px 18px rgba(83, 107, 101, .12);
+    }
+    .pick {
+      min-width: 68px;
+      padding: 8px 10px;
+      border: 1px solid #d7c8ae;
+      border-radius: 999px;
+      background: #fffaf2;
+      color: #554f45;
+      font: inherit;
+      font-size: 12px;
+      line-height: 1;
+      cursor: pointer;
+      box-shadow: inset 0 -2px rgba(0,0,0,.06);
+    }
+    .pick.active {
+      background: var(--active);
+      border-color: #6fb987;
+      color: #173322;
+    }
+    .pick.rarity-common { border-color: #8fc58a; }
+    .pick.rarity-uncommon { border-color: #78b8df; }
+    .pick.rarity-rare { border-color: #e18ecf; }
+    .pick.rarity-epic { border-color: #83d5c5; }
+    .pick.rarity-legendary { border-color: #e8bf4d; background: #fff7dc; }
+    .pick.rarity-mythic { border-color: #8e79bc; background: #f2ecff; }
+    .pick.rarity-divine { border-color: #9dddf8; background: #edfaff; }
+    .pick.rarity-secret { border-color: #c39aef; background: #fff0ca; }
+    .pad {
+      position: absolute;
+      right: 12px;
+      bottom: 12px;
+      display: grid;
+      grid-template-columns: repeat(3, 46px);
+      grid-template-rows: repeat(3, 46px);
+      gap: 8px;
+    }
+    .pad button {
+      width: 46px;
+      height: 46px;
+      border: 0;
+      border-radius: 10px;
+      background: rgba(255, 251, 245, .94);
+      color: #4f5b52;
+      font-size: 20px;
+      font-weight: 800;
+      box-shadow: inset 0 -3px rgba(0,0,0,.12), 0 2px 8px rgba(0,0,0,.08);
+    }
+    .pad button:active { transform: translateY(2px); }
+    .up { grid-column: 2; grid-row: 1; }
+    .left { grid-column: 1; grid-row: 2; }
+    .hit { grid-column: 2; grid-row: 2; }
+    .right { grid-column: 3; grid-row: 2; }
+    .down { grid-column: 2; grid-row: 3; }
+    .caption {
+      padding: 0 6px;
+      text-align: center;
+      font-size: 13px;
+      color: #6d685e;
+    }
+    .buildbar {
+      position: absolute;
+      left: 12px;
+      right: 12px;
+      bottom: 12px;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      padding: 7px;
+      border: 1px solid var(--edge);
+      border-radius: 12px;
+      background: rgba(255, 250, 241, .92);
+      box-shadow: 0 6px 18px rgba(83, 107, 101, .14);
+      max-width: calc(100% - 150px);
+      overflow-x: auto;
+    }
+    .build-tool {
+      flex: 0 0 44px;
+      width: 44px;
+      height: 44px;
+      display: grid;
+      place-items: center;
+      border: 1px solid #d7c8ae;
+      border-radius: 9px;
+      background: #fffaf2;
+      cursor: pointer;
+      box-shadow: inset 0 -2px rgba(0,0,0,.07);
+    }
+    .build-tool.active {
+      outline: 2px solid #6fb987;
+      background: #eaf8df;
+    }
+    .build-tool img {
+      max-width: 34px;
+      max-height: 34px;
+      image-rendering: pixelated;
+      pointer-events: none;
+    }
+    .build-tool span {
+      font-size: 20px;
+      line-height: 1;
+    }
+    @media (max-width: 720px) {
+      .picker {
+        max-height: 86px;
+        overflow: auto;
+      }
+      .hud { max-width: 176px; }
+      .buildbar {
+        max-width: calc(100% - 132px);
+      }
+      .pad {
+        grid-template-columns: repeat(3, 42px);
+        grid-template-rows: repeat(3, 42px);
+      }
+      .pad button {
+        width: 42px;
+        height: 42px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <main class="stage" aria-label="Cute overworld map">
+      <canvas id="scene" width="640" height="360"></canvas>
+      <div class="hud" id="hud">Fox<br>Move: WASD or arrow keys</div>
+      <div class="buildbar" id="buildbar" aria-label="Build tools"></div>
+      <div class="pad" aria-label="Touch controls">
+        <button class="up" data-key="ArrowUp" aria-label="Up">↑</button>
+        <button class="left" data-key="ArrowLeft" aria-label="Left">←</button>
+        <button class="hit" data-action="attack" aria-label="Attack">!</button>
+        <button class="down" data-key="ArrowDown" aria-label="Down">↓</button>
+        <button class="right" data-key="ArrowRight" aria-label="Right">→</button>
+      </div>
+    </main>
+    <div class="picker" id="picker" aria-label="Character switcher"></div>
+    <div class="caption">Online sprite credits: inkBubi, PIPOYA, AxulArt, RGS_Dev, karsiori, Cup Nooble, Kettoman, Shaade, Tayziulei, Daniel Eddeland, Stephen Challener / PixelFarm, patvanmackelberg, and Bouste.</div>
+  </div>
+  <script>
+    const VIEW_W = 640;
+    const VIEW_H = 360;
+    const WORLD_W = 1344;
+    const WORLD_H = 896;
+    const INTERIOR_W = 640;
+    const INTERIOR_H = 360;
+    const TILE = 16;
+    const MOVE_SPEED = 112;
+    const CHARACTER_WORLD_SCALE = 0.72;
+    const DIRECTIONS = ["front", "back", "left", "right"];
+    const pipoyaCharacters = [
+      ["pipoya_su1_student_female_01", "Student Girl 01"],
+      ["pipoya_su1_student_female_02", "Student Girl 02"],
+      ["pipoya_su1_student_female_03", "Student Girl 03"],
+      ["pipoya_su1_student_female_04", "Student Girl 04"],
+      ["pipoya_su1_student_female_05", "Student Girl 05"],
+      ["pipoya_su1_student_female_06", "Student Girl 06"],
+      ["pipoya_su1_student_female_07", "Student Girl 07"],
+      ["pipoya_su1_student_female_08", "Student Girl 08"],
+      ["pipoya_su1_student_female_09", "Student Girl 09"],
+      ["pipoya_su1_student_female_10", "Student Girl 10"],
+      ["pipoya_su1_student_female_11", "Student Girl 11"],
+      ["pipoya_su1_student_female_12", "Student Girl 12"],
+      ["pipoya_su1_student_female_13", "Student Girl 13"],
+      ["pipoya_su1_student_female_14", "Student Girl 14"],
+      ["pipoya_su1_student_female_15", "Student Girl 15"],
+      ["pipoya_su1_student_female_16", "Student Girl 16"],
+      ["pipoya_su1_student_female_17", "Student Girl 17"],
+      ["pipoya_su1_student_female_18", "Student Girl 18"],
+      ["pipoya_su1_student_male_01", "Student Boy 01"],
+      ["pipoya_su1_student_male_02", "Student Boy 02"],
+      ["pipoya_su1_student_male_03", "Student Boy 03"],
+      ["pipoya_su1_student_male_04", "Student Boy 04"],
+      ["pipoya_su1_student_male_05", "Student Boy 05"],
+      ["pipoya_su1_student_male_06", "Student Boy 06"],
+      ["pipoya_su1_student_male_07", "Student Boy 07"],
+      ["pipoya_su1_student_male_08", "Student Boy 08"],
+      ["pipoya_su1_student_male_09", "Student Boy 09"],
+      ["pipoya_su1_student_male_10", "Student Boy 10"],
+      ["pipoya_su1_student_male_11", "Student Boy 11"],
+      ["pipoya_su1_student_male_12", "Student Boy 12"],
+      ["pipoya_su1_student_male_13", "Student Boy 13"],
+      ["pipoya_headmaster_female", "Headmaster Girl"],
+      ["pipoya_headmaster_male", "Headmaster Boy"],
+      ["pipoya_teacher_female_01", "Teacher Girl 01"],
+      ["pipoya_teacher_female_02", "Teacher Girl 02"],
+      ["pipoya_teacher_female_03", "Teacher Girl 03"],
+      ["pipoya_teacher_female_04", "Teacher Girl 04"],
+      ["pipoya_teacher_male_01", "Teacher Boy 01"],
+      ["pipoya_teacher_male_02", "Teacher Boy 02"],
+      ["pipoya_teacher_male_03", "Teacher Boy 03"],
+      ["pipoya_teacher_male_04", "Teacher Boy 04"],
+      ["pipoya_pipo_xmaschara01", "Xmas 01"],
+      ["pipoya_pipo_xmaschara02", "Xmas 02"],
+      ["pipoya_pipo_xmaschara03", "Xmas 03"],
+      ["pipoya_pipo_xmaschara04", "Xmas 04"],
+      ["pipoya_pipo_xmaschara05", "Xmas 05"],
+      ["pipoya_pipo_xmaschara06", "Xmas 06"],
+      ["nekonin_pipo_nekonin001", "Nekonin 01"],
+      ["nekonin_pipo_nekonin002", "Nekonin 02"],
+      ["nekonin_pipo_nekonin003", "Nekonin 03"],
+      ["nekonin_pipo_nekonin004", "Nekonin 04"],
+      ["nekonin_pipo_nekonin005", "Nekonin 05"],
+      ["nekonin_pipo_nekonin006", "Nekonin 06"],
+      ["nekonin_pipo_nekonin007", "Nekonin 07"],
+      ["nekonin_pipo_nekonin008", "Nekonin 08"],
+      ["nekonin_pipo_nekonin009", "Nekonin 09"],
+      ["nekonin_pipo_nekonin010", "Nekonin 10"],
+      ["nekonin_pipo_nekonin011", "Nekonin 11"],
+      ["nekonin_pipo_nekonin012", "Nekonin 12"],
+      ["nekonin_pipo_nekonin013", "Nekonin 13"],
+      ["nekonin_pipo_nekonin014", "Nekonin 14"],
+      ["nekonin_pipo_nekonin015", "Nekonin 15"],
+      ["nekonin_pipo_nekonin016", "Nekonin 16"],
+      ["nekonin_pipo_nekonin017", "Nekonin 17"],
+      ["nekonin_pipo_nekonin018", "Nekonin 18"],
+      ["nekonin_pipo_nekonin019", "Nekonin 19"],
+      ["nekonin_pipo_nekonin020", "Nekonin 20"],
+      ["nekonin_pipo_nekonin021", "Nekonin 21"],
+      ["nekonin_pipo_nekonin022", "Nekonin 22"],
+      ["nekonin_pipo_nekonin023", "Nekonin 23"],
+      ["nekonin_pipo_nekonin024", "Nekonin 24"],
+      ["nekonin_pipo_nekonin025", "Nekonin 25"],
+      ["nekonin_pipo_nekonin026", "Nekonin 26"],
+      ["nekonin_pipo_nekonin027", "Nekonin 27"],
+      ["nekonin_pipo_nekonin028", "Nekonin 28"],
+      ["nekonin_pipo_nekonin029", "Nekonin 29"],
+      ["nekonin_pipo_nekonin030", "Nekonin 30"],
+      ["nekonin_pipo_nekonin031", "Nekonin 31"],
+      ["nekonin_pipo_nekonin032", "Nekonin 32"]
+    ];
+    const extraItchCharacters = [
+      ["axulart_blue_girl", "Axul Blue Girl"],
+      ["axulart_cap_boy", "Axul Cap Boy"],
+      ["axulart_orange_girl", "Axul Orange Girl"],
+      ["rgs_base_square", "RGS Base Square"],
+      ["rgs_hero_square", "RGS Hero Square"],
+      ["rgs_skeleton_square", "RGS Skeleton Square"],
+      ["rgs_monster_square", "RGS Monster Square"]
+    ];
+
+    const forestAnimals = [
+      "fox", "frog", "owl", "doe", "squirle", "bunny", "chicken", "turtle", "cow", "sheep", "pig",
+      "sprout_cat", "sprout_chicken", "sprout_cow",
+      "green_slime", "blue_slime", "pink_slime", "split_slime", "gold_slime", "shadow_slime", "galaxy_slime", "huge_split_slime",
+      ...pipoyaCharacters.map(([name]) => name),
+      ...extraItchCharacters.map(([name]) => name)
+    ];
+    const roster = {
+      fox: { label: "Fox", kind: "forest", base: "fox", scale: 1.95 },
+      frog: { label: "Frog", kind: "forest", base: "frog", scale: 2.45 },
+      owl: { label: "Owl", kind: "forest", base: "owl", scale: 2.2 },
+      doe: { label: "Deer", kind: "forest", base: "doe", scale: 1.85 },
+      squirle: { label: "Squirrel", kind: "forest", base: "squirle", scale: 2.15 },
+      bunny: { label: "Bunny", kind: "forest", base: "bunny", scale: 1.35 },
+      chicken: { label: "Chicken", kind: "forest", base: "chicken", scale: 1.5 },
+      turtle: { label: "Turtle", kind: "forest", base: "turtle", scale: 1.85 },
+      cow: { label: "Cow", kind: "forest", base: "cow", scale: 1.06 },
+      sheep: { label: "Sheep", kind: "forest", base: "sheep", scale: 1.08 },
+      pig: { label: "Pig", kind: "forest", base: "pig", scale: 1.22 },
+      sprout_cat: { label: "Sprout Cat", kind: "forest", base: "sprout_cat", scale: 1.28, attackMs: 420 },
+      sprout_chicken: { label: "Sprout Chicken", kind: "forest", base: "sprout_chicken", scale: 1.14, attackMs: 360 },
+      sprout_cow: { label: "Sprout Cow", kind: "forest", base: "sprout_cow", scale: 1.12, attackMs: 380 },
+      green_slime: { label: "Green Slime", rarity: "Common", kind: "forest", base: "green_slime", scale: 1.18, attackMs: 480 },
+      blue_slime: { label: "Blue Slime", rarity: "Uncommon", kind: "forest", base: "blue_slime", scale: 1.18, attackMs: 480 },
+      pink_slime: { label: "Ribbon Slime", rarity: "Rare", kind: "forest", base: "pink_slime", scale: 1.18, attackMs: 480 },
+      split_slime: { label: "Split Slime", rarity: "Epic", kind: "forest", base: "split_slime", scale: 1.18, attackMs: 480 },
+      gold_slime: { label: "Crown Slime", rarity: "Legendary", kind: "forest", base: "gold_slime", scale: 1.18, attackMs: 480 },
+      shadow_slime: { label: "Invert Slime", rarity: "Mythic", kind: "forest", base: "shadow_slime", scale: 1.18, attackMs: 480 },
+      galaxy_slime: { label: "Galaxy Slime", rarity: "Divine", kind: "forest", base: "galaxy_slime", scale: 1.18, attackMs: 480 },
+      huge_split_slime: { label: "Huge Split", rarity: "Secret", kind: "forest", base: "huge_split_slime", scale: 1.28, attackMs: 520 },
+      ...Object.fromEntries(pipoyaCharacters.map(([name, label]) => [name, { label, kind: "forest", base: name, scale: 1.45, attackMs: 400 }])),
+      ...Object.fromEntries(extraItchCharacters.map(([name, label]) => [name, { label, kind: "forest", base: name, scale: 1.55, attackMs: 420 }]))
+    };
+
+    const assets = {
+      grass: "assets/forest/sprout_grass.png",
+      farmSoil: "assets/plants/farm_soil_tilled.png",
+      toolSheet: "../work/plants/sproutlands/basic/Sprout Lands - Sprites - Basic pack/Characters/Tools.png"
+    };
+    const farmCrops = {
+      wheat: { label: "Wheat", name: "farm_crop_wheat", stages: 4 },
+      radish: { label: "Radish", name: "farm_crop_radish", stages: 4 }
+    };
+    const FARM_GRID = 28;
+    const FARM_CROP_SIZE = 32;
+    const CROP_GROW_MS = 28000;
+    const plantSprites = [
+      { name: "plant_tiny_spruce_tree_green", count: 12, fps: 9, w: 40, h: 68, x: 328, y: 390, solid: { x: -7, y: -15, w: 14, h: 16 } },
+      { name: "plant_spruce_tree_green_teal", count: 12, fps: 9, w: 51, h: 87, x: 390, y: 390, solid: { x: -8, y: -16, w: 16, h: 18 } },
+      { name: "plant_bubble_pine_tree_green", count: 12, fps: 9, w: 51, h: 91, x: 460, y: 392, solid: { x: -9, y: -18, w: 18, h: 20 } },
+      { name: "plant_pico_pine_tree_teal", count: 12, fps: 9, w: 40, h: 54, x: 530, y: 386, solid: { x: -6, y: -12, w: 12, h: 14 } },
+      { name: "plant_small_pine_tree_green", count: 12, fps: 9, w: 51, h: 85, x: 600, y: 390, solid: { x: -8, y: -16, w: 16, h: 18 } },
+      { name: "plant_triangle_spruce_tree_yellow", count: 12, fps: 9, w: 45, h: 76, x: 670, y: 388, solid: { x: -7, y: -15, w: 14, h: 16 } },
+      { name: "plant_slim_spruce_tree_cold", count: 12, fps: 9, w: 48, h: 92, x: 740, y: 394, solid: { x: -7, y: -17, w: 14, h: 18 } },
+      { name: "plant_thick_spruce_tree_green_teal", count: 12, fps: 9, w: 64, h: 104, x: 820, y: 402, solid: { x: -10, y: -19, w: 20, h: 21 } },
+      { name: "plant_sprout_tall_box_tree", count: 8, fps: 7, w: 40, h: 70, x: 318, y: 530, solid: { x: -8, y: -18, w: 16, h: 20 } },
+      { name: "plant_sprout_round_box_tree", count: 8, fps: 7, w: 66, h: 66, x: 386, y: 530, solid: { x: -9, y: -18, w: 18, h: 20 } },
+      { name: "plant_sprout_flower_box_tree", count: 8, fps: 7, w: 66, h: 66, x: 472, y: 530, solid: { x: -9, y: -18, w: 18, h: 20 } },
+      { name: "plant_sprout_cube_berry_bush", count: 8, fps: 5, w: 66, h: 34, x: 558, y: 536 },
+      { name: "plant_sprout_cube_plain_bush", count: 8, fps: 5, w: 66, h: 34, x: 638, y: 536 },
+      { name: "plant_sprout_blue_box_flower", count: 8, fps: 5, w: 34, h: 34, x: 712, y: 536 },
+      { name: "plant_sprout_pink_box_flower", count: 8, fps: 5, w: 34, h: 34, x: 758, y: 536 },
+      { name: "plant_sprout_sunflower", count: 8, fps: 5, w: 40, h: 68, x: 736, y: 598 },
+      { name: "plant_flower_blue_glow", count: 12, fps: 7, w: 44, h: 44, x: 286, y: 578 },
+      { name: "prop_sprout_chicken_house", count: 1, fps: 1, w: 88, h: 88, x: 250, y: 706, solid: { x: -24, y: -30, w: 48, h: 34 } },
+      { name: "prop_sprout_nest", count: 1, fps: 1, w: 34, h: 30, x: 322, y: 708 },
+      { name: "prop_sprout_egg", count: 1, fps: 1, w: 26, h: 28, x: 358, y: 705 },
+      { name: "prop_sprout_chest", count: 5, fps: 12, w: 44, h: 44, x: 780, y: 565, solid: { x: -14, y: -14, w: 28, h: 18 }, chest: true, open: false, chestAnimStarted: 0 },
+      { name: "prop_sprout_seed_wheat", count: 1, fps: 1, w: 32, h: 32, x: 610, y: 610 },
+      { name: "prop_sprout_wheat_item", count: 1, fps: 1, w: 34, h: 34, x: 650, y: 610 },
+      { name: "prop_sprout_seed_radish", count: 1, fps: 1, w: 32, h: 32, x: 690, y: 610 },
+      { name: "prop_sprout_radish_item", count: 1, fps: 1, w: 34, h: 34, x: 730, y: 610 },
+      { name: "prop_sprout_apple", count: 1, fps: 1, w: 32, h: 32, x: 610, y: 650 },
+      { name: "prop_sprout_big_apple", count: 1, fps: 1, w: 36, h: 36, x: 650, y: 652 },
+      { name: "prop_sprout_chopped_log", count: 1, fps: 1, w: 54, h: 34, x: 704, y: 650 },
+      { name: "prop_sprout_pink_mushrooms", count: 1, fps: 1, w: 36, h: 34, x: 610, y: 690 },
+      { name: "prop_sprout_round_mushroom", count: 1, fps: 1, w: 34, h: 34, x: 650, y: 690 },
+      { name: "prop_sprout_purple_mushroom", count: 1, fps: 1, w: 34, h: 34, x: 690, y: 690 },
+      { name: "prop_sprout_blue_flower", count: 1, fps: 1, w: 34, h: 34, x: 610, y: 730 },
+      { name: "prop_sprout_rose_flower", count: 1, fps: 1, w: 34, h: 34, x: 650, y: 730 },
+      { name: "prop_sprout_tiny_rock", count: 1, fps: 1, w: 32, h: 28, x: 690, y: 730 },
+      { name: "prop_sprout_big_rock", count: 1, fps: 1, w: 44, h: 32, x: 738, y: 730 },
+      { name: "prop_sprout_lily_pad", count: 1, fps: 1, w: 46, h: 36, x: 790, y: 730 },
+      { name: "prop_sprout_grass_clover", count: 1, fps: 1, w: 46, h: 30, x: 860, y: 570 },
+      { name: "prop_sprout_small_fruit", count: 1, fps: 1, w: 28, h: 28, x: 906, y: 570 },
+      { name: "prop_sprout_yellow_flower_small", count: 1, fps: 1, w: 32, h: 30, x: 948, y: 570 },
+      { name: "prop_sprout_yellow_flower_large", count: 1, fps: 1, w: 34, h: 32, x: 990, y: 570 },
+      { name: "prop_sprout_rock_pile", count: 1, fps: 1, w: 48, h: 34, x: 1040, y: 570 },
+      { name: "prop_sprout_fallen_log_left", count: 1, fps: 1, w: 54, h: 32, x: 1100, y: 570, solid: { x: -21, y: -12, w: 42, h: 14 } },
+      { name: "prop_sprout_fallen_log_big", count: 1, fps: 1, w: 70, h: 34, x: 1170, y: 570, solid: { x: -28, y: -13, w: 56, h: 15 } },
+      { name: "prop_sprout_path_tiles", count: 1, fps: 1, w: 78, h: 78, x: 870, y: 660 },
+      { name: "prop_sprout_bridge", count: 1, fps: 1, w: 100, h: 64, x: 966, y: 660 },
+      { name: "prop_sprout_fence_set", count: 1, fps: 1, w: 82, h: 82, x: 1064, y: 660, solid: { x: -36, y: -36, w: 72, h: 28 } },
+      { name: "prop_sprout_house", count: 1, fps: 1, w: 128, h: 96, x: 1180, y: 676, solid: { x: -54, y: -44, w: 108, h: 46 } },
+      { name: "prop_sprout_door_set", count: 1, fps: 1, w: 28, h: 84, x: 1268, y: 674 },
+      { name: "prop_sprout_materials", count: 1, fps: 1, w: 72, h: 48, x: 870, y: 760 },
+      { name: "prop_sprout_tools", count: 1, fps: 1, w: 98, h: 98, x: 966, y: 784 },
+      { name: "prop_sprout_furniture_top", count: 1, fps: 1, w: 128, h: 48, x: 1080, y: 760 },
+      { name: "prop_sprout_beds", count: 1, fps: 1, w: 96, h: 56, x: 1212, y: 762 },
+      { name: "prop_sprout_tables", count: 1, fps: 1, w: 104, h: 56, x: 880, y: 850 },
+      { name: "prop_sprout_rugs", count: 1, fps: 1, w: 128, h: 34, x: 1010, y: 840 }
+    ];
+    const interiorSprites = [
+      { name: "prop_sprout_furniture_top", count: 1, fps: 1, w: 128, h: 48, x: 318, y: 90, solid: { x: -56, y: -34, w: 112, h: 32 } },
+      { name: "prop_sprout_beds", count: 1, fps: 1, w: 96, h: 56, x: 144, y: 132, solid: { x: -42, y: -38, w: 84, h: 36 } },
+      { name: "prop_sprout_tables", count: 1, fps: 1, w: 104, h: 56, x: 470, y: 152, solid: { x: -38, y: -28, w: 76, h: 28 } },
+      { name: "prop_sprout_chest", count: 5, fps: 12, w: 44, h: 44, x: 84, y: 232, solid: { x: -14, y: -14, w: 28, h: 18 }, chest: true, open: false, chestAnimStarted: 0 },
+      { name: "prop_sprout_tools", count: 1, fps: 1, w: 74, h: 74, x: 558, y: 262, solid: { x: -22, y: -24, w: 44, h: 24 } },
+      { name: "prop_sprout_materials", count: 1, fps: 1, w: 72, h: 48, x: 192, y: 246 },
+      { name: "prop_sprout_rugs", count: 1, fps: 1, w: 128, h: 34, x: 320, y: 318 },
+      { name: "prop_sprout_seed_wheat", count: 1, fps: 1, w: 32, h: 32, x: 410, y: 244 },
+      { name: "prop_sprout_seed_radish", count: 1, fps: 1, w: 32, h: 32, x: 448, y: 244 }
+    ];
+    const buildPalette = [
+      { id: "wall", label: "Wall", name: "build_sprout_fence_post", count: 1, fps: 1, w: 32, h: 32, solid: { x: -12, y: -16, w: 24, h: 18 } },
+      { id: "equip-axe", label: "Equip axe", name: "build_sprout_tool_axe", count: 1, fps: 1, w: 34, h: 34, equipTool: "axe" },
+      { id: "equip-hoe", label: "Equip hoe", name: "build_sprout_tool_hoe", count: 1, fps: 1, w: 34, h: 34, equipTool: "hoe" },
+      { id: "equip-water", label: "Equip watering can", name: "build_sprout_tool_water", count: 1, fps: 1, w: 34, h: 34, equipTool: "water" },
+      { id: "seed-wheat", label: "Wheat seed", name: "build_sprout_seed_wheat", count: 1, fps: 1, w: 34, h: 34, equipTool: "seed-wheat" },
+      { id: "seed-radish", label: "Radish seed", name: "build_sprout_seed_radish", count: 1, fps: 1, w: 34, h: 34, equipTool: "seed-radish" },
+      { id: "bed-green", label: "Green bed", name: "build_sprout_bed_green", count: 1, fps: 1, w: 40, h: 70, solid: { x: -16, y: -46, w: 32, h: 44 } },
+      { id: "bed-blue", label: "Blue bed", name: "build_sprout_bed_blue", count: 1, fps: 1, w: 40, h: 70, solid: { x: -16, y: -46, w: 32, h: 44 } },
+      { id: "bed-pink", label: "Pink bed", name: "build_sprout_bed_pink", count: 1, fps: 1, w: 40, h: 70, solid: { x: -16, y: -46, w: 32, h: 44 } },
+      { id: "cabinet", label: "Cabinet", name: "build_sprout_cabinet", count: 1, fps: 1, w: 34, h: 34, solid: { x: -13, y: -18, w: 26, h: 18 } },
+      { id: "chair-left", label: "Left chair", name: "build_sprout_chair_left", count: 1, fps: 1, w: 34, h: 34, solid: { x: -12, y: -18, w: 24, h: 18 } },
+      { id: "chair-right", label: "Right chair", name: "build_sprout_chair_right", count: 1, fps: 1, w: 34, h: 34, solid: { x: -12, y: -18, w: 24, h: 18 } },
+      { id: "stool", label: "Stool", name: "build_sprout_stool", count: 1, fps: 1, w: 34, h: 34, solid: { x: -11, y: -14, w: 22, h: 14 } },
+      { id: "table-square", label: "Square table", name: "build_sprout_square_table", count: 1, fps: 1, w: 34, h: 34, solid: { x: -14, y: -18, w: 28, h: 18 } },
+      { id: "table-small", label: "Small table", name: "build_sprout_small_table", count: 1, fps: 1, w: 34, h: 34, solid: { x: -13, y: -16, w: 26, h: 16 } },
+      { id: "chest", label: "Chest", name: "prop_sprout_chest", count: 5, fps: 12, w: 44, h: 44, solid: { x: -14, y: -14, w: 28, h: 18 }, chest: true, open: false, chestAnimStarted: 0 },
+      { id: "plant", label: "Plant", name: "build_sprout_potted_plant", count: 1, fps: 1, w: 34, h: 34, solid: { x: -10, y: -14, w: 20, h: 14 } },
+      { id: "flower", label: "Flower pot", name: "build_sprout_flower_pot", count: 1, fps: 1, w: 34, h: 34, solid: { x: -10, y: -14, w: 20, h: 14 } },
+      { id: "rug-green", label: "Green rug", name: "build_sprout_rug_green_wide", count: 1, fps: 1, w: 70, h: 38 },
+      { id: "rug-pink", label: "Pink rug", name: "build_sprout_rug_pink_wide", count: 1, fps: 1, w: 70, h: 38 },
+      { id: "rug-blue", label: "Blue rug", name: "build_sprout_rug_blue_wide", count: 1, fps: 1, w: 70, h: 38 },
+      { id: "tools", label: "Tools", name: "prop_sprout_tools", count: 1, fps: 1, w: 72, h: 72, solid: { x: -22, y: -22, w: 44, h: 22 } },
+      { id: "erase", label: "Erase", erase: true }
+    ];
+    const buildConnectionSprites = [
+      { name: "build_sprout_fence_h", count: 1 },
+      { name: "build_sprout_fence_v", count: 1 },
+      { name: "build_sprout_fence_post", count: 1 },
+      { name: "build_sprout_fence_cross", count: 1 },
+      { name: "build_sprout_fence_left", count: 1 },
+      { name: "build_sprout_fence_mid", count: 1 },
+      { name: "build_sprout_fence_right", count: 1 }
+    ];
+
+    const scene = document.getElementById("scene");
+    const ctx = scene.getContext("2d");
+    const hud = document.getElementById("hud");
+    const picker = document.getElementById("picker");
+    const buildbar = document.getElementById("buildbar");
+    const keys = new Set();
+    const images = {};
+    const imagePromises = {};
+    const forestFrames = {};
+    let staticMap;
+    const placedSprites = [];
+    const farmPlots = [];
+    const ASSET_REV = "farm-crop-round-fix";
+
+    const state = {
+      x: 540,
+      y: 424,
+      dir: "front",
+      mode: "idle",
+      current: "fox",
+      cameraX: 0,
+      cameraY: 0,
+      t: 0,
+      last: performance.now(),
+      demo: true,
+      attackUntil: 0,
+      attackStarted: 0,
+      scene: "outside",
+      transitionStarted: 0,
+      transitionText: "",
+      buildTool: "wall",
+      equippedTool: "",
+      toolActionTool: "",
+      toolActionDir: "front",
+      toolActionStarted: 0,
+      toolActionUntil: 0,
+      buildHover: { x: 320, y: 220, active: false }
+    };
+    window.demoState = state;
+
+    function assetUrl(src) {
+      return `${src}${src.includes("?") ? "&" : "?"}v=${ASSET_REV}`;
+    }
+
+    function loadImage(src) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve(img);
+        img.onerror = () => reject(new Error(src));
+        img.src = assetUrl(src);
+      });
+    }
+
+    function loadImageCached(src) {
+      if (images[src]) return Promise.resolve(images[src]);
+      if (!imagePromises[src]) {
+        imagePromises[src] = loadImage(src).then(img => {
+          images[src] = img;
+          return img;
+        });
+      }
+      return imagePromises[src];
+    }
+
+    function roundedRect(target, x, y, w, h, r) {
+      target.beginPath();
+      target.moveTo(x + r, y);
+      target.lineTo(x + w - r, y);
+      target.quadraticCurveTo(x + w, y, x + w, y + r);
+      target.lineTo(x + w, y + h - r);
+      target.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+      target.lineTo(x + r, y + h);
+      target.quadraticCurveTo(x, y + h, x, y + h - r);
+      target.lineTo(x, y + r);
+      target.quadraticCurveTo(x, y, x + r, y);
+      target.closePath();
+    }
+
+    function aabb(ax, ay, aw, ah, bx, by, bw, bh) {
+      return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
+    }
+
+    function drawGrassTile(target, img, x, y, variant) {
+      const plainTiles = [[16, 16], [0, 80], [16, 80], [32, 80], [0, 96], [16, 96], [32, 96]];
+      const detailTiles = [[80, 80], [80, 96]];
+      const hash = Math.abs(Math.sin((x + 31) * 12.9898 + (y + 17) * 78.233) * 43758.5453);
+      let [sx, sy] = plainTiles[variant % plainTiles.length];
+      if (hash % 1 > 0.84) [sx, sy] = detailTiles[Math.floor(hash * 11) % detailTiles.length];
+      target.drawImage(img, sx, sy, TILE, TILE, x, y, TILE, TILE);
+    }
+
+    function buildStaticMap() {
+      staticMap = document.createElement("canvas");
+      staticMap.width = WORLD_W;
+      staticMap.height = WORLD_H;
+      const m = staticMap.getContext("2d");
+      m.imageSmoothingEnabled = false;
+      const grass = images[assets.grass];
+
+      for (let y = 0; y < WORLD_H; y += TILE) {
+        for (let x = 0; x < WORLD_W; x += TILE) {
+          drawGrassTile(m, grass, x, y, (x / TILE) * 5 + (y / TILE) * 3);
+        }
+      }
+    }
+
+    function drawInteriorBase() {
+      ctx.fillStyle = "#f5dbad";
+      ctx.fillRect(0, 0, INTERIOR_W, INTERIOR_H);
+      ctx.fillStyle = "#e6bf83";
+      for (let y = 24; y < INTERIOR_H - 24; y += 32) {
+        for (let x = 32; x < INTERIOR_W - 32; x += 32) {
+          ctx.fillRect(x, y, 30, 2);
+          ctx.fillRect(x, y, 2, 30);
+        }
+      }
+      ctx.fillStyle = "#c28f62";
+      ctx.fillRect(0, 0, INTERIOR_W, 24);
+      ctx.fillRect(0, 0, 24, INTERIOR_H);
+      ctx.fillRect(INTERIOR_W - 24, 0, 24, INTERIOR_H);
+      ctx.fillRect(0, INTERIOR_H - 18, INTERIOR_W, 18);
+      ctx.fillStyle = "#8b6346";
+      ctx.fillRect(284, INTERIOR_H - 18, 72, 18);
+      ctx.fillStyle = "#fff4c6";
+      ctx.fillRect(286, 26, 68, 38);
+      ctx.fillStyle = "#a6d5cf";
+      ctx.fillRect(291, 31, 58, 28);
+    }
+
+    function getForestFramePaths(base) {
+      const out = {};
+      for (const mode of ["idle", "run", "attack"]) {
+        for (const dir of DIRECTIONS) {
+          const count = base === "frog" && mode === "idle" ? 2 : 4;
+          out[`${mode}-${dir}`] = Array.from({ length: count }, (_, i) => `assets/${base}/${mode}_${dir}_frame_${i}.png`);
+        }
+      }
+      return out;
+    }
+
+    async function loadForestAnimal(base) {
+      if (!forestFrames[base]) forestFrames[base] = getForestFramePaths(base);
+      if (forestFrames[base].loaded) return;
+      await Promise.all(Object.values(forestFrames[base]).flat().map(loadImageCached));
+      forestFrames[base].loaded = true;
+    }
+
+    function plantFramePaths(plant) {
+      return Array.from({ length: plant.count }, (_, i) => `assets/plants/${plant.name}/frame_${i}.png`);
+    }
+
+    async function loadPlants() {
+      const allPlants = [...plantSprites, ...interiorSprites, ...buildPalette.filter(item => !item.erase), ...buildConnectionSprites];
+      const cropFrames = Object.values(farmCrops).flatMap(crop =>
+        Array.from({ length: crop.stages }, (_, i) => `assets/plants/${crop.name}/frame_${i}.png`)
+      );
+      await Promise.all([...allPlants.flatMap(plant => plantFramePaths(plant)), ...cropFrames].map(loadImageCached));
+    }
+
+    function currentFrame() {
+      const cfg = roster[state.current];
+      if (cfg.kind === "forest") {
+        const frames = forestFrames[cfg.base][`${state.mode}-${state.dir}`];
+        const fps = state.mode === "attack" ? 9 : state.mode === "run" ? 9 : 5;
+        const t = state.mode === "attack" ? Math.max(0, performance.now() - state.attackStarted) / 1000 : state.t;
+        const index = state.mode === "attack" ? Math.min(frames.length - 1, Math.floor(t * fps)) : Math.floor(t * fps) % frames.length;
+        const image = images[frames[index]];
+        return { image, sx: 0, sy: 0, sw: image.width, sh: image.height, scale: cfg.scale };
+      }
+      const index = Math.floor(state.t * (cfg.fps || 6)) % cfg.frames.length;
+      const [sx, sy] = cfg.frames[index];
+      return { image: images[cfg.src], sx, sy, sw: cfg.frameW, sh: cfg.frameH, scale: cfg.scale };
+    }
+
+    function drawPlayerAt(frame, x, y) {
+      const w = Math.round(frame.sw * frame.scale * CHARACTER_WORLD_SCALE);
+      const h = Math.round(frame.sh * frame.scale * CHARACTER_WORLD_SCALE);
+      ctx.drawImage(frame.image, frame.sx, frame.sy, frame.sw, frame.sh, Math.round(x - w / 2), Math.round(y - h + 10), w, h);
+    }
+
+    function toolFrame(tool, dir, step) {
+      if (tool === "water") return { col: 0, row: step > 0 ? 1 : 0 };
+      const row = tool === "hoe" ? 4 : 2;
+      const frames = {
+        left: [2, 1, 0, 1],
+        right: [2, 4, 3, 4],
+        front: [5, 4, 3, 4],
+        back: [2, 1, 0, 1]
+      };
+      return { col: frames[dir]?.[step] ?? 2, row };
+    }
+
+    function drawWaterDrops(x, y, dir, step) {
+      if (step < 1) return;
+      const offsets = {
+        front: [[-8, 18], [2, 24], [12, 18]],
+        back: [[-8, -38], [2, -44], [12, -38]],
+        left: [[-30, -8], [-38, 0], [-30, 8]],
+        right: [[30, -8], [38, 0], [30, 8]]
+      }[dir] || [];
+      ctx.fillStyle = "#77a7cf";
+      offsets.forEach(([ox, oy]) => ctx.fillRect(Math.round(x + ox), Math.round(y + oy), 3, 3));
+    }
+
+    function toolLabel(tool) {
+      return {
+        axe: "Axe",
+        hoe: "Hoe",
+        water: "Water",
+        "seed-wheat": "Wheat seed",
+        "seed-radish": "Radish seed"
+      }[tool] || tool;
+    }
+
+    function drawToolUseAt(x, y) {
+      if (performance.now() > state.toolActionUntil) return;
+      const elapsed = performance.now() - state.toolActionStarted;
+      const step = Math.min(3, Math.floor(elapsed / 90));
+      const dir = state.toolActionDir;
+      const offsets = {
+        front: [-10, -18],
+        back: [-10, -46],
+        left: [-34, -34],
+        right: [8, -34]
+      }[dir] || [-10, -18];
+      if (state.toolActionTool.startsWith("seed-")) {
+        const seedName = state.toolActionTool === "seed-wheat" ? "build_sprout_seed_wheat" : "build_sprout_seed_radish";
+        const seedImg = images[`assets/plants/${seedName}/frame_0.png`];
+        if (seedImg) ctx.drawImage(seedImg, Math.round(x + offsets[0]), Math.round(y + offsets[1]), 24, 24);
+        return;
+      }
+      const frame = toolFrame(state.toolActionTool, dir, step);
+      const img = images[assets.toolSheet];
+      if (!img) return;
+      ctx.drawImage(img, frame.col * 16, frame.row * 16, 16, 16, Math.round(x + offsets[0]), Math.round(y + offsets[1]), 32, 32);
+      if (state.toolActionTool === "water") drawWaterDrops(x, y, dir, step);
+    }
+
+    function drawPlant(plant) {
+      const index = plant.chest ? chestFrameIndex(plant) : Math.floor((state.t + plant.x * 0.003) * plant.fps) % plant.count;
+      const img = images[`assets/plants/${plant.name}/frame_${index}.png`];
+      if (!img) return;
+      ctx.drawImage(img, Math.round(plant.x - plant.w / 2), Math.round(plant.y - plant.h), plant.w, plant.h);
+    }
+
+    function chestFrameIndex(chest) {
+      const elapsed = Math.max(0, performance.now() - (chest.chestAnimStarted || 0));
+      const step = Math.min(4, Math.floor(elapsed / 70));
+      return chest.open ? step : 4 - step;
+    }
+
+    function activeSprites() {
+      return state.scene === "interior" ? [...interiorSprites, ...placedSprites.filter(item => item.scene === "interior")] : [...plantSprites, ...placedSprites.filter(item => item.scene === "outside")];
+    }
+
+    function drawDepthSortedActors() {
+      const frame = currentFrame();
+      const actors = activeSprites().map(plant => ({
+        y: plant.y,
+        draw: () => drawPlant(plant)
+      }));
+      actors.push({
+        y: state.y,
+        draw: () => {
+          if (state.toolActionDir === "back") drawToolUseAt(state.x, state.y);
+          drawPlayerAt(frame, state.x, state.y);
+          if (state.toolActionDir !== "back") drawToolUseAt(state.x, state.y);
+        }
+      });
+      actors.sort((a, b) => a.y - b.y);
+      actors.forEach(actor => actor.draw());
+    }
+
+    function currentBuildItem() {
+      return buildPalette.find(item => item.id === state.buildTool) || buildPalette[0];
+    }
+
+    function drawBuildGhost() {
+      if (!state.buildHover.active) return;
+      const item = currentBuildItem();
+      const x = state.buildHover.x;
+      const y = state.buildHover.y;
+      ctx.save();
+      ctx.globalAlpha = 0.62;
+      if (item.erase) {
+        ctx.strokeStyle = "#b65b5b";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(Math.round(x - 12), Math.round(y - 12), 24, 24);
+        ctx.beginPath();
+        ctx.moveTo(x - 8, y - 8);
+        ctx.lineTo(x + 8, y + 8);
+        ctx.moveTo(x + 8, y - 8);
+        ctx.lineTo(x - 8, y + 8);
+        ctx.stroke();
+      } else if (item.equipTool) {
+        ctx.restore();
+        return;
+      } else {
+        drawPlant({ ...item, x, y });
+      }
+      ctx.restore();
+    }
+
+    function cropStage(plot) {
+      if (!plot.crop) return -1;
+      const crop = farmCrops[plot.crop];
+      const elapsed = Math.max(0, performance.now() - plot.plantedAt);
+      const speed = plot.watered ? 1.35 : 1;
+      return Math.min(crop.stages - 1, Math.floor(elapsed * speed / CROP_GROW_MS * crop.stages));
+    }
+
+    function drawFarmPatch() {
+      const soil = images[assets.farmSoil];
+      for (const plot of farmPlots) {
+        ctx.drawImage(soil, plot.x - FARM_GRID / 2, plot.y - FARM_GRID / 2, FARM_GRID, FARM_GRID);
+        if (plot.watered) {
+          ctx.fillStyle = "rgba(112, 151, 188, .18)";
+          ctx.fillRect(plot.x - FARM_GRID / 2 + 3, plot.y - FARM_GRID / 2 + 3, FARM_GRID - 6, FARM_GRID - 6);
+        }
+        const stage = cropStage(plot);
+        if (stage >= 0) {
+          const crop = farmCrops[plot.crop];
+          const img = images[`assets/plants/${crop.name}/frame_${stage}.png`];
+          if (img) ctx.drawImage(img, plot.x - FARM_CROP_SIZE / 2, plot.y - FARM_CROP_SIZE + 8, FARM_CROP_SIZE, FARM_CROP_SIZE);
+        }
+      }
+    }
+
+    function collides(x, y) {
+      const feet = { x: x - 8, y: y - 8, w: 16, h: 10 };
+      return activeSprites().some(plant => {
+        if (!plant.solid) return false;
+        const solid = {
+          x: plant.x + plant.solid.x,
+          y: plant.y + plant.solid.y,
+          w: plant.solid.w,
+          h: plant.solid.h
+        };
+        return aabb(feet.x, feet.y, feet.w, feet.h, solid.x, solid.y, solid.w, solid.h);
+      });
+    }
+
+    function screenToWorld(clientX, clientY) {
+      const rect = scene.getBoundingClientRect();
+      const sx = (clientX - rect.left) * VIEW_W / rect.width;
+      const sy = (clientY - rect.top) * VIEW_H / rect.height;
+      return {
+        x: sx + (state.scene === "outside" ? state.cameraX : 0),
+        y: sy + (state.scene === "outside" ? state.cameraY : 0)
+      };
+    }
+
+    function snapBuildPoint(point) {
+      const item = currentBuildItem();
+      const grid = item.id === "wall" ? 32 : 16;
+      return {
+        x: Math.round(point.x / grid) * grid,
+        y: Math.round(point.y / grid) * grid
+      };
+    }
+
+    function updateBuildHover(clientX, clientY) {
+      state.buildHover = { ...snapBuildPoint(screenToWorld(clientX, clientY)), active: true };
+    }
+
+    function placeBuildItem() {
+      const item = currentBuildItem();
+      const { x, y } = state.buildHover;
+      if (!state.buildHover.active) return;
+      if (item.equipTool) {
+        state.equippedTool = item.equipTool;
+        return;
+      }
+      if (item.erase) {
+        removePlacedAt(x, y);
+        return;
+      }
+      const existing = placedSprites.findIndex(sprite => sprite.scene === state.scene && sprite.x === x && sprite.y === y && sprite.buildId === item.id);
+      if (existing >= 0) placedSprites.splice(existing, 1);
+      placedSprites.push({
+        ...item,
+        scene: state.scene,
+        buildId: item.id,
+        x,
+        y,
+        built: true,
+        chestAnimStarted: 0
+      });
+      refreshWallConnections();
+    }
+
+    function removePlacedAt(x, y) {
+      for (let i = placedSprites.length - 1; i >= 0; i--) {
+        const item = placedSprites[i];
+        if (item.scene !== state.scene) continue;
+        if (Math.abs(item.x - x) <= Math.max(20, item.w / 2) && Math.abs(item.y - y) <= Math.max(18, item.h / 2)) {
+          placedSprites.splice(i, 1);
+          refreshWallConnections();
+          return;
+        }
+      }
+    }
+
+    function wallAt(sceneName, x, y) {
+      return placedSprites.find(item => item.scene === sceneName && item.buildId === "wall" && item.x === x && item.y === y);
+    }
+
+    function nearestChest() {
+      return activeSprites()
+        .filter(item => item.chest)
+        .map(item => ({ item, dist: Math.hypot(item.x - state.x, item.y - state.y) }))
+        .filter(entry => entry.dist < 54)
+        .sort((a, b) => a.dist - b.dist)[0]?.item;
+    }
+
+    function toggleNearestChest() {
+      const chest = nearestChest();
+      if (!chest) return false;
+      chest.open = !chest.open;
+      chest.chestAnimStarted = performance.now();
+      state.demo = false;
+      return true;
+    }
+
+    function farmTargetPoint() {
+      const offset = {
+        front: [0, 28],
+        back: [0, -28],
+        left: [-28, 0],
+        right: [28, 0]
+      }[state.dir] || [0, 28];
+      return {
+        x: Math.round((state.x + offset[0]) / FARM_GRID) * FARM_GRID,
+        y: Math.round((state.y + offset[1]) / FARM_GRID) * FARM_GRID
+      };
+    }
+
+    function farmPlotAt(x, y) {
+      return farmPlots.find(plot => plot.x === x && plot.y === y);
+    }
+
+    function applyFarmTool(tool) {
+      if (state.scene !== "outside") return;
+      const target = farmTargetPoint();
+      let plot = farmPlotAt(target.x, target.y);
+      if (tool === "hoe") {
+        if (!plot) farmPlots.push({ x: target.x, y: target.y, crop: "", plantedAt: 0, watered: false });
+        return;
+      }
+      if (tool === "water") {
+        if (plot) plot.watered = true;
+        return;
+      }
+      if (tool.startsWith("seed-")) {
+        const crop = tool.replace("seed-", "");
+        if (plot && !plot.crop && farmCrops[crop]) {
+          plot.crop = crop;
+          plot.plantedAt = performance.now();
+          plot.watered = false;
+        }
+      }
+    }
+
+    function refreshWallConnections() {
+      for (const item of placedSprites) {
+        if (item.buildId !== "wall") continue;
+        const left = wallAt(item.scene, item.x - 32, item.y);
+        const right = wallAt(item.scene, item.x + 32, item.y);
+        const up = wallAt(item.scene, item.x, item.y - 32);
+        const down = wallAt(item.scene, item.x, item.y + 32);
+        const horizontal = left || right;
+        const vertical = up || down;
+        item.name = left && right ? "build_sprout_fence_mid" :
+          left ? "build_sprout_fence_left" :
+          right ? "build_sprout_fence_right" :
+          vertical ? "build_sprout_fence_v" :
+          horizontal ? "build_sprout_fence_h" :
+          "build_sprout_fence_post";
+      }
+    }
+
+    function startTransition(text) {
+      state.transitionStarted = performance.now();
+      state.transitionText = text;
+    }
+
+    function enterHouse() {
+      state.scene = "interior";
+      state.x = 320;
+      state.y = 302;
+      state.cameraX = 0;
+      state.cameraY = 0;
+      state.demo = false;
+      startTransition("Inside");
+    }
+
+    function exitHouse() {
+      state.scene = "outside";
+      state.x = 1180;
+      state.y = 738;
+      state.demo = false;
+      startTransition("Outside");
+    }
+
+    function maybeTeleport() {
+      if (performance.now() - state.transitionStarted < 650) return;
+      if (state.scene === "outside" && aabb(state.x - 8, state.y - 8, 16, 12, 1148, 692, 64, 46)) {
+        enterHouse();
+      } else if (state.scene === "interior" && aabb(state.x - 8, state.y - 8, 16, 12, 286, 312, 68, 34)) {
+        exitHouse();
+      }
+    }
+
+    function triggerAttack() {
+      if (toggleNearestChest()) return;
+      if (state.equippedTool) {
+        triggerToolUse();
+        return;
+      }
+      state.demo = false;
+      state.attackStarted = performance.now();
+      state.attackUntil = state.attackStarted + (roster[state.current].attackMs || 420);
+    }
+
+    function triggerToolUse() {
+      state.demo = false;
+      state.toolActionTool = state.equippedTool;
+      state.toolActionDir = state.dir;
+      state.toolActionStarted = performance.now();
+      state.toolActionUntil = state.toolActionStarted + 380;
+      state.attackStarted = state.toolActionStarted;
+      state.attackUntil = state.toolActionUntil;
+      applyFarmTool(state.equippedTool);
+    }
+
+    function seedDemoFarm() {
+      if (farmPlots.length) return;
+      const now = performance.now();
+      const starts = [
+        { x: 392, y: 560, crop: "", age: 0 },
+        { x: 420, y: 560, crop: "wheat", age: 3000 },
+        { x: 448, y: 560, crop: "wheat", age: 12000, watered: true },
+        { x: 476, y: 560, crop: "wheat", age: 25000, watered: true },
+        { x: 392, y: 588, crop: "", age: 0 },
+        { x: 420, y: 588, crop: "radish", age: 3000 },
+        { x: 448, y: 588, crop: "radish", age: 12000, watered: true },
+        { x: 476, y: 588, crop: "radish", age: 25000, watered: true }
+      ];
+      starts.forEach(plot => farmPlots.push({
+        x: plot.x,
+        y: plot.y,
+        crop: plot.crop,
+        plantedAt: plot.crop ? now - plot.age : 0,
+        watered: Boolean(plot.watered)
+      }));
+    }
+
+    function setKey(key, on) {
+      const k = key.toLowerCase();
+      if (on && k === "e") {
+        placeBuildItem();
+        return;
+      }
+      if (on && (k === "backspace" || k === "delete")) {
+        removePlacedAt(state.buildHover.x, state.buildHover.y);
+        return;
+      }
+      if ((k === " " || k === "space" || k === "k" || k === "!") && on) {
+        triggerAttack();
+        return;
+      }
+      if (["arrowup", "arrowdown", "arrowleft", "arrowright", "w", "a", "s", "d"].includes(k)) {
+        if (on) state.demo = false;
+        on ? keys.add(k) : keys.delete(k);
+      }
+    }
+
+    function pressed(...names) {
+      return names.some(name => keys.has(name));
+    }
+
+    async function setCurrent(name) {
+      const cfg = roster[name];
+      if (cfg.kind === "forest") await loadForestAnimal(cfg.base);
+      else await loadImageCached(cfg.src);
+      state.current = name;
+      document.querySelectorAll(".pick").forEach(btn => btn.classList.toggle("active", btn.dataset.name === name));
+      const rarity = roster[name].rarity ? `<br>${roster[name].rarity}` : "";
+      const equipped = state.equippedTool ? `<br>Tool: ${toolLabel(state.equippedTool)}` : "";
+      hud.innerHTML = `${roster[name].label}${rarity}${equipped}<br>Move: WASD or arrows<br>Use: ! / Space / K<br>Build: click or E`;
+    }
+
+    function renderPicker() {
+      const rarityClass = cfg => cfg.rarity ? ` rarity-${cfg.rarity.toLowerCase()}` : "";
+      picker.innerHTML = Object.entries(roster).map(([name, cfg]) =>
+        `<button class="pick${rarityClass(cfg)}${name === state.current ? " active" : ""}" data-name="${name}">${cfg.label}</button>`
+      ).join("");
+      picker.querySelectorAll(".pick").forEach(btn => btn.addEventListener("click", () => setCurrent(btn.dataset.name).catch(err => {
+        hud.textContent = `Asset load failed: ${err.message}`;
+      })));
+    }
+
+    function renderBuildbar() {
+      buildbar.innerHTML = buildPalette.map(item => {
+        const active = item.id === state.buildTool ? " active" : "";
+        const body = item.erase ? "<span>×</span>" : `<img src="${assetUrl(`assets/plants/${item.name}/frame_0.png`)}" alt="">`;
+        return `<button class="build-tool${active}" data-build="${item.id}" title="${item.label}" aria-label="${item.label}">${body}</button>`;
+      }).join("");
+      buildbar.querySelectorAll(".build-tool").forEach(btn => btn.addEventListener("click", () => {
+        state.buildTool = btn.dataset.build;
+        const item = currentBuildItem();
+        if (item.equipTool) {
+          state.equippedTool = item.equipTool;
+          setCurrent(state.current).catch(() => {});
+        }
+        renderBuildbar();
+      }));
+    }
+
+    function updateCamera() {
+      if (state.scene === "interior") {
+        state.cameraX = 0;
+        state.cameraY = 0;
+        return;
+      }
+      state.cameraX += (state.x - VIEW_W / 2 - state.cameraX) * 0.16;
+      state.cameraY += (state.y - VIEW_H / 2 - state.cameraY) * 0.16;
+      state.cameraX = Math.max(0, Math.min(WORLD_W - VIEW_W, state.cameraX));
+      state.cameraY = Math.max(0, Math.min(WORLD_H - VIEW_H, state.cameraY));
+    }
+
+    function update(now) {
+      const dt = Math.min((now - state.last) / 1000, 0.05);
+      state.last = now;
+      state.t += dt;
+
+      let dx = Number(pressed("arrowright", "d")) - Number(pressed("arrowleft", "a"));
+      let dy = Number(pressed("arrowdown", "s")) - Number(pressed("arrowup", "w"));
+
+      if (state.demo && !keys.size) {
+        const t = now / 1650;
+        dx = Math.cos(t) > .38 ? 1 : Math.cos(t) < -.38 ? -1 : 0;
+        dy = Math.sin(t * .9) > .5 ? 1 : Math.sin(t * .9) < -.5 ? -1 : 0;
+      }
+
+      const attacking = now < state.attackUntil;
+      const moving = !attacking && (dx || dy);
+      const len = Math.hypot(dx, dy) || 1;
+      if (!attacking) {
+        const maxX = state.scene === "interior" ? INTERIOR_W - 34 : WORLD_W - 24;
+        const maxY = state.scene === "interior" ? INTERIOR_H - 24 : WORLD_H - 24;
+        const nextX = Math.max(24, Math.min(maxX, state.x + dx / len * MOVE_SPEED * dt));
+        const nextY = Math.max(34, Math.min(maxY, state.y + dy / len * MOVE_SPEED * dt));
+        if (!collides(nextX, state.y)) state.x = nextX;
+        if (!collides(state.x, nextY)) state.y = nextY;
+      }
+      maybeTeleport();
+
+      if (!attacking) {
+        if (Math.abs(dy) > Math.abs(dx)) state.dir = dy > 0 ? "front" : "back";
+        else if (dx) state.dir = dx > 0 ? "right" : "left";
+      }
+      state.mode = attacking ? "attack" : moving ? "run" : "idle";
+
+      updateCamera();
+      draw();
+      requestAnimationFrame(update);
+    }
+
+    function draw() {
+      scene.dataset.x = state.x.toFixed(2);
+      scene.dataset.y = state.y.toFixed(2);
+      scene.dataset.cameraX = state.cameraX.toFixed(2);
+      scene.dataset.cameraY = state.cameraY.toFixed(2);
+      scene.dataset.character = state.current;
+      scene.dataset.mode = state.mode;
+      scene.dataset.scene = state.scene;
+      scene.dataset.transition = state.transitionText;
+      scene.dataset.placed = placedSprites.length;
+      ctx.imageSmoothingEnabled = false;
+      ctx.clearRect(0, 0, VIEW_W, VIEW_H);
+      ctx.save();
+      if (state.scene === "interior") {
+        drawInteriorBase();
+        drawDepthSortedActors();
+        drawBuildGhost();
+      } else {
+        ctx.translate(-Math.round(state.cameraX), -Math.round(state.cameraY));
+        ctx.drawImage(staticMap, 0, 0);
+        drawFarmPatch();
+        drawDepthSortedActors();
+        drawBuildGhost();
+      }
+      ctx.restore();
+      drawTransition();
+    }
+
+    function drawTransition() {
+      const elapsed = performance.now() - state.transitionStarted;
+      if (elapsed > 900) return;
+      const p = elapsed / 900;
+      const alpha = p < 0.5 ? 1 - p * 2 : (p - 0.5) * 2;
+      const radius = 28 + Math.sin(p * Math.PI) * 250;
+      ctx.save();
+      ctx.fillStyle = `rgba(255, 246, 218, ${Math.max(0, alpha * 0.82)})`;
+      ctx.beginPath();
+      ctx.rect(0, 0, VIEW_W, VIEW_H);
+      ctx.moveTo(VIEW_W / 2 + radius, VIEW_H / 2);
+      ctx.arc(VIEW_W / 2, VIEW_H / 2, radius, 0, Math.PI * 2, true);
+      ctx.fill("evenodd");
+      ctx.beginPath();
+      ctx.fillStyle = `rgba(91, 67, 48, ${Math.max(0, alpha)})`;
+      ctx.font = "700 18px Georgia, serif";
+      ctx.textAlign = "center";
+      ctx.fillText(state.transitionText, VIEW_W / 2, VIEW_H / 2 + 6);
+      ctx.restore();
+    }
+
+    async function start() {
+      await Promise.all(Object.values(assets).map(loadImageCached));
+      await loadPlants();
+      await loadForestAnimal("fox");
+
+      renderPicker();
+      renderBuildbar();
+      buildStaticMap();
+      seedDemoFarm();
+      await setCurrent("fox");
+      requestAnimationFrame(update);
+    }
+
+    addEventListener("keydown", e => setKey(e.key, true));
+    addEventListener("keyup", e => setKey(e.key, false));
+    scene.addEventListener("pointermove", e => updateBuildHover(e.clientX, e.clientY));
+    scene.addEventListener("pointerleave", () => {
+      state.buildHover.active = false;
+    });
+    scene.addEventListener("pointerdown", e => {
+      updateBuildHover(e.clientX, e.clientY);
+      if (e.button === 2) removePlacedAt(state.buildHover.x, state.buildHover.y);
+      else placeBuildItem();
+    });
+    scene.addEventListener("contextmenu", e => e.preventDefault());
+    document.querySelectorAll(".pad button[data-key]").forEach(btn => {
+      const key = btn.dataset.key;
+      btn.addEventListener("pointerdown", e => {
+        e.currentTarget.setPointerCapture(e.pointerId);
+        setKey(key, true);
+      });
+      btn.addEventListener("pointerup", () => setKey(key, false));
+      btn.addEventListener("pointercancel", () => setKey(key, false));
+      btn.addEventListener("pointerleave", () => setKey(key, false));
+    });
+    document.querySelector(".hit").addEventListener("pointerdown", triggerAttack);
+
+    start().catch(err => {
+      hud.textContent = `Asset load failed: ${err.message}`;
+    });
+  </script>
+</body>
+</html>
