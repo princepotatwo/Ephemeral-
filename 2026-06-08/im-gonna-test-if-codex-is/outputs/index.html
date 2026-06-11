@@ -43,7 +43,6 @@
       display: block;
       width: 100%;
       aspect-ratio: 16 / 9;
-      image-rendering: pixelated;
       background: #9fca65;
     }
     .hud {
@@ -312,7 +311,7 @@
       ["rgs_monster_square", "RGS Monster Square"]
     ];
     const silksongStudyCharacters = [
-      ["silksong_hornet", "Hornet Study", 0.64],
+      ["silksong_hornet", "Hornet Study", 0.18],
       ["silksong_moss_creep", "Moss Creep", 0.58],
       ["silksong_bone_worm", "Bone Worm", 0.54],
       ["silksong_moss_crawler", "Moss Crawler", 0.54],
@@ -363,6 +362,9 @@
       water: "assets/forest/sprout_water.png",
       farmSoil: "assets/plants/farm_soil_tilled.png",
       toolSheet: "../work/plants/sproutlands/basic/Sprout Lands - Sprites - Basic pack/Characters/Tools.png"
+    };
+    const forestFrameCounts = {
+      silksong_hornet: { idle: 4, run: 10, attack: 4 }
     };
     const farmCrops = {
       wheat: { label: "Wheat", name: "farm_crop_wheat", stages: 4 },
@@ -572,6 +574,18 @@
 
     const scene = document.getElementById("scene");
     const ctx = scene.getContext("2d");
+    function resizeSceneCanvas() {
+      const rect = scene.getBoundingClientRect();
+      const dpr = Math.max(1, Math.min(3, window.devicePixelRatio || 1));
+      const targetW = Math.max(1, Math.round(rect.width * dpr));
+      const targetH = Math.max(1, Math.round(rect.height * dpr));
+      if (scene.width !== targetW || scene.height !== targetH) {
+        scene.width = targetW;
+        scene.height = targetH;
+      }
+      ctx.setTransform(targetW / VIEW_W, 0, 0, targetH / VIEW_H, 0, 0);
+      ctx.imageSmoothingEnabled = false;
+    }
     const hud = document.getElementById("hud");
     const picker = document.getElementById("picker");
     const buildbar = document.getElementById("buildbar");
@@ -582,7 +596,7 @@
     let staticMap;
     const placedSprites = [];
     const farmPlots = [];
-    const ASSET_REV = "one-tree-biomes-water-v12";
+    const ASSET_REV = "one-tree-biomes-water-v15";
     const startBiome = new URLSearchParams(location.search).get("biome") || "";
     const startPositions = {
       dark: { x: 2550, y: 1080 },
@@ -776,7 +790,7 @@
       const out = {};
       for (const mode of ["idle", "run", "attack"]) {
         for (const dir of DIRECTIONS) {
-          const count = base === "frog" && mode === "idle" ? 2 : 4;
+          const count = forestFrameCounts[base]?.[mode] ?? (base === "frog" && mode === "idle" ? 2 : 4);
           out[`${mode}-${dir}`] = Array.from({ length: count }, (_, i) => `assets/${base}/${mode}_${dir}_frame_${i}.png`);
         }
       }
@@ -1400,6 +1414,7 @@
     }
 
     function draw() {
+      resizeSceneCanvas();
       scene.dataset.x = state.x.toFixed(2);
       scene.dataset.y = state.y.toFixed(2);
       scene.dataset.cameraX = state.cameraX.toFixed(2);
@@ -1452,6 +1467,7 @@
     }
 
     async function start() {
+      resizeSceneCanvas();
       await Promise.all(Object.values(assets).map(loadImageCached));
       await loadPlants();
       await loadForestAnimal("fox");
@@ -1464,6 +1480,7 @@
       requestAnimationFrame(update);
     }
 
+    addEventListener("resize", resizeSceneCanvas);
     addEventListener("keydown", e => setKey(e.key, true));
     addEventListener("keyup", e => setKey(e.key, false));
     scene.addEventListener("pointermove", e => updateBuildHover(e.clientX, e.clientY));
