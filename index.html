@@ -379,6 +379,7 @@
     });
     roster.silksong_hornet.idleFps = 7;
     roster.silksong_hornet.runFps = 12;
+    roster.silksong_hornet.stopFps = 12;
     roster.silksong_hornet.attackFps = 12;
 
     const assets = {
@@ -388,15 +389,15 @@
       toolSheet: "../work/plants/sproutlands/basic/Sprout Lands - Sprites - Basic pack/Characters/Tools.png"
     };
     const forestFrameCounts = {
-      silksong_hornet: { idle: 6, run: 10, attack: 6 },
-      silksong_moss_creep: { idle: 6, run: 3, attack: 6 },
-      silksong_bone_worm: { idle: 4, run: 4, attack: 7 },
-      silksong_moss_crawler: { idle: 3, run: 23, attack: 3 },
-      silksong_staff_pilgrim: { idle: 6, run: 10, attack: 13 },
-      silksong_pilgrim_hiker: { idle: 5, run: 10, attack: 8 },
-      silksong_ladybug: { idle: 7, run: 22, attack: 2 },
-      silksong_lifeblood_worm: { idle: 4, run: 14, attack: 8 },
-      silksong_shakra_rest: { idle: 25, run: 25, attack: 10 }
+      silksong_hornet: { idle: 6, run: 10, stop: 6, attack: 6 },
+      silksong_moss_creep: { idle: 6, run: 3, stop: 6, attack: 6 },
+      silksong_bone_worm: { idle: 4, run: 4, stop: 4, attack: 7 },
+      silksong_moss_crawler: { idle: 3, run: 23, stop: 3, attack: 3 },
+      silksong_staff_pilgrim: { idle: 6, run: 10, stop: 6, attack: 13 },
+      silksong_pilgrim_hiker: { idle: 5, run: 10, stop: 5, attack: 8 },
+      silksong_ladybug: { idle: 7, run: 22, stop: 7, attack: 2 },
+      silksong_lifeblood_worm: { idle: 4, run: 14, stop: 4, attack: 8 },
+      silksong_shakra_rest: { idle: 25, run: 25, stop: 25, attack: 10 }
     };
     const farmCrops = {
       wheat: { label: "Wheat", name: "farm_crop_wheat", stages: 4 },
@@ -628,7 +629,7 @@
     let staticMap;
     const placedSprites = [];
     const farmPlots = [];
-    const ASSET_REV = "one-tree-biomes-water-v20";
+    const ASSET_REV = "one-tree-biomes-water-v22";
     const startBiome = new URLSearchParams(location.search).get("biome") || "";
     const startPositions = {
       dark: { x: 2550, y: 1080 },
@@ -651,6 +652,11 @@
       demo: true,
       attackUntil: 0,
       attackStarted: 0,
+      attackDir: "right",
+      stopStarted: 0,
+      stopUntil: 0,
+      wasMoving: false,
+      zoom: 1,
       scene: "outside",
       transitionStarted: 0,
       transitionText: "",
@@ -764,8 +770,8 @@
 	      if (!water) return;
 	      const startX = Math.max(0, Math.floor(state.cameraX / TILE) * TILE - TILE);
 	      const startY = Math.max(0, Math.floor(state.cameraY / TILE) * TILE - TILE);
-	      const endX = Math.min(WORLD_W, state.cameraX + VIEW_W + TILE * 2);
-	      const endY = Math.min(WORLD_H, state.cameraY + VIEW_H + TILE * 2);
+	      const endX = Math.min(WORLD_W, state.cameraX + viewWorldW() + TILE * 2);
+	      const endY = Math.min(WORLD_H, state.cameraY + viewWorldH() + TILE * 2);
 	      const timeFrame = Math.floor(state.t * 4) % 4;
 	      for (let y = startY; y < endY; y += TILE) {
 	        for (let x = startX; x < endX; x += TILE) {
@@ -820,9 +826,11 @@
 
     function getForestFramePaths(base) {
       const out = {};
-      for (const mode of ["idle", "run", "attack"]) {
+      const counts = forestFrameCounts[base];
+      const modes = counts?.stop ? ["idle", "run", "stop", "attack"] : ["idle", "run", "attack"];
+      for (const mode of modes) {
         for (const dir of DIRECTIONS) {
-          const count = forestFrameCounts[base]?.[mode] ?? (base === "frog" && mode === "idle" ? 2 : 4);
+          const count = counts?.[mode] ?? (base === "frog" && mode === "idle" ? 2 : 4);
           out[`${mode}-${dir}`] = Array.from({ length: count }, (_, i) => `assets/${base}/${mode}_${dir}_frame_${i}.png`);
         }
       }
@@ -855,14 +863,61 @@
       return dir === "left" ? "left" : "right";
     }
 
+    function currentFacingDir() {
+      const cfg = roster[state.current];
+      return cfg?.sideView ? sideFacingDir(state.dir) : state.dir;
+    }
+
+    function viewWorldW() {
+      return VIEW_W / state.zoom;
+    }
+
+    function viewWorldH() {
+      return VIEW_H / state.zoom;
+    }
+
+    function clampCamera() {
+      const maxX = Math.max(0, WORLD_W - viewWorldW());
+      const maxY = Math.max(0, WORLD_H - viewWorldH());
+      state.cameraX = clamp(state.cameraX, 0, maxX);
+      state.cameraY = clamp(state.cameraY, 0, maxY);
+    }
+
+    function worldPointFromScreen(sx, sy) {
+      return {
+        x: state.scene === "outside" ? state.cameraX + sx / state.zoom : sx,
+        y: state.scene === "outside" ? state.cameraY + sy / state.zoom : sy
+      };
+    }
+
+    function setZoom(nextZoom, clientX, clientY) {
+      const zoom = clamp(nextZoom, 0.65, 2.35);
+      if (state.scene !== "outside") {
+        state.zoom = zoom;
+        return;
+      }
+      const rect = scene.getBoundingClientRect();
+      const sx = clientX == null ? VIEW_W / 2 : (clientX - rect.left) * VIEW_W / rect.width;
+      const sy = clientY == null ? VIEW_H / 2 : (clientY - rect.top) * VIEW_H / rect.height;
+      const before = worldPointFromScreen(sx, sy);
+      state.zoom = zoom;
+      state.cameraX = before.x - sx / state.zoom;
+      state.cameraY = before.y - sy / state.zoom;
+      clampCamera();
+    }
+
     function currentFrame() {
       const cfg = roster[state.current];
       if (cfg.kind === "forest") {
-        const dir = cfg.sideView ? sideFacingDir(state.dir) : state.mode === "idle" && cfg.idleDir ? cfg.idleDir : state.dir;
-        const frames = forestFrames[cfg.base][`${state.mode}-${dir}`];
-        const fps = state.mode === "attack" ? (cfg.attackFps || 9) : state.mode === "run" ? (cfg.runFps || 9) : (cfg.idleFps || 5);
-        const t = state.mode === "attack" ? Math.max(0, performance.now() - state.attackStarted) / 1000 : state.t;
-        const index = state.mode === "attack" ? Math.min(frames.length - 1, Math.floor(t * fps)) : Math.floor(t * fps) % frames.length;
+        const activeDir = state.mode === "attack" ? state.attackDir : state.dir;
+        const dir = cfg.sideView ? sideFacingDir(activeDir) : state.mode === "idle" && cfg.idleDir ? cfg.idleDir : activeDir;
+        const mode = state.mode === "stop" && !forestFrames[cfg.base][`stop-${dir}`] ? "idle" : state.mode;
+        const frames = forestFrames[cfg.base][`${mode}-${dir}`] || forestFrames[cfg.base][`idle-${dir}`];
+        const fps = mode === "attack" ? (cfg.attackFps || 9) : mode === "stop" ? (cfg.stopFps || 12) : mode === "run" ? (cfg.runFps || 9) : (cfg.idleFps || 5);
+        const started = mode === "attack" ? state.attackStarted : mode === "stop" ? state.stopStarted : 0;
+        const playOnce = mode === "attack" || mode === "stop";
+        const t = playOnce ? Math.max(0, performance.now() - started) / 1000 : state.t;
+        const index = playOnce ? Math.min(frames.length - 1, Math.floor(t * fps)) : Math.floor(t * fps) % frames.length;
         const image = images[frames[index]];
         return { image, sx: 0, sy: 0, sw: image.width, sh: image.height, scale: cfg.scale, smooth: cfg.smooth };
       }
@@ -956,9 +1011,9 @@
       }
       const pad = 180;
       const left = state.cameraX - pad;
-      const right = state.cameraX + VIEW_W + pad;
+      const right = state.cameraX + viewWorldW() + pad;
       const top = state.cameraY - pad;
-      const bottom = state.cameraY + VIEW_H + pad;
+      const bottom = state.cameraY + viewWorldH() + pad;
       const visible = item => item.x + item.w / 2 > left &&
         item.x - item.w / 2 < right &&
         item.y > top &&
@@ -989,7 +1044,7 @@
     }
 
     function drawBiomeScreenFilter() {
-      const biome = biomeBlendAt(state.cameraX + VIEW_W * 0.58, state.cameraY + VIEW_H * 0.56);
+      const biome = biomeBlendAt(state.cameraX + viewWorldW() * 0.58, state.cameraY + viewWorldH() * 0.56);
       if (!biome.layer.tint || state.scene !== "outside") return;
       const amount = Math.pow(biome.amount, .72);
       if (amount < .02) return;
@@ -1124,10 +1179,7 @@
       const rect = scene.getBoundingClientRect();
       const sx = (clientX - rect.left) * VIEW_W / rect.width;
       const sy = (clientY - rect.top) * VIEW_H / rect.height;
-      return {
-        x: sx + (state.scene === "outside" ? state.cameraX : 0),
-        y: sy + (state.scene === "outside" ? state.cameraY : 0)
-      };
+      return worldPointFromScreen(sx, sy);
     }
 
     function snapBuildPoint(point) {
@@ -1300,17 +1352,21 @@
       }
       state.demo = false;
       state.attackStarted = performance.now();
+      state.attackDir = currentFacingDir();
       state.attackUntil = state.attackStarted + (roster[state.current].attackMs || 420);
+      state.stopUntil = 0;
     }
 
     function triggerToolUse() {
       state.demo = false;
       state.toolActionTool = state.equippedTool;
-      state.toolActionDir = state.dir;
+      state.toolActionDir = currentFacingDir();
+      state.attackDir = state.toolActionDir;
       state.toolActionStarted = performance.now();
       state.toolActionUntil = state.toolActionStarted + 380;
       state.attackStarted = state.toolActionStarted;
       state.attackUntil = state.toolActionUntil;
+      state.stopUntil = 0;
       applyFarmTool(state.equippedTool);
     }
 
@@ -1366,6 +1422,10 @@
       else await loadImageCached(cfg.src);
       state.current = name;
       if (cfg.sideView) state.dir = sideFacingDir(state.dir);
+      state.attackDir = currentFacingDir();
+      state.stopStarted = 0;
+      state.stopUntil = 0;
+      state.wasMoving = false;
       document.querySelectorAll(".pick").forEach(btn => btn.classList.toggle("active", btn.dataset.name === name));
       const rarity = roster[name].rarity ? `<br>${roster[name].rarity}` : "";
       const equipped = state.equippedTool ? `<br>Tool: ${toolLabel(state.equippedTool)}` : "";
@@ -1405,10 +1465,9 @@
         state.cameraY = 0;
         return;
       }
-      state.cameraX += (state.x - VIEW_W / 2 - state.cameraX) * 0.16;
-      state.cameraY += (state.y - VIEW_H / 2 - state.cameraY) * 0.16;
-      state.cameraX = Math.max(0, Math.min(WORLD_W - VIEW_W, state.cameraX));
-      state.cameraY = Math.max(0, Math.min(WORLD_H - VIEW_H, state.cameraY));
+      state.cameraX += (state.x - viewWorldW() / 2 - state.cameraX) * 0.16;
+      state.cameraY += (state.y - viewWorldH() / 2 - state.cameraY) * 0.16;
+      clampCamera();
     }
 
     function update(now) {
@@ -1427,6 +1486,7 @@
 
       const attacking = now < state.attackUntil;
       const moving = !attacking && (dx || dy);
+      const wasMoving = state.wasMoving;
       const len = Math.hypot(dx, dy) || 1;
       if (!attacking) {
         const maxX = state.scene === "interior" ? INTERIOR_W - 34 : WORLD_W - 24;
@@ -1450,7 +1510,21 @@
           state.dir = dx > 0 ? "right" : "left";
         }
       }
-      state.mode = attacking ? "attack" : moving ? "run" : "idle";
+      if (attacking) {
+        state.stopUntil = 0;
+      } else if (moving) {
+        state.stopUntil = 0;
+      } else if (wasMoving) {
+        const cfg = roster[state.current];
+        const stopFrames = cfg?.kind === "forest" && cfg.sideView ? forestFrameCounts[cfg.base]?.stop || 0 : 0;
+        if (stopFrames) {
+          state.stopStarted = now;
+          state.stopUntil = now + stopFrames / (cfg.stopFps || 12) * 1000;
+        }
+      }
+      state.wasMoving = Boolean(moving);
+      const stopping = !attacking && !moving && now < state.stopUntil;
+      state.mode = attacking ? "attack" : moving ? "run" : stopping ? "stop" : "idle";
 
       updateCamera();
       draw();
@@ -1465,9 +1539,12 @@
       scene.dataset.cameraY = state.cameraY.toFixed(2);
       scene.dataset.character = state.current;
       scene.dataset.mode = state.mode;
+      scene.dataset.dir = state.dir;
+      scene.dataset.attackDir = state.attackDir;
       scene.dataset.scene = state.scene;
       scene.dataset.transition = state.transitionText;
       scene.dataset.placed = placedSprites.length;
+      scene.dataset.zoom = state.zoom.toFixed(2);
       scene.dataset.seed = WORLD_SEED;
       ctx.imageSmoothingEnabled = false;
       ctx.clearRect(0, 0, VIEW_W, VIEW_H);
@@ -1477,6 +1554,7 @@
         drawDepthSortedActors();
         drawBuildGhost();
       } else {
+	        ctx.scale(state.zoom, state.zoom);
 	        ctx.translate(-Math.round(state.cameraX), -Math.round(state.cameraY));
 	        ctx.drawImage(staticMap, 0, 0);
 	        drawAnimatedWater();
@@ -1536,6 +1614,12 @@
       if (e.button === 2) removePlacedAt(state.buildHover.x, state.buildHover.y);
       else placeBuildItem();
     });
+    scene.addEventListener("wheel", e => {
+      e.preventDefault();
+      state.demo = false;
+      const zoomStep = e.ctrlKey ? 0.004 : 0.0018;
+      setZoom(state.zoom * Math.exp(-e.deltaY * zoomStep), e.clientX, e.clientY);
+    }, { passive: false });
     scene.addEventListener("contextmenu", e => e.preventDefault());
     document.querySelectorAll(".pad button[data-key]").forEach(btn => {
       const key = btn.dataset.key;
