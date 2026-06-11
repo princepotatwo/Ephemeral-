@@ -14,7 +14,7 @@ import json
 import os
 import re
 import shutil
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Iterable
 
@@ -23,10 +23,8 @@ from PIL import Image, ImageOps
 
 
 DIRECTIONS = ("front", "back", "left", "right")
-MODES = ("idle", "run", "attack")
-DEFAULT_BUNDLE_ROOT = Path(
-    os.environ.get("TK2D_BUNDLE_ROOT", "work/tk2d_bundles")
-)
+MODES = ("idle", "run", "stop", "attack")
+DEFAULT_BUNDLE_ROOT = Path(os.environ.get("TK2D_BUNDLE_ROOT", "work/tk2d_bundles"))
 
 
 @dataclass(frozen=True)
@@ -42,6 +40,8 @@ class CharacterSpec:
     bundle: str
     groups: dict[str, FrameGroup]
     source_facing: str = "left"
+    mode_facing: dict[str, str] = field(default_factory=dict)
+    normalize_facing: bool = True
 
 
 CHARACTERS = (
@@ -51,8 +51,10 @@ CHARACTERS = (
         {
             "idle": FrameGroup("idle", limit=6),
             "run": FrameGroup("Hornet_run_new", limit=10),
+            "stop": FrameGroup("Hornet_skid_to_idle", limit=6),
             "attack": FrameGroup("Hornet_slashes", limit=6),
         },
+        mode_facing={"attack": "right"},
     ),
     CharacterSpec(
         "silksong_moss_creep",
@@ -89,6 +91,7 @@ CHARACTERS = (
             "run": FrameGroup("PS_walk"),
             "attack": FrameGroup("PS_attack"),
         },
+        source_facing="right",
     ),
     CharacterSpec(
         "silksong_ladybug",
@@ -116,6 +119,7 @@ CHARACTERS = (
             "run": FrameGroup("charge_attack_dig_away"),
             "attack": FrameGroup("attack_spit"),
         },
+        source_facing="right",
     ),
     CharacterSpec(
         "silksong_shakra_rest",
@@ -245,6 +249,60 @@ def bake_sprite(texture: Image.Image, sprite: dict) -> Image.Image | None:
     return canvas
 
 
+def frame_feature(image: Image.Image) -> bytes:
+    alpha = image.getchannel("A")
+    bbox = alpha.getbbox()
+    if not bbox:
+        return bytes(48 * 48)
+
+    cropped = image.crop(bbox)
+    alpha = cropped.getchannel("A")
+    gray = cropped.convert("L")
+    gray.putalpha(alpha)
+    side = max(gray.width, gray.height)
+    square = Image.new("RGBA", (side, side), (0, 0, 0, 0))
+    square.alpha_composite(gray.convert("RGBA"), ((side - gray.width) // 2, (side - gray.height) // 2))
+    return square.resize((48, 48), Image.Resampling.BILINEAR).convert("LA").tobytes()
+
+
+def feature_distance(a: bytes, b: bytes) -> int:
+    return sum(abs(x - y) for x, y in zip(a, b))
+
+
+def normalize_frame_facing(sequence: list[Image.Image]) -> list[Image.Image]:
+    if len(sequence) < 2:
+        return sequence
+
+    variants = [(image, ImageOps.mirror(image)) for image in sequence]
+    features = [(frame_feature(original), frame_feature(mirrored)) for original, mirrored in variants]
+
+    costs = [[0, 1000000]]
+    backs: list[list[int]] = []
+    for index in range(1, len(sequence)):
+        row = []
+        back_row = []
+        for state in (0, 1):
+            candidates = [
+                costs[index - 1][prev_state]
+                + feature_distance(features[index - 1][prev_state], features[index][state])
+                for prev_state in (0, 1)
+            ]
+            prev_state = 0 if candidates[0] <= candidates[1] else 1
+            row.append(candidates[prev_state])
+            back_row.append(prev_state)
+        costs.append(row)
+        backs.append(back_row)
+
+    state = 0 if costs[-1][0] <= costs[-1][1] else 1
+    path = [state]
+    for back_row in reversed(backs):
+        state = back_row[state]
+        path.append(state)
+    path.reverse()
+
+    return [variants[index][state] for index, state in enumerate(path)]
+
+
 def write_character(spec: CharacterSpec, frames: dict[str, Image.Image], out_root: Path) -> dict:
     out_dir = out_root / spec.asset_id
     if out_dir.exists():
@@ -253,18 +311,22 @@ def write_character(spec: CharacterSpec, frames: dict[str, Image.Image], out_roo
 
     counts = {}
     for mode in MODES:
-        group = spec.groups[mode]
+        group = spec.groups.get(mode, spec.groups["idle"])
         names = group_names(frames.keys(), group)
         if not names and mode != "idle":
             names = group_names(frames.keys(), spec.groups["idle"])
         if not names:
             raise RuntimeError(f"{spec.asset_id}: no frames for {mode} prefix {group.prefix!r}")
 
-        counts[mode] = len(names)
-        for index, name in enumerate(names):
-            source = frames[name]
-            left = source if spec.source_facing == "left" else ImageOps.mirror(source)
-            right = ImageOps.mirror(source) if spec.source_facing == "left" else source
+        sequence = [frames[name] for name in names]
+        if spec.normalize_facing:
+            sequence = normalize_frame_facing(sequence)
+
+        counts[mode] = len(sequence)
+        source_facing = spec.mode_facing.get(mode, spec.source_facing)
+        for index, source in enumerate(sequence):
+            left = source if source_facing == "left" else ImageOps.mirror(source)
+            right = ImageOps.mirror(source) if source_facing == "left" else source
             left.save(out_dir / f"{mode}_left_frame_{index}.png")
             right.save(out_dir / f"{mode}_right_frame_{index}.png")
             right.save(out_dir / f"{mode}_front_frame_{index}.png")
@@ -273,7 +335,7 @@ def write_character(spec: CharacterSpec, frames: dict[str, Image.Image], out_roo
     return {
         "id": spec.asset_id,
         "counts": counts,
-        "groups": {mode: spec.groups[mode].prefix for mode in MODES},
+        "groups": {mode: spec.groups.get(mode, spec.groups["idle"]).prefix for mode in MODES},
     }
 
 
