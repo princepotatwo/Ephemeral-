@@ -39,6 +39,19 @@
       background: var(--paper);
       box-shadow: 0 18px 42px rgba(83, 107, 101, .18);
     }
+    .stage::before,
+    .stage::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: clamp(22px, 7.5vw, 52px);
+      background: #050505;
+      pointer-events: none;
+      z-index: 2;
+    }
+    .stage::before { top: 0; }
+    .stage::after { bottom: 0; }
     #scene {
       display: block;
       width: 100%;
@@ -57,6 +70,7 @@
       font-size: 13px;
       line-height: 1.35;
       backdrop-filter: blur(5px);
+      z-index: 3;
     }
     .picker {
       width: 100%;
@@ -103,6 +117,7 @@
       grid-template-columns: repeat(3, 46px);
       grid-template-rows: repeat(3, 46px);
       gap: 8px;
+      z-index: 3;
     }
     .pad button {
       width: 46px;
@@ -142,6 +157,7 @@
       box-shadow: 0 6px 18px rgba(83, 107, 101, .14);
       max-width: calc(100% - 150px);
       overflow-x: auto;
+      z-index: 3;
     }
     .build-tool {
       flex: 0 0 44px;
@@ -312,12 +328,15 @@
     ];
     const silksongStudyCharacters = [
       ["silksong_hornet", "Hornet Study", 0.18],
-      ["silksong_moss_creep", "Moss Creep", 0.58],
-      ["silksong_bone_worm", "Bone Worm", 0.54],
-      ["silksong_moss_crawler", "Moss Crawler", 0.54],
-      ["silksong_staff_pilgrim", "Staff Pilgrim", 0.56],
-      ["silksong_bell_shop", "Bell Shop", 0.57],
-      ["silksong_ladybug", "Ladybug", 0.52]
+      ["silksong_moss_creep", "Moss Creep", 0.19],
+      ["silksong_bone_worm", "Bone Worm", 0.16],
+      ["silksong_moss_crawler", "Moss Crawler", 0.34],
+      ["silksong_staff_pilgrim", "Staff Pilgrim", 0.18],
+      ["silksong_pilgrim_hiker", "Pilgrim Hiker", 0.28],
+      ["silksong_ladybug", "Ladybug", 0.2],
+      ["silksong_lifeblood_worm", "Lifeblood Worm", 0.13],
+      ["silksong_shakra_rest", "Shakra Rest", 0.27],
+      ["silksong_bell_shop", "Bell Shop", 0.57]
     ];
 
     const forestAnimals = [
@@ -355,7 +374,9 @@
       ...Object.fromEntries(pipoyaCharacters.map(([name, label]) => [name, { label, kind: "forest", base: name, scale: 1.45, attackMs: 400 }])),
       ...Object.fromEntries(extraItchCharacters.map(([name, label]) => [name, { label, kind: "forest", base: name, scale: 1.55, attackMs: 420 }]))
     };
-    roster.silksong_hornet.sideView = true;
+    silksongStudyCharacters.forEach(([name]) => {
+      roster[name].sideView = true;
+    });
     roster.silksong_hornet.idleFps = 7;
     roster.silksong_hornet.runFps = 12;
     roster.silksong_hornet.attackFps = 12;
@@ -367,7 +388,15 @@
       toolSheet: "../work/plants/sproutlands/basic/Sprout Lands - Sprites - Basic pack/Characters/Tools.png"
     };
     const forestFrameCounts = {
-      silksong_hornet: { idle: 6, run: 10, attack: 6 }
+      silksong_hornet: { idle: 6, run: 10, attack: 6 },
+      silksong_moss_creep: { idle: 6, run: 3, attack: 6 },
+      silksong_bone_worm: { idle: 4, run: 4, attack: 7 },
+      silksong_moss_crawler: { idle: 3, run: 23, attack: 3 },
+      silksong_staff_pilgrim: { idle: 6, run: 10, attack: 13 },
+      silksong_pilgrim_hiker: { idle: 5, run: 10, attack: 8 },
+      silksong_ladybug: { idle: 7, run: 22, attack: 2 },
+      silksong_lifeblood_worm: { idle: 4, run: 14, attack: 8 },
+      silksong_shakra_rest: { idle: 25, run: 25, attack: 10 }
     };
     const farmCrops = {
       wheat: { label: "Wheat", name: "farm_crop_wheat", stages: 4 },
@@ -599,7 +628,7 @@
     let staticMap;
     const placedSprites = [];
     const farmPlots = [];
-    const ASSET_REV = "one-tree-biomes-water-v19";
+    const ASSET_REV = "one-tree-biomes-water-v20";
     const startBiome = new URLSearchParams(location.search).get("biome") || "";
     const startPositions = {
       dark: { x: 2550, y: 1080 },
