@@ -1,7 +1,10 @@
 assets/silksong_*/
+assets/silksong_import_manifest.json
 outputs/assets/silksong_*/
+outputs/assets/silksong_import_manifest.json
 outputs/silksong_*preview*.jpg
 outputs/silksong_*previews*/
+outputs/silksong_*candidates*.jpg
 outputs/hornet_*previews*/
 outputs/hornet_mapping_test/
 outputs/test_dont_starve_fog.html
