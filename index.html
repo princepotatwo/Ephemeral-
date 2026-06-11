@@ -355,7 +355,7 @@
       ...Object.fromEntries(pipoyaCharacters.map(([name, label]) => [name, { label, kind: "forest", base: name, scale: 1.45, attackMs: 400 }])),
       ...Object.fromEntries(extraItchCharacters.map(([name, label]) => [name, { label, kind: "forest", base: name, scale: 1.55, attackMs: 420 }]))
     };
-    roster.silksong_hornet.idleDir = "front";
+    roster.silksong_hornet.sideView = true;
     roster.silksong_hornet.idleFps = 7;
     roster.silksong_hornet.runFps = 12;
     roster.silksong_hornet.attackFps = 12;
@@ -599,7 +599,7 @@
     let staticMap;
     const placedSprites = [];
     const farmPlots = [];
-    const ASSET_REV = "one-tree-biomes-water-v17";
+    const ASSET_REV = "one-tree-biomes-water-v18";
     const startBiome = new URLSearchParams(location.search).get("biome") || "";
     const startPositions = {
       dark: { x: 2550, y: 1080 },
@@ -822,10 +822,14 @@
       await Promise.all([...allPlants.flatMap(plant => plantFramePaths(plant)), ...cropFrames].map(loadImageCached));
     }
 
+    function sideFacingDir(dir) {
+      return dir === "left" ? "left" : "right";
+    }
+
     function currentFrame() {
       const cfg = roster[state.current];
       if (cfg.kind === "forest") {
-        const dir = state.mode === "idle" && cfg.idleDir ? cfg.idleDir : state.dir;
+        const dir = cfg.sideView ? sideFacingDir(state.dir) : state.mode === "idle" && cfg.idleDir ? cfg.idleDir : state.dir;
         const frames = forestFrames[cfg.base][`${state.mode}-${dir}`];
         const fps = state.mode === "attack" ? (cfg.attackFps || 9) : state.mode === "run" ? (cfg.runFps || 9) : (cfg.idleFps || 5);
         const t = state.mode === "attack" ? Math.max(0, performance.now() - state.attackStarted) / 1000 : state.t;
@@ -1332,6 +1336,7 @@
       if (cfg.kind === "forest") await loadForestAnimal(cfg.base);
       else await loadImageCached(cfg.src);
       state.current = name;
+      if (cfg.sideView) state.dir = sideFacingDir(state.dir);
       document.querySelectorAll(".pick").forEach(btn => btn.classList.toggle("active", btn.dataset.name === name));
       const rarity = roster[name].rarity ? `<br>${roster[name].rarity}` : "";
       const equipped = state.equippedTool ? `<br>Tool: ${toolLabel(state.equippedTool)}` : "";
@@ -1406,8 +1411,15 @@
       maybeTeleport();
 
       if (!attacking) {
-        if (Math.abs(dy) > Math.abs(dx)) state.dir = dy > 0 ? "front" : "back";
-        else if (dx) state.dir = dx > 0 ? "right" : "left";
+        const cfg = roster[state.current];
+        if (cfg.sideView) {
+          if (dx) state.dir = dx > 0 ? "right" : "left";
+          else state.dir = sideFacingDir(state.dir);
+        } else if (Math.abs(dy) > Math.abs(dx)) {
+          state.dir = dy > 0 ? "front" : "back";
+        } else if (dx) {
+          state.dir = dx > 0 ? "right" : "left";
+        }
       }
       state.mode = attacking ? "attack" : moving ? "run" : "idle";
 
