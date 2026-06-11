@@ -14,4 +14,5 @@
 - Boxy trees, bushes, crops, characters, props, furniture, bridge, fences, house parts, tools, and tilled soil: Cup Nooble, "Sprout Lands - Asset Pack" basic pack, non-commercial use with credit required, https://cupnooble.itch.io/sprout-lands-asset-pack
 - Farm crops and soil: Kettoman, "Free Pixel Farming Base Pack | Animals, Crops & Tileset 16x16", https://kettoman.itch.io/pixel-farming-base-pack-animals-crops-tileset
 - Small plant sprites: Shaade, "Free Pixel Art Plants (Trees,Bushes,Grass)", https://shaade.itch.io/free-pixel-art
+- Silksong study character frames: locally extracted from the APK supplied by the user for private research/study only; do not redistribute.
 - Animated flowers and small plants: Tayziulei, "Mystic Flora - Pixel Plant & Flower Pack", https://tayziulei.itch.io/mystic-flora-pixel-plant-flower-pack
