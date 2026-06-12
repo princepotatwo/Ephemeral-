@@ -46,7 +46,9 @@
       left: 0;
       right: 0;
       height: clamp(22px, 7.5vw, 52px);
-      background: #050505;
+      background:
+        linear-gradient(180deg, rgba(36, 40, 48, .36), rgba(0, 0, 0, 0) 34%, rgba(0, 0, 0, .24)),
+        #050505;
       pointer-events: none;
       z-index: 2;
     }
@@ -57,20 +59,11 @@
       width: 100%;
       aspect-ratio: 16 / 9;
       background: #9fca65;
+      touch-action: none;
+      user-select: none;
     }
     .hud {
-      position: absolute;
-      left: 12px;
-      top: 12px;
-      max-width: 214px;
-      padding: 9px 11px;
-      border: 1px solid var(--edge);
-      border-radius: 10px;
-      background: var(--panel);
-      font-size: 13px;
-      line-height: 1.35;
-      backdrop-filter: blur(5px);
-      z-index: 3;
+      display: none;
     }
     .picker {
       width: 100%;
@@ -109,33 +102,6 @@
     .pick.rarity-mythic { border-color: #8e79bc; background: #f2ecff; }
     .pick.rarity-divine { border-color: #9dddf8; background: #edfaff; }
     .pick.rarity-secret { border-color: #c39aef; background: #fff0ca; }
-    .pad {
-      position: absolute;
-      right: 12px;
-      bottom: 12px;
-      display: grid;
-      grid-template-columns: repeat(3, 46px);
-      grid-template-rows: repeat(3, 46px);
-      gap: 8px;
-      z-index: 3;
-    }
-    .pad button {
-      width: 46px;
-      height: 46px;
-      border: 0;
-      border-radius: 10px;
-      background: rgba(255, 251, 245, .94);
-      color: #4f5b52;
-      font-size: 20px;
-      font-weight: 800;
-      box-shadow: inset 0 -3px rgba(0,0,0,.12), 0 2px 8px rgba(0,0,0,.08);
-    }
-    .pad button:active { transform: translateY(2px); }
-    .up { grid-column: 2; grid-row: 1; }
-    .left { grid-column: 1; grid-row: 2; }
-    .hit { grid-column: 2; grid-row: 2; }
-    .right { grid-column: 3; grid-row: 2; }
-    .down { grid-column: 2; grid-row: 3; }
     .caption {
       padding: 0 6px;
       text-align: center;
@@ -144,40 +110,52 @@
     }
     .buildbar {
       position: absolute;
-      left: 12px;
-      right: 12px;
-      bottom: 12px;
-      display: flex;
+      left: 14px;
+      right: 14px;
+      display: none;
       gap: 6px;
       align-items: center;
-      padding: 7px;
-      border: 1px solid var(--edge);
-      border-radius: 12px;
-      background: rgba(255, 250, 241, .92);
-      box-shadow: 0 6px 18px rgba(83, 107, 101, .14);
-      max-width: calc(100% - 150px);
+      justify-content: center;
+      padding: 4px 6px;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      box-shadow: none;
       overflow-x: auto;
       z-index: 3;
+      scrollbar-width: none;
+    }
+    .buildbar::-webkit-scrollbar {
+      display: none;
+    }
+    .buildbar.buildbar-top {
+      top: 4px;
+    }
+    .buildbar.buildbar-bottom {
+      bottom: 4px;
+    }
+    .buildbar.open {
+      display: flex;
     }
     .build-tool {
-      flex: 0 0 44px;
-      width: 44px;
-      height: 44px;
+      flex: 0 0 38px;
+      width: 38px;
+      height: 38px;
       display: grid;
       place-items: center;
-      border: 1px solid #d7c8ae;
-      border-radius: 9px;
-      background: #fffaf2;
+      border: 1px solid rgba(255, 250, 241, .55);
+      border-radius: 8px;
+      background: rgba(255, 250, 241, .9);
       cursor: pointer;
-      box-shadow: inset 0 -2px rgba(0,0,0,.07);
+      box-shadow: inset 0 -2px rgba(0,0,0,.16), 0 2px 8px rgba(0,0,0,.28);
     }
     .build-tool.active {
-      outline: 2px solid #6fb987;
+      outline: 2px solid #90d39f;
       background: #eaf8df;
     }
     .build-tool img {
-      max-width: 34px;
-      max-height: 34px;
+      max-width: 30px;
+      max-height: 30px;
       image-rendering: pixelated;
       pointer-events: none;
     }
@@ -190,17 +168,19 @@
         max-height: 86px;
         overflow: auto;
       }
-      .hud { max-width: 176px; }
       .buildbar {
-        max-width: calc(100% - 132px);
+        left: 8px;
+        right: 8px;
+        justify-content: flex-start;
       }
-      .pad {
-        grid-template-columns: repeat(3, 42px);
-        grid-template-rows: repeat(3, 42px);
+      .build-tool {
+        flex-basis: 34px;
+        width: 34px;
+        height: 34px;
       }
-      .pad button {
-        width: 42px;
-        height: 42px;
+      .build-tool img {
+        max-width: 27px;
+        max-height: 27px;
       }
     }
   </style>
@@ -209,15 +189,9 @@
   <div class="shell">
     <main class="stage" aria-label="Cute overworld map">
       <canvas id="scene" width="640" height="360"></canvas>
-      <div class="hud" id="hud">Fox<br>Move: WASD or arrow keys</div>
-      <div class="buildbar" id="buildbar" aria-label="Build tools"></div>
-      <div class="pad" aria-label="Touch controls">
-        <button class="up" data-key="ArrowUp" aria-label="Up">↑</button>
-        <button class="left" data-key="ArrowLeft" aria-label="Left">←</button>
-        <button class="hit" data-action="attack" aria-label="Attack">!</button>
-        <button class="down" data-key="ArrowDown" aria-label="Down">↓</button>
-        <button class="right" data-key="ArrowRight" aria-label="Right">→</button>
-      </div>
+      <div class="hud" id="hud" aria-live="polite"></div>
+      <div class="buildbar buildbar-top" id="buildbar-buildings" aria-label="Buildings"></div>
+      <div class="buildbar buildbar-bottom" id="buildbar-tools" aria-label="Tools and usable items"></div>
     </main>
     <div class="picker" id="picker" aria-label="Character switcher"></div>
     <div class="caption">Online sprite credits: inkBubi, PIPOYA, AxulArt, RGS_Dev, karsiori, Cup Nooble, Kettoman, Shaade, Tayziulei, Daniel Eddeland, Stephen Challener / PixelFarm, patvanmackelberg, and Bouste.</div>
@@ -327,7 +301,7 @@
       ["rgs_monster_square", "RGS Monster Square"]
     ];
     const silksongStudyCharacters = [
-      ["silksong_hornet", "Hornet Study", 0.18],
+      ["silksong_hornet", "Hornet Study", 0.24],
       ["silksong_moss_creep", "Moss Creep", 0.19],
       ["silksong_bone_worm", "Bone Worm", 0.16],
       ["silksong_moss_crawler", "Moss Crawler", 0.34],
@@ -380,6 +354,7 @@
     roster.silksong_hornet.idleFps = 7;
     roster.silksong_hornet.runFps = 12;
     roster.silksong_hornet.stopFps = 12;
+    roster.silksong_hornet.skidFps = 12;
     roster.silksong_hornet.attackFps = 12;
 
     const assets = {
@@ -389,7 +364,7 @@
       toolSheet: "../work/plants/sproutlands/basic/Sprout Lands - Sprites - Basic pack/Characters/Tools.png"
     };
     const forestFrameCounts = {
-      silksong_hornet: { idle: 6, run: 10, stop: 6, attack: 6 },
+      silksong_hornet: { idle: 6, run: 10, stop: 6, skid: 6, attack: 6 },
       silksong_moss_creep: { idle: 6, run: 3, stop: 6, attack: 6 },
       silksong_bone_worm: { idle: 4, run: 4, stop: 4, attack: 7 },
       silksong_moss_crawler: { idle: 3, run: 23, stop: 3, attack: 3 },
@@ -424,15 +399,18 @@
       const d = hash01(gx + 1, gy + 1, salt);
       return (a + (b - a) * fx) * (1 - fy) + (c + (d - c) * fx) * fy;
     }
+    const TREE_HIT_SHAKE_MS = 220;
+    const TREE_RESPAWN_MS = 17000;
+    const TREE_RESPAWN_JITTER_MS = 9000;
     const biomeTreeTypes = {
-      sprout: { name: "plant_sprout_round_box_tree", count: 8, fps: 7, w: 66, h: 66, solid: { x: -9, y: -18, w: 18, h: 20 } },
-      shadow: { name: "dark_tree_leafy", count: 1, fps: 1, w: 76, h: 94, solid: { x: -7, y: -16, w: 14, h: 18 } },
-      pine: { name: "dark_tree_pine", count: 1, fps: 1, w: 62, h: 92, solid: { x: -7, y: -16, w: 14, h: 18 } },
-      yellow: { name: "plant_triangle_spruce_tree_yellow", count: 12, fps: 9, w: 45, h: 76, solid: { x: -7, y: -15, w: 14, h: 16 } },
-      cold: { name: "plant_slim_spruce_tree_cold", count: 12, fps: 9, w: 48, h: 92, solid: { x: -7, y: -17, w: 14, h: 18 } },
-      teal: { name: "plant_thick_spruce_tree_green_teal", count: 12, fps: 9, w: 64, h: 104, solid: { x: -10, y: -19, w: 20, h: 21 } },
-      bubble: { name: "plant_bubble_pine_tree_green", count: 12, fps: 9, w: 51, h: 91, solid: { x: -9, y: -18, w: 18, h: 20 } },
-      tiny: { name: "plant_tiny_spruce_tree_green", count: 12, fps: 9, w: 40, h: 68, solid: { x: -7, y: -15, w: 14, h: 16 } }
+      sprout: { name: "plant_sprout_round_box_tree", count: 8, fps: 7, w: 66, h: 66, hits: 5, solid: { x: -9, y: -18, w: 18, h: 20 } },
+      shadow: { name: "dark_tree_leafy", count: 1, fps: 1, w: 76, h: 94, hits: 9, crop: { sx: 0, sy: 0, sw: 58, sh: 62 }, solid: { x: -7, y: -16, w: 14, h: 18 } },
+      pine: { name: "dark_tree_pine", count: 1, fps: 1, w: 62, h: 92, hits: 8, solid: { x: -7, y: -16, w: 14, h: 18 } },
+      yellow: { name: "plant_triangle_spruce_tree_yellow", count: 12, fps: 9, w: 45, h: 76, hits: 6, solid: { x: -7, y: -15, w: 14, h: 16 } },
+      cold: { name: "plant_slim_spruce_tree_cold", count: 12, fps: 9, w: 48, h: 92, hits: 7, solid: { x: -7, y: -17, w: 14, h: 18 } },
+      teal: { name: "plant_thick_spruce_tree_green_teal", count: 12, fps: 9, w: 64, h: 104, hits: 10, solid: { x: -10, y: -19, w: 20, h: 21 } },
+      bubble: { name: "plant_bubble_pine_tree_green", count: 12, fps: 9, w: 51, h: 91, hits: 7, solid: { x: -9, y: -18, w: 18, h: 20 } },
+      tiny: { name: "plant_tiny_spruce_tree_green", count: 12, fps: 9, w: 40, h: 68, hits: 5, solid: { x: -7, y: -15, w: 14, h: 16 } }
     };
     const biomeLayers = [
       { id: "safe", radius: SAFE_RADIUS, tree: "sprout", density: 0.08, tint: null, detail: "meadow" },
@@ -529,6 +507,38 @@
       return { layer: biomeLayers[biomeLayers.length - 1], amount: 1 };
     }
 
+    function waterMaskAt(x, y) {
+      const biome = biomeBlendAt(x + TILE / 2, y + TILE / 2);
+      if (biome.layer.detail !== "water") return { biome, water: false };
+      const wet = valueNoise(x, y, 180, 72);
+      const ribbon = Math.sin(x * .018 + y * .011 + valueNoise(x, y, 360, 73) * 8);
+      return {
+        biome,
+        water: wet > .58 || ribbon > .72
+      };
+    }
+
+    function waterTileAt(x, y) {
+      const mask = waterMaskAt(x, y);
+      if (!mask.water) return null;
+      return { biome: mask.biome, seed: Math.floor(hash01(x, y, 74) * 4) };
+    }
+
+    function isWaterAtWorldPoint(x, y) {
+      return waterMaskAt(Math.floor(x / TILE) * TILE, Math.floor(y / TILE) * TILE).water;
+    }
+
+    function isTreeName(name) {
+      return /(^|_)tree($|_)/.test(name) || name.startsWith("dark_tree_");
+    }
+
+    function treeMaxHp(treeType, w, h, variance = 0) {
+      const base = biomeTreeTypes[treeType]?.hits || 5;
+      const sizeBonus = Math.max(0, Math.round((w * h - 3800) / 4200));
+      const randomBonus = variance > 0.68 ? 1 : 0;
+      return Math.max(5, base + sizeBonus + randomBonus);
+    }
+
     const biomeTrees = (() => {
       const trees = [];
       const cell = 86;
@@ -539,13 +549,22 @@
           const layer = biomeAt(cx, cy);
           const nearHome = Math.hypot(cx - SAFE_CENTER_X, cy - SAFE_CENTER_Y) < 420;
           const cluster = hash01(gx, gy, 43);
-          if (nearHome || cluster > layer.density) continue;
+          if (nearHome || cluster > layer.density || isWaterAtWorldPoint(cx, cy)) continue;
           const type = biomeTreeTypes[layer.tree];
           const scale = 0.86 + hash01(gx, gy, 45) * 0.5;
+          const w = Math.round(type.w * scale);
+          const h = Math.round(type.h * scale);
+          const maxHp = treeMaxHp(layer.tree, w, h, hash01(gx, gy, 46));
           trees.push({
             ...type,
-            w: Math.round(type.w * scale),
-            h: Math.round(type.h * scale),
+            tree: true,
+            biomeTree: true,
+            treeType: layer.tree,
+            biomeId: layer.id,
+            maxHp,
+            hp: maxHp,
+            w,
+            h,
             x: Math.round(cx),
             y: Math.round(cy),
             solid: type.solid ? {
@@ -570,7 +589,10 @@
       { name: "prop_sprout_seed_wheat", count: 1, fps: 1, w: 32, h: 32, x: 410, y: 244 },
       { name: "prop_sprout_seed_radish", count: 1, fps: 1, w: 32, h: 32, x: 448, y: 244 }
     ];
-    const buildPalette = [
+    const BUILD_SCALE = 0.5;
+    const BUILD_GRID = Math.max(8, Math.round(16 * BUILD_SCALE));
+    const BUILD_WALL_STEP = Math.max(8, Math.round(32 * BUILD_SCALE));
+    const buildPaletteBase = [
       { id: "wall", label: "Wall", name: "build_sprout_fence_post", count: 1, fps: 1, w: 32, h: 32, solid: { x: -12, y: -16, w: 24, h: 18 } },
       { id: "equip-axe", label: "Equip axe", name: "build_sprout_tool_axe", count: 1, fps: 1, w: 34, h: 34, equipTool: "axe" },
       { id: "equip-hoe", label: "Equip hoe", name: "build_sprout_tool_hoe", count: 1, fps: 1, w: 34, h: 34, equipTool: "hoe" },
@@ -595,6 +617,17 @@
       { id: "tools", label: "Tools", name: "prop_sprout_tools", count: 1, fps: 1, w: 72, h: 72, solid: { x: -22, y: -22, w: 44, h: 22 } },
       { id: "erase", label: "Erase", erase: true }
     ];
+    const buildPalette = buildPaletteBase.map(item => ({
+      ...item,
+      w: item.w == null ? item.w : Math.max(8, Math.round(item.w * BUILD_SCALE)),
+      h: item.h == null ? item.h : Math.max(8, Math.round(item.h * BUILD_SCALE)),
+      solid: item.solid ? {
+        x: Math.round(item.solid.x * BUILD_SCALE),
+        y: Math.round(item.solid.y * BUILD_SCALE),
+        w: Math.max(4, Math.round(item.solid.w * BUILD_SCALE)),
+        h: Math.max(4, Math.round(item.solid.h * BUILD_SCALE))
+      } : item.solid
+    }));
     const buildConnectionSprites = [
       { name: "build_sprout_fence_h", count: 1 },
       { name: "build_sprout_fence_v", count: 1 },
@@ -604,6 +637,14 @@
       { name: "build_sprout_fence_mid", count: 1 },
       { name: "build_sprout_fence_right", count: 1 }
     ];
+    plantSprites.forEach(sprite => {
+      if (!isTreeName(sprite.name)) return;
+      sprite.tree = true;
+      sprite.treeType = "sprout";
+      sprite.maxHp = treeMaxHp(sprite.treeType, sprite.w, sprite.h, hash01(sprite.x, sprite.y, 47));
+      sprite.hp = sprite.maxHp;
+      sprite.respawnMs = TREE_RESPAWN_MS + TREE_RESPAWN_JITTER_MS * 0.5;
+    });
 
     const scene = document.getElementById("scene");
     const ctx = scene.getContext("2d");
@@ -621,15 +662,23 @@
     }
     const hud = document.getElementById("hud");
     const picker = document.getElementById("picker");
-    const buildbar = document.getElementById("buildbar");
+    const buildbarBuildings = document.getElementById("buildbar-buildings");
+    const buildbarTools = document.getElementById("buildbar-tools");
     const keys = new Set();
+    let tapTimes = [];
+    let pendingBuildTap = 0;
     const images = {};
     const imagePromises = {};
     const forestFrames = {};
     let staticMap;
     const placedSprites = [];
     const farmPlots = [];
-    const ASSET_REV = "one-tree-biomes-water-v22";
+    const ASSET_REV = "one-tree-biomes-water-v46";
+    const DIALOGUE_COOLDOWN_MS = 5000;
+    const LONG_SKID_STOP_MS = 3600;
+    const DIALOGUE_MOVE_DISTANCE = 430;
+    const DIALOGUE_RANDOM_MIN_MS = 5200;
+    const DIALOGUE_RANDOM_JITTER_MS = 7200;
     const startBiome = new URLSearchParams(location.search).get("biome") || "";
     const startPositions = {
       dark: { x: 2550, y: 1080 },
@@ -655,18 +704,46 @@
       attackDir: "right",
       stopStarted: 0,
       stopUntil: 0,
+      stopMode: "stop",
+      moveStarted: 0,
       wasMoving: false,
+      treeHits: 0,
+      treesDestroyed: 0,
+      lastTreeHit: "",
+      nextTreeRespawnCheck: 0,
+      dialogueText: "",
+      dialogueSide: "right",
+      dialogueStarted: 0,
+      dialogueUntil: 0,
+      dialoguePriority: 0,
+      dialogueCooldownUntil: 0,
+      dialogueMoveDistance: 0,
+      dialogueLastX: startPosition.x,
+      dialogueLastY: startPosition.y,
+      dialogueNextRandom: performance.now() + 2600,
+      dialogueBiome: "",
       zoom: 1,
       scene: "outside",
       transitionStarted: 0,
       transitionText: "",
       buildTool: "wall",
+      buildUiOpen: false,
       equippedTool: "",
       toolActionTool: "",
       toolActionDir: "front",
       toolActionStarted: 0,
       toolActionUntil: 0,
-      buildHover: { x: 320, y: 220, active: false }
+      buildHover: { x: 320, y: 220, active: false },
+      joystick: {
+        active: false,
+        pointerId: null,
+        startX: 0,
+        startY: 0,
+        x: 0,
+        y: 0,
+        maxDistance: 76,
+        moved: false
+      }
     };
     window.demoState = state;
 
@@ -712,18 +789,14 @@
 	      return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
 	    }
 
-	    function waterTileAt(x, y) {
-	      const biome = biomeBlendAt(x + TILE / 2, y + TILE / 2);
-	      if (biome.layer.detail !== "water") return null;
-	      const wet = valueNoise(x, y, 180, 72);
-	      const ribbon = Math.sin(x * .018 + y * .011 + valueNoise(x, y, 360, 73) * 8);
-	      if (wet <= .58 && ribbon <= .72) return null;
-	      return { biome, seed: Math.floor(hash01(x, y, 74) * 4) };
-	    }
-
 	    function drawGrassTile(target, img, x, y, variant) {
 	      const plainTiles = [[16, 16], [0, 80], [16, 80], [32, 80], [0, 96], [16, 96], [32, 96]];
 	      const detailTiles = [[80, 80], [80, 96]];
+      const shorelineTile = shorelineTileAt(x, y);
+      if (shorelineTile && drawWaterBaseTile(target, x, y, 0)) {
+        target.drawImage(img, shorelineTile[0] * TILE, shorelineTile[1] * TILE, TILE, TILE, x, y, TILE, TILE);
+        return;
+      }
       const hash = hash01(x, y, 1);
       let [sx, sy] = plainTiles[variant % plainTiles.length];
       if (hash > 0.84) [sx, sy] = detailTiles[Math.floor(hash * 11) % detailTiles.length];
@@ -765,6 +838,48 @@
 	      }
 	    }
 
+    function shorelineTileAt(x, y) {
+      if (waterTileAt(x, y)) return null;
+      const n = Boolean(waterTileAt(x, y - TILE));
+      const e = Boolean(waterTileAt(x + TILE, y));
+      const s = Boolean(waterTileAt(x, y + TILE));
+      const w = Boolean(waterTileAt(x - TILE, y));
+      if (!n && !e && !s && !w) return null;
+      if (n && w) return [0, 0];
+      if (n && e) return [2, 0];
+      if (s && w) return [0, 2];
+      if (s && e) return [2, 2];
+      if (n) return [1, 0];
+      if (e) return [2, 1];
+      if (s) return [1, 2];
+      if (w) return [0, 1];
+      return null;
+    }
+
+    function drawWaterBaseTile(target, x, y, timeFrame = 0) {
+      const water = images[assets.water];
+      if (!water) return false;
+      const adjacent = waterTileAt(x, y) ||
+        waterTileAt(x, y - TILE) ||
+        waterTileAt(x + TILE, y) ||
+        waterTileAt(x, y + TILE) ||
+        waterTileAt(x - TILE, y);
+      const seed = adjacent ? adjacent.seed : Math.floor(hash01(x, y, 73) * 4);
+      const frame = (seed + timeFrame) % 4;
+      target.drawImage(water, frame * TILE, 0, TILE, TILE, x, y, TILE, TILE);
+      target.fillStyle = "rgba(96, 166, 184, 0.18)";
+      target.fillRect(x, y, TILE, TILE);
+      return true;
+    }
+
+    function drawShorelineTile(target, x, y, timeFrame = 0) {
+      const grass = images[assets.grass];
+      if (!grass) return;
+      const tile = shorelineTileAt(x, y);
+      if (!tile || !drawWaterBaseTile(target, x, y, timeFrame)) return;
+      target.drawImage(grass, tile[0] * TILE, tile[1] * TILE, TILE, TILE, x, y, TILE, TILE);
+    }
+
 	    function drawAnimatedWater() {
 	      const water = images[assets.water];
 	      if (!water) return;
@@ -785,6 +900,18 @@
 	        }
 	      }
 	    }
+
+    function drawAnimatedShoreline() {
+      if (!images[assets.grass] || !images[assets.water]) return;
+      const startX = Math.max(0, Math.floor(state.cameraX / TILE) * TILE - TILE);
+      const startY = Math.max(0, Math.floor(state.cameraY / TILE) * TILE - TILE);
+      const endX = Math.min(WORLD_W, state.cameraX + viewWorldW() + TILE * 2);
+      const endY = Math.min(WORLD_H, state.cameraY + viewWorldH() + TILE * 2);
+      const timeFrame = Math.floor(state.t * 4) % 4;
+      for (let y = startY; y < endY; y += TILE) {
+        for (let x = startX; x < endX; x += TILE) drawShorelineTile(ctx, x, y, timeFrame);
+      }
+    }
 
 	    function buildStaticMap() {
       staticMap = document.createElement("canvas");
@@ -827,7 +954,10 @@
     function getForestFramePaths(base) {
       const out = {};
       const counts = forestFrameCounts[base];
-      const modes = counts?.stop ? ["idle", "run", "stop", "attack"] : ["idle", "run", "attack"];
+      const modes = ["idle", "run"];
+      if (counts?.stop) modes.push("stop");
+      if (counts?.skid) modes.push("skid");
+      modes.push("attack");
       for (const mode of modes) {
         for (const dir of DIRECTIONS) {
           const count = counts?.[mode] ?? (base === "frog" && mode === "idle" ? 2 : 4);
@@ -861,6 +991,75 @@
 
     function sideFacingDir(dir) {
       return dir === "left" ? "left" : "right";
+    }
+
+    const dialogueLines = {
+      move: [
+        "Kita mau ke mana?",
+        "Jauh juga ya.",
+        "Masih jauh?",
+        "Ayo terus jalan.",
+        "Pelan-pelan saja."
+      ],
+      attack: [
+        "Apa yang kamu lakukan?",
+        "Hei, hati-hati!",
+        "Kenapa pukul itu?",
+        "Jangan kasar.",
+        "Aduh, kaget!"
+      ],
+      biome: [
+        "Wah, keren!",
+        "Tempat baru!",
+        "Indah sekali.",
+        "Warnanya cantik.",
+        "Aku suka ini.",
+        "Aneh tapi keren.",
+        "Lihat itu!"
+      ],
+      random: [
+        "Aku lapar.",
+        "Mau makan.",
+        "Aku haus.",
+        "Capek juga.",
+        "Seru!",
+        "Halo.",
+        "Apa kabar?",
+        "Aku senang.",
+        "Aku penasaran.",
+        "Hati-hati.",
+        "Tunggu sebentar.",
+        "Ayo main.",
+        "Di mana kita?",
+        "Ini lucu.",
+        "Bagus sekali.",
+        "Tenang saja.",
+        "Aku lihat sesuatu.",
+        "Kita aman?",
+        "Sini dulu.",
+        "Terima kasih."
+      ]
+    };
+
+    function pickDialogue(group) {
+      const lines = dialogueLines[group] || dialogueLines.random;
+      return lines[Math.floor(Math.random() * lines.length)];
+    }
+
+    function sayDialogue(text, priority = 1, duration = 2500) {
+      const now = performance.now();
+      if (now < state.dialogueCooldownUntil) return;
+      if (state.dialogueText && now < state.dialogueUntil && priority < state.dialoguePriority) return;
+      state.dialogueText = text;
+      state.dialogueSide = sideFacingDir(state.mode === "attack" ? state.attackDir : state.dir);
+      state.dialogueStarted = now;
+      state.dialogueUntil = now + duration;
+      state.dialoguePriority = priority;
+      state.dialogueCooldownUntil = now + DIALOGUE_COOLDOWN_MS;
+    }
+
+    function scheduleNextRandomDialogue(now) {
+      state.dialogueNextRandom = now + DIALOGUE_RANDOM_MIN_MS + Math.random() * DIALOGUE_RANDOM_JITTER_MS;
     }
 
     function currentFacingDir() {
@@ -911,11 +1110,12 @@
       if (cfg.kind === "forest") {
         const activeDir = state.mode === "attack" ? state.attackDir : state.dir;
         const dir = cfg.sideView ? sideFacingDir(activeDir) : state.mode === "idle" && cfg.idleDir ? cfg.idleDir : activeDir;
-        const mode = state.mode === "stop" && !forestFrames[cfg.base][`stop-${dir}`] ? "idle" : state.mode;
+        const isStopMode = state.mode === "stop" || state.mode === "skid";
+        const mode = isStopMode && !forestFrames[cfg.base][`${state.mode}-${dir}`] ? "idle" : state.mode;
         const frames = forestFrames[cfg.base][`${mode}-${dir}`] || forestFrames[cfg.base][`idle-${dir}`];
-        const fps = mode === "attack" ? (cfg.attackFps || 9) : mode === "stop" ? (cfg.stopFps || 12) : mode === "run" ? (cfg.runFps || 9) : (cfg.idleFps || 5);
-        const started = mode === "attack" ? state.attackStarted : mode === "stop" ? state.stopStarted : 0;
-        const playOnce = mode === "attack" || mode === "stop";
+        const fps = mode === "attack" ? (cfg.attackFps || 9) : mode === "skid" ? (cfg.skidFps || cfg.stopFps || 12) : mode === "stop" ? (cfg.stopFps || 12) : mode === "run" ? (cfg.runFps || 9) : (cfg.idleFps || 5);
+        const started = mode === "attack" ? state.attackStarted : mode === "stop" || mode === "skid" ? state.stopStarted : 0;
+        const playOnce = mode === "attack" || mode === "stop" || mode === "skid";
         const t = playOnce ? Math.max(0, performance.now() - started) / 1000 : state.t;
         const index = playOnce ? Math.min(frames.length - 1, Math.floor(t * fps)) : Math.floor(t * fps) % frames.length;
         const image = images[frames[index]];
@@ -926,12 +1126,78 @@
       return { image: images[cfg.src], sx, sy, sw: cfg.frameW, sh: cfg.frameH, scale: cfg.scale };
     }
 
-    function drawPlayerAt(frame, x, y) {
+    function playerDrawSize(frame) {
       const w = Math.round(frame.sw * frame.scale * CHARACTER_WORLD_SCALE);
       const h = Math.round(frame.sh * frame.scale * CHARACTER_WORLD_SCALE);
+      return { w, h };
+    }
+
+    function drawPlayerAt(frame, x, y) {
+      const { w, h } = playerDrawSize(frame);
       ctx.imageSmoothingEnabled = Boolean(frame.smooth);
       ctx.drawImage(frame.image, frame.sx, frame.sy, frame.sw, frame.sh, Math.round(x - w / 2), Math.round(y - h + 10), w, h);
       ctx.imageSmoothingEnabled = false;
+    }
+
+    function wrapDialogueText(text, maxChars) {
+      const words = text.split(" ");
+      const lines = [];
+      let line = "";
+      for (const word of words) {
+        const next = line ? `${line} ${word}` : word;
+        if (next.length > maxChars && line) {
+          lines.push(line);
+          line = word;
+        } else {
+          line = next;
+        }
+      }
+      if (line) lines.push(line);
+      return lines.slice(0, 3);
+    }
+
+    function roundedRectPath(x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + w - r, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+      ctx.lineTo(x + w, y + h - r);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+      ctx.lineTo(x + r, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+      ctx.lineTo(x, y + r);
+      ctx.quadraticCurveTo(x, y, x + r, y);
+      ctx.closePath();
+    }
+
+    function drawDialogueBubble(frame, x, y) {
+      const now = performance.now();
+      if (!state.dialogueText || now > state.dialogueUntil) return;
+      const { w, h } = playerDrawSize(frame);
+      const age = now - state.dialogueStarted;
+      const fadeIn = Math.min(1, age / 120);
+      const fadeOut = Math.min(1, Math.max(0, state.dialogueUntil - now) / 260);
+      const alpha = Math.min(fadeIn, fadeOut);
+      const fontSize = clamp(Math.round(h * 0.08), 5, 8);
+      const lines = wrapDialogueText(state.dialogueText, fontSize > 6 ? 18 : 16);
+      const lineHeight = Math.round(fontSize * 1.22);
+      ctx.save();
+      ctx.font = `700 ${fontSize}px Georgia, serif`;
+      const textW = Math.max(...lines.map(line => ctx.measureText(line).width));
+      const onLeft = state.dialogueSide === "left";
+      const gap = Math.max(1, Math.round(fontSize * 0.2));
+      const anchorX = Math.round(x + (onLeft ? -w * 0.16 : w * 0.16));
+      const bx = onLeft ? anchorX - textW - gap : anchorX + gap;
+      const rise = Math.round((1 - alpha) * 4);
+      const by = Math.round(y - h + 10 + h * 0.08 - rise);
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = "#fff";
+      ctx.textBaseline = "top";
+      lines.forEach((line, i) => {
+        const ty = by + i * lineHeight;
+        ctx.fillText(line, bx, ty);
+      });
+      ctx.restore();
     }
 
     function toolFrame(tool, dir, step) {
@@ -996,7 +1262,36 @@
       const index = plant.chest ? chestFrameIndex(plant) : Math.floor((state.t + plant.x * 0.003) * plant.fps) % plant.count;
       const img = images[`assets/plants/${plant.name}/frame_${index}.png`];
       if (!img) return;
-      ctx.drawImage(img, Math.round(plant.x - plant.w / 2), Math.round(plant.y - plant.h), plant.w, plant.h);
+      let shake = 0;
+      if (plant.tree && plant.hitStarted) {
+        const elapsed = performance.now() - plant.hitStarted;
+        if (elapsed < TREE_HIT_SHAKE_MS) {
+          const p = elapsed / TREE_HIT_SHAKE_MS;
+          shake = Math.sin(p * Math.PI * 10) * (1 - p) * 6 * (plant.hitDir || 1);
+        }
+      }
+      const crop = plant.crop || { sx: 0, sy: 0, sw: img.width, sh: img.height };
+      ctx.drawImage(
+        img,
+        crop.sx,
+        crop.sy,
+        crop.sw,
+        crop.sh,
+        Math.round(plant.x - plant.w / 2 + shake),
+        Math.round(plant.y - plant.h),
+        plant.w,
+        plant.h
+      );
+    }
+
+    function isAlwaysUnderPlayerSprite(plant) {
+      if (plant.built && plant.buildId !== "wall" && !plant.chest) return true;
+      return /(_bridge|_path|_rug|_beds|_tables|_furniture_top|_chair|_stool|_bed_)/.test(plant.name);
+    }
+
+    function plantDepthY(plant) {
+      if (isAlwaysUnderPlayerSprite(plant)) return -100000 + plant.y * 0.001;
+      return plant.y;
     }
 
     function chestFrameIndex(chest) {
@@ -1014,7 +1309,8 @@
       const right = state.cameraX + viewWorldW() + pad;
       const top = state.cameraY - pad;
       const bottom = state.cameraY + viewWorldH() + pad;
-      const visible = item => item.x + item.w / 2 > left &&
+      const visible = item => !item.destroyed &&
+        item.x + item.w / 2 > left &&
         item.x - item.w / 2 < right &&
         item.y > top &&
         item.y - item.h < bottom;
@@ -1028,9 +1324,19 @@
     function drawDepthSortedActors() {
       const frame = currentFrame();
       const actors = activeSprites().map(plant => ({
-        y: plant.y,
+        y: plantDepthY(plant),
         draw: () => drawPlant(plant)
       }));
+      if (state.scene === "outside") {
+        for (const plot of farmPlots) {
+          const stage = cropStage(plot);
+          if (stage < 0) continue;
+          actors.push({
+            y: -100000 + plot.y * 0.001,
+            draw: () => drawFarmCrop(plot, stage)
+          });
+        }
+      }
       actors.push({
         y: state.y,
         draw: () => {
@@ -1041,6 +1347,7 @@
       });
       actors.sort((a, b) => a.y - b.y);
       actors.forEach(actor => actor.draw());
+      drawDialogueBubble(frame, state.x, state.y);
     }
 
     function drawBiomeScreenFilter() {
@@ -1062,12 +1369,73 @@
       ctx.restore();
     }
 
+    function drawAnimeColorGrade() {
+      ctx.save();
+      const sky = ctx.createLinearGradient(0, 0, 0, VIEW_H);
+      sky.addColorStop(0, "rgba(92, 116, 154, 0.20)");
+      sky.addColorStop(0.44, "rgba(220, 232, 244, 0.035)");
+      sky.addColorStop(1, "rgba(38, 51, 72, 0.12)");
+      ctx.globalCompositeOperation = "source-over";
+      ctx.fillStyle = sky;
+      ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+
+      ctx.globalCompositeOperation = "soft-light";
+      const warmth = ctx.createLinearGradient(0, 0, VIEW_W, VIEW_H);
+      warmth.addColorStop(0, "rgba(255, 241, 214, 0.18)");
+      warmth.addColorStop(0.55, "rgba(255, 255, 255, 0.04)");
+      warmth.addColorStop(1, "rgba(160, 188, 230, 0.18)");
+      ctx.fillStyle = warmth;
+      ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+
+      ctx.globalCompositeOperation = "screen";
+      const haze = ctx.createRadialGradient(VIEW_W * 0.5, VIEW_H * 0.18, 20, VIEW_W * 0.5, VIEW_H * 0.18, VIEW_W * 0.8);
+      haze.addColorStop(0, "rgba(255, 255, 255, 0.13)");
+      haze.addColorStop(0.45, "rgba(255, 244, 224, 0.035)");
+      haze.addColorStop(1, "rgba(255, 255, 255, 0)");
+      ctx.fillStyle = haze;
+      ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+
+      ctx.globalCompositeOperation = "multiply";
+      const vignette = ctx.createRadialGradient(VIEW_W / 2, VIEW_H / 2, 126, VIEW_W / 2, VIEW_H / 2, 390);
+      vignette.addColorStop(0, "rgba(255, 255, 255, 0)");
+      vignette.addColorStop(0.62, "rgba(235, 239, 246, 0.03)");
+      vignette.addColorStop(1, "rgba(23, 28, 38, 0.24)");
+      ctx.fillStyle = vignette;
+      ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+
+      ctx.globalCompositeOperation = "source-over";
+      const bars = ctx.createLinearGradient(0, 0, 0, VIEW_H);
+      bars.addColorStop(0, "rgba(7, 9, 13, 0.25)");
+      bars.addColorStop(0.16, "rgba(7, 9, 13, 0)");
+      bars.addColorStop(0.84, "rgba(7, 9, 13, 0)");
+      bars.addColorStop(1, "rgba(7, 9, 13, 0.24)");
+      ctx.fillStyle = bars;
+      ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+      ctx.restore();
+    }
+
     function currentBuildItem() {
       return buildPalette.find(item => item.id === state.buildTool) || buildPalette[0];
     }
 
+    function buildPaletteGroup(item) {
+      return item.equipTool || item.erase ? "tools" : "buildings";
+    }
+
+    function setBuildUiOpen(open) {
+      state.buildUiOpen = open;
+      buildbarBuildings.classList.toggle("open", state.buildUiOpen);
+      buildbarTools.classList.toggle("open", state.buildUiOpen);
+      if (!state.buildUiOpen) state.buildHover.active = false;
+    }
+
+    function toggleBuildUi() {
+      setBuildUiOpen(!state.buildUiOpen);
+      state.demo = false;
+    }
+
     function drawBuildGhost() {
-      if (!state.buildHover.active) return;
+      if (!state.buildUiOpen || !state.buildHover.active) return;
       const item = currentBuildItem();
       const x = state.buildHover.x;
       const y = state.buildHover.y;
@@ -1108,13 +1476,14 @@
           ctx.fillStyle = "rgba(112, 151, 188, .18)";
           ctx.fillRect(plot.x - FARM_GRID / 2 + 3, plot.y - FARM_GRID / 2 + 3, FARM_GRID - 6, FARM_GRID - 6);
         }
-        const stage = cropStage(plot);
-        if (stage >= 0) {
-          const crop = farmCrops[plot.crop];
-          const img = images[`assets/plants/${crop.name}/frame_${stage}.png`];
-          if (img) ctx.drawImage(img, plot.x - FARM_CROP_SIZE / 2, plot.y - FARM_CROP_SIZE + 8, FARM_CROP_SIZE, FARM_CROP_SIZE);
-        }
       }
+    }
+
+    function drawFarmCrop(plot, stage = cropStage(plot)) {
+      if (stage < 0) return;
+      const crop = farmCrops[plot.crop];
+      const img = images[`assets/plants/${crop.name}/frame_${stage}.png`];
+      if (img) ctx.drawImage(img, plot.x - FARM_CROP_SIZE / 2, plot.y - FARM_CROP_SIZE + 8, FARM_CROP_SIZE, FARM_CROP_SIZE);
     }
 
     function solidRectFor(plant) {
@@ -1184,7 +1553,7 @@
 
     function snapBuildPoint(point) {
       const item = currentBuildItem();
-      const grid = item.id === "wall" ? 32 : 16;
+      const grid = item.id === "wall" ? BUILD_WALL_STEP : BUILD_GRID;
       return {
         x: Math.round(point.x / grid) * grid,
         y: Math.round(point.y / grid) * grid
@@ -1198,7 +1567,7 @@
     function placeBuildItem() {
       const item = currentBuildItem();
       const { x, y } = state.buildHover;
-      if (!state.buildHover.active) return;
+      if (!state.buildUiOpen || !state.buildHover.active) return;
       if (item.equipTool) {
         state.equippedTool = item.equipTool;
         return;
@@ -1255,6 +1624,109 @@
       return true;
     }
 
+    function allTreeSprites() {
+      return [...plantSprites, ...biomeTrees].filter(item => item.tree);
+    }
+
+    function attackTargetRect() {
+      const dir = state.attackDir || currentFacingDir();
+      const sideReach = 24;
+      if (dir === "left") return { x: state.x - sideReach, y: state.y - 42, w: sideReach + 4, h: 52 };
+      if (dir === "right") return { x: state.x - 4, y: state.y - 42, w: sideReach + 4, h: 52 };
+      if (dir === "back") return { x: state.x - 18, y: state.y - 34, w: 36, h: 24 };
+      return { x: state.x - 18, y: state.y - 4, w: 36, h: 24 };
+    }
+
+    function treeTargetRect(tree) {
+      const trunk = solidRectFor(tree);
+      if (trunk) {
+        return {
+          x: trunk.x - 3,
+          y: trunk.y - 4,
+          w: trunk.w + 6,
+          h: trunk.h + 8
+        };
+      }
+      const w = Math.min(tree.w * 0.24, 22);
+      const h = Math.min(tree.h * 0.24, 28);
+      return { x: tree.x - w / 2, y: tree.y - h, w, h };
+    }
+
+    function hitTreeInFront() {
+      if (state.scene !== "outside") return false;
+      const hit = attackTargetRect();
+      const target = allTreeSprites()
+        .filter(tree => !tree.destroyed)
+        .map(tree => ({ tree, rect: treeTargetRect(tree), dist: Math.hypot(tree.x - state.x, tree.y - state.y) }))
+        .filter(entry => aabb(hit.x, hit.y, hit.w, hit.h, entry.rect.x, entry.rect.y, entry.rect.w, entry.rect.h))
+        .sort((a, b) => a.dist - b.dist)[0]?.tree;
+      if (!target) return false;
+      damageTree(target);
+      return true;
+    }
+
+    function damageTree(tree) {
+      const now = performance.now();
+      if (!tree.maxHp) tree.maxHp = treeMaxHp(tree.treeType || "sprout", tree.w, tree.h, hash01(tree.x, tree.y, 48));
+      tree.hp = Math.max(0, (tree.hp ?? tree.maxHp) - 1);
+      tree.hitStarted = now;
+      tree.hitDir = state.attackDir === "left" ? -1 : 1;
+      state.treeHits += 1;
+      state.lastTreeHit = `${tree.name}:${tree.hp}/${tree.maxHp}`;
+      if (tree.hp > 0) return;
+      tree.destroyed = true;
+      tree.respawnAt = now + (tree.respawnMs || TREE_RESPAWN_MS) + hash01(tree.x, tree.y, 49) * TREE_RESPAWN_JITTER_MS;
+      state.treesDestroyed += 1;
+    }
+
+    function updateTreeRespawns(now) {
+      if (state.scene !== "outside" || now < state.nextTreeRespawnCheck) return;
+      state.nextTreeRespawnCheck = now + 500;
+      for (const tree of allTreeSprites()) {
+        if (!tree.destroyed || now < tree.respawnAt) continue;
+        if (Math.hypot(tree.x - state.x, tree.y - state.y) < 92) {
+          tree.respawnAt = now + 1200;
+          continue;
+        }
+        if (tree.biomeTree && biomeAt(tree.x, tree.y).tree !== tree.treeType) {
+          tree.respawnAt = now + 1200;
+          continue;
+        }
+        if (tree.biomeTree && isWaterAtWorldPoint(tree.x, tree.y)) {
+          tree.respawnAt = now + 1200;
+          continue;
+        }
+        tree.destroyed = false;
+        tree.hp = tree.maxHp;
+        tree.hitStarted = now;
+        tree.hitDir = 1;
+      }
+    }
+    window.demoTreeStats = () => {
+      const trees = allTreeSprites();
+      return {
+        total: trees.length,
+        live: trees.filter(tree => !tree.destroyed).length,
+        destroyed: trees.filter(tree => tree.destroyed).length,
+        minHp: Math.min(...trees.map(tree => tree.maxHp || 0).filter(Boolean)),
+        maxHp: Math.max(...trees.map(tree => tree.maxHp || 0)),
+        near: trees
+          .filter(tree => !tree.destroyed)
+          .map(tree => ({
+            name: tree.name,
+            type: tree.treeType,
+            biome: tree.biomeId || "static",
+            hp: tree.hp,
+            maxHp: tree.maxHp,
+            x: tree.x,
+            y: tree.y,
+            dist: Math.hypot(tree.x - state.x, tree.y - state.y)
+          }))
+          .sort((a, b) => a.dist - b.dist)
+          .slice(0, 6)
+      };
+    };
+
     function farmTargetPoint() {
       const offset = {
         front: [0, 28],
@@ -1297,10 +1769,10 @@
     function refreshWallConnections() {
       for (const item of placedSprites) {
         if (item.buildId !== "wall") continue;
-        const left = wallAt(item.scene, item.x - 32, item.y);
-        const right = wallAt(item.scene, item.x + 32, item.y);
-        const up = wallAt(item.scene, item.x, item.y - 32);
-        const down = wallAt(item.scene, item.x, item.y + 32);
+        const left = wallAt(item.scene, item.x - BUILD_WALL_STEP, item.y);
+        const right = wallAt(item.scene, item.x + BUILD_WALL_STEP, item.y);
+        const up = wallAt(item.scene, item.x, item.y - BUILD_WALL_STEP);
+        const down = wallAt(item.scene, item.x, item.y + BUILD_WALL_STEP);
         const horizontal = left || right;
         const vertical = up || down;
         item.name = left && right ? "build_sprout_fence_mid" :
@@ -1355,6 +1827,8 @@
       state.attackDir = currentFacingDir();
       state.attackUntil = state.attackStarted + (roster[state.current].attackMs || 420);
       state.stopUntil = 0;
+      sayDialogue(pickDialogue("attack"), 5, 2300);
+      hitTreeInFront();
     }
 
     function triggerToolUse() {
@@ -1367,7 +1841,44 @@
       state.attackStarted = state.toolActionStarted;
       state.attackUntil = state.toolActionUntil;
       state.stopUntil = 0;
-      applyFarmTool(state.equippedTool);
+      sayDialogue(pickDialogue("attack"), 5, 2300);
+      if (state.equippedTool === "axe") hitTreeInFront();
+      else applyFarmTool(state.equippedTool);
+    }
+
+    function updateDialogue(now, moving, attacking) {
+      if (now > state.dialogueUntil) {
+        state.dialogueText = "";
+        state.dialoguePriority = 0;
+      }
+      const moved = Math.hypot(state.x - state.dialogueLastX, state.y - state.dialogueLastY);
+      state.dialogueLastX = state.x;
+      state.dialogueLastY = state.y;
+      if (moved < 180) state.dialogueMoveDistance += moved;
+      else state.dialogueMoveDistance = 0;
+
+      const biomeId = state.scene === "outside" ? biomeAt(state.x, state.y).id : "inside";
+      if (!state.dialogueBiome) {
+        state.dialogueBiome = biomeId;
+      } else if (biomeId !== state.dialogueBiome) {
+        state.dialogueBiome = biomeId;
+        state.dialogueMoveDistance = 0;
+        sayDialogue(pickDialogue("biome"), 4, 2800);
+        scheduleNextRandomDialogue(now);
+        return;
+      }
+
+      if (moving && state.dialogueMoveDistance >= DIALOGUE_MOVE_DISTANCE) {
+        state.dialogueMoveDistance = 0;
+        sayDialogue(pickDialogue("move"), 3, 2600);
+        scheduleNextRandomDialogue(now);
+        return;
+      }
+
+      if (!moving && !attacking && now > state.dialogueNextRandom) {
+        sayDialogue(pickDialogue("random"), 1, 2400);
+        scheduleNextRandomDialogue(now);
+      }
     }
 
     function seedDemoFarm() {
@@ -1395,11 +1906,11 @@
     function setKey(key, on) {
       const k = key.toLowerCase();
       if (on && k === "e") {
-        placeBuildItem();
+        toggleBuildUi();
         return;
       }
       if (on && (k === "backspace" || k === "delete")) {
-        removePlacedAt(state.buildHover.x, state.buildHover.y);
+        if (state.buildUiOpen) removePlacedAt(state.buildHover.x, state.buildHover.y);
         return;
       }
       if ((k === " " || k === "space" || k === "k" || k === "!") && on) {
@@ -1425,11 +1936,13 @@
       state.attackDir = currentFacingDir();
       state.stopStarted = 0;
       state.stopUntil = 0;
+      state.stopMode = "stop";
+      state.moveStarted = 0;
       state.wasMoving = false;
       document.querySelectorAll(".pick").forEach(btn => btn.classList.toggle("active", btn.dataset.name === name));
       const rarity = roster[name].rarity ? `<br>${roster[name].rarity}` : "";
       const equipped = state.equippedTool ? `<br>Tool: ${toolLabel(state.equippedTool)}` : "";
-      hud.innerHTML = `${roster[name].label}${rarity}${equipped}<br>Move: WASD or arrows<br>Use: ! / Space / K<br>Build: click or E`;
+      hud.innerHTML = `${roster[name].label}${rarity}${equipped}`;
     }
 
     function renderPicker() {
@@ -1443,12 +1956,14 @@
     }
 
     function renderBuildbar() {
-      buildbar.innerHTML = buildPalette.map(item => {
+      const buttonFor = item => {
         const active = item.id === state.buildTool ? " active" : "";
         const body = item.erase ? "<span>×</span>" : `<img src="${assetUrl(`assets/plants/${item.name}/frame_0.png`)}" alt="">`;
         return `<button class="build-tool${active}" data-build="${item.id}" title="${item.label}" aria-label="${item.label}">${body}</button>`;
-      }).join("");
-      buildbar.querySelectorAll(".build-tool").forEach(btn => btn.addEventListener("click", () => {
+      };
+      buildbarBuildings.innerHTML = buildPalette.filter(item => buildPaletteGroup(item) === "buildings").map(buttonFor).join("");
+      buildbarTools.innerHTML = buildPalette.filter(item => buildPaletteGroup(item) === "tools").map(buttonFor).join("");
+      document.querySelectorAll(".build-tool").forEach(btn => btn.addEventListener("click", () => {
         state.buildTool = btn.dataset.build;
         const item = currentBuildItem();
         if (item.equipTool) {
@@ -1457,6 +1972,91 @@
         }
         renderBuildbar();
       }));
+      buildbarBuildings.classList.toggle("open", state.buildUiOpen);
+      buildbarTools.classList.toggle("open", state.buildUiOpen);
+    }
+
+    function resetJoystick() {
+      state.joystick.active = false;
+      state.joystick.pointerId = null;
+      state.joystick.x = 0;
+      state.joystick.y = 0;
+      state.joystick.moved = false;
+    }
+
+    function updateJoystickFromPointer(e) {
+      const stick = state.joystick;
+      if (!stick.active || e.pointerId !== stick.pointerId) return;
+      const rawX = e.clientX - stick.startX;
+      const rawY = e.clientY - stick.startY;
+      const distance = Math.hypot(rawX, rawY);
+      const deadZone = 8;
+      stick.moved = stick.moved || distance > 12;
+      if (distance <= deadZone) {
+        stick.x = 0;
+        stick.y = 0;
+        return;
+      }
+      const strength = Math.min(1, (distance - deadZone) / stick.maxDistance);
+      stick.x = rawX / distance * strength;
+      stick.y = rawY / distance * strength;
+    }
+
+    function registerQuickTap(clientX, clientY) {
+      const now = performance.now();
+      updateBuildHover(clientX, clientY);
+      if (state.buildUiOpen) {
+        clearTimeout(pendingBuildTap);
+        pendingBuildTap = 0;
+        tapTimes = [];
+        placeBuildItem();
+        return;
+      }
+      tapTimes = tapTimes.filter(time => now - time < 650);
+      tapTimes.push(now);
+      if (tapTimes.length >= 3) {
+        clearTimeout(pendingBuildTap);
+        pendingBuildTap = 0;
+        tapTimes = [];
+        toggleBuildUi();
+      }
+    }
+
+    function beginCanvasPointer(e) {
+      updateBuildHover(e.clientX, e.clientY);
+      if (e.button === 2) {
+        if (state.buildUiOpen) removePlacedAt(state.buildHover.x, state.buildHover.y);
+        return;
+      }
+      if (e.button !== 0) return;
+      state.demo = false;
+      state.joystick.active = true;
+      state.joystick.pointerId = e.pointerId;
+      state.joystick.startX = e.clientX;
+      state.joystick.startY = e.clientY;
+      state.joystick.x = 0;
+      state.joystick.y = 0;
+      state.joystick.moved = false;
+      scene.setPointerCapture(e.pointerId);
+      e.preventDefault();
+    }
+
+    function moveCanvasPointer(e) {
+      updateBuildHover(e.clientX, e.clientY);
+      updateJoystickFromPointer(e);
+      if (state.joystick.active && e.pointerId === state.joystick.pointerId) e.preventDefault();
+    }
+
+    function endCanvasPointer(e) {
+      if (!state.joystick.active || e.pointerId !== state.joystick.pointerId) return;
+      updateJoystickFromPointer(e);
+      const wasTap = !state.joystick.moved && Math.hypot(e.clientX - state.joystick.startX, e.clientY - state.joystick.startY) < 12;
+      resetJoystick();
+      if (wasTap) registerQuickTap(e.clientX, e.clientY);
+      try {
+        scene.releasePointerCapture(e.pointerId);
+      } catch (_) {}
+      e.preventDefault();
     }
 
     function updateCamera() {
@@ -1474,9 +2074,14 @@
       const dt = Math.min((now - state.last) / 1000, 0.05);
       state.last = now;
       state.t += dt;
+      updateTreeRespawns(now);
 
       let dx = Number(pressed("arrowright", "d")) - Number(pressed("arrowleft", "a"));
       let dy = Number(pressed("arrowdown", "s")) - Number(pressed("arrowup", "w"));
+      if (state.joystick.active) {
+        dx += state.joystick.x;
+        dy += state.joystick.y;
+      }
 
       if (state.demo && !keys.size) {
         const t = now / 1650;
@@ -1487,6 +2092,7 @@
       const attacking = now < state.attackUntil;
       const moving = !attacking && (dx || dy);
       const wasMoving = state.wasMoving;
+      if (moving && !wasMoving) state.moveStarted = now;
       const len = Math.hypot(dx, dy) || 1;
       if (!attacking) {
         const maxX = state.scene === "interior" ? INTERIOR_W - 34 : WORLD_W - 24;
@@ -1498,6 +2104,7 @@
       }
       resolvePlayerOverlap();
       maybeTeleport();
+      updateDialogue(now, Boolean(moving), Boolean(attacking));
 
       if (!attacking) {
         const cfg = roster[state.current];
@@ -1516,15 +2123,18 @@
         state.stopUntil = 0;
       } else if (wasMoving) {
         const cfg = roster[state.current];
-        const stopFrames = cfg?.kind === "forest" && cfg.sideView ? forestFrameCounts[cfg.base]?.stop || 0 : 0;
+        const counts = cfg?.kind === "forest" && cfg.sideView ? forestFrameCounts[cfg.base] : null;
+        state.stopMode = counts?.skid && now - state.moveStarted > LONG_SKID_STOP_MS ? "skid" : "stop";
+        const stopFrames = counts?.[state.stopMode] || counts?.stop || 0;
         if (stopFrames) {
           state.stopStarted = now;
-          state.stopUntil = now + stopFrames / (cfg.stopFps || 12) * 1000;
+          const fps = state.stopMode === "skid" ? (cfg.skidFps || cfg.stopFps || 12) : (cfg.stopFps || 12);
+          state.stopUntil = now + stopFrames / fps * 1000;
         }
       }
       state.wasMoving = Boolean(moving);
       const stopping = !attacking && !moving && now < state.stopUntil;
-      state.mode = attacking ? "attack" : moving ? "run" : stopping ? "stop" : "idle";
+      state.mode = attacking ? "attack" : moving ? "run" : stopping ? state.stopMode : "idle";
 
       updateCamera();
       draw();
@@ -1539,11 +2149,18 @@
       scene.dataset.cameraY = state.cameraY.toFixed(2);
       scene.dataset.character = state.current;
       scene.dataset.mode = state.mode;
+      scene.dataset.stopMode = state.stopMode;
       scene.dataset.dir = state.dir;
       scene.dataset.attackDir = state.attackDir;
       scene.dataset.scene = state.scene;
       scene.dataset.transition = state.transitionText;
       scene.dataset.placed = placedSprites.length;
+      scene.dataset.treeHits = state.treeHits;
+      scene.dataset.treesDestroyed = state.treesDestroyed;
+      scene.dataset.lastTreeHit = state.lastTreeHit;
+      scene.dataset.dialogue = state.dialogueText;
+      scene.dataset.buildUiOpen = state.buildUiOpen ? "true" : "false";
+      scene.dataset.joystick = state.joystick.active ? `${state.joystick.x.toFixed(2)},${state.joystick.y.toFixed(2)}` : "0,0";
       scene.dataset.zoom = state.zoom.toFixed(2);
       scene.dataset.seed = WORLD_SEED;
       ctx.imageSmoothingEnabled = false;
@@ -1558,14 +2175,16 @@
 	        ctx.translate(-Math.round(state.cameraX), -Math.round(state.cameraY));
 	        ctx.drawImage(staticMap, 0, 0);
 	        drawAnimatedWater();
+	        drawAnimatedShoreline();
 	        drawFarmPatch();
 	        drawDepthSortedActors();
 	        drawBuildGhost();
 	      }
-      ctx.restore();
-      drawBiomeScreenFilter();
-      drawTransition();
-    }
+	      ctx.restore();
+	      drawBiomeScreenFilter();
+	      drawAnimeColorGrade();
+	      drawTransition();
+	    }
 
     function drawTransition() {
       const elapsed = performance.now() - state.transitionStarted;
@@ -1605,15 +2224,14 @@
     addEventListener("resize", resizeSceneCanvas);
     addEventListener("keydown", e => setKey(e.key, true));
     addEventListener("keyup", e => setKey(e.key, false));
-    scene.addEventListener("pointermove", e => updateBuildHover(e.clientX, e.clientY));
+    scene.addEventListener("pointermove", moveCanvasPointer);
     scene.addEventListener("pointerleave", () => {
       state.buildHover.active = false;
+      resetJoystick();
     });
-    scene.addEventListener("pointerdown", e => {
-      updateBuildHover(e.clientX, e.clientY);
-      if (e.button === 2) removePlacedAt(state.buildHover.x, state.buildHover.y);
-      else placeBuildItem();
-    });
+    scene.addEventListener("pointerdown", beginCanvasPointer);
+    scene.addEventListener("pointerup", endCanvasPointer);
+    scene.addEventListener("pointercancel", resetJoystick);
     scene.addEventListener("wheel", e => {
       e.preventDefault();
       state.demo = false;
@@ -1621,17 +2239,6 @@
       setZoom(state.zoom * Math.exp(-e.deltaY * zoomStep), e.clientX, e.clientY);
     }, { passive: false });
     scene.addEventListener("contextmenu", e => e.preventDefault());
-    document.querySelectorAll(".pad button[data-key]").forEach(btn => {
-      const key = btn.dataset.key;
-      btn.addEventListener("pointerdown", e => {
-        e.currentTarget.setPointerCapture(e.pointerId);
-        setKey(key, true);
-      });
-      btn.addEventListener("pointerup", () => setKey(key, false));
-      btn.addEventListener("pointercancel", () => setKey(key, false));
-      btn.addEventListener("pointerleave", () => setKey(key, false));
-    });
-    document.querySelector(".hit").addEventListener("pointerdown", triggerAttack);
 
     start().catch(err => {
       hud.textContent = `Asset load failed: ${err.message}`;
