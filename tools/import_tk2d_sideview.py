@@ -23,7 +23,7 @@ from PIL import Image, ImageOps
 
 
 DIRECTIONS = ("front", "back", "left", "right")
-MODES = ("idle", "run", "stop", "attack")
+MODES = ("idle", "run", "stop", "skid", "attack")
 DEFAULT_BUNDLE_ROOT = Path(os.environ.get("TK2D_BUNDLE_ROOT", "work/tk2d_bundles"))
 
 
@@ -49,12 +49,13 @@ CHARACTERS = (
         "silksong_hornet",
         "extract/tk2d_assets_assets_collections_knightdata_4e7b296df1048c2dd41251a3e1d42be7.bundle",
         {
-            "idle": FrameGroup("idle", limit=6),
+            "idle": FrameGroup("talk_standard", limit=6),
             "run": FrameGroup("Hornet_run_new", limit=10),
-            "stop": FrameGroup("Hornet_skid_to_idle", limit=6),
+            "stop": FrameGroup("idle", limit=6),
+            "skid": FrameGroup("Hornet_skid_to_idle", limit=6),
             "attack": FrameGroup("Hornet_slashes", limit=6),
         },
-        mode_facing={"attack": "right"},
+        mode_facing={"idle": "right", "stop": "right", "attack": "right"},
     ),
     CharacterSpec(
         "silksong_moss_creep",
