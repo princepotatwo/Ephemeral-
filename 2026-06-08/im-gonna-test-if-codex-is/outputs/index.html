@@ -1088,7 +1088,6 @@
     const buildbarTools = document.getElementById("buildbar-tools");
     const buildbarClose = document.getElementById("buildbar-close");
     const buildbarRotate = document.getElementById("buildbar-rotate");
-    let fullscreenWanted = false;
     let fullscreenBusy = false;
     function isMobileView() {
       return Math.min(window.innerWidth, window.innerHeight) < 720;
@@ -1096,20 +1095,24 @@
     function isLandscapeView() {
       return window.innerWidth > window.innerHeight;
     }
+    function wantsFullscreen() {
+      return isMobileView() && isLandscapeView();
+    }
     function syncFullscreenClass() {
-      document.body.classList.toggle("is-game-fullscreen", fullscreenWanted || document.fullscreenElement === stage);
+      document.body.classList.toggle("is-game-fullscreen", wantsFullscreen() || document.fullscreenElement === stage);
       resizeSceneCanvas();
     }
     async function setOrientationFullscreen() {
-      fullscreenWanted = isMobileView() && isLandscapeView();
       syncFullscreenClass();
       if (fullscreenBusy) return;
       fullscreenBusy = true;
       try {
-        if (fullscreenWanted && !document.fullscreenElement && stage?.requestFullscreen) {
+        if (wantsFullscreen() && !document.fullscreenElement && stage?.requestFullscreen) {
+          history.pushState({ gameFullscreen: true }, "");
           await stage.requestFullscreen();
-        } else if (!fullscreenWanted && document.fullscreenElement && document.exitFullscreen) {
+        } else if (!wantsFullscreen() && document.fullscreenElement && document.exitFullscreen) {
           await document.exitFullscreen();
+          if (history.state?.gameFullscreen) history.back();
         }
       } catch (_) {
         // Some browsers need a tap before fullscreen; pointerdown retries.
@@ -3499,6 +3502,10 @@
     addEventListener("resize", resizeSceneCanvas);
     addEventListener("resize", setOrientationFullscreen);
     addEventListener("orientationchange", setOrientationFullscreen);
+    addEventListener("popstate", () => {
+      if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+      syncFullscreenClass();
+    });
     document.addEventListener("fullscreenchange", syncFullscreenClass);
     addEventListener("keydown", e => setKey(e.key, true));
     addEventListener("keyup", e => setKey(e.key, false));
