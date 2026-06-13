@@ -60,6 +60,7 @@
       width: 100vw;
       height: 100dvh;
       max-width: none;
+      gap: 0;
     }
     body.is-game-fullscreen .stage,
     .stage:fullscreen {
@@ -117,6 +118,9 @@
       border-radius: 12px;
       background: rgba(255, 250, 241, .9);
       box-shadow: 0 6px 18px rgba(83, 107, 101, .12);
+    }
+    body.is-game-fullscreen .picker {
+      display: none;
     }
     .pick {
       min-width: 68px;
@@ -1086,6 +1090,9 @@
     const buildbarRotate = document.getElementById("buildbar-rotate");
     let fullscreenWanted = false;
     let fullscreenBusy = false;
+    function isMobileView() {
+      return Math.min(window.innerWidth, window.innerHeight) < 720;
+    }
     function isLandscapeView() {
       return window.innerWidth > window.innerHeight;
     }
@@ -1094,7 +1101,7 @@
       resizeSceneCanvas();
     }
     async function setOrientationFullscreen() {
-      fullscreenWanted = isLandscapeView();
+      fullscreenWanted = isMobileView() && isLandscapeView();
       syncFullscreenClass();
       if (fullscreenBusy) return;
       fullscreenBusy = true;
