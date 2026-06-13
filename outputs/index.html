@@ -2,9 +2,29 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Grass Animal Tester</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Grass Tester">
+  <meta name="theme-color" content="#9fca65">
+  <link rel="apple-touch-icon" href="assets/icon-192.png">
   <style>
+    /* Force true fullscreen on installed PWA — no browser chrome */
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      /* Extend into safe areas (iPhone notch, Android cutouts) */
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+      padding-left: env(safe-area-inset-left);
+      padding-right: env(safe-area-inset-right);
+    }
     :root {
       --paper: #fff8ec;
       --ink: #534c41;
@@ -108,39 +128,72 @@
       font-size: 13px;
       color: #6d685e;
     }
-    .buildbar {
+    .buildbar-line {
       position: absolute;
       left: 14px;
       right: 14px;
       display: none;
-      gap: 6px;
       align-items: center;
-      justify-content: center;
-      padding: 4px 6px;
+      padding: 1px 6px;
       border: 0;
       border-radius: 0;
       background: transparent;
       box-shadow: none;
+      z-index: 4;
+      /* Grid: left-bar grows | fixed center button | right-bar grows */
+      grid-template-columns: 1fr auto 1fr;
+      gap: 6px;
+    }
+    .buildbar-line.open {
+      display: grid;
+    }
+    .buildbar-line-top {
+      top: 10px;
+    }
+    .buildbar-line-bottom {
+      bottom: 10px;
+    }
+    .buildbar {
+      min-width: 0;
+      display: flex;
+      gap: 6px;
+      align-items: center;
       overflow-x: auto;
-      z-index: 3;
       scrollbar-width: none;
+    }
+    .buildbar-left {
+      /* items pack toward the RIGHT (toward center button) */
+      justify-content: flex-end;
+    }
+    .buildbar-right {
+      /* items pack toward the LEFT (toward center button) */
+      justify-content: flex-start;
     }
     .buildbar::-webkit-scrollbar {
       display: none;
     }
-    .buildbar.buildbar-top {
-      top: 4px;
+    .buildbar-action {
+      flex: 0 0 96px;
+      min-width: 84px;
+      height: 28px;
+      padding: 0 10px;
+      border: 1px solid rgba(255, 250, 241, .7);
+      border-radius: 7px;
+      background: rgba(255, 250, 241, .96);
+      color: #2f2a24;
+      font: 700 12px/1.1 system-ui, sans-serif;
+      letter-spacing: 0;
+      box-shadow: inset 0 -2px rgba(0,0,0,.14), 0 3px 10px rgba(0,0,0,.34);
+      cursor: pointer;
     }
-    .buildbar.buildbar-bottom {
-      bottom: 4px;
-    }
-    .buildbar.open {
-      display: flex;
+    .buildbar-action:disabled {
+      opacity: .45;
+      cursor: default;
     }
     .build-tool {
-      flex: 0 0 38px;
-      width: 38px;
-      height: 38px;
+      flex: 0 0 28px;
+      width: 28px;
+      height: 28px;
       display: grid;
       place-items: center;
       border: 1px solid rgba(255, 250, 241, .55);
@@ -154,10 +207,11 @@
       background: #eaf8df;
     }
     .build-tool img {
-      max-width: 30px;
-      max-height: 30px;
+      max-width: 23px;
+      max-height: 23px;
       image-rendering: pixelated;
       pointer-events: none;
+      transition: transform .12s ease;
     }
     .build-tool span {
       font-size: 20px;
@@ -168,33 +222,169 @@
         max-height: 86px;
         overflow: auto;
       }
-      .buildbar {
+      .buildbar-line {
         left: 8px;
         right: 8px;
-        justify-content: flex-start;
       }
       .build-tool {
-        flex-basis: 34px;
-        width: 34px;
-        height: 34px;
+        flex-basis: 27px;
+        width: 27px;
+        height: 27px;
       }
       .build-tool img {
-        max-width: 27px;
-        max-height: 27px;
+        max-width: 22px;
+        max-height: 22px;
       }
+    }
+
+    /* ── Loading screen ──────────────────────────────────── */
+    #loading-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      background: linear-gradient(180deg, #dff4ff 0%, #f8f5e8 36%, #e7f4cc 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: Georgia, serif;
+      transition: opacity 0.5s ease;
+    }
+    #loading-screen.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+    #loading-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      width: min(88vw, 340px);
+    }
+    #loading-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #3a5a2a;
+    }
+    #loading-sub {
+      font-size: 13px;
+      color: #6d685e;
+      min-height: 18px;
+    }
+    #loading-bar-wrap {
+      width: 100%;
+      height: 14px;
+      background: rgba(255,255,255,0.6);
+      border: 1px solid #b8d9a0;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    #loading-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #6abf5e, #90d39f);
+      border-radius: 999px;
+      transition: width 0.15s ease;
+    }
+    #loading-pct {
+      font-size: 13px;
+      color: #6d685e;
+    }
+
+    /* ── Install / Add to Home Screen button ─────────────── */
+    #install-btn {
+      position: fixed;
+      bottom: 18px;
+      right: 18px;
+      z-index: 8888;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      background: rgba(20, 36, 20, 0.88);
+      color: #cef0a8;
+      border: 1px solid rgba(144, 211, 159, 0.5);
+      border-radius: 999px;
+      font: 700 13px/1 system-ui, sans-serif;
+      cursor: pointer;
+      box-shadow: 0 4px 18px rgba(0,0,0,.45);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+    #install-btn.show { display: flex; }
+    #install-btn span { font-size: 18px; }
+    /* iOS-specific install instructions toast */
+    #ios-install-toast {
+      position: fixed;
+      bottom: 72px;
+      right: 18px;
+      z-index: 8889;
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+      max-width: 240px;
+      padding: 12px 14px;
+      background: rgba(20, 36, 20, 0.94);
+      color: #cef0a8;
+      border: 1px solid rgba(144, 211, 159, 0.45);
+      border-radius: 14px;
+      font: 13px/1.5 system-ui, sans-serif;
+      box-shadow: 0 4px 18px rgba(0,0,0,.5);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+    #ios-install-toast.show { display: flex; }
+    #ios-install-toast strong { font-size: 13px; display: block; margin-bottom: 4px; }
+    #ios-install-toast-close {
+      align-self: flex-end;
+      background: none;
+      border: none;
+      color: #cef0a8;
+      font-size: 18px;
+      line-height: 1;
+      cursor: pointer;
+      padding: 0;
+      margin-top: 4px;
     }
   </style>
 </head>
 <body>
+  <!-- Loading screen -->
+  <div id="loading-screen">
+    <div id="loading-box">
+      <div id="loading-title">🌿 Grass Animal Tester</div>
+      <div id="loading-sub">Loading assets…</div>
+      <div id="loading-bar-wrap"><div id="loading-bar"></div></div>
+      <div id="loading-pct">0%</div>
+    </div>
+  </div>
+  <!-- Add to Home Screen / Install button -->
+  <button id="install-btn" type="button" aria-label="Add to Home Screen">
+    <span aria-hidden="true">⊕</span> Add to Home Screen
+  </button>
+  <!-- iOS install instructions toast -->
+  <div id="ios-install-toast" role="status">
+    <strong>Add to Home Screen (iOS)</strong>
+    Tap the <strong>Share</strong> button (□↑) in Safari, then choose <strong>"Add to Home Screen"</strong>.
+    <button id="ios-install-toast-close" aria-label="Dismiss">✕</button>
+  </div>
+
   <div class="shell">
     <main class="stage" aria-label="Cute overworld map">
       <canvas id="scene" width="640" height="360"></canvas>
       <div class="hud" id="hud" aria-live="polite"></div>
-      <div class="buildbar buildbar-top" id="buildbar-buildings" aria-label="Buildings"></div>
-      <div class="buildbar buildbar-bottom" id="buildbar-tools" aria-label="Tools and usable items"></div>
+      <div class="buildbar-line buildbar-line-top" id="buildrow-buildings" aria-label="Buildings">
+        <div class="buildbar buildbar-left" id="buildbar-buildings-left"></div>
+        <button class="buildbar-action" id="buildbar-close" type="button">Close this</button>
+        <div class="buildbar buildbar-right" id="buildbar-buildings"></div>
+      </div>
+      <div class="buildbar-line buildbar-line-bottom" id="buildrow-tools" aria-label="Tools and usable items">
+        <div class="buildbar buildbar-left" id="buildbar-tools-left"></div>
+        <button class="buildbar-action" id="buildbar-rotate" type="button">Rotate</button>
+        <div class="buildbar buildbar-right" id="buildbar-tools"></div>
+      </div>
     </main>
     <div class="picker" id="picker" aria-label="Character switcher"></div>
-    <div class="caption">Online sprite credits: inkBubi, PIPOYA, AxulArt, RGS_Dev, karsiori, Cup Nooble, Kettoman, Shaade, Tayziulei, Daniel Eddeland, Stephen Challener / PixelFarm, patvanmackelberg, and Bouste.</div>
+    <div class="caption">Online sprite credits: inkBubi, PIPOYA, AxulArt, RGS_Dev, karsiori, Cup Nooble, Kettoman, Shaade, Tayziulei, Daniel Eddeland, Stephen Challener / PixelFarm, patvanmackelberg, Bouste, and Kenney.</div>
   </div>
   <script>
     const VIEW_W = 640;
@@ -300,6 +490,38 @@
       ["rgs_skeleton_square", "RGS Skeleton Square"],
       ["rgs_monster_square", "RGS Monster Square"]
     ];
+    const kenneyCharacters = [
+      ["kenney_bear", "Kenney Bear"],
+      ["kenney_buffalo", "Kenney Buffalo"],
+      ["kenney_chick", "Kenney Chick"],
+      ["kenney_chicken", "Kenney Chicken"],
+      ["kenney_cow", "Kenney Cow"],
+      ["kenney_crocodile", "Kenney Crocodile"],
+      ["kenney_dog", "Kenney Dog"],
+      ["kenney_duck", "Kenney Duck"],
+      ["kenney_elephant", "Kenney Elephant"],
+      ["kenney_frog", "Kenney Frog"],
+      ["kenney_giraffe", "Kenney Giraffe"],
+      ["kenney_goat", "Kenney Goat"],
+      ["kenney_gorilla", "Kenney Gorilla"],
+      ["kenney_hippo", "Kenney Hippo"],
+      ["kenney_horse", "Kenney Horse"],
+      ["kenney_monkey", "Kenney Monkey"],
+      ["kenney_moose", "Kenney Moose"],
+      ["kenney_narwhal", "Kenney Narwhal"],
+      ["kenney_owl", "Kenney Owl"],
+      ["kenney_panda", "Kenney Panda"],
+      ["kenney_parrot", "Kenney Parrot"],
+      ["kenney_penguin", "Kenney Penguin"],
+      ["kenney_pig", "Kenney Pig"],
+      ["kenney_rabbit", "Kenney Rabbit"],
+      ["kenney_rhino", "Kenney Rhino"],
+      ["kenney_sloth", "Kenney Sloth"],
+      ["kenney_snake", "Kenney Snake"],
+      ["kenney_walrus", "Kenney Walrus"],
+      ["kenney_whale", "Kenney Whale"],
+      ["kenney_zebra", "Kenney Zebra"]
+    ];
     const silksongStudyCharacters = [
       ["silksong_hornet", "Hornet Study", 0.24],
       ["silksong_moss_creep", "Moss Creep", 0.19],
@@ -315,11 +537,13 @@
 
     const forestAnimals = [
       ...silksongStudyCharacters.map(([name]) => name),
+      "silksong_hornet_boss", "silksong_silk_boss",
       "fox", "frog", "owl", "doe", "squirle", "bunny", "chicken", "turtle", "cow", "sheep", "pig",
       "sprout_cat", "sprout_chicken", "sprout_cow",
       "green_slime", "blue_slime", "pink_slime", "split_slime", "gold_slime", "shadow_slime", "galaxy_slime", "huge_split_slime",
       ...pipoyaCharacters.map(([name]) => name),
-      ...extraItchCharacters.map(([name]) => name)
+      ...extraItchCharacters.map(([name]) => name),
+      ...kenneyCharacters.map(([name]) => name)
     ];
     const roster = {
       ...Object.fromEntries(silksongStudyCharacters.map(([name, label, scale]) => [name, { label, kind: "forest", base: name, scale, attackMs: 520, smooth: true }])),
@@ -346,7 +570,10 @@
       galaxy_slime: { label: "Galaxy Slime", rarity: "Divine", kind: "forest", base: "galaxy_slime", scale: 1.18, attackMs: 480 },
       huge_split_slime: { label: "Huge Split", rarity: "Secret", kind: "forest", base: "huge_split_slime", scale: 1.28, attackMs: 520 },
       ...Object.fromEntries(pipoyaCharacters.map(([name, label]) => [name, { label, kind: "forest", base: name, scale: 1.45, attackMs: 400 }])),
-      ...Object.fromEntries(extraItchCharacters.map(([name, label]) => [name, { label, kind: "forest", base: name, scale: 1.55, attackMs: 420 }]))
+      ...Object.fromEntries(extraItchCharacters.map(([name, label]) => [name, { label, kind: "forest", base: name, scale: 1.55, attackMs: 420 }])),
+      ...Object.fromEntries(kenneyCharacters.map(([name, label]) => [name, { label, kind: "forest", base: name, scale: 1.6, attackMs: 420 }])),
+      silksong_hornet_boss: { label: "Hornet Boss", kind: "forest", base: "silksong_hornet_boss", scale: 0.26, attackMs: 520 },
+      silksong_silk_boss: { label: "Silk Boss", kind: "forest", base: "silksong_silk_boss", scale: 0.26, attackMs: 520 }
     };
     silksongStudyCharacters.forEach(([name]) => {
       roster[name].sideView = true;
@@ -361,7 +588,7 @@
       grass: "assets/forest/sprout_grass.png",
       water: "assets/forest/sprout_water.png",
       farmSoil: "assets/plants/farm_soil_tilled.png",
-      toolSheet: "../work/plants/sproutlands/basic/Sprout Lands - Sprites - Basic pack/Characters/Tools.png"
+      toolSheet: "assets/Tools.png"
     };
     const forestFrameCounts = {
       silksong_hornet: { idle: 6, run: 10, stop: 6, skid: 6, attack: 6 },
@@ -592,42 +819,206 @@
     const BUILD_SCALE = 0.5;
     const BUILD_GRID = Math.max(8, Math.round(16 * BUILD_SCALE));
     const BUILD_WALL_STEP = Math.max(8, Math.round(32 * BUILD_SCALE));
-    const buildPaletteBase = [
+    const buildLabelFromName = name => name
+      .replace(/^(build|prop|plant|farm)_/, "")
+      .replace(/^sprout_/, "")
+      .replace(/_/g, " ")
+      .replace(/\b\w/g, char => char.toUpperCase());
+
+    function isUsableBuildAsset(name) {
+      return /seed|apple|egg|wheat_item|radish_item|tool_/.test(name);
+    }
+
+    function isGroupedBuildAsset(name) {
+      return /_(set|tiles|materials|tools|furniture_top|beds|tables|rugs)$/.test(name) ||
+        name === "prop_sprout_house" ||
+        name === "prop_sprout_door_set";
+    }
+
+    function buildItemId(name) {
+      return `asset-${name.replace(/[^a-z0-9]+/gi, "-")}`;
+    }
+
+    function buildItemFromSprite(sprite, overrides = {}) {
+      const {
+        x,
+        y,
+        hitStarted,
+        hitDir,
+        hp,
+        maxHp,
+        respawnAt,
+        destroyed,
+        biomeTree,
+        biomeId,
+        ...copy
+      } = sprite;
+      if (isGroupedBuildAsset(sprite.name)) return null;
+      const item = {
+        ...copy,
+        id: buildItemId(sprite.name),
+        label: buildLabelFromName(sprite.name),
+        group: isUsableBuildAsset(sprite.name) ? "tools" : "buildings",
+        ...overrides
+      };
+      if (isTreeName(item.name)) {
+        item.tree = true;
+        item.treeType = item.treeType || "sprout";
+      }
+      return item;
+    }
+
+    function scaledSolid(solid, scale = BUILD_SCALE) {
+      return solid ? {
+        x: Math.round(solid.x * scale),
+        y: Math.round(solid.y * scale),
+        w: Math.max(4, Math.round(solid.w * scale)),
+        h: Math.max(4, Math.round(solid.h * scale))
+      } : solid;
+    }
+
+    function scaleBuildItem(item) {
+      const scale = item.keepScale ? 1 : BUILD_SCALE;
+      return {
+        ...item,
+        w: item.w == null ? item.w : Math.max(8, Math.round(item.w * scale)),
+        h: item.h == null ? item.h : Math.max(8, Math.round(item.h * scale)),
+        baseW: item.w == null ? item.w : Math.max(8, Math.round(item.w * scale)),
+        baseH: item.h == null ? item.h : Math.max(8, Math.round(item.h * scale)),
+        solid: scaledSolid(item.solid, scale),
+        variants: item.variants?.map(variant => ({
+          ...variant,
+          w: variant.w == null ? variant.w : Math.max(8, Math.round(variant.w * scale)),
+          h: variant.h == null ? variant.h : Math.max(8, Math.round(variant.h * scale)),
+          baseW: variant.w == null ? variant.w : Math.max(8, Math.round(variant.w * scale)),
+          baseH: variant.h == null ? variant.h : Math.max(8, Math.round(variant.h * scale)),
+          solid: scaledSolid(variant.solid, scale)
+        }))
+      };
+    }
+
+    function tileBuildItems(prefix, label, coords) {
+      return coords.map(([col, row], index) => ({
+        id: `${prefix}-${col}-${row}`,
+        label: `${label} ${index + 1}`,
+        name: `${prefix}_${col}_${row}`,
+        count: 1,
+        fps: 1,
+        w: 16,
+        h: 16,
+        keepScale: true,
+        grid: 16,
+        flatBuild: true
+      }));
+    }
+
+    const coreBuildPaletteBase = [
       { id: "wall", label: "Wall", name: "build_sprout_fence_post", count: 1, fps: 1, w: 32, h: 32, solid: { x: -12, y: -16, w: 24, h: 18 } },
-      { id: "equip-axe", label: "Equip axe", name: "build_sprout_tool_axe", count: 1, fps: 1, w: 34, h: 34, equipTool: "axe" },
-      { id: "equip-hoe", label: "Equip hoe", name: "build_sprout_tool_hoe", count: 1, fps: 1, w: 34, h: 34, equipTool: "hoe" },
-      { id: "equip-water", label: "Equip watering can", name: "build_sprout_tool_water", count: 1, fps: 1, w: 34, h: 34, equipTool: "water" },
-      { id: "seed-wheat", label: "Wheat seed", name: "build_sprout_seed_wheat", count: 1, fps: 1, w: 34, h: 34, equipTool: "seed-wheat" },
-      { id: "seed-radish", label: "Radish seed", name: "build_sprout_seed_radish", count: 1, fps: 1, w: 34, h: 34, equipTool: "seed-radish" },
       { id: "bed-green", label: "Green bed", name: "build_sprout_bed_green", count: 1, fps: 1, w: 40, h: 70, solid: { x: -16, y: -46, w: 32, h: 44 } },
       { id: "bed-blue", label: "Blue bed", name: "build_sprout_bed_blue", count: 1, fps: 1, w: 40, h: 70, solid: { x: -16, y: -46, w: 32, h: 44 } },
       { id: "bed-pink", label: "Pink bed", name: "build_sprout_bed_pink", count: 1, fps: 1, w: 40, h: 70, solid: { x: -16, y: -46, w: 32, h: 44 } },
       { id: "cabinet", label: "Cabinet", name: "build_sprout_cabinet", count: 1, fps: 1, w: 34, h: 34, solid: { x: -13, y: -18, w: 26, h: 18 } },
-      { id: "chair-left", label: "Left chair", name: "build_sprout_chair_left", count: 1, fps: 1, w: 34, h: 34, solid: { x: -12, y: -18, w: 24, h: 18 } },
-      { id: "chair-right", label: "Right chair", name: "build_sprout_chair_right", count: 1, fps: 1, w: 34, h: 34, solid: { x: -12, y: -18, w: 24, h: 18 } },
-      { id: "stool", label: "Stool", name: "build_sprout_stool", count: 1, fps: 1, w: 34, h: 34, solid: { x: -11, y: -14, w: 22, h: 14 } },
-      { id: "table-square", label: "Square table", name: "build_sprout_square_table", count: 1, fps: 1, w: 34, h: 34, solid: { x: -14, y: -18, w: 28, h: 18 } },
-      { id: "table-small", label: "Small table", name: "build_sprout_small_table", count: 1, fps: 1, w: 34, h: 34, solid: { x: -13, y: -16, w: 26, h: 16 } },
+      {
+        id: "chair",
+        label: "Chair",
+        name: "build_sprout_chair_left",
+        count: 1,
+        fps: 1,
+        w: 34,
+        h: 34,
+        variants: [
+          { name: "build_sprout_chair_left", label: "Left" },
+          { name: "build_sprout_stool", label: "Front" },
+          { name: "build_sprout_chair_right", label: "Right" }
+        ]
+      },
+      { id: "table-square", label: "Square table", name: "build_sprout_square_table", count: 1, fps: 1, w: 34, h: 34 },
+      { id: "table-small", label: "Small table", name: "build_sprout_small_table", count: 1, fps: 1, w: 34, h: 34 },
+      { id: "table-round", label: "Round table", name: "build_sprout_round_table", count: 1, fps: 1, w: 34, h: 34 },
       { id: "chest", label: "Chest", name: "prop_sprout_chest", count: 5, fps: 12, w: 44, h: 44, solid: { x: -14, y: -14, w: 28, h: 18 }, chest: true, open: false, chestAnimStarted: 0 },
       { id: "plant", label: "Plant", name: "build_sprout_potted_plant", count: 1, fps: 1, w: 34, h: 34, solid: { x: -10, y: -14, w: 20, h: 14 } },
+      { id: "plant-tiny", label: "Tiny plant", name: "build_sprout_plant_tiny", count: 1, fps: 1, w: 34, h: 34, solid: { x: -9, y: -13, w: 18, h: 13 } },
       { id: "flower", label: "Flower pot", name: "build_sprout_flower_pot", count: 1, fps: 1, w: 34, h: 34, solid: { x: -10, y: -14, w: 20, h: 14 } },
+      { id: "wall-picture", label: "Wall picture", name: "build_sprout_wall_picture", count: 1, fps: 1, w: 34, h: 34 },
       { id: "rug-green", label: "Green rug", name: "build_sprout_rug_green_wide", count: 1, fps: 1, w: 70, h: 38 },
       { id: "rug-pink", label: "Pink rug", name: "build_sprout_rug_pink_wide", count: 1, fps: 1, w: 70, h: 38 },
       { id: "rug-blue", label: "Blue rug", name: "build_sprout_rug_blue_wide", count: 1, fps: 1, w: 70, h: 38 },
-      { id: "tools", label: "Tools", name: "prop_sprout_tools", count: 1, fps: 1, w: 72, h: 72, solid: { x: -22, y: -22, w: 44, h: 22 } },
+      { id: "rug-green-small", label: "Small green rug", name: "build_sprout_rug_green", count: 1, fps: 1, w: 38, h: 38 },
+      { id: "rug-pink-small", label: "Small pink rug", name: "build_sprout_rug_pink", count: 1, fps: 1, w: 38, h: 38 },
+      { id: "rug-blue-small", label: "Small blue rug", name: "build_sprout_rug_blue", count: 1, fps: 1, w: 38, h: 38 },
+      { id: "build-chest", label: "Build chest", name: "build_sprout_chest", count: 1, fps: 1, w: 44, h: 44, solid: { x: -14, y: -14, w: 28, h: 18 }, chest: true, open: false, chestAnimStarted: 0 }
+    ];
+
+    const houseTileBuildBase = [
+      ...tileBuildItems("build_house_roof", "Roof", [
+        [0, 0], [1, 0], [2, 0], [3, 0], [4, 0], [5, 0], [6, 0],
+        [0, 1], [1, 1], [2, 1], [3, 1], [4, 1],
+        [0, 2], [1, 2], [2, 2], [3, 2], [4, 2], [5, 2], [6, 2],
+        [0, 3], [1, 3], [2, 3], [3, 3], [4, 3], [5, 3], [6, 3],
+        [0, 4], [1, 4], [2, 4], [3, 4], [4, 4], [5, 4], [6, 4]
+      ]),
+      ...tileBuildItems("build_house_wall_floor", "Wall floor", [
+        [0, 0], [1, 0], [2, 0], [3, 0], [4, 0],
+        [0, 1], [1, 1], [2, 1], [3, 1], [4, 1],
+        [0, 2], [1, 2], [2, 2], [3, 2]
+      ]),
+      ...tileBuildItems("build_house_door", "Door", [[0, 0], [0, 1], [0, 2], [0, 3]]),
+      ...tileBuildItems("build_path_piece", "Path", [
+        [0, 0], [0, 1], [1, 1], [2, 1], [0, 2], [1, 2], [2, 2], [1, 3], [2, 3], [3, 3]
+      ])
+    ];
+
+    const extraBuildAssetBase = [
+      { name: "farm_crop_wheat", count: 4, fps: 1, w: 32, h: 32 },
+      { name: "farm_crop_radish", count: 4, fps: 1, w: 32, h: 32 },
+      { name: "plant_blue_sprout", count: 1, fps: 1, w: 42, h: 42 },
+      { name: "plant_box_bush_green", count: 1, fps: 1, w: 70, h: 42 },
+      { name: "plant_box_bush_teal", count: 1, fps: 1, w: 64, h: 42 },
+      { name: "plant_crop_potato", count: 1, fps: 1, w: 32, h: 32 },
+      { name: "plant_crop_radish", count: 1, fps: 1, w: 32, h: 32 },
+      { name: "plant_crop_strawberry", count: 1, fps: 1, w: 32, h: 32 },
+      { name: "plant_crop_tree", count: 1, fps: 1, w: 32, h: 32 },
+      { name: "plant_flower_forward", count: 1, fps: 1, w: 48, h: 48 },
+      { name: "plant_flower_side", count: 1, fps: 1, w: 48, h: 48 },
+      { name: "plant_low_bush_green", count: 1, fps: 1, w: 84, h: 36 },
+      { name: "plant_round_bush_yellowish", count: 1, fps: 1, w: 48, h: 42 },
+      { name: "plant_shaade_bush", count: 1, fps: 1, w: 44, h: 44 },
+      { name: "plant_shaade_leafy", count: 1, fps: 1, w: 44, h: 44 },
+      { name: "plant_shaade_sapling", count: 1, fps: 1, w: 44, h: 44 },
+      { name: "plant_sprout_radish_growth", count: 1, fps: 1, w: 34, h: 34 },
+      { name: "plant_sprout_wheat_growth", count: 1, fps: 1, w: 34, h: 34 }
+    ];
+
+    const buildToolPaletteBase = [
+      { id: "equip-axe", label: "Equip axe", name: "build_sprout_tool_axe", count: 1, fps: 1, w: 34, h: 34, equipTool: "axe", group: "tools" },
+      { id: "equip-hoe", label: "Equip hoe", name: "build_sprout_tool_hoe", count: 1, fps: 1, w: 34, h: 34, equipTool: "hoe", group: "tools" },
+      { id: "equip-water", label: "Equip watering can", name: "build_sprout_tool_water", count: 1, fps: 1, w: 34, h: 34, equipTool: "water", group: "tools" },
+      { id: "seed-wheat", label: "Wheat seed", name: "build_sprout_seed_wheat", count: 1, fps: 1, w: 34, h: 34, equipTool: "seed-wheat", group: "tools" },
+      { id: "seed-radish", label: "Radish seed", name: "build_sprout_seed_radish", count: 1, fps: 1, w: 34, h: 34, equipTool: "seed-radish", group: "tools" },
       { id: "erase", label: "Erase", erase: true }
     ];
-    const buildPalette = buildPaletteBase.map(item => ({
-      ...item,
-      w: item.w == null ? item.w : Math.max(8, Math.round(item.w * BUILD_SCALE)),
-      h: item.h == null ? item.h : Math.max(8, Math.round(item.h * BUILD_SCALE)),
-      solid: item.solid ? {
-        x: Math.round(item.solid.x * BUILD_SCALE),
-        y: Math.round(item.solid.y * BUILD_SCALE),
-        w: Math.max(4, Math.round(item.solid.w * BUILD_SCALE)),
-        h: Math.max(4, Math.round(item.solid.h * BUILD_SCALE))
-      } : item.solid
-    }));
+
+    const buildPaletteBase = (() => {
+      const items = [];
+      const seenIds = new Set();
+      const seenNames = new Set();
+      const add = item => {
+        if (!item || seenIds.has(item.id)) return;
+        const names = [item.name, ...(item.variants || []).map(variant => variant.name)].filter(Boolean);
+        if (names.some(name => seenNames.has(name))) return;
+        items.push(item);
+        seenIds.add(item.id);
+        names.forEach(name => seenNames.add(name));
+      };
+      coreBuildPaletteBase.forEach(add);
+      houseTileBuildBase.forEach(add);
+      plantSprites.forEach(sprite => add(buildItemFromSprite(sprite)));
+      Object.values(biomeTreeTypes).forEach(sprite => add(buildItemFromSprite(sprite)));
+      extraBuildAssetBase.forEach(sprite => add(buildItemFromSprite(sprite)));
+      buildToolPaletteBase.forEach(add);
+      return items;
+    })();
+    const buildPalette = buildPaletteBase.map(scaleBuildItem);
     const buildConnectionSprites = [
       { name: "build_sprout_fence_h", count: 1 },
       { name: "build_sprout_fence_v", count: 1 },
@@ -662,8 +1053,14 @@
     }
     const hud = document.getElementById("hud");
     const picker = document.getElementById("picker");
+    const buildrowBuildings = document.getElementById("buildrow-buildings");
+    const buildrowTools = document.getElementById("buildrow-tools");
+    const buildbarBuildingsLeft = document.getElementById("buildbar-buildings-left");
     const buildbarBuildings = document.getElementById("buildbar-buildings");
+    const buildbarToolsLeft = document.getElementById("buildbar-tools-left");
     const buildbarTools = document.getElementById("buildbar-tools");
+    const buildbarClose = document.getElementById("buildbar-close");
+    const buildbarRotate = document.getElementById("buildbar-rotate");
     const keys = new Set();
     let tapTimes = [];
     let pendingBuildTap = 0;
@@ -673,7 +1070,86 @@
     let staticMap;
     const placedSprites = [];
     const farmPlots = [];
-    const ASSET_REV = "one-tree-biomes-water-v46";
+    const ASSET_REV = "one-tree-biomes-water-v55";
+    const APP_VERSION = "1.1.20";
+
+    // ── Auto-refresh on new version ───────────────────────
+    // Stores the version in localStorage. If it changed, clears caches and reloads.
+    (async function checkVersion() {
+      const stored = localStorage.getItem("app_version");
+      if (stored && stored !== APP_VERSION) {
+        // New version detected — clear SW cache and hard reload
+        localStorage.setItem("app_version", APP_VERSION);
+        if ("caches" in window) {
+          const keys = await caches.keys();
+          await Promise.all(keys.map(k => caches.delete(k)));
+        }
+        location.reload(true);
+        return;
+      }
+      localStorage.setItem("app_version", APP_VERSION);
+    })();
+    const STUDY_CAPTURE_COOLDOWN_MS = 10000;
+    const STUDY_CAPTURE_SCAN_STEP_MS = 1450;
+    const STUDY_CAPTURE_SHOW_MS = 6500;
+    const studyVocabulary = {
+      tree: {
+        word: "pohon",
+        english: "tree",
+        sentence: "Ini pohon.",
+        explain: "Pohon tinggi. Daunnya memberi rasa teduh.",
+        related: [["daun", "leaf"], ["batang", "trunk"], ["akar", "root"]]
+      },
+      grass: {
+        word: "rumput",
+        english: "grass",
+        sentence: "Ini rumput.",
+        explain: "Rumput kecil menutup tanah. Warnanya hijau dan lembut.",
+        related: [["hijau", "green"], ["tanah", "soil"], ["lapang", "field"]]
+      },
+      water: {
+        word: "air",
+        english: "water",
+        sentence: "Ini air.",
+        explain: "Air bergerak pelan. Tempat ini terasa sejuk.",
+        related: [["basah", "wet"], ["sungai", "river"], ["tenang", "calm"]]
+      },
+      wall: {
+        word: "pagar",
+        english: "wall / fence",
+        sentence: "Ini pagar.",
+        explain: "Pagar menjadi batas. Biasanya dibuat dari kayu.",
+        related: [["kayu", "wood"], ["batas", "border"], ["dekat", "near"]]
+      },
+      flower: {
+        word: "bunga",
+        english: "flower",
+        sentence: "Ini bunga.",
+        explain: "Bunga terlihat cantik. Warnanya membuat tempat hidup.",
+        related: [["mekar", "bloom"], ["harum", "fragrant"], ["cantik", "pretty"]]
+      },
+      crop: {
+        word: "tanaman",
+        english: "crop / plant",
+        sentence: "Ini tanaman.",
+        explain: "Tanaman tumbuh dari bibit. Nanti bisa dipanen.",
+        related: [["bibit", "seed"], ["panen", "harvest"], ["tumbuh", "grow"]]
+      },
+      bridge: {
+        word: "jembatan",
+        english: "bridge",
+        sentence: "Ini jembatan.",
+        explain: "Jembatan membantu kita menyeberang tempat yang sulit.",
+        related: [["jalan", "path"], ["seberang", "across"], ["kayu", "wood"]]
+      },
+      bed: {
+        word: "kasur",
+        english: "bed",
+        sentence: "Ini kasur.",
+        explain: "Kasur tempat tidur. Badan bisa istirahat di sini.",
+        related: [["tidur", "sleep"], ["lembut", "soft"], ["malam", "night"]]
+      }
+    };
     const DIALOGUE_COOLDOWN_MS = 5000;
     const LONG_SKID_STOP_MS = 3600;
     const DIALOGUE_MOVE_DISTANCE = 430;
@@ -728,6 +1204,7 @@
       transitionText: "",
       buildTool: "wall",
       buildUiOpen: false,
+      buildRotations: {},
       equippedTool: "",
       toolActionTool: "",
       toolActionDir: "front",
@@ -743,6 +1220,19 @@
         y: 0,
         maxDistance: 76,
         moved: false
+      },
+      studyCapture: {
+        phase: "idle",
+        nextAt: performance.now() + STUDY_CAPTURE_COOLDOWN_MS,
+        started: 0,
+        until: 0,
+        candidates: [],
+        target: null,
+        images: [],
+        scanIndex: 0,
+        lastBiomeId: biomeAt(startPosition.x, startPosition.y).id,
+        pendingBiomeId: "",
+        layoutSeed: hash01(startPosition.x, startPosition.y, 170)
       }
     };
     window.demoState = state;
@@ -760,13 +1250,20 @@
       });
     }
 
-    function loadImageCached(src) {
+    function loadImageCached(src, retries = 2) {
       if (images[src]) return Promise.resolve(images[src]);
       if (!imagePromises[src]) {
-        imagePromises[src] = loadImage(src).then(img => {
+        const attempt = (tries) => loadImage(src).then(img => {
           images[src] = img;
           return img;
+        }).catch(err => {
+          if (tries > 0) {
+            // wait 400ms then retry
+            return new Promise(r => setTimeout(r, 400)).then(() => attempt(tries - 1));
+          }
+          return null; // give up silently
         });
+        imagePromises[src] = attempt(retries);
       }
       return imagePromises[src];
     }
@@ -789,12 +1286,96 @@
 	      return ax < bx + bw && ax + aw > bx && ay < by + bh && ay + ah > by;
 	    }
 
+    function drawBiomeSurfaceOverlay(target, x, y) {
+      const biome = biomeBlendAt(x + TILE / 2, y + TILE / 2);
+      if (!biome.layer.tint) return;
+      const amount = Math.pow(biome.amount, .72);
+      if (amount < .02) return;
+      const [ar, ag, ab, aa] = biome.layer.tint.a;
+      const [br, bg, bb, ba] = biome.layer.tint.b;
+      target.fillStyle = `rgba(${ar}, ${ag}, ${ab}, ${aa * amount})`;
+      target.fillRect(x, y, TILE, TILE);
+      target.fillStyle = `rgba(${br}, ${bg}, ${bb}, ${ba * amount})`;
+      target.fillRect(x, y, TILE, TILE);
+      if (hash01(x, y, 5) > 0.48) {
+        const color = biome.layer.detail === "water" ? [80, 130, 139] :
+          biome.layer.detail === "cold" ? [104, 124, 128] :
+          biome.layer.detail === "deep" ? [31, 58, 44] : [40, 31, 21];
+        target.strokeStyle = `rgba(${color[0]}, ${color[1]}, ${color[2]}, ${0.32 * amount})`;
+        target.lineWidth = 1;
+        target.beginPath();
+        for (let i = 0; i < 3; i++) {
+          const ox = Math.floor(hash01(x, y, 10 + i) * 12) + 2;
+          const oy = Math.floor(hash01(x, y, 20 + i) * 12) + 2;
+          target.moveTo(x + ox, y + oy);
+          target.lineTo(x + ox + 5, y + oy + 2);
+        }
+        target.stroke();
+      }
+    }
+
+    function tintScratchTile(scratchCtx, x, y) {
+      const biome = biomeBlendAt(x + TILE / 2, y + TILE / 2);
+      if (!biome.layer.tint) return;
+      const amount = Math.pow(biome.amount, .72);
+      if (amount < .02) return;
+      const [ar, ag, ab, aa] = biome.layer.tint.a;
+      const [br, bg, bb, ba] = biome.layer.tint.b;
+      scratchCtx.globalCompositeOperation = "source-atop";
+      scratchCtx.fillStyle = `rgba(${ar}, ${ag}, ${ab}, ${aa * amount})`;
+      scratchCtx.fillRect(0, 0, TILE, TILE);
+      scratchCtx.fillStyle = `rgba(${br}, ${bg}, ${bb}, ${ba * amount})`;
+      scratchCtx.fillRect(0, 0, TILE, TILE);
+      scratchCtx.globalCompositeOperation = "source-over";
+    }
+
+    function drawTintedGrassTile(target, img, sx, sy, x, y) {
+      const biome = biomeBlendAt(x + TILE / 2, y + TILE / 2);
+      if (!biome.layer.tint || biome.amount < .02) {
+        target.drawImage(img, sx, sy, TILE, TILE, x, y, TILE, TILE);
+        return;
+      }
+      if (!drawTintedGrassTile.cache) drawTintedGrassTile.cache = new Map();
+      const bucket = Math.round(Math.pow(biome.amount, .72) * 12);
+      const key = `${sx}:${sy}:${biome.layer.id}:${bucket}`;
+      let scratch = drawTintedGrassTile.cache.get(key);
+      if (!scratch) {
+        scratch = document.createElement("canvas");
+        scratch.width = TILE;
+        scratch.height = TILE;
+        const scratchCtx = scratch.getContext("2d");
+        scratchCtx.imageSmoothingEnabled = false;
+        scratchCtx.drawImage(img, sx, sy, TILE, TILE, 0, 0, TILE, TILE);
+        const amount = bucket / 12;
+        const [ar, ag, ab, aa] = biome.layer.tint.a;
+        const [br, bg, bb, ba] = biome.layer.tint.b;
+        scratchCtx.globalCompositeOperation = "source-atop";
+        scratchCtx.fillStyle = `rgba(${ar}, ${ag}, ${ab}, ${aa * amount})`;
+        scratchCtx.fillRect(0, 0, TILE, TILE);
+        scratchCtx.fillStyle = `rgba(${br}, ${bg}, ${bb}, ${ba * amount})`;
+        scratchCtx.fillRect(0, 0, TILE, TILE);
+        scratchCtx.globalCompositeOperation = "source-over";
+        if (drawTintedGrassTile.cache.size > 128) drawTintedGrassTile.cache.clear();
+        drawTintedGrassTile.cache.set(key, scratch);
+      }
+      target.drawImage(scratch, x, y);
+    }
+
+    function drawWaterTintOverlay(target, x, y, waterInfo) {
+      const biome = waterInfo?.biome || biomeBlendAt(x + TILE / 2, y + TILE / 2);
+      const amount = Math.pow(biome.amount || 0, .72);
+      target.fillStyle = `rgba(96, 166, 184, ${0.1 + 0.18 * amount})`;
+      target.fillRect(x, y, TILE, TILE);
+      target.fillStyle = `rgba(56, 125, 145, ${0.04 + 0.08 * amount})`;
+      target.fillRect(x, y, TILE, TILE);
+    }
+
 	    function drawGrassTile(target, img, x, y, variant) {
 	      const plainTiles = [[16, 16], [0, 80], [16, 80], [32, 80], [0, 96], [16, 96], [32, 96]];
 	      const detailTiles = [[80, 80], [80, 96]];
       const shorelineTile = shorelineTileAt(x, y);
       if (shorelineTile && drawWaterBaseTile(target, x, y, 0)) {
-        target.drawImage(img, shorelineTile[0] * TILE, shorelineTile[1] * TILE, TILE, TILE, x, y, TILE, TILE);
+        drawTintedGrassTile(target, img, shorelineTile[0] * TILE, shorelineTile[1] * TILE, x, y);
         return;
       }
       const hash = hash01(x, y, 1);
@@ -810,8 +1391,7 @@
 	        const waterTile = waterTileAt(x, y);
 	        if (water && waterTile) {
 	          target.drawImage(water, waterTile.seed * TILE, 0, TILE, TILE, x, y, TILE, TILE);
-	          target.fillStyle = `rgba(96, 166, 184, ${0.1 + 0.18 * amount})`;
-	          target.fillRect(x, y, TILE, TILE);
+	          drawWaterTintOverlay(target, x, y, waterTile);
 	          return;
 	        }
 	      }
@@ -845,6 +1425,9 @@
       const s = Boolean(waterTileAt(x, y + TILE));
       const w = Boolean(waterTileAt(x - TILE, y));
       if (!n && !e && !s && !w) return null;
+      if (e && w && n && s) return [3, 3];
+      if (e && w) return n ? [3, 0] : s ? [3, 2] : [3, 1];
+      if (n && s) return w ? [0, 3] : e ? [2, 3] : [1, 3];
       if (n && w) return [0, 0];
       if (n && e) return [2, 0];
       if (s && w) return [0, 2];
@@ -867,8 +1450,7 @@
       const seed = adjacent ? adjacent.seed : Math.floor(hash01(x, y, 73) * 4);
       const frame = (seed + timeFrame) % 4;
       target.drawImage(water, frame * TILE, 0, TILE, TILE, x, y, TILE, TILE);
-      target.fillStyle = "rgba(96, 166, 184, 0.18)";
-      target.fillRect(x, y, TILE, TILE);
+      drawWaterTintOverlay(target, x, y, adjacent);
       return true;
     }
 
@@ -877,7 +1459,7 @@
       if (!grass) return;
       const tile = shorelineTileAt(x, y);
       if (!tile || !drawWaterBaseTile(target, x, y, timeFrame)) return;
-      target.drawImage(grass, tile[0] * TILE, tile[1] * TILE, TILE, TILE, x, y, TILE, TILE);
+      drawTintedGrassTile(target, grass, tile[0] * TILE, tile[1] * TILE, x, y);
     }
 
 	    function drawAnimatedWater() {
@@ -892,11 +1474,9 @@
 	        for (let x = startX; x < endX; x += TILE) {
 	          const waterTile = waterTileAt(x, y);
 	          if (!waterTile) continue;
-	          const amount = Math.pow(waterTile.biome.amount, .72);
 	          const frame = (waterTile.seed + timeFrame) % 4;
 	          ctx.drawImage(water, frame * TILE, 0, TILE, TILE, x, y, TILE, TILE);
-	          ctx.fillStyle = `rgba(96, 166, 184, ${0.1 + 0.18 * amount})`;
-	          ctx.fillRect(x, y, TILE, TILE);
+	          drawWaterTintOverlay(ctx, x, y, waterTile);
 	        }
 	      }
 	    }
@@ -913,17 +1493,66 @@
       }
     }
 
-	    function buildStaticMap() {
-      staticMap = document.createElement("canvas");
-      staticMap.width = WORLD_W;
-      staticMap.height = WORLD_H;
-      const m = staticMap.getContext("2d");
+    // ── Chunk-based tile cache ─────────────────────────────
+    const CHUNK_PX = 512; // size of each cached chunk in pixels
+    const chunkCache = new Map(); // key: "cx,cy" → offscreen canvas
+
+    function getChunk(cx, cy) {
+      const key = `${cx},${cy}`;
+      if (chunkCache.has(key)) return chunkCache.get(key);
+      // Build this chunk synchronously — only ~18×16 tiles per chunk
+      const chunkX = cx * CHUNK_PX;
+      const chunkY = cy * CHUNK_PX;
+      const chunkW = Math.min(CHUNK_PX, WORLD_W - chunkX);
+      const chunkH = Math.min(CHUNK_PX, WORLD_H - chunkY);
+      if (chunkW <= 0 || chunkH <= 0) return null;
+      const offscreen = document.createElement("canvas");
+      offscreen.width = chunkW;
+      offscreen.height = chunkH;
+      const m = offscreen.getContext("2d");
       m.imageSmoothingEnabled = false;
       const grass = images[assets.grass];
+      for (let row = 0; row < chunkH; row += TILE) {
+        for (let col = 0; col < chunkW; col += TILE) {
+          const wx = chunkX + col;
+          const wy = chunkY + row;
+          // drawGrassTile uses world coords for hash/biome, draws into m at (wx,wy)
+          // We need to translate so it draws at chunk-local coords
+          m.save();
+          m.translate(-chunkX, -chunkY);
+          drawGrassTile(m, grass, wx, wy, (wx / TILE) * 5 + (wy / TILE) * 3);
+          m.restore();
+        }
+      }
+      chunkCache.set(key, offscreen);
+      return offscreen;
+    }
 
-      for (let y = 0; y < WORLD_H; y += TILE) {
-        for (let x = 0; x < WORLD_W; x += TILE) {
-          drawGrassTile(m, grass, x, y, (x / TILE) * 5 + (y / TILE) * 3);
+    function buildStaticMap() {
+      // No-op — chunks are built on demand in drawVisibleGrass
+    }
+
+    function drawVisibleGrass() {
+      const camX = state.cameraX;
+      const camY = state.cameraY;
+      const vw = viewWorldW();
+      const vh = viewWorldH();
+
+      // Which chunks overlap the viewport?
+      const startCX = Math.floor(camX / CHUNK_PX);
+      const startCY = Math.floor(camY / CHUNK_PX);
+      const endCX = Math.floor((camX + vw) / CHUNK_PX);
+      const endCY = Math.floor((camY + vh) / CHUNK_PX);
+
+      for (let cy = startCY; cy <= endCY; cy++) {
+        for (let cx = startCX; cx <= endCX; cx++) {
+          const chunk = getChunk(cx, cy);
+          if (!chunk) continue;
+          // World position of this chunk's top-left corner
+          const wx = cx * CHUNK_PX;
+          const wy = cy * CHUNK_PX;
+          // Screen position (ctx is already translated by camera in the render loop)
+          ctx.drawImage(chunk, wx, wy);
         }
       }
     }
@@ -970,12 +1599,20 @@
     async function loadForestAnimal(base) {
       if (!forestFrames[base]) forestFrames[base] = getForestFramePaths(base);
       if (forestFrames[base].loaded) return;
-      await Promise.all(Object.values(forestFrames[base]).flat().map(loadImageCached));
+      await Promise.all(
+        Object.values(forestFrames[base]).flat().map(src =>
+          loadImageCached(src).catch(() => null)
+        )
+      );
       forestFrames[base].loaded = true;
     }
 
     function plantFramePaths(plant) {
-      return Array.from({ length: plant.count }, (_, i) => `assets/plants/${plant.name}/frame_${i}.png`);
+      const pathsFor = item => Array.from(
+        { length: item.count || plant.count || 1 },
+        (_, i) => `assets/plants/${item.name}/frame_${i}.png`
+      );
+      return [plant, ...(plant.variants || [])].flatMap(pathsFor);
     }
 
     async function loadPlants() {
@@ -1271,6 +1908,27 @@
         }
       }
       const crop = plant.crop || { sx: 0, sy: 0, sw: img.width, sh: img.height };
+      const rotateSteps = ((plant.rotateSteps || 0) % 4 + 4) % 4;
+      if (rotateSteps) {
+        const drawW = plant.baseW || plant.w;
+        const drawH = plant.baseH || plant.h;
+        ctx.save();
+        ctx.translate(Math.round(plant.x + shake), Math.round(plant.y - plant.h / 2));
+        ctx.rotate(rotateSteps * Math.PI / 2);
+        ctx.drawImage(
+          img,
+          crop.sx,
+          crop.sy,
+          crop.sw,
+          crop.sh,
+          Math.round(-drawW / 2),
+          Math.round(-drawH / 2),
+          drawW,
+          drawH
+        );
+        ctx.restore();
+        return;
+      }
       ctx.drawImage(
         img,
         crop.sx,
@@ -1350,6 +2008,397 @@
       drawDialogueBubble(frame, state.x, state.y);
     }
 
+    function worldRectToViewRect(rect) {
+      return {
+        x: (rect.x - state.cameraX) * state.zoom,
+        y: (rect.y - state.cameraY) * state.zoom,
+        w: rect.w * state.zoom,
+        h: rect.h * state.zoom
+      };
+    }
+
+    function expandRect(rect, pad) {
+      return { x: rect.x - pad, y: rect.y - pad, w: rect.w + pad * 2, h: rect.h + pad * 2 };
+    }
+
+    function studyRectVisible(rect) {
+      const view = worldRectToViewRect(rect);
+      return view.x + view.w > 8 && view.x < VIEW_W - 8 && view.y + view.h > 8 && view.y < VIEW_H - 8;
+    }
+
+    function studyKindForSprite(sprite) {
+      const name = sprite.name || "";
+      if (sprite.buildId === "wall" || /fence|wall/.test(name)) return "wall";
+      if (sprite.tree || isTreeName(name)) return "tree";
+      if (/flower|sunflower/.test(name)) return "flower";
+      if (/bridge/.test(name)) return "bridge";
+      if (/bed/.test(name)) return "bed";
+      if (/seed|wheat|radish/.test(name)) return "crop";
+      if (/grass|clover|bush/.test(name)) return "grass";
+      return "";
+    }
+
+    function studyCandidateFromSprite(sprite) {
+      const kind = studyKindForSprite(sprite);
+      if (!kind || !studyVocabulary[kind]) return null;
+      const rect = expandRect({
+        x: sprite.x - sprite.w / 2,
+        y: sprite.y - sprite.h,
+        w: sprite.w,
+        h: sprite.h
+      }, kind === "tree" ? 4 : 7);
+      if (!studyRectVisible(rect)) return null;
+      return {
+        kind,
+        rect,
+        dist: Math.hypot(sprite.x - state.x, sprite.y - state.y),
+        seed: hash01(Math.round(sprite.x), Math.round(sprite.y), 121)
+      };
+    }
+
+    function studyTileCandidates() {
+      if (state.scene !== "outside") return [];
+      const candidates = [];
+      let waterCount = 0;
+      let grassCount = 0;
+      const startX = Math.max(0, Math.floor(state.cameraX / TILE) * TILE);
+      const startY = Math.max(0, Math.floor(state.cameraY / TILE) * TILE);
+      const endX = Math.min(WORLD_W, state.cameraX + viewWorldW());
+      const endY = Math.min(WORLD_H, state.cameraY + viewWorldH());
+      for (let y = startY; y < endY; y += TILE * 2) {
+        for (let x = startX; x < endX; x += TILE * 2) {
+          const rect = { x, y, w: TILE * 2, h: TILE * 2 };
+          const water = waterTileAt(x, y);
+          if (water && waterCount < 8 && hash01(x, y, 122) > 0.42) {
+            waterCount += 1;
+            candidates.push({ kind: "water", rect, dist: Math.hypot(x - state.x, y - state.y), seed: hash01(x, y, 123) });
+          } else if (!water && grassCount < 8 && hash01(x, y, 124) > 0.82) {
+            grassCount += 1;
+            candidates.push({ kind: "grass", rect, dist: Math.hypot(x - state.x, y - state.y), seed: hash01(x, y, 125) });
+          }
+        }
+      }
+      return candidates;
+    }
+
+    function studyCaptureCandidates() {
+      const fromSprites = activeSprites()
+        .map(studyCandidateFromSprite)
+        .filter(Boolean);
+      if (state.scene === "outside") {
+        for (const plot of farmPlots) {
+          if (cropStage(plot) < 0) continue;
+          const rect = { x: plot.x - FARM_GRID / 2, y: plot.y - FARM_GRID / 2, w: FARM_GRID, h: FARM_GRID };
+          if (studyRectVisible(rect)) {
+            fromSprites.push({ kind: "crop", rect, dist: Math.hypot(plot.x - state.x, plot.y - state.y), seed: hash01(plot.x, plot.y, 126) });
+          }
+        }
+      }
+      return [...fromSprites, ...studyTileCandidates()]
+        .sort((a, b) => a.dist - b.dist || a.seed - b.seed)
+        .slice(0, 22);
+    }
+
+    function fallbackStudyCandidates(count = 3) {
+      const picks = [];
+      const used = new Set();
+      const points = [
+        [0.28, 0.36],
+        [0.66, 0.44],
+        [0.46, 0.68],
+        [0.78, 0.28],
+        [0.18, 0.62]
+      ];
+      for (const [px, py] of points) {
+        const tx = Math.floor((state.cameraX + viewWorldW() * px) / TILE) * TILE;
+        const ty = Math.floor((state.cameraY + viewWorldH() * py) / TILE) * TILE;
+        const key = `${tx}:${ty}`;
+        if (used.has(key)) continue;
+        used.add(key);
+        picks.push({
+          kind: waterTileAt(tx, ty) ? "water" : "grass",
+          rect: { x: tx, y: ty, w: TILE * 2, h: TILE * 2 },
+          dist: Math.hypot(tx - state.x, ty - state.y),
+          seed: hash01(tx, ty, 145 + picks.length)
+        });
+        if (picks.length >= count) break;
+      }
+      return picks;
+    }
+
+    function currentStudyScanCandidate(now) {
+      const candidates = state.studyCapture.candidates;
+      if (!candidates.length) return null;
+      const index = Math.floor((now - state.studyCapture.started) / 360) % candidates.length;
+      return candidates[index];
+    }
+
+    function updateStudyCapture(now) {
+      const study = state.studyCapture;
+      const currentBiomeId = state.scene === "outside" ? biomeAt(state.x, state.y).id : "";
+      if (state.scene !== "outside") {
+        if (study.phase !== "idle") {
+          study.phase = "idle";
+          study.candidates = [];
+          study.target = null;
+          study.images = [];
+          study.scanIndex = 0;
+        }
+        study.pendingBiomeId = "";
+        study.lastBiomeId = currentBiomeId;
+        return;
+      }
+      if (currentBiomeId && currentBiomeId !== study.lastBiomeId) {
+        study.lastBiomeId = currentBiomeId;
+        study.pendingBiomeId = currentBiomeId;
+      }
+      if (study.phase === "idle") {
+        if (!study.pendingBiomeId || now < study.nextAt) return;
+        let candidates = studyCaptureCandidates();
+        if (!candidates.length) candidates = fallbackStudyCandidates(3);
+        if (!candidates.length) {
+          study.nextAt = now + 2500;
+          return;
+        }
+        study.phase = "scan";
+        study.started = now;
+        study.until = now + STUDY_CAPTURE_SCAN_STEP_MS;
+        study.candidates = candidates;
+        study.target = null;
+        study.images = [];
+        study.scanIndex = 0;
+        study.layoutSeed = hash01(state.x, state.y, 170 + Math.floor(now / 1000));
+        study.pendingBiomeId = "";
+        return;
+      }
+      if (study.phase === "scan") {
+        const used = new Set(study.images.map(entry => studyCandidateKey(entry.target)));
+        let candidates = studyCaptureCandidates().filter(candidate => !used.has(studyCandidateKey(candidate)));
+        if (!candidates.length) candidates = fallbackStudyCandidates(3 - study.images.length);
+        if (candidates.length) study.candidates = candidates;
+        if (now < study.until) return;
+        const selected = currentStudyScanCandidate(now) || study.candidates[0];
+        if (!selected) {
+          if (study.images.length) {
+            study.target = study.images[0].target;
+            study.phase = "show";
+            study.started = now;
+            study.until = now + STUDY_CAPTURE_SHOW_MS;
+            study.nextAt = now + STUDY_CAPTURE_COOLDOWN_MS;
+          } else {
+            study.phase = "idle";
+            study.nextAt = now + 2500;
+          }
+          return;
+        }
+        study.phase = "capture";
+        study.started = now;
+        study.target = { ...selected, rect: { ...selected.rect } };
+        return;
+      }
+      if (study.phase === "show" && now >= study.until) {
+        study.phase = "idle";
+        study.candidates = [];
+        study.target = null;
+        study.images = [];
+        study.scanIndex = 0;
+      }
+    }
+
+    function studyCandidateKey(candidate) {
+      if (!candidate) return "";
+      return `${candidate.kind}:${Math.round(candidate.rect.x / TILE)}:${Math.round(candidate.rect.y / TILE)}`;
+    }
+
+    function captureStudyImageFor(candidate) {
+      const rect = expandRect(candidate.rect, candidate.kind === "tree" ? 10 : 14);
+      const view = worldRectToViewRect(rect);
+      const safeTop = 56;
+      const safeBottom = VIEW_H - 56;
+      const x1 = clamp(view.x, 0, VIEW_W);
+      const y1 = clamp(view.y, safeTop, safeBottom);
+      const x2 = clamp(view.x + view.w, 0, VIEW_W);
+      const y2 = clamp(view.y + view.h, safeTop, safeBottom);
+      const sw = x2 - x1;
+      const sh = y2 - y1;
+      if (sw < 8 || sh < 8) return null;
+      const snap = document.createElement("canvas");
+      snap.width = 96;
+      snap.height = 96;
+      const snapCtx = snap.getContext("2d");
+      snapCtx.imageSmoothingEnabled = false;
+      snapCtx.fillStyle = "#eef2d5";
+      snapCtx.fillRect(0, 0, snap.width, snap.height);
+      const sx = scene.width / VIEW_W;
+      const sy = scene.height / VIEW_H;
+      const side = Math.min(sw, sh);
+      const ox = (sw - side) / 2;
+      const oy = (sh - side) / 2;
+      snapCtx.drawImage(scene, (x1 + ox) * sx, (y1 + oy) * sy, side * sx, side * sy, 0, 0, snap.width, snap.height);
+      return { image: snap, target: { ...candidate, rect: { ...candidate.rect } } };
+    }
+
+    function captureStudySnapshot(now) {
+      const study = state.studyCapture;
+      if (study.phase !== "capture" || !study.target) return;
+      try {
+        const capture = captureStudyImageFor(study.target);
+        if (!capture) throw new Error("empty study capture");
+        capture.shownAt = now;
+        study.images.push(capture);
+        if (study.images.length < 3) {
+          const used = new Set(study.images.map(entry => studyCandidateKey(entry.target)));
+          let nextCandidates = studyCaptureCandidates().filter(candidate => !used.has(studyCandidateKey(candidate)));
+          if (!nextCandidates.length) nextCandidates = fallbackStudyCandidates(3 - study.images.length);
+          study.phase = "scan";
+          study.scanIndex = study.images.length;
+          study.started = now;
+          study.until = now + STUDY_CAPTURE_SCAN_STEP_MS;
+          study.candidates = nextCandidates.length ? nextCandidates : studyTileCandidates();
+          study.target = null;
+        } else {
+          study.target = study.images[0].target;
+          study.phase = "show";
+          study.started = now;
+          study.until = now + STUDY_CAPTURE_SHOW_MS;
+          study.nextAt = now + STUDY_CAPTURE_COOLDOWN_MS;
+        }
+      } catch (_) {
+        if (study.images.length) {
+          study.target = study.images[0].target;
+          study.phase = "show";
+          study.started = now;
+          study.until = now + STUDY_CAPTURE_SHOW_MS;
+          study.nextAt = now + STUDY_CAPTURE_COOLDOWN_MS;
+        } else {
+          study.phase = "idle";
+          study.images = [];
+          study.nextAt = now + STUDY_CAPTURE_COOLDOWN_MS;
+        }
+      }
+    }
+
+    function drawStudyScanOverlay(now) {
+      const target = currentStudyScanCandidate(now);
+      if (!target) return;
+      const view = worldRectToViewRect(expandRect(target.rect, 4));
+      const pulse = 1 + Math.sin(now * 0.009) * 0.035;
+      const cx = view.x + view.w / 2;
+      const cy = view.y + view.h / 2;
+      const w = Math.max(22, view.w * pulse);
+      const h = Math.max(22, view.h * pulse);
+      const x = Math.round(cx - w / 2);
+      const y = Math.round(cy - h / 2);
+      ctx.save();
+      ctx.globalAlpha = 0.94;
+      ctx.lineWidth = 3;
+      ctx.strokeStyle = "rgba(255, 255, 255, .96)";
+      ctx.strokeRect(x, y, w, h);
+      ctx.restore();
+    }
+
+    function wrapStudyLine(text, maxChars) {
+      const words = text.split(" ");
+      const lines = [];
+      let line = "";
+      for (const word of words) {
+        const next = line ? `${line} ${word}` : word;
+        if (next.length > maxChars && line) {
+          lines.push(line);
+          line = word;
+        } else {
+          line = next;
+        }
+      }
+      if (line) lines.push(line);
+      return lines.slice(0, 4);
+    }
+
+    function drawTypewriterLines(lines, chars, x, y, lineHeight) {
+      let remaining = Math.max(0, chars);
+      for (let i = 0; i < lines.length; i++) {
+        if (remaining <= 0) break;
+        const visible = lines[i].slice(0, remaining);
+        ctx.fillText(visible, x, y + i * lineHeight);
+        remaining -= lines[i].length + 1;
+      }
+    }
+
+    function drawStudyCard(now) {
+      const study = state.studyCapture;
+      const fadeOut = study.phase === "show" ? Math.min(1, Math.max(0, study.until - now) / 480) : 1;
+      const captures = study.images.length ? study.images : [{ image: null, target: study.target }];
+      const layoutSets = [
+        [
+          { x: 16, y: 62, size: 68, imageSide: "left", chars: 25 },
+          { x: VIEW_W - 72, y: 140, size: 54, imageSide: "right", chars: 23 },
+          { x: 106, y: 224, size: 46, imageSide: "left", chars: 21 }
+        ],
+        [
+          { x: VIEW_W - 86, y: 64, size: 72, imageSide: "right", chars: 25 },
+          { x: 18, y: 150, size: 50, imageSide: "left", chars: 22 },
+          { x: VIEW_W - 138, y: 232, size: 44, imageSide: "right", chars: 20 }
+        ],
+        [
+          { x: 24, y: 118, size: 58, imageSide: "left", chars: 24 },
+          { x: VIEW_W - 82, y: 70, size: 64, imageSide: "right", chars: 23 },
+          { x: 142, y: 236, size: 48, imageSide: "left", chars: 21 }
+        ],
+        [
+          { x: VIEW_W - 82, y: 112, size: 62, imageSide: "right", chars: 24 },
+          { x: 20, y: 70, size: 52, imageSide: "left", chars: 22 },
+          { x: 92, y: 224, size: 50, imageSide: "left", chars: 21 }
+        ]
+      ];
+      const layouts = layoutSets[Math.floor((study.layoutSeed || 0) * layoutSets.length) % layoutSets.length];
+      const drawSquare = (entry, x, y, size) => {
+        ctx.save();
+        ctx.fillStyle = "#111";
+        ctx.fillRect(x, y, size, size);
+        if (entry?.image) ctx.drawImage(entry.image, x, y, size, size);
+        ctx.strokeStyle = "rgba(0, 0, 0, .92)";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x - 0.5, y - 0.5, size + 1, size + 1);
+        ctx.restore();
+      };
+      captures.slice(0, 3).forEach((entry, i) => {
+        const layout = layouts[i];
+        const localAge = now - (entry.shownAt || study.started);
+        if (localAge < 0) return;
+        const reveal = Math.min(1, localAge / 360);
+        const alpha = Math.min(reveal, fadeOut);
+        const drift = Math.round((1 - reveal) * 7);
+        const vocab = studyVocabulary[entry.target?.kind] || studyVocabulary.grass;
+        const ix = layout.x + (layout.imageSide === "right" ? drift : -drift);
+        const iy = layout.y;
+        const textX = layout.imageSide === "left" ? ix + layout.size + 9 : ix - 9;
+        const textAlign = layout.imageSide === "left" ? "left" : "right";
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        drawSquare(entry, ix, iy, layout.size);
+        ctx.textBaseline = "top";
+        ctx.textAlign = textAlign;
+        ctx.fillStyle = "#fff";
+        ctx.font = `700 ${i === 0 ? 18 : 15}px Georgia, serif`;
+        ctx.fillText(vocab.word, textX, iy + 2);
+        ctx.font = "8px Georgia, serif";
+        const infoLines = [
+          ...wrapStudyLine(vocab.sentence, layout.chars),
+          `English: ${vocab.english}`,
+          ...wrapStudyLine(vocab.explain, layout.chars),
+          ...vocab.related.slice(0, 2).map(([id, en]) => `${id}: ${en}`)
+        ].slice(0, i === 0 ? 7 : i === 1 ? 6 : 5);
+        const typedChars = Math.floor(Math.max(0, localAge - 250) / 24);
+        drawTypewriterLines(infoLines, typedChars, textX, iy + (i === 0 ? 27 : 24), 9);
+        ctx.restore();
+      });
+    }
+
+    function drawStudyCaptureOverlay(now) {
+      if (state.studyCapture.images.length) drawStudyCard(now);
+      if (state.studyCapture.phase === "scan") drawStudyScanOverlay(now);
+    }
+
     function drawBiomeScreenFilter() {
       const biome = biomeBlendAt(state.cameraX + viewWorldW() * 0.58, state.cameraY + viewWorldH() * 0.56);
       if (!biome.layer.tint || state.scene !== "outside") return;
@@ -1418,14 +2467,65 @@
       return buildPalette.find(item => item.id === state.buildTool) || buildPalette[0];
     }
 
+    function buildRotationIndex(item = currentBuildItem()) {
+      return state.buildRotations[item.id] || 0;
+    }
+
+    function activeBuildItem(item = currentBuildItem()) {
+      const rotation = buildRotationIndex(item);
+      const variant = item.variants?.[rotation % item.variants.length];
+      if (!variant) {
+        const steps = item.rotatable === false ? 0 : rotation % 4;
+        const turnsSideways = steps % 2 === 1;
+        return {
+          ...item,
+          rotation,
+          rotateSteps: steps,
+          baseW: item.baseW || item.w,
+          baseH: item.baseH || item.h,
+          w: turnsSideways ? (item.baseH || item.h) : item.w,
+          h: turnsSideways ? (item.baseW || item.w) : item.h
+        };
+      }
+      return {
+        ...item,
+        ...variant,
+        id: item.id,
+        label: item.label,
+        variantLabel: variant.label || item.label,
+        variants: item.variants,
+        rotation,
+        rotateSteps: 0,
+        baseW: variant.baseW || item.baseW || item.w,
+        baseH: variant.baseH || item.baseH || item.h,
+        w: variant.w || item.w,
+        h: variant.h || item.h,
+        solid: variant.solid || item.solid
+      };
+    }
+
+    function buildButtonItem(item) {
+      return item.id === state.buildTool ? activeBuildItem(item) : item;
+    }
+
+    function rotateBuildItem() {
+      if (!state.buildUiOpen) return;
+      const item = currentBuildItem();
+      if (item.equipTool || item.erase) return;
+      const steps = item.variants?.length || 4;
+      state.buildRotations[item.id] = (buildRotationIndex(item) + 1) % steps;
+      state.demo = false;
+      renderBuildbar();
+    }
+
     function buildPaletteGroup(item) {
-      return item.equipTool || item.erase ? "tools" : "buildings";
+      return item.group === "tools" || item.equipTool || item.erase ? "tools" : "buildings";
     }
 
     function setBuildUiOpen(open) {
       state.buildUiOpen = open;
-      buildbarBuildings.classList.toggle("open", state.buildUiOpen);
-      buildbarTools.classList.toggle("open", state.buildUiOpen);
+      buildrowBuildings.classList.toggle("open", state.buildUiOpen);
+      buildrowTools.classList.toggle("open", state.buildUiOpen);
       if (!state.buildUiOpen) state.buildHover.active = false;
     }
 
@@ -1436,7 +2536,7 @@
 
     function drawBuildGhost() {
       if (!state.buildUiOpen || !state.buildHover.active) return;
-      const item = currentBuildItem();
+      const item = activeBuildItem();
       const x = state.buildHover.x;
       const y = state.buildHover.y;
       ctx.save();
@@ -1552,8 +2652,8 @@
     }
 
     function snapBuildPoint(point) {
-      const item = currentBuildItem();
-      const grid = item.id === "wall" ? BUILD_WALL_STEP : BUILD_GRID;
+      const item = activeBuildItem();
+      const grid = item.grid || (item.id === "wall" ? BUILD_WALL_STEP : BUILD_GRID);
       return {
         x: Math.round(point.x / grid) * grid,
         y: Math.round(point.y / grid) * grid
@@ -1565,7 +2665,7 @@
     }
 
     function placeBuildItem() {
-      const item = currentBuildItem();
+      const item = activeBuildItem();
       const { x, y } = state.buildHover;
       if (!state.buildUiOpen || !state.buildHover.active) return;
       if (item.equipTool) {
@@ -1579,7 +2679,7 @@
       if (wouldBlockPlayer(item, x, y)) return;
       const existing = placedSprites.findIndex(sprite => sprite.scene === state.scene && sprite.x === x && sprite.y === y && sprite.buildId === item.id);
       if (existing >= 0) placedSprites.splice(existing, 1);
-      placedSprites.push({
+      const placed = {
         ...item,
         scene: state.scene,
         buildId: item.id,
@@ -1587,7 +2687,15 @@
         y,
         built: true,
         chestAnimStarted: 0
-      });
+      };
+      if (placed.tree || isTreeName(placed.name)) {
+        placed.tree = true;
+        placed.treeType = placed.treeType || "sprout";
+        placed.maxHp = treeMaxHp(placed.treeType, placed.w, placed.h, hash01(x, y, 51));
+        placed.hp = placed.maxHp;
+        placed.respawnMs = TREE_RESPAWN_MS + TREE_RESPAWN_JITTER_MS * 0.5;
+      }
+      placedSprites.push(placed);
       refreshWallConnections();
     }
 
@@ -1909,6 +3017,10 @@
         toggleBuildUi();
         return;
       }
+      if (on && k === "r") {
+        rotateBuildItem();
+        return;
+      }
       if (on && (k === "backspace" || k === "delete")) {
         if (state.buildUiOpen) removePlacedAt(state.buildHover.x, state.buildHover.y);
         return;
@@ -1927,10 +3039,18 @@
       return names.some(name => keys.has(name));
     }
 
+    // Token to cancel in-flight setCurrent loads when a new one starts
+    let setCurrentToken = 0;
+
     async function setCurrent(name) {
+      const token = ++setCurrentToken;
       const cfg = roster[name];
+      // Switch the picker highlight immediately so it feels responsive
+      document.querySelectorAll(".pick").forEach(btn => btn.classList.toggle("active", btn.dataset.name === name));
       if (cfg.kind === "forest") await loadForestAnimal(cfg.base);
       else await loadImageCached(cfg.src);
+      // If another setCurrent was called while we were loading, bail out
+      if (token !== setCurrentToken) return;
       state.current = name;
       if (cfg.sideView) state.dir = sideFacingDir(state.dir);
       state.attackDir = currentFacingDir();
@@ -1939,7 +3059,6 @@
       state.stopMode = "stop";
       state.moveStarted = 0;
       state.wasMoving = false;
-      document.querySelectorAll(".pick").forEach(btn => btn.classList.toggle("active", btn.dataset.name === name));
       const rarity = roster[name].rarity ? `<br>${roster[name].rarity}` : "";
       const equipped = state.equippedTool ? `<br>Tool: ${toolLabel(state.equippedTool)}` : "";
       hud.innerHTML = `${roster[name].label}${rarity}${equipped}`;
@@ -1958,11 +3077,35 @@
     function renderBuildbar() {
       const buttonFor = item => {
         const active = item.id === state.buildTool ? " active" : "";
-        const body = item.erase ? "<span>×</span>" : `<img src="${assetUrl(`assets/plants/${item.name}/frame_0.png`)}" alt="">`;
-        return `<button class="build-tool${active}" data-build="${item.id}" title="${item.label}" aria-label="${item.label}">${body}</button>`;
+        const display = buildButtonItem(item);
+        const rotation = active
+          ? item.variants
+            ? ` (${display.variantLabel || "rotated"})`
+            : display.rotateSteps
+              ? ` (${display.rotateSteps * 90} deg)`
+              : ""
+          : "";
+        const rotateStyle = active && display.rotateSteps ? ` style="transform: rotate(${display.rotateSteps * 90}deg)"` : "";
+        const body = item.erase ? "<span>×</span>" : `<img src="${assetUrl(`assets/plants/${display.name}/frame_0.png`)}" alt=""${rotateStyle}>`;
+        return `<button class="build-tool${active}" data-build="${item.id}" title="${item.label}${rotation}" aria-label="${item.label}${rotation}">${body}</button>`;
       };
-      buildbarBuildings.innerHTML = buildPalette.filter(item => buildPaletteGroup(item) === "buildings").map(buttonFor).join("");
-      buildbarTools.innerHTML = buildPalette.filter(item => buildPaletteGroup(item) === "tools").map(buttonFor).join("");
+      const renderSplitRow = (items, leftNode, rightNode) => {
+        const midpoint = Math.ceil(items.length / 2);
+        leftNode.innerHTML = items.slice(0, midpoint).map(buttonFor).join("");
+        rightNode.innerHTML = items.slice(midpoint).map(buttonFor).join("");
+        // Left bar: scroll to end so items appear flush against center button
+        leftNode.scrollLeft = leftNode.scrollWidth;
+      };
+      renderSplitRow(
+        buildPalette.filter(item => buildPaletteGroup(item) === "buildings"),
+        buildbarBuildingsLeft,
+        buildbarBuildings
+      );
+      renderSplitRow(
+        buildPalette.filter(item => buildPaletteGroup(item) === "tools"),
+        buildbarToolsLeft,
+        buildbarTools
+      );
       document.querySelectorAll(".build-tool").forEach(btn => btn.addEventListener("click", () => {
         state.buildTool = btn.dataset.build;
         const item = currentBuildItem();
@@ -1972,8 +3115,10 @@
         }
         renderBuildbar();
       }));
-      buildbarBuildings.classList.toggle("open", state.buildUiOpen);
-      buildbarTools.classList.toggle("open", state.buildUiOpen);
+      buildrowBuildings.classList.toggle("open", state.buildUiOpen);
+      buildrowTools.classList.toggle("open", state.buildUiOpen);
+      const item = currentBuildItem();
+      buildbarRotate.disabled = Boolean(item.equipTool || item.erase);
     }
 
     function resetJoystick() {
@@ -2137,32 +3282,14 @@
       state.mode = attacking ? "attack" : moving ? "run" : stopping ? state.stopMode : "idle";
 
       updateCamera();
+      updateStudyCapture(now);
       draw();
       requestAnimationFrame(update);
     }
 
     function draw() {
-      resizeSceneCanvas();
-      scene.dataset.x = state.x.toFixed(2);
-      scene.dataset.y = state.y.toFixed(2);
-      scene.dataset.cameraX = state.cameraX.toFixed(2);
-      scene.dataset.cameraY = state.cameraY.toFixed(2);
-      scene.dataset.character = state.current;
-      scene.dataset.mode = state.mode;
-      scene.dataset.stopMode = state.stopMode;
-      scene.dataset.dir = state.dir;
-      scene.dataset.attackDir = state.attackDir;
-      scene.dataset.scene = state.scene;
-      scene.dataset.transition = state.transitionText;
-      scene.dataset.placed = placedSprites.length;
-      scene.dataset.treeHits = state.treeHits;
-      scene.dataset.treesDestroyed = state.treesDestroyed;
-      scene.dataset.lastTreeHit = state.lastTreeHit;
-      scene.dataset.dialogue = state.dialogueText;
-      scene.dataset.buildUiOpen = state.buildUiOpen ? "true" : "false";
-      scene.dataset.joystick = state.joystick.active ? `${state.joystick.x.toFixed(2)},${state.joystick.y.toFixed(2)}` : "0,0";
-      scene.dataset.zoom = state.zoom.toFixed(2);
-      scene.dataset.seed = WORLD_SEED;
+      // dataset writes are cheap debug info — skip on mobile for perf
+      const now = performance.now();
       ctx.imageSmoothingEnabled = false;
       ctx.clearRect(0, 0, VIEW_W, VIEW_H);
       ctx.save();
@@ -2173,7 +3300,7 @@
       } else {
 	        ctx.scale(state.zoom, state.zoom);
 	        ctx.translate(-Math.round(state.cameraX), -Math.round(state.cameraY));
-	        ctx.drawImage(staticMap, 0, 0);
+	        drawVisibleGrass();
 	        drawAnimatedWater();
 	        drawAnimatedShoreline();
 	        drawFarmPatch();
@@ -2181,9 +3308,11 @@
 	        drawBuildGhost();
 	      }
 	      ctx.restore();
+	      captureStudySnapshot(now);
 	      drawBiomeScreenFilter();
 	      drawAnimeColorGrade();
 	      drawTransition();
+	      drawStudyCaptureOverlay(now);
 	    }
 
     function drawTransition() {
@@ -2209,21 +3338,115 @@
 
     async function start() {
       resizeSceneCanvas();
-      await Promise.all(Object.values(assets).map(loadImageCached));
-      await loadPlants();
-      await loadForestAnimal("fox");
+
+      const loadingScreen = document.getElementById("loading-screen");
+      const loadingBar = document.getElementById("loading-bar");
+      const loadingPct = document.getElementById("loading-pct");
+      const loadingSub = document.getElementById("loading-sub");
+      // Show version on loading title
+      document.getElementById("loading-title").textContent = `🌿 Grass Animal Tester v${APP_VERSION}`;
+
+      // ── Step 1: collect all srcs ──────────────────────────
+      function allCharacterSrcs() {
+        const srcs = new Set();
+        for (const [, cfg] of Object.entries(roster)) {
+          if (cfg.kind === "forest") {
+            const paths = getForestFramePaths(cfg.base);
+            Object.values(paths).flat().forEach(s => srcs.add(s));
+          } else if (cfg.src) {
+            srcs.add(cfg.src);
+          }
+        }
+        return [...srcs];
+      }
+
+      const coreSrcs = Object.values(assets);
+      const plantSrcs = (() => {
+        const out = new Set();
+        const uniquePlants = new Map();
+        [...plantSprites, ...biomeTrees, ...interiorSprites,
+         ...buildPalette.filter(i => !i.erase), ...buildConnectionSprites]
+          .forEach(item => uniquePlants.set(`${item.name}:${item.count}`, item));
+        [...uniquePlants.values()].forEach(plant => {
+          [plant, ...(plant.variants || [])].forEach(item => {
+            Array.from({ length: item.count || plant.count || 1 }, (_, i) =>
+              out.add(`assets/plants/${item.name}/frame_${i}.png`)
+            );
+          });
+        });
+        Object.values(farmCrops).forEach(crop =>
+          Array.from({ length: crop.stages }, (_, i) =>
+            out.add(`assets/plants/${crop.name}/frame_${i}.png`)
+          )
+        );
+        return [...out];
+      })();
+
+      const charSrcs = allCharacterSrcs();
+      const allSrcs = [...new Set([...coreSrcs, ...plantSrcs, ...charSrcs])];
+      const mapStrips = Math.ceil(WORLD_H / 512);
+      const total = allSrcs.length + mapStrips;
+      let loaded = 0;
+
+      function onProgress(name) {
+        loaded++;
+        const pct = Math.round((loaded / total) * 100);
+        loadingBar.style.width = pct + "%";
+        loadingPct.textContent = pct + "%";
+        const match = name.match(/assets\/([^/]+)\//);
+        if (match) loadingSub.textContent = `Loading ${match[1].replace(/_/g, " ")}…`;
+      }
+
+      // ── Step 2: load assets in batches ────────────────────
+      const BATCH = 8; // smaller batches = more UI updates on mobile
+      for (let i = 0; i < allSrcs.length; i += BATCH) {
+        const batch = allSrcs.slice(i, i + BATCH);
+        await Promise.all(batch.map(src =>
+          loadImageCached(src).then(() => onProgress(src)).catch(() => onProgress(src))
+        ));
+      }
+
+      // Mark all forest animals as fully loaded
+      for (const [, cfg] of Object.entries(roster)) {
+        if (cfg.kind === "forest") {
+          if (!forestFrames[cfg.base]) forestFrames[cfg.base] = getForestFramePaths(cfg.base);
+          forestFrames[cfg.base].loaded = true;
+        }
+      }
+
+      // ── Step 3: skip full-world pre-render — chunks built on demand ──
+      loadingSub.textContent = "Generating map…";
+      await new Promise(resolve => setTimeout(resolve, 30));
+      // Advance progress bar to account for skipped map strips
+      loaded += mapStrips;
+      const mapPct = Math.round((loaded / total) * 100);
+      loadingBar.style.width = mapPct + "%";
+      loadingPct.textContent = mapPct + "%";
+
+      loadingBar.style.width = "100%";
+      loadingPct.textContent = "100%";
+      loadingSub.textContent = `Ready! v${APP_VERSION}`;
+      await new Promise(resolve => setTimeout(resolve, 120));
 
       renderPicker();
       renderBuildbar();
-      buildStaticMap();
       seedDemoFarm();
       await setCurrent("fox");
       requestAnimationFrame(update);
+
+      // Fade out loading screen
+      loadingScreen.classList.add("fade-out");
+      setTimeout(() => loadingScreen.remove(), 550);
     }
 
     addEventListener("resize", resizeSceneCanvas);
     addEventListener("keydown", e => setKey(e.key, true));
     addEventListener("keyup", e => setKey(e.key, false));
+    buildbarClose.addEventListener("click", () => {
+      setBuildUiOpen(false);
+      state.demo = false;
+    });
+    buildbarRotate.addEventListener("click", rotateBuildItem);
     scene.addEventListener("pointermove", moveCanvasPointer);
     scene.addEventListener("pointerleave", () => {
       state.buildHover.active = false;
@@ -2243,6 +3466,52 @@
     start().catch(err => {
       hud.textContent = `Asset load failed: ${err.message}`;
     });
+
+    // ── PWA / Add to Home Screen ──────────────────────────
+    const installBtn = document.getElementById("install-btn");
+    const iosToast = document.getElementById("ios-install-toast");
+    const iosToastClose = document.getElementById("ios-install-toast-close");
+
+    // Detect iOS Safari
+    const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+    const isInStandaloneMode = window.navigator.standalone === true ||
+      window.matchMedia("(display-mode: standalone)").matches;
+
+    if (isIos && !isInStandaloneMode) {
+      // Show the button for iOS; tapping opens instructions toast
+      installBtn.classList.add("show");
+      installBtn.addEventListener("click", () => {
+        iosToast.classList.toggle("show");
+      });
+      iosToastClose.addEventListener("click", () => {
+        iosToast.classList.remove("show");
+      });
+    }
+
+    // Android / Chrome: listen for the beforeinstallprompt event
+    let deferredInstallPrompt = null;
+    window.addEventListener("beforeinstallprompt", e => {
+      e.preventDefault();
+      deferredInstallPrompt = e;
+      installBtn.classList.add("show");
+    });
+    installBtn.addEventListener("click", () => {
+      if (!deferredInstallPrompt) return;
+      deferredInstallPrompt.prompt();
+      deferredInstallPrompt.userChoice.then(() => {
+        deferredInstallPrompt = null;
+        installBtn.classList.remove("show");
+      });
+    });
+    window.addEventListener("appinstalled", () => {
+      installBtn.classList.remove("show");
+      deferredInstallPrompt = null;
+    });
+
+    // ── Service Worker (offline support) ─────────────────
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("sw.js").catch(() => {});
+    }
   </script>
 </body>
 </html>
