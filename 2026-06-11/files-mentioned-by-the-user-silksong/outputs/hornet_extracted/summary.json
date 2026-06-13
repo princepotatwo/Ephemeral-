@@ -1,0 +1,66 @@
+[
+  {
+    "bundle": "atlas_assets_assets_texture2d_sactx-0-4096x4096-bc7-hornet-d4b8429f.png_b79d4675d9cb24091fd939af971abb59.bundle",
+    "counts": {
+      "Texture2D": 1,
+      "AssetBundle": 1
+    },
+    "saved": [
+      "atlas_assets_assets_texture2d_sactx-0-4096x4096-bc7-hornet-d4b8429f.png_b79d4675d9cb24091fd939af971abb59/Texture2D_-9034021307360241596.png"
+    ],
+    "saved_count": 1
+  },
+  {
+    "bundle": "tk2d_assets_assets_collections_hornetbossclndata_1b09ee614b7117b249473d1bb823a55c.bundle",
+    "counts": {
+      "MonoBehaviour": 1,
+      "GameObject": 1,
+      "AssetBundle": 1,
+      "Sprite": 2,
+      "Transform": 1,
+      "Material": 1,
+      "Texture2D": 1
+    },
+    "saved": [
+      "tk2d_assets_assets_collections_hornetbossclndata_1b09ee614b7117b249473d1bb823a55c/Sprite_890638326335326169.png",
+      "tk2d_assets_assets_collections_hornetbossclndata_1b09ee614b7117b249473d1bb823a55c/Sprite_4995138198717851466.png",
+      "tk2d_assets_assets_collections_hornetbossclndata_1b09ee614b7117b249473d1bb823a55c/Texture2D_7722163119456249674.png"
+    ],
+    "saved_count": 3
+  },
+  {
+    "bundle": "tk2d_assets_assets_collections_knightdata_4e7b296df1048c2dd41251a3e1d42be7.bundle",
+    "counts": {
+      "GameObject": 1,
+      "Texture2D": 4,
+      "Material": 4,
+      "AssetBundle": 1,
+      "Transform": 1,
+      "MonoBehaviour": 1
+    },
+    "saved": [
+      "tk2d_assets_assets_collections_knightdata_4e7b296df1048c2dd41251a3e1d42be7/Texture2D_-2364446572446808314.png",
+      "tk2d_assets_assets_collections_knightdata_4e7b296df1048c2dd41251a3e1d42be7/Texture2D_2943592582722355249.png",
+      "tk2d_assets_assets_collections_knightdata_4e7b296df1048c2dd41251a3e1d42be7/Texture2D_6645212717271387411.png",
+      "tk2d_assets_assets_collections_knightdata_4e7b296df1048c2dd41251a3e1d42be7/Texture2D_9075196710313671132.png"
+    ],
+    "saved_count": 4
+  },
+  {
+    "bundle": "tk2d_assets_assets_collections_silkbossclndata_6838eeb9efc858e31f544da9efd525f3.bundle",
+    "counts": {
+      "Texture2D": 3,
+      "MonoBehaviour": 1,
+      "AssetBundle": 1,
+      "Material": 3,
+      "Transform": 1,
+      "GameObject": 1
+    },
+    "saved": [
+      "tk2d_assets_assets_collections_silkbossclndata_6838eeb9efc858e31f544da9efd525f3/Texture2D_-8927814606858544335.png",
+      "tk2d_assets_assets_collections_silkbossclndata_6838eeb9efc858e31f544da9efd525f3/Texture2D_-533399417025745414.png",
+      "tk2d_assets_assets_collections_silkbossclndata_6838eeb9efc858e31f544da9efd525f3/Texture2D_5242340366229439007.png"
+    ],
+    "saved_count": 3
+  }
+]

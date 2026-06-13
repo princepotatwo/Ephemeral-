@@ -1,0 +1,80 @@
+[
+  {
+    "bundle": "tk2d_assets_assets_collections_hornetbossclndata_1b09ee614b7117b249473d1bb823a55c.bundle",
+    "frames_saved": 321,
+    "sample": [
+      "0000_attack_air_dash0005.png",
+      "0001_attack_air_dash0002.png",
+      "0002_attack_air_dash0003.png",
+      "0003_attack_air_dash0004.png",
+      "0004_attack_air_dash0006.png",
+      "0005_attack_air_dash0008.png",
+      "0006_attack_air_dash0001.png",
+      "0007_attack_air_dash0000.png",
+      "0008_attack_air_dash0007.png",
+      "0009_attack_air_dash0009.png",
+      "0010_barb_thread_throw0007.png",
+      "0011_barb_thread_throw0004.png",
+      "0012_barb_thread_throw0002.png",
+      "0013_barb_thread_throw0006.png",
+      "0014_barb_thread_throw0003.png",
+      "0015_barb_thread_throw0008.png",
+      "0016_barb_thread_throw0009.png",
+      "0017_barb_thread_throw0000.png",
+      "0018_barb_thread_throw0010.png",
+      "0019_barb_thread_throw0001.png"
+    ]
+  },
+  {
+    "bundle": "tk2d_assets_assets_collections_knightdata_4e7b296df1048c2dd41251a3e1d42be7.bundle",
+    "frames_saved": 1828,
+    "sample": [
+      "0000_idle_to_run_short0000.png",
+      "0001_idle_to_run_short0001.png",
+      "0002_hornet_recoil_somersault0001.png",
+      "0003_hornet_recoil_somersault0002.png",
+      "0004_hornet_recoil_somersault0003.png",
+      "0005_hornet_recoil_somersault0004.png",
+      "0006_recoil_upside_down0000.png",
+      "0007_recoil_upside_down0004.png",
+      "0008_recoil_upside_down0005.png",
+      "0009_recoil_upside_down0006.png",
+      "0010_recoil_upside_down0008.png",
+      "0011_recoil_upside_down0007.png",
+      "0012_recoil_upside_down0001.png",
+      "0013_recoil_upside_down0002.png",
+      "0014_recoil_upside_down0003.png",
+      "0015_Hornet_down_stab_burst_effect0000.png",
+      "0016_Hornet_down_stab_burst_effect0001.png",
+      "0017_Hornet_down_stab_burst_effect0002.png",
+      "0018_Hornet_down_stab0009.png",
+      "0019_Hornet_down_stab0010.png"
+    ]
+  },
+  {
+    "bundle": "tk2d_assets_assets_collections_silkbossclndata_6838eeb9efc858e31f544da9efd525f3.bundle",
+    "frames_saved": 208,
+    "sample": [
+      "0000_antic0000.png",
+      "0001_antic0001.png",
+      "0002_antic0002.png",
+      "0003_antic0003.png",
+      "0004_dash0004.png",
+      "0005_dash0000.png",
+      "0006_dash0001.png",
+      "0007_dash0002.png",
+      "0008_dash0003.png",
+      "0009_dash_antic0002.png",
+      "0010_dash_antic0003.png",
+      "0011_dash_antic0001.png",
+      "0012_dash_antic0000.png",
+      "0013_drift_backward0000.png",
+      "0014_drift_backward0001.png",
+      "0015_drift_backward0003.png",
+      "0016_drift_backward0002.png",
+      "0017_drift_forwards0003.png",
+      "0018_drift_forwards0000.png",
+      "0019_drift_forwards0001.png"
+    ]
+  }
+]
