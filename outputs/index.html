@@ -51,6 +51,23 @@
       display: grid;
       gap: 10px;
     }
+    body.is-game-fullscreen {
+      padding: 0;
+      background: #000;
+    }
+    body.is-game-fullscreen .shell,
+    .stage:fullscreen {
+      width: 100vw;
+      height: 100dvh;
+      max-width: none;
+    }
+    body.is-game-fullscreen .stage,
+    .stage:fullscreen {
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
+      background: #000;
+    }
     .stage {
       position: relative;
       overflow: hidden;
@@ -81,6 +98,11 @@
       background: #9fca65;
       touch-action: none;
       user-select: none;
+    }
+    body.is-game-fullscreen #scene,
+    .stage:fullscreen #scene {
+      height: 100%;
+      aspect-ratio: auto;
     }
     .hud {
       display: none;
@@ -1038,6 +1060,7 @@
     });
 
     const scene = document.getElementById("scene");
+    const stage = scene.closest(".stage");
     const ctx = scene.getContext("2d");
     function resizeSceneCanvas() {
       const rect = scene.getBoundingClientRect();
@@ -1061,6 +1084,33 @@
     const buildbarTools = document.getElementById("buildbar-tools");
     const buildbarClose = document.getElementById("buildbar-close");
     const buildbarRotate = document.getElementById("buildbar-rotate");
+    let fullscreenWanted = false;
+    let fullscreenBusy = false;
+    function isLandscapeView() {
+      return window.innerWidth > window.innerHeight;
+    }
+    function syncFullscreenClass() {
+      document.body.classList.toggle("is-game-fullscreen", fullscreenWanted || document.fullscreenElement === stage);
+      resizeSceneCanvas();
+    }
+    async function setOrientationFullscreen() {
+      fullscreenWanted = isLandscapeView();
+      syncFullscreenClass();
+      if (fullscreenBusy) return;
+      fullscreenBusy = true;
+      try {
+        if (fullscreenWanted && !document.fullscreenElement && stage?.requestFullscreen) {
+          await stage.requestFullscreen();
+        } else if (!fullscreenWanted && document.fullscreenElement && document.exitFullscreen) {
+          await document.exitFullscreen();
+        }
+      } catch (_) {
+        // Some browsers need a tap before fullscreen; pointerdown retries.
+      } finally {
+        fullscreenBusy = false;
+        syncFullscreenClass();
+      }
+    }
     const keys = new Set();
     let tapTimes = [];
     let pendingBuildTap = 0;
@@ -1071,7 +1121,7 @@
     const placedSprites = [];
     const farmPlots = [];
     const ASSET_REV = "one-tree-biomes-water-v55";
-    const APP_VERSION = "1.1.20";
+    const APP_VERSION = "1.1.22";
 
     // ── Auto-refresh on new version ───────────────────────
     // Stores the version in localStorage. If it changed, clears caches and reloads.
@@ -3440,6 +3490,9 @@
     }
 
     addEventListener("resize", resizeSceneCanvas);
+    addEventListener("resize", setOrientationFullscreen);
+    addEventListener("orientationchange", setOrientationFullscreen);
+    document.addEventListener("fullscreenchange", syncFullscreenClass);
     addEventListener("keydown", e => setKey(e.key, true));
     addEventListener("keyup", e => setKey(e.key, false));
     buildbarClose.addEventListener("click", () => {
@@ -3453,6 +3506,7 @@
       resetJoystick();
     });
     scene.addEventListener("pointerdown", beginCanvasPointer);
+    scene.addEventListener("pointerdown", setOrientationFullscreen);
     scene.addEventListener("pointerup", endCanvasPointer);
     scene.addEventListener("pointercancel", resetJoystick);
     scene.addEventListener("wheel", e => {
@@ -3466,6 +3520,7 @@
     start().catch(err => {
       hud.textContent = `Asset load failed: ${err.message}`;
     });
+    setOrientationFullscreen();
 
     // ── PWA / Add to Home Screen ──────────────────────────
     const installBtn = document.getElementById("install-btn");
