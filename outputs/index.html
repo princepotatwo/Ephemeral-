@@ -54,13 +54,21 @@
     body.is-game-fullscreen {
       padding: 0;
       background: #000;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
     body.is-game-fullscreen .shell,
+    body.is-game-fullscreen .stage,
     .stage:fullscreen {
       width: 100vw;
       height: 100dvh;
       max-width: none;
       gap: 0;
+    }
+    body.is-game-fullscreen .caption {
+      display: none;
     }
     body.is-game-fullscreen .stage,
     .stage:fullscreen {
@@ -92,6 +100,19 @@
     }
     .stage::before { top: 0; }
     .stage::after { bottom: 0; }
+    .bar-zone {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: clamp(22px, 7.5vw, 52px);
+      z-index: 3;
+      pointer-events: auto;
+      touch-action: none;
+      user-select: none;
+      cursor: pointer;
+    }
+    .bar-zone-top { top: 0; }
+    .bar-zone-bottom { bottom: 0; }
     #scene {
       display: block;
       width: 100%;
@@ -189,14 +210,32 @@
     }
     .buildbar-left {
       /* items pack toward the RIGHT (toward center button) */
-      justify-content: flex-end;
+      justify-content: flex-start;
+    }
+    .buildbar-left > :first-child {
+      margin-left: auto;
     }
     .buildbar-right {
-      /* items pack toward the LEFT (toward center button) */
       justify-content: flex-start;
     }
     .buildbar::-webkit-scrollbar {
       display: none;
+    }
+    .buildbar-center {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+    .buildbar-right-container {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+      justify-content: flex-start;
+      flex: 1;
+    }
+    .buildbar-right-container .buildbar-right {
+      flex: 1;
     }
     .buildbar-action {
       flex: 0 0 96px;
@@ -261,6 +300,65 @@
         max-width: 22px;
         max-height: 22px;
       }
+    }
+
+    /* ── Currency HUD ──────────────────────────────────── */
+    .currency-hud {
+      position: absolute;
+      top: 58px;
+      right: 10px;
+      display: none;
+      gap: 8px;
+      z-index: 5;
+      align-items: center;
+    }
+    .currency-hud.show {
+      display: flex;
+    }
+    .currency-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      background: rgba(20, 18, 16, 0.72);
+      color: #fff;
+      border-radius: 8px;
+      font: 700 12px/1 system-ui, sans-serif;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      user-select: none;
+      min-width: 44px;
+      justify-content: center;
+    }
+    .currency-icon {
+      font-size: 14px;
+    }
+
+    /* ── Pet HUD ──────────────────────────────────────── */
+    .pet-hud {
+      position: absolute;
+      top: 58px;
+      right: 10px;
+      display: none;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      background: rgba(20, 18, 16, 0.72);
+      color: #fff;
+      border-radius: 8px;
+      font: 700 12px/1 system-ui, sans-serif;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      user-select: none;
+      z-index: 5;
+      min-width: 44px;
+      justify-content: center;
+    }
+    .pet-hud.show {
+      display: flex;
+    }
+    .pet-icon {
+      font-size: 14px;
     }
 
     /* ── Loading screen ──────────────────────────────────── */
@@ -397,16 +495,30 @@
   <div class="shell">
     <main class="stage" aria-label="Cute overworld map">
       <canvas id="scene" width="640" height="360"></canvas>
+      <div class="bar-zone bar-zone-top" id="bar-zone-top"></div>
+      <div class="bar-zone bar-zone-bottom" id="bar-zone-bottom"></div>
       <div class="hud" id="hud" aria-live="polite"></div>
+      <div class="currency-hud" id="currency-hud">
+        <div class="currency-item"><span class="currency-icon">🪵</span><span id="currency-logs">0</span></div>
+        <div class="currency-item"><span class="currency-icon">💧</span><span id="currency-blood">0</span></div>
+      </div>
+      <div class="pet-hud" id="pet-hud">
+        <span class="pet-icon">🐾</span><span id="pet-count">0</span>
+      </div>
       <div class="buildbar-line buildbar-line-top" id="buildrow-buildings" aria-label="Buildings">
         <div class="buildbar buildbar-left" id="buildbar-buildings-left"></div>
-        <button class="buildbar-action" id="buildbar-close" type="button">Close this</button>
+        <div class="buildbar-center">
+          <button class="buildbar-action" id="buildbar-close" type="button">Close this</button>
+        </div>
         <div class="buildbar buildbar-right" id="buildbar-buildings"></div>
       </div>
       <div class="buildbar-line buildbar-line-bottom" id="buildrow-tools" aria-label="Tools and usable items">
         <div class="buildbar buildbar-left" id="buildbar-tools-left"></div>
         <button class="buildbar-action" id="buildbar-rotate" type="button">Rotate</button>
-        <div class="buildbar buildbar-right" id="buildbar-tools"></div>
+        <div class="buildbar-right-container">
+          <div class="buildbar buildbar-right" id="buildbar-tools"></div>
+          <button class="build-tool" id="buildbar-fullscreen" type="button"></button>
+        </div>
       </div>
     </main>
     <div class="picker" id="picker" aria-label="Character switcher"></div>
@@ -666,11 +778,11 @@
       tiny: { name: "plant_tiny_spruce_tree_green", count: 12, fps: 9, w: 40, h: 68, hits: 5, solid: { x: -7, y: -15, w: 14, h: 16 } }
     };
     const biomeLayers = [
-      { id: "safe", radius: SAFE_RADIUS, tree: "sprout", density: 0.08, tint: null, detail: "meadow" },
-      { id: "shadow", radius: 2300, tree: "shadow", density: 0.62, tint: { a: [76, 54, 33, .38], b: [20, 18, 16, .18] }, detail: "dead" },
-      { id: "goldwood", radius: 3650, tree: "yellow", density: 0.54, tint: { a: [101, 78, 34, .3], b: [46, 34, 18, .1] }, detail: "dry" },
-      { id: "bluewater", radius: 5050, tree: "cold", density: 0.56, tint: { a: [42, 86, 106, .34], b: [13, 33, 47, .14] }, detail: "water" },
-      { id: "deepteal", radius: 99999, tree: "teal", density: 0.68, tint: { a: [24, 75, 63, .34], b: [7, 18, 16, .2] }, detail: "deep" }
+      { id: "safe", displayName: "Meadow", radius: SAFE_RADIUS, tree: "sprout", density: 0.08, tint: null, detail: "meadow" },
+      { id: "shadow", displayName: "Gloomy Woods", radius: 2300, tree: "shadow", density: 0.62, tint: { a: [76, 54, 33, .38], b: [20, 18, 16, .18] }, detail: "dead" },
+      { id: "goldwood", displayName: "Amber Grove", radius: 3650, tree: "yellow", density: 0.54, tint: { a: [101, 78, 34, .3], b: [46, 34, 18, .1] }, detail: "dry" },
+      { id: "bluewater", displayName: "Frost Lake", radius: 5050, tree: "cold", density: 0.56, tint: { a: [42, 86, 106, .34], b: [13, 33, 47, .14] }, detail: "water" },
+      { id: "deepteal", displayName: "Deep Mire", radius: 99999, tree: "teal", density: 0.68, tint: { a: [24, 75, 63, .34], b: [7, 18, 16, .2] }, detail: "deep" }
     ];
     const plantSprites = [
       { name: "plant_tiny_spruce_tree_green", count: 12, fps: 9, w: 40, h: 68, x: 328, y: 390, solid: { x: -7, y: -15, w: 14, h: 16 } },
@@ -742,6 +854,10 @@
     function biomeAt(x, y) {
       const distance = biomeDistanceAt(x, y);
       return biomeLayers.find(layer => distance < layer.radius) || biomeLayers[biomeLayers.length - 1];
+    }
+
+    function biomeDisplayName(id) {
+      return biomeLayers.find(l => l.id === id)?.displayName || id;
     }
 
     function biomeBlendAt(x, y) {
@@ -1087,8 +1203,17 @@
     const buildbarToolsLeft = document.getElementById("buildbar-tools-left");
     const buildbarTools = document.getElementById("buildbar-tools");
     const buildbarClose = document.getElementById("buildbar-close");
+    const buildbarFullscreen = document.getElementById("buildbar-fullscreen");
     const buildbarRotate = document.getElementById("buildbar-rotate");
+    const barZoneTop = document.getElementById("bar-zone-top");
+    const barZoneBottom = document.getElementById("bar-zone-bottom");
+    const currencyHud = document.getElementById("currency-hud");
+    const currencyLogsEl = document.getElementById("currency-logs");
+    const currencyBloodEl = document.getElementById("currency-blood");
+    const petHud = document.getElementById("pet-hud");
+    const petCountEl = document.getElementById("pet-count");
     let fullscreenBusy = false;
+    let manualFullscreen = null;
     function isMobileView() {
       return Math.min(window.innerWidth, window.innerHeight) < 720;
     }
@@ -1096,21 +1221,61 @@
       return window.innerWidth > window.innerHeight;
     }
     function wantsFullscreen() {
+      if (manualFullscreen !== null) return manualFullscreen;
       return isMobileView() && isLandscapeView();
     }
     function syncFullscreenClass() {
-      document.body.classList.toggle("is-game-fullscreen", wantsFullscreen() || document.fullscreenElement === stage);
+      if (!isLandscapeView() && manualFullscreen === false) {
+        manualFullscreen = null;
+      }
+      const isFull = wantsFullscreen() || document.fullscreenElement === stage;
+      document.body.classList.toggle("is-game-fullscreen", isFull);
       resizeSceneCanvas();
+      updateFullscreenButton();
+    }
+    function updateFullscreenButton() {
+      const isFull = document.fullscreenElement === stage || document.body.classList.contains("is-game-fullscreen");
+      buildbarFullscreen.innerHTML = isFull
+        ? `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 4H4V7M11 4H14V7M7 14H4V11M14 11V14H11"/></svg>`
+        : `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V4H7M11 4H14V7M4 11V14H7M14 11V14H11"/></svg>`;
+      buildbarFullscreen.title = isFull ? "Exit fullscreen" : "Enter fullscreen";
+      buildbarFullscreen.setAttribute("aria-label", isFull ? "Exit fullscreen" : "Enter fullscreen");
+    }
+    function toggleFullscreenManual() {
+      state.demo = false;
+      const isFull = document.fullscreenElement === stage || document.body.classList.contains("is-game-fullscreen");
+      if (isFull) {
+        manualFullscreen = false;
+        if (document.fullscreenElement && document.exitFullscreen) {
+          document.exitFullscreen().catch(() => {});
+        }
+        if (screen.orientation?.unlock) {
+          screen.orientation.unlock();
+        }
+        if (isMobileView() && screen.orientation?.lock) {
+          screen.orientation.lock('portrait').catch(() => {});
+        }
+      } else {
+        manualFullscreen = true;
+        if (stage.requestFullscreen) {
+          stage.requestFullscreen().catch(() => {});
+        }
+        if (isMobileView() && screen.orientation?.lock) {
+          screen.orientation.lock('landscape').catch(() => {});
+        }
+      }
+      syncFullscreenClass();
     }
     async function setOrientationFullscreen() {
-      syncFullscreenClass();
       if (fullscreenBusy) return;
       fullscreenBusy = true;
       try {
-        if (wantsFullscreen() && !document.fullscreenElement && stage?.requestFullscreen) {
+        const wantsFull = wantsFullscreen();
+        const isCurrentlyFull = document.fullscreenElement === stage;
+        if (wantsFull && !isCurrentlyFull && stage?.requestFullscreen) {
           history.pushState({ gameFullscreen: true }, "");
           await stage.requestFullscreen();
-        } else if (!wantsFullscreen() && document.fullscreenElement && document.exitFullscreen) {
+        } else if (!wantsFull && isCurrentlyFull && document.exitFullscreen) {
           await document.exitFullscreen();
           if (history.state?.gameFullscreen) history.back();
         }
@@ -1122,14 +1287,14 @@
       }
     }
     const keys = new Set();
-    let tapTimes = [];
-    let pendingBuildTap = 0;
     const images = {};
     const imagePromises = {};
     const forestFrames = {};
     let staticMap;
     const placedSprites = [];
     const farmPlots = [];
+    const roamingNPCs = [];
+    const petSlimes = [];
     const ASSET_REV = "one-tree-biomes-water-v55";
     const APP_VERSION = "1.1.22";
 
@@ -1276,11 +1441,15 @@
         pointerId: null,
         startX: 0,
         startY: 0,
+        baseX: 0,
+        baseY: 0,
         x: 0,
         y: 0,
         maxDistance: 76,
         moved: false
       },
+      logs: 0,
+      blood: 0,
       studyCapture: {
         phase: "idle",
         nextAt: performance.now() + STUDY_CAPTURE_COOLDOWN_MS,
@@ -1823,17 +1992,75 @@
       return { image: images[cfg.src], sx, sy, sw: cfg.frameW, sh: cfg.frameH, scale: cfg.scale };
     }
 
+    function npcFrame(npc) {
+      const cfg = roster[npc.base];
+      if (!cfg || cfg.kind !== "forest") return null;
+      const dir = cfg.sideView ? sideFacingDir(npc.dir) : npc.dir;
+      const mode = npc.mode;
+      const frames = forestFrames[npc.base][`${mode}-${dir}`] || forestFrames[npc.base][`idle-${dir}`];
+      if (!frames) return null;
+      const fps = mode === "attack" ? (cfg.attackFps || 9) : mode === "run" ? (cfg.runFps || 9) : (cfg.idleFps || 5);
+      const started = mode === "attack" ? (npc.attackStarted || npc.t) : 0;
+      const playOnce = mode === "attack";
+      const t = playOnce ? Math.max(0, performance.now() - started) / 1000 : npc.t;
+      const index = playOnce ? Math.min(frames.length - 1, Math.floor(t * fps)) : Math.floor(t * fps) % frames.length;
+      const image = images[frames[index]];
+      if (!image) return null;
+      return { image, sx: 0, sy: 0, sw: image.width, sh: image.height, scale: cfg.scale, smooth: cfg.smooth };
+    }
+
     function playerDrawSize(frame) {
       const w = Math.round(frame.sw * frame.scale * CHARACTER_WORLD_SCALE);
       const h = Math.round(frame.sh * frame.scale * CHARACTER_WORLD_SCALE);
       return { w, h };
     }
 
-    function drawPlayerAt(frame, x, y) {
+    function drawPlayerAt(frame, x, y, shake = 0) {
       const { w, h } = playerDrawSize(frame);
       ctx.imageSmoothingEnabled = Boolean(frame.smooth);
-      ctx.drawImage(frame.image, frame.sx, frame.sy, frame.sw, frame.sh, Math.round(x - w / 2), Math.round(y - h + 10), w, h);
+      ctx.drawImage(frame.image, frame.sx, frame.sy, frame.sw, frame.sh, Math.round(x - w / 2 + shake), Math.round(y - h + 10), w, h);
       ctx.imageSmoothingEnabled = false;
+    }
+
+    function drawHitFlash(frame, x, y, shake, flashUntil) {
+      drawPlayerAt(frame, x, y, shake);
+      if (performance.now() >= flashUntil) return;
+      const { w, h } = playerDrawSize(frame);
+      ctx.save();
+      ctx.globalCompositeOperation = "source-atop";
+      ctx.fillStyle = "rgba(255, 40, 40, 0.42)";
+      ctx.fillRect(Math.round(x - w / 2 + shake), Math.round(y - h + 10), w, h);
+      ctx.restore();
+    }
+
+    function drawEvaporatingNPC(frame, x, y, elapsed, shake = 0) {
+      const { w, h } = playerDrawSize(frame);
+      const p = Math.min(1, elapsed / NPC_EVAPORATE_MS);
+      const alpha = 1 - p;
+      const scale = 1 - p * 0.25;
+      const driftY = -p * 12;
+      const drawW = Math.round(w * scale);
+      const drawH = Math.round(h * scale);
+      const drawX = Math.round(x - drawW / 2 + shake);
+      const drawY = Math.round(y - drawH + 10 + driftY);
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.imageSmoothingEnabled = Boolean(frame.smooth);
+      ctx.drawImage(frame.image, frame.sx, frame.sy, frame.sw, frame.sh, drawX, drawY, drawW, drawH);
+      ctx.imageSmoothingEnabled = false;
+      // dust particles
+      ctx.fillStyle = `rgba(180, 210, 180, ${alpha * 0.7})`;
+      const seed = Math.floor(x * 1000 + y);
+      const dustCount = 6 + Math.floor(p * 4);
+      for (let i = 0; i < dustCount; i++) {
+        const dx = (Math.sin(seed + i * 3.7) * 0.5 + 0.5) * drawW - drawW / 2;
+        const dy = (Math.cos(seed + i * 5.3) * 0.5 + 0.5) * drawH - drawH;
+        const px = Math.round(x + dx + (p * 8 * Math.sin(seed + i * 2.1)));
+        const py = Math.round(y + dy + driftY - p * 16 * (0.5 + (i % 3) * 0.25));
+        const size = Math.max(1, Math.round(2 - p * 1.5));
+        ctx.fillRect(px, py, size, size);
+      }
+      ctx.restore();
     }
 
     function wrapDialogueText(text, maxChars) {
@@ -1956,7 +2183,15 @@
     }
 
     function drawPlant(plant) {
-      const index = plant.chest ? chestFrameIndex(plant) : Math.floor((state.t + plant.x * 0.003) * plant.fps) % plant.count;
+      let index;
+      if (plant.chest) {
+        index = chestFrameIndex(plant);
+      } else if (plant.tree && Math.hypot(plant.x - state.x, plant.y - state.y) > 550) {
+        // Far tree: freeze at a static frame to save animation calc
+        index = Math.floor(plant.x * 0.003 * plant.fps) % plant.count;
+      } else {
+        index = Math.floor((state.t + plant.x * 0.003) * plant.fps) % plant.count;
+      }
       const img = images[`assets/plants/${plant.name}/frame_${index}.png`];
       if (!img) return;
       let shake = 0;
@@ -2052,6 +2287,59 @@
           actors.push({
             y: -100000 + plot.y * 0.001,
             draw: () => drawFarmCrop(plot, stage)
+          });
+        }
+        // Add roaming NPCs (slimes) to the depth-sorted draw list
+        for (const npc of roamingNPCs) {
+          const npcFrameObj = npcFrame(npc);
+          if (!npcFrameObj) continue;
+          const pad = 180;
+          const onScreen = npc.x + 40 > state.cameraX - pad && npc.x - 40 < state.cameraX + viewWorldW() + pad && npc.y + 40 > state.cameraY - pad && npc.y - 40 < state.cameraY + viewWorldH() + pad;
+          if (!onScreen) continue;
+          let shake = 0;
+          if (npc.hitStarted) {
+            const elapsed = performance.now() - npc.hitStarted;
+            if (elapsed < NPC_HIT_SHAKE_MS) {
+              const p = elapsed / NPC_HIT_SHAKE_MS;
+              shake = Math.sin(p * Math.PI * 10) * (1 - p) * 6 * (npc.hitDir || 1);
+            }
+          }
+          if (npc.dead) {
+            const elapsed = performance.now() - npc.deadAt;
+            if (elapsed < NPC_EVAPORATE_MS) {
+              actors.push({
+                y: npc.y,
+                draw: () => drawEvaporatingNPC(npcFrameObj, npc.x, npc.y, elapsed, shake)
+              });
+            }
+            continue;
+          }
+          actors.push({
+            y: npc.y,
+            draw: () => drawHitFlash(npcFrameObj, npc.x, npc.y, shake, npc.hitFlashUntil)
+          });
+        }
+        // Add pet slimes to the depth-sorted draw list
+        for (const pet of petSlimes) {
+          const petFrameObj = npcFrame(pet);
+          if (!petFrameObj) continue;
+          const pad = 180;
+          const onScreen = pet.x + 40 > state.cameraX - pad && pet.x - 40 < state.cameraX + viewWorldW() + pad && pet.y + 40 > state.cameraY - pad && pet.y - 40 < state.cameraY + viewWorldH() + pad;
+          if (!onScreen) continue;
+          let shake = 0;
+          if (pet.hitStarted) {
+            const elapsed = performance.now() - pet.hitStarted;
+            if (elapsed < NPC_HIT_SHAKE_MS) {
+              const p = elapsed / NPC_HIT_SHAKE_MS;
+              shake = Math.sin(p * Math.PI * 10) * (1 - p) * 6 * (pet.hitDir || 1);
+            }
+          }
+          actors.push({
+            y: pet.y,
+            draw: () => {
+              drawHitFlash(petFrameObj, pet.x, pet.y, shake, pet.hitFlashUntil);
+              drawPetIndicator(pet, pet.x, pet.y);
+            }
           });
         }
       }
@@ -2586,7 +2874,16 @@
       state.buildUiOpen = open;
       buildrowBuildings.classList.toggle("open", state.buildUiOpen);
       buildrowTools.classList.toggle("open", state.buildUiOpen);
+      if (currencyHud) currencyHud.classList.toggle("show", state.buildUiOpen);
+      if (petHud) petHud.classList.toggle("show", petSlimes.length > 0 && state.buildUiOpen);
       if (!state.buildUiOpen) state.buildHover.active = false;
+    }
+
+    function updateCurrencyHud() {
+      if (currencyLogsEl) currencyLogsEl.textContent = state.logs;
+      if (currencyBloodEl) currencyBloodEl.textContent = state.blood;
+      if (petCountEl) petCountEl.textContent = petSlimes.length;
+      if (petHud) petHud.classList.toggle("show", petSlimes.length > 0 && state.buildUiOpen);
     }
 
     function toggleBuildUi() {
@@ -2821,16 +3118,16 @@
     }
 
     function hitTreeInFront() {
-      if (state.scene !== "outside") return false;
+      if (state.scene !== "outside") return null;
       const hit = attackTargetRect();
       const target = allTreeSprites()
         .filter(tree => !tree.destroyed)
         .map(tree => ({ tree, rect: treeTargetRect(tree), dist: Math.hypot(tree.x - state.x, tree.y - state.y) }))
         .filter(entry => aabb(hit.x, hit.y, hit.w, hit.h, entry.rect.x, entry.rect.y, entry.rect.w, entry.rect.h))
         .sort((a, b) => a.dist - b.dist)[0]?.tree;
-      if (!target) return false;
+      if (!target) return null;
       damageTree(target);
-      return true;
+      return target;
     }
 
     function damageTree(tree) {
@@ -2845,6 +3142,8 @@
       tree.destroyed = true;
       tree.respawnAt = now + (tree.respawnMs || TREE_RESPAWN_MS) + hash01(tree.x, tree.y, 49) * TREE_RESPAWN_JITTER_MS;
       state.treesDestroyed += 1;
+      state.logs += 1;
+      updateCurrencyHud();
     }
 
     function updateTreeRespawns(now) {
@@ -2986,17 +3285,22 @@
 
     function triggerAttack() {
       if (toggleNearestChest()) return;
+      const now = performance.now();
+      if (now < state.attackUntil) return;
       if (state.equippedTool) {
         triggerToolUse();
         return;
       }
       state.demo = false;
-      state.attackStarted = performance.now();
+      state.attackStarted = now;
       state.attackDir = currentFacingDir();
       state.attackUntil = state.attackStarted + (roster[state.current].attackMs || 420);
       state.stopUntil = 0;
       sayDialogue(pickDialogue("attack"), 5, 2300);
-      hitTreeInFront();
+      const treeTarget = hitTreeInFront();
+      const slimeTarget = hitSlimeInFront();
+      const target = treeTarget || slimeTarget;
+      triggerPetAttacks(target);
     }
 
     function triggerToolUse() {
@@ -3069,6 +3373,519 @@
         plantedAt: plot.crop ? now - plot.age : 0,
         watered: Boolean(plot.watered)
       }));
+    }
+
+    // ── Roaming NPCs (slimes) ────────────────────────────
+    const NPC_MOVE_SPEED = 56; // 50% of player speed (112)
+    const NPC_HP = 10; // 2x pet HP
+    const NPC_ATTACK_DAMAGE = 2; // 2x pet damage
+    const NPC_ATTACK_MS = 800; // wild slime attack interval
+    const NPC_AGGRO_MS = 4000; // how long wild slimes stay angry after being hit
+    const NPC_RESPAWN_MS = 8000;
+    const NPC_HIT_SHAKE_MS = 220;
+    const NPC_EVAPORATE_MS = 400;
+    const HIT_FLASH_MS = 140;
+
+    // ── Pet Slime System ─────────────────────────────────
+    const PET_HP = 5; // pet health
+    const PET_PERSONALITIES = [
+      { name: "eager", followDist: 35, speedMult: 1.3, wanderChance: 0.08, hopChance: 0.15, label: "Eager" },
+      { name: "lazy", followDist: 80, speedMult: 0.7, wanderChance: 0.04, hopChance: 0.05, label: "Lazy" },
+      { name: "playful", followDist: 55, speedMult: 1.1, wanderChance: 0.22, hopChance: 0.28, label: "Playful" },
+      { name: "loyal", followDist: 25, speedMult: 1.0, wanderChance: 0.03, hopChance: 0.08, label: "Loyal" },
+      { name: "shy", followDist: 100, speedMult: 0.85, wanderChance: 0.06, hopChance: 0.04, label: "Shy" }
+    ];
+    const PET_MOVE_SPEED_BASE = 50;
+    const PET_ATTACK_MS = 350;
+    const PET_ATTACK_RANGE = 80;
+    const PET_BRAIN_DECISION_MIN = 400;
+    const PET_BRAIN_DECISION_MAX = 1600;
+    const PET_HOP_DURATION = 280;
+    const PET_TAME_HEART_COUNT = 6;
+
+    function initRoamingNPCs() {
+      const slimeBases = ["green_slime", "blue_slime", "pink_slime"];
+      const count = 6; // 6 slimes in the Meadow
+      for (let i = 0; i < count; i++) {
+        const base = slimeBases[Math.floor(Math.random() * slimeBases.length)];
+        const angle = Math.random() * Math.PI * 2;
+        const dist = Math.random() * 600;
+        let x = Math.max(80, Math.min(WORLD_W - 80, SAFE_CENTER_X + Math.cos(angle) * dist));
+        let y = Math.max(80, Math.min(WORLD_H - 80, SAFE_CENTER_Y + Math.sin(angle) * dist));
+        if (isWaterAtWorldPoint(x, y)) continue;
+        const cfg = roster[base];
+        if (!cfg || cfg.kind !== "forest") continue;
+        const now = performance.now();
+        roamingNPCs.push({
+          x, y,
+          base,
+          dir: Math.random() > 0.5 ? "right" : "left",
+          mode: "idle",
+          t: Math.random() * 10,
+          hp: NPC_HP,
+          maxHp: NPC_HP,
+          hitStarted: 0,
+          hitDir: 1,
+          hitFlashUntil: 0,
+          aggroTarget: null,
+          aggroUntil: 0,
+          nextAttackAt: 0,
+          dead: false,
+          deadAt: 0,
+          nextDecisionAt: now + Math.random() * 2000,
+          moveDir: { x: 0, y: 0 },
+          speed: NPC_MOVE_SPEED
+        });
+      }
+    }
+
+    function updateRoamingNPCs(now, dt) {
+      for (let i = roamingNPCs.length - 1; i >= 0; i--) {
+        const npc = roamingNPCs[i];
+        npc.t += dt;
+        if (npc.dead) {
+          const elapsed = now - npc.deadAt;
+          if (elapsed < NPC_EVAPORATE_MS) {
+            // Still evaporating, keep in array for drawing
+            continue;
+          }
+          // Evaporate finished - convert to pet if player killed it
+          if (npc.playerKilled) {
+            convertSlimeToPet(npc, now);
+          }
+          roamingNPCs.splice(i, 1);
+          continue;
+        }
+        if (npc.aggroTarget && (!petSlimes.includes(npc.aggroTarget) || npc.aggroTarget.hp <= 0)) {
+          npc.aggroTarget = null;
+        }
+        if (npc.aggroTarget && now < npc.aggroUntil) {
+          const target = npc.aggroTarget;
+          const dx = target.x - npc.x;
+          const dy = target.y - npc.y;
+          const dist = Math.hypot(dx, dy);
+          if (dist > 30) {
+            npc.mode = "run";
+            npc.x = Math.max(60, Math.min(WORLD_W - 60, npc.x + (dx / dist) * npc.speed * 1.15 * dt));
+            npc.y = Math.max(60, Math.min(WORLD_H - 60, npc.y + (dy / dist) * npc.speed * 1.15 * dt));
+          } else {
+            npc.mode = "attack";
+            if (now >= npc.nextAttackAt) {
+              npc.attackStarted = now;
+              npc.attackUntil = now + NPC_ATTACK_MS;
+              npc.nextAttackAt = now + NPC_ATTACK_MS;
+              damagePetSlime(target, npc);
+            }
+          }
+          npc.dir = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? "right" : "left") : (dy > 0 ? "front" : "back");
+          continue;
+        }
+        if (now >= npc.nextDecisionAt) {
+          const isMoving = Math.random() > 0.35;
+          if (isMoving) {
+            npc.mode = "run";
+            const moveAngle = Math.random() * Math.PI * 2;
+            npc.moveDir = { x: Math.cos(moveAngle), y: Math.sin(moveAngle) };
+            npc.nextDecisionAt = now + 600 + Math.random() * 2400;
+          } else {
+            npc.mode = "idle";
+            npc.moveDir = { x: 0, y: 0 };
+            npc.nextDecisionAt = now + 400 + Math.random() * 1800;
+          }
+        }
+        if (npc.mode === "run") {
+          const nextX = npc.x + npc.moveDir.x * npc.speed * dt;
+          const nextY = npc.y + npc.moveDir.y * npc.speed * dt;
+          let bounced = false;
+          if (nextX < 60 || nextX > WORLD_W - 60) {
+            npc.moveDir.x *= -1;
+            bounced = true;
+          }
+          if (nextY < 60 || nextY > WORLD_H - 60) {
+            npc.moveDir.y *= -1;
+            bounced = true;
+          }
+          if (bounced) {
+            npc.nextDecisionAt = now + 200 + Math.random() * 600;
+          }
+          npc.x = Math.max(60, Math.min(WORLD_W - 60, npc.x + npc.moveDir.x * npc.speed * dt));
+          npc.y = Math.max(60, Math.min(WORLD_H - 60, npc.y + npc.moveDir.y * npc.speed * dt));
+          if (Math.abs(npc.moveDir.x) > Math.abs(npc.moveDir.y)) {
+            npc.dir = npc.moveDir.x > 0 ? "right" : "left";
+          } else {
+            npc.dir = npc.moveDir.y > 0 ? "front" : "back";
+          }
+        }
+      }
+    }
+
+    function convertSlimeToPet(slime, now) {
+      const personality = PET_PERSONALITIES[Math.floor(Math.random() * PET_PERSONALITIES.length)];
+      const pet = {
+        x: slime.x,
+        y: slime.y,
+        base: slime.base,
+        dir: slime.dir,
+        mode: "idle",
+        t: slime.t,
+        personality,
+        hp: PET_HP,
+        maxHp: PET_HP,
+        dead: false,
+        deadAt: 0,
+        brainState: "tame", // tame, idle, follow, wander, hop, attack, excited
+        brainUntil: now + 800,
+        targetX: slime.x,
+        targetY: slime.y,
+        attackTarget: null,
+        petTarget: null,
+        bangUntil: 0,
+        attackStarted: 0,
+        attackUntil: 0,
+        hitStarted: 0,
+        hitDir: 1,
+        hitFlashUntil: 0,
+        hearts: [], // heart particle effects
+        loveBurst: now // tame heart burst timer
+      };
+      // spawn heart burst
+      for (let i = 0; i < PET_TAME_HEART_COUNT; i++) {
+        pet.hearts.push({
+          x: 0, y: 0,
+          vx: (Math.random() - 0.5) * 30,
+          vy: -Math.random() * 20 - 10,
+          born: now,
+          life: 600 + Math.random() * 400
+        });
+      }
+      petSlimes.push(pet);
+      state.blood += 2;
+      updateCurrencyHud();
+      // spawn a new wild slime to replace the tamed one
+      spawnNewWildSlime();
+    }
+
+    function spawnNewWildSlime() {
+      const slimeBases = ["green_slime", "blue_slime", "pink_slime"];
+      const base = slimeBases[Math.floor(Math.random() * slimeBases.length)];
+      const angle = Math.random() * Math.PI * 2;
+      const dist = Math.random() * 600;
+      let x = Math.max(80, Math.min(WORLD_W - 80, SAFE_CENTER_X + Math.cos(angle) * dist));
+      let y = Math.max(80, Math.min(WORLD_H - 80, SAFE_CENTER_Y + Math.sin(angle) * dist));
+      if (isWaterAtWorldPoint(x, y)) return;
+      const cfg = roster[base];
+      if (!cfg || cfg.kind !== "forest") return;
+      const now = performance.now();
+      roamingNPCs.push({
+        x, y,
+        base,
+        dir: Math.random() > 0.5 ? "right" : "left",
+        mode: "idle",
+        t: Math.random() * 10,
+        hp: NPC_HP,
+        maxHp: NPC_HP,
+        hitStarted: 0,
+        hitDir: 1,
+        hitFlashUntil: 0,
+        aggroTarget: null,
+        aggroUntil: 0,
+        nextAttackAt: 0,
+        dead: false,
+        deadAt: 0,
+        nextDecisionAt: now + Math.random() * 2000,
+        moveDir: { x: 0, y: 0 },
+        speed: NPC_MOVE_SPEED
+      });
+    }
+
+    function updatePetSlimes(now, dt) {
+      for (const pet of petSlimes) {
+        pet.t += dt;
+        // update heart particles
+        pet.hearts = pet.hearts.filter(h => now - h.born < h.life);
+        for (const h of pet.hearts) {
+          h.x += h.vx * dt;
+          h.y += h.vy * dt;
+          h.vy += 20 * dt; // gravity
+        }
+        // random excited heart puff
+        if (pet.brainState === "excited" && Math.random() < 0.15) {
+          pet.hearts.push({
+            x: 0, y: -pet.y * 0.02,
+            vx: (Math.random() - 0.5) * 16,
+            vy: -Math.random() * 12 - 6,
+            born: now,
+            life: 400 + Math.random() * 300
+          });
+        }
+        // brain state machine
+        if (now >= pet.brainUntil) {
+          decidePetBrain(pet, now);
+        }
+        const speed = PET_MOVE_SPEED_BASE * pet.personality.speedMult;
+        const dx = pet.targetX - pet.x;
+        const dy = pet.targetY - pet.y;
+        const dist = Math.hypot(dx, dy);
+        if (pet.brainState === "attack" && pet.petTarget) {
+          const target = pet.petTarget;
+          // Check if target is dead or too far FROM THE PET (not player)
+          const targetDead = target.destroyed || target.dead || false;
+          const targetFar = Math.hypot(target.x - pet.x, target.y - pet.y) > 350;
+          if (targetDead || targetFar) {
+            // Target gone, go back to follow immediately
+            pet.petTarget = null;
+            pet.brainState = "follow";
+            pet.brainUntil = now + 200;
+            pet.mode = "idle";
+          } else {
+            // Keep chasing the live target
+            const tdx = target.x - pet.x;
+            const tdy = target.y - pet.y;
+            const tdist = Math.hypot(tdx, tdy);
+            if (tdist > 30) {
+              // Not close enough, run toward target
+              pet.x += (tdx / tdist) * speed * 1.4 * dt;
+              pet.y += (tdy / tdist) * speed * 1.4 * dt;
+              pet.mode = "run";
+            } else {
+              // Close enough, attack!
+              // But first check if target is still valid
+              const targetStillAlive = !target.destroyed && !target.dead;
+              if (!targetStillAlive) {
+                // Target died just as we arrived, abort
+                pet.petTarget = null;
+                pet.brainState = "follow";
+                pet.brainUntil = now + 200;
+                pet.mode = "idle";
+              } else {
+                pet.mode = "attack";
+                // Deal damage once per attack cycle (at the start of the attack)
+                const attackElapsed = now - pet.attackStarted;
+                if (attackElapsed < 50) {
+                  // Just started attacking, deal damage
+                  if (target.tree && !target.destroyed) {
+                    damageTree(target);
+                  } else if (target.hp !== undefined && !target.dead) {
+                    damageSlime(target, pet);
+                  }
+                  // Hit visual feedback
+                  pet.hitStarted = now;
+                  pet.hitDir = pet.dir === "left" ? -1 : 1;
+                }
+              }
+            }
+            if (Math.abs(tdx) > Math.abs(tdy)) {
+              pet.dir = tdx > 0 ? "right" : "left";
+            } else {
+              pet.dir = tdy > 0 ? "front" : "back";
+            }
+            // When attack animation ends, re-trigger if target still alive
+            if (now >= pet.attackUntil) {
+              if (!targetDead && !targetFar) {
+                pet.attackStarted = now;
+                pet.attackUntil = now + PET_ATTACK_MS;
+                pet.brainUntil = now + PET_ATTACK_MS;
+              } else {
+                pet.petTarget = null;
+                pet.brainState = "follow";
+                pet.brainUntil = now + 200;
+                pet.mode = "idle";
+              }
+            }
+          }
+        } else if (pet.brainState === "hop") {
+          pet.mode = "run";
+          if (dist > 5) {
+            pet.x += (dx / dist) * speed * 1.6 * dt;
+            pet.y += (dy / dist) * speed * 1.6 * dt;
+          }
+          if (now >= pet.brainUntil) {
+            decidePetBrain(pet, now);
+          }
+        } else if (pet.brainState === "follow" || pet.brainState === "tame") {
+          pet.mode = dist > 20 ? "run" : "idle";
+          if (dist > 5) {
+            pet.x += (dx / dist) * speed * dt;
+            pet.y += (dy / dist) * speed * dt;
+          }
+          if (Math.abs(dx) > Math.abs(dy)) {
+            pet.dir = dx > 0 ? "right" : "left";
+          } else {
+            pet.dir = dy > 0 ? "front" : "back";
+          }
+        } else if (pet.brainState === "wander") {
+          pet.mode = dist > 15 ? "run" : "idle";
+          if (dist > 5) {
+            pet.x += (dx / dist) * speed * 0.7 * dt;
+            pet.y += (dy / dist) * speed * 0.7 * dt;
+          }
+          if (now >= pet.brainUntil) {
+            decidePetBrain(pet, now);
+          }
+        } else if (pet.brainState === "idle" || pet.brainState === "excited") {
+          pet.mode = "idle";
+          if (now >= pet.brainUntil) {
+            decidePetBrain(pet, now);
+          }
+        }
+        // keep in world bounds
+        pet.x = Math.max(40, Math.min(WORLD_W - 40, pet.x));
+        pet.y = Math.max(40, Math.min(WORLD_H - 40, pet.y));
+      }
+    }
+
+    function decidePetBrain(pet, now) {
+      const p = pet.personality;
+      const px = state.x;
+      const py = state.y;
+      const followDist = p.followDist;
+      const angle = Math.random() * Math.PI * 2;
+      const dist = followDist + (Math.random() - 0.5) * followDist * 0.8;
+      // Check if pet has a persistent target that's still alive and near the pet
+      if (pet.petTarget) {
+        const target = pet.petTarget;
+        const targetDead = target.destroyed || target.dead || false;
+        const targetFar = Math.hypot(target.x - pet.x, target.y - pet.y) > 350;
+        if (!targetDead && !targetFar) {
+          // Re-attack the same target
+          pet.brainState = "attack";
+          pet.brainUntil = now + PET_ATTACK_MS;
+          pet.attackStarted = now;
+          pet.attackUntil = now + PET_ATTACK_MS;
+          pet.bangUntil = now + 700;
+          return;
+        }
+        pet.petTarget = null; // clear dead/far target
+      }
+      // personality-driven behavior roll
+      const roll = Math.random();
+      if (roll < p.hopChance) {
+        pet.brainState = "hop";
+        pet.brainUntil = now + PET_HOP_DURATION;
+        pet.targetX = px + Math.cos(angle) * dist * 0.5;
+        pet.targetY = py + Math.sin(angle) * dist * 0.5;
+      } else if (roll < p.hopChance + p.wanderChance) {
+        pet.brainState = "wander";
+        pet.brainUntil = now + PET_BRAIN_DECISION_MIN + Math.random() * PET_BRAIN_DECISION_MAX;
+        pet.targetX = px + Math.cos(angle) * (dist * 1.5);
+        pet.targetY = py + Math.sin(angle) * (dist * 1.5);
+      } else if (Math.random() < 0.25) {
+        pet.brainState = "excited";
+        pet.brainUntil = now + 300 + Math.random() * 500;
+        pet.targetX = px + Math.cos(angle) * dist;
+        pet.targetY = py + Math.sin(angle) * dist;
+      } else {
+        pet.brainState = "follow";
+        pet.brainUntil = now + PET_BRAIN_DECISION_MIN + Math.random() * PET_BRAIN_DECISION_MAX;
+        pet.targetX = px + Math.cos(angle) * dist;
+        pet.targetY = py + Math.sin(angle) * dist;
+      }
+    }
+
+    function triggerPetAttacks(target) {
+      if (!target) return; // player missed, pets don't attack empty air
+      const now = performance.now();
+      for (const pet of petSlimes) {
+        if (Math.hypot(pet.x - state.x, pet.y - state.y) > 250) continue;
+        pet.brainState = "attack";
+        pet.brainUntil = now + PET_ATTACK_MS;
+        pet.attackStarted = now;
+        pet.attackUntil = now + PET_ATTACK_MS;
+        pet.petTarget = target;
+        pet.bangUntil = now + 700;
+      }
+    }
+
+    function drawPetIndicator(pet, x, y) {
+      // draw floating hearts above pet
+      const now = performance.now();
+      for (const h of pet.hearts) {
+        const age = now - h.born;
+        if (age < 0 || age > h.life) continue;
+        const alpha = Math.min(1, age / 120) * Math.min(1, (h.life - age) / 200);
+        ctx.save();
+        ctx.globalAlpha = alpha * 0.85;
+        ctx.fillStyle = "#ff8eb7";
+        ctx.font = "700 10px system-ui, sans-serif";
+        ctx.fillText("♥", Math.round(x + h.x), Math.round(y - 36 + h.y));
+        ctx.restore();
+      }
+      // small heart badge above head
+      if (pet.brainState === "excited" || pet.brainState === "tame") {
+        const pulse = 1 + Math.sin(now * 0.012) * 0.15;
+        ctx.save();
+        ctx.globalAlpha = 0.7;
+        ctx.fillStyle = "#ff8eb7";
+        ctx.font = `700 ${Math.round(10 * pulse)}px system-ui, sans-serif`;
+        ctx.fillText("♥", Math.round(x - 4), Math.round(y - 38));
+        ctx.restore();
+      }
+      // "!" attack trigger indicator
+      if (pet.bangUntil && now < pet.bangUntil) {
+        const age = now - (pet.bangUntil - 700);
+        const alpha = Math.min(1, age / 100) * Math.min(1, (pet.bangUntil - now) / 200);
+        const bounce = Math.sin(age * 0.02) * 3;
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = "#ffee55";
+        ctx.font = "700 14px system-ui, sans-serif";
+        ctx.fillText("!", Math.round(x - 3), Math.round(y - 44 + bounce));
+        ctx.restore();
+      }
+    }
+
+    function slimeTargetRect(slime) {
+      return { x: slime.x - 14, y: slime.y - 28, w: 28, h: 32 };
+    }
+
+    function hitSlimeInFront() {
+      if (state.scene !== "outside") return null;
+      const hit = attackTargetRect();
+      const target = roamingNPCs
+        .filter(npc => !npc.dead)
+        .map(npc => ({ npc, rect: slimeTargetRect(npc), dist: Math.hypot(npc.x - state.x, npc.y - state.y) }))
+        .filter(entry => aabb(hit.x, hit.y, hit.w, hit.h, entry.rect.x, entry.rect.y, entry.rect.w, entry.rect.h))
+        .sort((a, b) => a.dist - b.dist)[0]?.npc;
+      if (!target) return null;
+      damageSlime(target, state);
+      return target;
+    }
+
+    function damageSlime(slime, attacker = null) {
+      const now = performance.now();
+      slime.hp = Math.max(0, slime.hp - 1);
+      slime.hitStarted = now;
+      slime.hitDir = state.attackDir === "left" ? -1 : 1;
+      slime.hitFlashUntil = now + HIT_FLASH_MS;
+      if (attacker && petSlimes.includes(attacker)) {
+        slime.aggroTarget = attacker;
+        slime.aggroUntil = now + NPC_AGGRO_MS;
+        slime.nextAttackAt = now + 160;
+      }
+      state.blood += 1;
+      updateCurrencyHud();
+      if (slime.hp > 0) return;
+      slime.dead = true;
+      slime.deadAt = now;
+      slime.playerKilled = attacker === state || attacker === null;
+      if (slime.playerKilled) {
+        state.blood += 2; // bonus for player kill
+        updateCurrencyHud();
+      } else {
+        state.blood += 1; // small bonus for pet helping
+        updateCurrencyHud();
+      }
+    }
+
+    function damagePetSlime(pet, attacker = null) {
+      const now = performance.now();
+      pet.hp = Math.max(1, pet.hp - 1);
+      pet.hitStarted = now;
+      pet.hitDir = attacker && attacker.x < pet.x ? 1 : -1;
+      pet.hitFlashUntil = now + HIT_FLASH_MS;
+      pet.brainState = "excited";
+      pet.brainUntil = now + 220;
+      pet.mode = "attack";
     }
 
     function setKey(key, on) {
@@ -3166,7 +3983,7 @@
         buildbarToolsLeft,
         buildbarTools
       );
-      document.querySelectorAll(".build-tool").forEach(btn => btn.addEventListener("click", () => {
+      document.querySelectorAll(".build-tool[data-build]").forEach(btn => btn.addEventListener("click", () => {
         state.buildTool = btn.dataset.build;
         const item = currentBuildItem();
         if (item.equipTool) {
@@ -3207,47 +4024,52 @@
       stick.y = rawY / distance * strength;
     }
 
-    function registerQuickTap(clientX, clientY) {
-      const now = performance.now();
-      updateBuildHover(clientX, clientY);
-      if (state.buildUiOpen) {
-        clearTimeout(pendingBuildTap);
-        pendingBuildTap = 0;
-        tapTimes = [];
-        placeBuildItem();
-        return;
-      }
-      tapTimes = tapTimes.filter(time => now - time < 650);
-      tapTimes.push(now);
-      if (tapTimes.length >= 3) {
-        clearTimeout(pendingBuildTap);
-        pendingBuildTap = 0;
-        tapTimes = [];
-        toggleBuildUi();
-      }
-    }
-
     function beginCanvasPointer(e) {
-      updateBuildHover(e.clientX, e.clientY);
       if (e.button === 2) {
-        if (state.buildUiOpen) removePlacedAt(state.buildHover.x, state.buildHover.y);
+        if (state.buildUiOpen) {
+          updateBuildHover(e.clientX, e.clientY);
+          removePlacedAt(state.buildHover.x, state.buildHover.y);
+        }
         return;
       }
       if (e.button !== 0) return;
       state.demo = false;
-      state.joystick.active = true;
-      state.joystick.pointerId = e.pointerId;
-      state.joystick.startX = e.clientX;
-      state.joystick.startY = e.clientY;
-      state.joystick.x = 0;
-      state.joystick.y = 0;
-      state.joystick.moved = false;
-      scene.setPointerCapture(e.pointerId);
-      e.preventDefault();
+      const rect = scene.getBoundingClientRect();
+      const relX = e.clientX - rect.left;
+      const isLeft = relX < rect.width / 2;
+      // Always update build hover when build mode is on (so left-side taps can build too)
+      if (state.buildUiOpen) {
+        updateBuildHover(e.clientX, e.clientY);
+      }
+      if (isLeft) {
+        // Left side always starts joystick (for movement)
+        state.joystick.active = true;
+        state.joystick.pointerId = e.pointerId;
+        state.joystick.startX = e.clientX;
+        state.joystick.startY = e.clientY;
+        state.joystick.x = 0;
+        state.joystick.y = 0;
+        state.joystick.moved = false;
+        const scaleX = VIEW_W / rect.width;
+        const scaleY = VIEW_H / rect.height;
+        state.joystick.baseX = relX * scaleX;
+        state.joystick.baseY = (e.clientY - rect.top) * scaleY;
+        scene.setPointerCapture(e.pointerId);
+        e.preventDefault();
+      } else {
+        // Right side: place build when build mode ON, attack when OFF
+        if (state.buildUiOpen) {
+          placeBuildItem();
+        } else {
+          triggerAttack();
+        }
+      }
     }
 
     function moveCanvasPointer(e) {
-      updateBuildHover(e.clientX, e.clientY);
+      if (!(state.joystick.active && e.pointerId === state.joystick.pointerId)) {
+        updateBuildHover(e.clientX, e.clientY);
+      }
       updateJoystickFromPointer(e);
       if (state.joystick.active && e.pointerId === state.joystick.pointerId) e.preventDefault();
     }
@@ -3255,13 +4077,42 @@
     function endCanvasPointer(e) {
       if (!state.joystick.active || e.pointerId !== state.joystick.pointerId) return;
       updateJoystickFromPointer(e);
-      const wasTap = !state.joystick.moved && Math.hypot(e.clientX - state.joystick.startX, e.clientY - state.joystick.startY) < 12;
+      // If build mode is on and this was a tap (not a swipe), place a build item
+      if (state.buildUiOpen && !state.joystick.moved) {
+        placeBuildItem();
+      }
       resetJoystick();
-      if (wasTap) registerQuickTap(e.clientX, e.clientY);
       try {
         scene.releasePointerCapture(e.pointerId);
       } catch (_) {}
       e.preventDefault();
+    }
+
+    function drawJoystick() {
+      const stick = state.joystick;
+      if (!stick.active) return;
+      const rect = scene.getBoundingClientRect();
+      const scale = VIEW_W / rect.width;
+      const baseX = stick.baseX;
+      const baseY = stick.baseY;
+      const maxR = stick.maxDistance * scale;
+      const thumbX = baseX + stick.x * maxR;
+      const thumbY = baseY + stick.y * maxR;
+      ctx.save();
+      ctx.globalAlpha = 0.55;
+      ctx.fillStyle = "rgba(255, 255, 255, 0.18)";
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.55)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(baseX, baseY, maxR, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.globalAlpha = 0.85;
+      ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+      ctx.beginPath();
+      ctx.arc(thumbX, thumbY, 8, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
     }
 
     function updateCamera() {
@@ -3295,32 +4146,28 @@
       }
 
       const attacking = now < state.attackUntil;
-      const moving = !attacking && (dx || dy);
+      const moving = dx || dy;
       const wasMoving = state.wasMoving;
       if (moving && !wasMoving) state.moveStarted = now;
       const len = Math.hypot(dx, dy) || 1;
-      if (!attacking) {
-        const maxX = state.scene === "interior" ? INTERIOR_W - 34 : WORLD_W - 24;
-        const maxY = state.scene === "interior" ? INTERIOR_H - 24 : WORLD_H - 24;
-        const nextX = Math.max(24, Math.min(maxX, state.x + dx / len * MOVE_SPEED * dt));
-        const nextY = Math.max(34, Math.min(maxY, state.y + dy / len * MOVE_SPEED * dt));
-        if (!collides(nextX, state.y)) state.x = nextX;
-        if (!collides(state.x, nextY)) state.y = nextY;
-      }
+      const maxX = state.scene === "interior" ? INTERIOR_W - 34 : WORLD_W - 24;
+      const maxY = state.scene === "interior" ? INTERIOR_H - 24 : WORLD_H - 24;
+      const nextX = Math.max(24, Math.min(maxX, state.x + dx / len * MOVE_SPEED * dt));
+      const nextY = Math.max(34, Math.min(maxY, state.y + dy / len * MOVE_SPEED * dt));
+      if (!collides(nextX, state.y)) state.x = nextX;
+      if (!collides(state.x, nextY)) state.y = nextY;
       resolvePlayerOverlap();
       maybeTeleport();
       updateDialogue(now, Boolean(moving), Boolean(attacking));
 
-      if (!attacking) {
-        const cfg = roster[state.current];
-        if (cfg.sideView) {
-          if (dx) state.dir = dx > 0 ? "right" : "left";
-          else state.dir = sideFacingDir(state.dir);
-        } else if (Math.abs(dy) > Math.abs(dx)) {
-          state.dir = dy > 0 ? "front" : "back";
-        } else if (dx) {
-          state.dir = dx > 0 ? "right" : "left";
-        }
+      const cfg = roster[state.current];
+      if (cfg.sideView) {
+        if (dx) state.dir = dx > 0 ? "right" : "left";
+        else state.dir = sideFacingDir(state.dir);
+      } else if (Math.abs(dy) > Math.abs(dx)) {
+        state.dir = dy > 0 ? "front" : "back";
+      } else if (dx) {
+        state.dir = dx > 0 ? "right" : "left";
       }
       if (attacking) {
         state.stopUntil = 0;
@@ -3341,6 +4188,8 @@
       const stopping = !attacking && !moving && now < state.stopUntil;
       state.mode = attacking ? "attack" : moving ? "run" : stopping ? state.stopMode : "idle";
 
+      updateRoamingNPCs(now, dt);
+      updatePetSlimes(now, dt);
       updateCamera();
       updateStudyCapture(now);
       draw();
@@ -3358,22 +4207,23 @@
         drawDepthSortedActors();
         drawBuildGhost();
       } else {
-	        ctx.scale(state.zoom, state.zoom);
-	        ctx.translate(-Math.round(state.cameraX), -Math.round(state.cameraY));
-	        drawVisibleGrass();
-	        drawAnimatedWater();
-	        drawAnimatedShoreline();
-	        drawFarmPatch();
-	        drawDepthSortedActors();
-	        drawBuildGhost();
-	      }
-	      ctx.restore();
-	      captureStudySnapshot(now);
-	      drawBiomeScreenFilter();
-	      drawAnimeColorGrade();
-	      drawTransition();
-	      drawStudyCaptureOverlay(now);
-	    }
+        ctx.scale(state.zoom, state.zoom);
+        ctx.translate(-Math.round(state.cameraX), -Math.round(state.cameraY));
+        drawVisibleGrass();
+        drawAnimatedWater();
+        drawAnimatedShoreline();
+        drawFarmPatch();
+        drawDepthSortedActors();
+        drawBuildGhost();
+      }
+      ctx.restore();
+      // drawJoystick(); // hidden but still functional
+      captureStudySnapshot(now);
+      drawBiomeScreenFilter();
+      drawAnimeColorGrade();
+      drawTransition();
+      drawStudyCaptureOverlay(now);
+    }
 
     function drawTransition() {
       const elapsed = performance.now() - state.transitionStarted;
@@ -3490,7 +4340,9 @@
 
       renderPicker();
       renderBuildbar();
+      updateFullscreenButton();
       seedDemoFarm();
+      initRoamingNPCs();
       await setCurrent("fox");
       requestAnimationFrame(update);
 
@@ -3506,13 +4358,19 @@
       if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
       syncFullscreenClass();
     });
-    document.addEventListener("fullscreenchange", syncFullscreenClass);
+    document.addEventListener("fullscreenchange", () => {
+      if (!document.fullscreenElement) {
+        manualFullscreen = false;
+      }
+      syncFullscreenClass();
+    });
     addEventListener("keydown", e => setKey(e.key, true));
     addEventListener("keyup", e => setKey(e.key, false));
     buildbarClose.addEventListener("click", () => {
       setBuildUiOpen(false);
       state.demo = false;
     });
+    buildbarFullscreen.addEventListener("click", toggleFullscreenManual);
     buildbarRotate.addEventListener("click", rotateBuildItem);
     scene.addEventListener("pointermove", moveCanvasPointer);
     scene.addEventListener("pointerleave", () => {
@@ -3530,6 +4388,14 @@
       setZoom(state.zoom * Math.exp(-e.deltaY * zoomStep), e.clientX, e.clientY);
     }, { passive: false });
     scene.addEventListener("contextmenu", e => e.preventDefault());
+    barZoneTop.addEventListener("pointerdown", e => {
+      e.preventDefault();
+      toggleBuildUi();
+    });
+    barZoneBottom.addEventListener("pointerdown", e => {
+      e.preventDefault();
+      toggleBuildUi();
+    });
 
     start().catch(err => {
       hud.textContent = `Asset load failed: ${err.message}`;
