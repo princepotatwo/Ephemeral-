@@ -2022,17 +2022,6 @@
       ctx.imageSmoothingEnabled = false;
     }
 
-    function drawHitFlash(frame, x, y, shake, flashUntil) {
-      drawPlayerAt(frame, x, y, shake);
-      if (performance.now() >= flashUntil) return;
-      const { w, h } = playerDrawSize(frame);
-      ctx.save();
-      ctx.globalCompositeOperation = "source-atop";
-      ctx.fillStyle = "rgba(255, 40, 40, 0.42)";
-      ctx.fillRect(Math.round(x - w / 2 + shake), Math.round(y - h + 10), w, h);
-      ctx.restore();
-    }
-
     function drawEvaporatingNPC(frame, x, y, elapsed, shake = 0) {
       const { w, h } = playerDrawSize(frame);
       const p = Math.min(1, elapsed / NPC_EVAPORATE_MS);
@@ -2316,7 +2305,7 @@
           }
           actors.push({
             y: npc.y,
-            draw: () => drawHitFlash(npcFrameObj, npc.x, npc.y, shake, npc.hitFlashUntil)
+            draw: () => drawPlayerAt(npcFrameObj, npc.x, npc.y, shake)
           });
         }
         // Add pet slimes to the depth-sorted draw list
@@ -2337,7 +2326,7 @@
           actors.push({
             y: pet.y,
             draw: () => {
-              drawHitFlash(petFrameObj, pet.x, pet.y, shake, pet.hitFlashUntil);
+              drawPlayerAt(petFrameObj, pet.x, pet.y, shake);
               drawPetIndicator(pet, pet.x, pet.y);
             }
           });
@@ -3385,7 +3374,6 @@
     const NPC_RESPAWN_MS = 8000;
     const NPC_HIT_SHAKE_MS = 220;
     const NPC_EVAPORATE_MS = 400;
-    const HIT_FLASH_MS = 140;
 
     // ── Pet Slime System ─────────────────────────────────
     const PET_HP = 5; // pet health
@@ -3457,7 +3445,6 @@
         petDamage: stats.petDamage,
         hitStarted: 0,
         hitDir: 1,
-        hitFlashUntil: 0,
         aggroTarget: null,
         aggroUntil: 0,
         nextAttackAt: 0,
@@ -3589,7 +3576,6 @@
         attackUntil: 0,
         hitStarted: 0,
         hitDir: 1,
-        hitFlashUntil: 0,
         hearts: [], // heart particle effects
         loveBurst: now // tame heart burst timer
       };
@@ -3879,7 +3865,6 @@
       slime.hp = Math.max(0, slime.hp - (attacker?.attackDamage || PET_DAMAGE));
       slime.hitStarted = now;
       slime.hitDir = state.attackDir === "left" ? -1 : 1;
-      slime.hitFlashUntil = now + HIT_FLASH_MS;
       if (attacker && petSlimes.includes(attacker)) {
         slime.aggroTarget = attacker;
         slime.aggroUntil = now + NPC_AGGRO_MS;
@@ -3905,7 +3890,6 @@
       pet.hp = Math.max(0, pet.hp - (attacker?.attackDamage || NPC_ATTACK_DAMAGE));
       pet.hitStarted = now;
       pet.hitDir = attacker && attacker.x < pet.x ? 1 : -1;
-      pet.hitFlashUntil = now + HIT_FLASH_MS;
       if (pet.hp <= 0) {
         pet.dead = true;
         pet.deadAt = now;
