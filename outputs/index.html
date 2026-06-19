@@ -3400,17 +3400,22 @@
       { biomeId: "deepteal", center: startPositions.deep, bases: ["fox"], count: 4, spread: 760 }
     ];
     const WILD_NPC_STATS = {
-      green_slime: { petHp: 5, npcHp: 10, petDamage: 1, npcDamage: 2, speed: 56 },
-      blue_slime: { petHp: 5, npcHp: 10, petDamage: 1, npcDamage: 2, speed: 56 },
-      pink_slime: { petHp: 5, npcHp: 10, petDamage: 1, npcDamage: 2, speed: 56 },
-      doe: { petHp: 6, npcHp: 12, petDamage: 1, npcDamage: 2, speed: 58 },
-      squirle: { petHp: 4, npcHp: 8, petDamage: 1, npcDamage: 2, speed: 70 },
-      frog: { petHp: 4, npcHp: 8, petDamage: 1, npcDamage: 2, speed: 62 },
-      fox: { petHp: 5, npcHp: 10, petDamage: 1, npcDamage: 2, speed: 76 }
+      green_slime: { npcHp: 10, npcDamage: 2, speed: 56 },
+      blue_slime: { npcHp: 10, npcDamage: 2, speed: 56 },
+      pink_slime: { npcHp: 10, npcDamage: 2, speed: 56 },
+      doe: { npcHp: 20, npcDamage: 4, speed: 58 },
+      squirle: { npcHp: 14, npcDamage: 3, speed: 70 },
+      frog: { npcHp: 16, npcDamage: 3, speed: 62 },
+      fox: { npcHp: 18, npcDamage: 4, speed: 76 }
     };
 
     function wildNpcStats(base) {
-      return WILD_NPC_STATS[base] || { petHp: PET_HP, npcHp: NPC_HP, petDamage: PET_DAMAGE, npcDamage: NPC_ATTACK_DAMAGE, speed: NPC_MOVE_SPEED };
+      const stats = WILD_NPC_STATS[base] || { npcHp: NPC_HP, npcDamage: NPC_ATTACK_DAMAGE, speed: NPC_MOVE_SPEED };
+      return {
+        ...stats,
+        petHp: Math.max(1, Math.ceil(stats.npcHp / 2)),
+        petDamage: Math.max(1, stats.npcDamage / 2)
+      };
     }
 
     function randomNpcPoint(group) {
