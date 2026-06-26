@@ -3880,8 +3880,9 @@
       if (slime.hp > 0) return;
       slime.dead = true;
       slime.deadAt = now;
-      slime.playerKilled = attacker === state || attacker === null;
-      if (slime.playerKilled) {
+      slime.playerKilled = attacker === state || attacker === null || petSlimes.includes(attacker);
+      const isDirectPlayerKill = attacker === state || attacker === null;
+      if (isDirectPlayerKill) {
         state.blood += 2; // bonus for player kill
         updateCurrencyHud();
       } else {
