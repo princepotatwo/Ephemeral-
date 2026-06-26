@@ -2015,10 +2015,12 @@
       return { w, h };
     }
 
-    function drawPlayerAt(frame, x, y, shake = 0) {
+    function drawPlayerAt(frame, x, y, shake = 0, scaleFactor = 1) {
       const { w, h } = playerDrawSize(frame);
+      const drawW = Math.round(w * scaleFactor);
+      const drawH = Math.round(h * scaleFactor);
       ctx.imageSmoothingEnabled = Boolean(frame.smooth);
-      ctx.drawImage(frame.image, frame.sx, frame.sy, frame.sw, frame.sh, Math.round(x - w / 2 + shake), Math.round(y - h + 10), w, h);
+      ctx.drawImage(frame.image, frame.sx, frame.sy, frame.sw, frame.sh, Math.round(x - drawW / 2 + shake), Math.round(y - drawH + 10), drawW, drawH);
       ctx.imageSmoothingEnabled = false;
     }
 
@@ -2326,7 +2328,7 @@
           actors.push({
             y: pet.y,
             draw: () => {
-              drawPlayerAt(petFrameObj, pet.x, pet.y, shake);
+              drawPlayerAt(petFrameObj, pet.x, pet.y, shake, pet.scale || 1);
               drawPetIndicator(pet, pet.x, pet.y);
             }
           });
@@ -2871,7 +2873,10 @@
     function updateCurrencyHud() {
       if (currencyLogsEl) currencyLogsEl.textContent = state.logs;
       if (currencyBloodEl) currencyBloodEl.textContent = state.blood;
-      if (petCountEl) petCountEl.textContent = petSlimes.length;
+      const maxLevel = petSlimes.reduce((max, pet) => Math.max(max, pet.level || 1), 1);
+      if (petCountEl) {
+        petCountEl.textContent = petSlimes.length > 0 ? `${petSlimes.length} (Max Lv. ${maxLevel})` : "0";
+      }
       if (petHud) petHud.classList.toggle("show", petSlimes.length > 0 && state.buildUiOpen);
     }
 
@@ -3367,7 +3372,7 @@
     // ── Roaming NPCs (slimes) ────────────────────────────
     const NPC_MOVE_SPEED = 56; // 50% of player speed (112)
     const PET_DAMAGE = 1;
-    const NPC_HP = 10; // 2x pet HP
+    const NPC_HP = 50; // 5x bigger (was 10)
     const NPC_ATTACK_DAMAGE = 2; // 2x pet damage
     const NPC_ATTACK_MS = 800; // wild slime attack interval
     const NPC_AGGRO_MS = 4000; // how long wild slimes stay angry after being hit
@@ -3376,7 +3381,7 @@
     const NPC_EVAPORATE_MS = 400;
 
     // ── Pet Slime System ─────────────────────────────────
-    const PET_HP = 5; // pet health
+    const PET_HP = 25; // 5x bigger (was 5)
     const PET_PERSONALITIES = [
       { name: "eager", followDist: 35, speedMult: 1.3, wanderChance: 0.08, hopChance: 0.15, label: "Eager" },
       { name: "lazy", followDist: 80, speedMult: 0.7, wanderChance: 0.04, hopChance: 0.05, label: "Lazy" },
@@ -3400,13 +3405,13 @@
       { biomeId: "deepteal", center: startPositions.deep, bases: ["fox"], count: 4, spread: 760 }
     ];
     const WILD_NPC_STATS = {
-      green_slime: { npcHp: 10, npcDamage: 2, speed: 56 },
-      blue_slime: { npcHp: 10, npcDamage: 2, speed: 56 },
-      pink_slime: { npcHp: 10, npcDamage: 2, speed: 56 },
-      doe: { npcHp: 20, npcDamage: 4, speed: 58 },
-      squirle: { npcHp: 14, npcDamage: 3, speed: 70 },
-      frog: { npcHp: 16, npcDamage: 3, speed: 62 },
-      fox: { npcHp: 18, npcDamage: 4, speed: 76 }
+      green_slime: { npcHp: 50, npcDamage: 2, speed: 56 },
+      blue_slime: { npcHp: 50, npcDamage: 2, speed: 56 },
+      pink_slime: { npcHp: 50, npcDamage: 2, speed: 56 },
+      doe: { npcHp: 100, npcDamage: 4, speed: 58 },
+      squirle: { npcHp: 70, npcDamage: 3, speed: 70 },
+      frog: { npcHp: 80, npcDamage: 3, speed: 62 },
+      fox: { npcHp: 90, npcDamage: 4, speed: 76 }
     };
 
     function wildNpcStats(base) {
@@ -3484,10 +3489,33 @@
             // Still evaporating, keep in array for drawing
             continue;
           }
-          // Evaporate finished - convert to pet if player killed it
+          // Evaporate finished - convert to pet if player's side killed it (with 20% gacha chance)
           if (npc.playerKilled) {
-            convertSlimeToPet(npc, now);
+            const roll = Math.random();
+            if (roll < 0.20) {
+              // 20% chance: tame!
+              convertSlimeToPet(npc, now);
+            } else {
+              // 80% chance: XP!
+              const xpAmount = Math.max(5, Math.floor(npc.maxHp / 5));
+              const killer = npc.killer;
+              if (killer && petSlimes.includes(killer)) {
+                awardPetXp(killer, xpAmount, now);
+              } else {
+                // Player kill: distribute to all active pets
+                for (const pet of petSlimes) {
+                  awardPetXp(pet, xpAmount, now);
+                }
+              }
+            }
           }
+          
+          // Always queue a delayed respawn for the wild NPC to keep the world populated
+          const biomeId = npc.biomeId || "safe";
+          setTimeout(() => {
+            spawnNewWildSlime(biomeId);
+          }, NPC_RESPAWN_MS + Math.random() * 4000); // 8-12 seconds delay
+
           roamingNPCs.splice(i, 1);
           continue;
         }
@@ -3582,7 +3610,10 @@
         hitStarted: 0,
         hitDir: 1,
         hearts: [], // heart particle effects
-        loveBurst: now // tame heart burst timer
+        loveBurst: now, // tame heart burst timer
+        level: 1,
+        xp: 0,
+        scale: 1.0
       };
       // spawn heart burst
       for (let i = 0; i < PET_TAME_HEART_COUNT; i++) {
@@ -3597,8 +3628,40 @@
       petSlimes.push(pet);
       state.blood += 2;
       updateCurrencyHud();
-      // spawn a new wild NPC in the same biome to replace the tamed one
-      spawnNewWildSlime(slime.biomeId || "safe");
+    }
+
+    function awardPetXp(pet, amount, now) {
+      if (!pet.level) pet.level = 1;
+      if (!pet.xp) pet.xp = 0;
+      pet.xp += amount;
+      
+      let leveledUp = false;
+      while (pet.xp >= pet.level * 100) {
+        pet.xp -= pet.level * 100;
+        pet.level += 1;
+        leveledUp = true;
+        
+        // Increase stats
+        pet.maxHp = Math.round(pet.maxHp * 1.25); // +25% max HP per level
+        pet.hp = pet.maxHp; // Heal to full
+        pet.attackDamage = Math.round(pet.attackDamage * 1.2); // +20% damage per level
+        pet.scale = 1 + (pet.level - 1) * 0.15; // 15% larger per level
+      }
+      
+      if (leveledUp) {
+        // Show excited particles / visual feedback for leveling up
+        pet.brainState = "excited";
+        pet.brainUntil = now + 1500; // Be excited for 1.5s
+        for (let i = 0; i < 15; i++) {
+          pet.hearts.push({
+            x: 0, y: 0,
+            vx: (Math.random() - 0.5) * 45,
+            vy: -Math.random() * 30 - 15,
+            born: now,
+            life: 800 + Math.random() * 400
+          });
+        }
+      }
     }
 
     function spawnNewWildSlime(biomeId = "safe") {
@@ -3811,8 +3874,25 @@
     }
 
     function drawPetIndicator(pet, x, y) {
-      // draw floating hearts above pet
       const now = performance.now();
+      const scale = pet.scale || 1;
+      
+      // Level indicator
+      const level = pet.level || 1;
+      ctx.save();
+      ctx.fillStyle = "#ffffff";
+      ctx.strokeStyle = "#2f2a24";
+      ctx.lineWidth = 2;
+      ctx.font = "800 8px system-ui, sans-serif";
+      ctx.textAlign = "center";
+      const txt = `Lv.${level}`;
+      const lx = Math.round(x);
+      const ly = Math.round(y - 26 * scale);
+      ctx.strokeText(txt, lx, ly);
+      ctx.fillText(txt, lx, ly);
+      ctx.restore();
+
+      // draw floating hearts above pet
       for (const h of pet.hearts) {
         const age = now - h.born;
         if (age < 0 || age > h.life) continue;
@@ -3821,7 +3901,7 @@
         ctx.globalAlpha = alpha * 0.85;
         ctx.fillStyle = "#ff8eb7";
         ctx.font = "700 10px system-ui, sans-serif";
-        ctx.fillText("♥", Math.round(x + h.x), Math.round(y - 36 + h.y));
+        ctx.fillText("♥", Math.round(x + h.x), Math.round(y - 36 * scale + h.y));
         ctx.restore();
       }
       // small heart badge above head
@@ -3831,7 +3911,7 @@
         ctx.globalAlpha = 0.7;
         ctx.fillStyle = "#ff8eb7";
         ctx.font = `700 ${Math.round(10 * pulse)}px system-ui, sans-serif`;
-        ctx.fillText("♥", Math.round(x - 4), Math.round(y - 38));
+        ctx.fillText("♥", Math.round(x - 4), Math.round(y - 38 * scale));
         ctx.restore();
       }
       // "!" attack trigger indicator
@@ -3843,7 +3923,7 @@
         ctx.globalAlpha = alpha;
         ctx.fillStyle = "#ffee55";
         ctx.font = "700 14px system-ui, sans-serif";
-        ctx.fillText("!", Math.round(x - 3), Math.round(y - 44 + bounce));
+        ctx.fillText("!", Math.round(x - 3), Math.round(y - 44 * scale + bounce));
         ctx.restore();
       }
     }
@@ -3866,6 +3946,7 @@
     }
 
     function damageSlime(slime, attacker = null) {
+      if (slime.dead || slime.hp <= 0) return;
       const now = performance.now();
       slime.hp = Math.max(0, slime.hp - (attacker?.attackDamage || PET_DAMAGE));
       slime.hitStarted = now;
@@ -3880,6 +3961,22 @@
       if (slime.hp > 0) return;
       slime.dead = true;
       slime.deadAt = now;
+      slime.killer = attacker;
+      
+      // Heal pet to full and spawn hearts when it kills an NPC!
+      if (attacker && petSlimes.includes(attacker)) {
+        attacker.hp = attacker.maxHp;
+        for (let j = 0; j < 6; j++) {
+          attacker.hearts.push({
+            x: 0, y: 0,
+            vx: (Math.random() - 0.5) * 20,
+            vy: -Math.random() * 12 - 6,
+            born: now,
+            life: 600 + Math.random() * 400
+          });
+        }
+      }
+
       slime.playerKilled = attacker === state || attacker === null || petSlimes.includes(attacker);
       const isDirectPlayerKill = attacker === state || attacker === null;
       if (isDirectPlayerKill) {
