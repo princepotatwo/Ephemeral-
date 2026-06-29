@@ -4528,6 +4528,66 @@
         drawAnimatedShoreline();
         drawFarmPatch();
         drawDepthSortedActors();
+        
+        // Night shadow overlay & Pixel-Art Dithered Flashlight (world space)
+        if (state.timeOfDay === "night") {
+          ctx.save();
+          const pad = 100;
+          const w = viewWorldW() + pad * 2;
+          const h = viewWorldH() + pad * 2;
+          
+          // Draw solid dark night overlay (90% opacity for intense retro feel)
+          ctx.fillStyle = "rgba(4, 4, 15, 0.90)";
+          ctx.fillRect(state.cameraX - pad, state.cameraY - pad, w, h);
+          
+          // Set composite operation to clear the darkness dither-style
+          ctx.globalCompositeOperation = "destination-out";
+          const cx = state.x;
+          const cy = state.y - 10;
+          
+          // 1. Outer ring: clears 25% (leaves 75% darkness)
+          if (ditherPatterns.d25) {
+            ctx.fillStyle = ditherPatterns.d25;
+            ctx.beginPath();
+            ctx.arc(cx, cy, 114, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          
+          // 2. Middle-outer ring: clears 50% (leaves 50% darkness)
+          if (ditherPatterns.d50) {
+            ctx.fillStyle = ditherPatterns.d50;
+            ctx.beginPath();
+            ctx.arc(cx, cy, 96, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          
+          // 3. Middle-inner ring: clears 75% (leaves 25% darkness)
+          if (ditherPatterns.d75) {
+            ctx.fillStyle = ditherPatterns.d75;
+            ctx.beginPath();
+            ctx.arc(cx, cy, 78, 0, Math.PI * 2);
+            ctx.fill();
+          }
+          
+          // 4. Innermost core: clears 100% (fully lit)
+          ctx.fillStyle = "#000000";
+          ctx.beginPath();
+          ctx.arc(cx, cy, 56, 0, Math.PI * 2);
+          ctx.fill();
+          
+          // Restore composite operation to draw a warm yellow retro ambient glow
+          ctx.globalCompositeOperation = "source-over";
+          const yellowGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, 114);
+          yellowGrad.addColorStop(0, "rgba(255, 230, 110, 0.22)");
+          yellowGrad.addColorStop(0.5, "rgba(255, 215, 80, 0.09)");
+          yellowGrad.addColorStop(1.0, "rgba(255, 215, 80, 0.0)");
+          ctx.fillStyle = yellowGrad;
+          ctx.beginPath();
+          ctx.arc(cx, cy, 114, 0, Math.PI * 2);
+          ctx.fill();
+          
+          ctx.restore();
+        }
         drawBuildGhost();
       }
       ctx.restore();
@@ -4614,7 +4674,50 @@
       ctx.restore();
     }
 
+    const ditherPatterns = {};
+    function initDitherPatterns() {
+      const createPatternCanvas = (pixels) => {
+        const canvas = document.createElement("canvas");
+        canvas.width = 4;
+        canvas.height = 4;
+        const pCtx = canvas.getContext("2d");
+        const imgData = pCtx.createImageData(4, 4);
+        for (let i = 0; i < 16; i++) {
+          const val = pixels[i] ? 255 : 0;
+          const idx = i * 4;
+          imgData.data[idx] = 0;
+          imgData.data[idx+1] = 0;
+          imgData.data[idx+2] = 0;
+          imgData.data[idx+3] = val;
+        }
+        pCtx.putImageData(imgData, 0, 0);
+        return ctx.createPattern(canvas, "repeat");
+      };
+      
+      ditherPatterns.d25 = createPatternCanvas([
+        1, 0, 0, 0,
+        0, 0, 1, 0,
+        0, 1, 0, 0,
+        0, 0, 0, 1
+      ]);
+      
+      ditherPatterns.d50 = createPatternCanvas([
+        1, 0, 1, 0,
+        0, 1, 0, 1,
+        1, 0, 1, 0,
+        0, 1, 0, 1
+      ]);
+      
+      ditherPatterns.d75 = createPatternCanvas([
+        1, 1, 0, 1,
+        0, 1, 1, 1,
+        1, 0, 1, 1,
+        1, 1, 1, 0
+      ]);
+    }
+
     async function start() {
+      initDitherPatterns();
       resizeSceneCanvas();
 
       const loadingScreen = document.getElementById("loading-screen");
