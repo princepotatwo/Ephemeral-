@@ -1413,7 +1413,7 @@
       moveStarted: 0,
       wasMoving: false,
       timeOfDay: "day",
-      timeRemaining: 60,
+      timeRemaining: 5,
       announcement: "",
       announcementTyped: "",
       announcementStart: 0,
@@ -4583,33 +4583,18 @@
       // Draw Day/Night HUD
       if (state.scene === "outside") {
         ctx.save();
-        ctx.textAlign = "center";
-        ctx.textBaseline = "middle";
-        ctx.font = "bold 13px 'Courier New', Courier, monospace";
+        ctx.textAlign = "right";
+        ctx.textBaseline = "alphabetic";
+        ctx.font = "11px 'Courier New', Courier, monospace";
         
         const isNight = state.timeOfDay === "night";
         const icon = isNight ? "🌙" : "☀️";
         const phaseLabel = isNight ? "NIGHT" : "DAY";
         const secs = Math.ceil(state.timeRemaining);
-        const hudText = `${icon} ${phaseLabel}: ${secs}s`;
+        const hudText = `${icon} ${phaseLabel}: ${secs}S`;
         
-        const hudX = VIEW_W / 2;
-        const hudY = 20;
-        
-        const metrics = ctx.measureText(hudText);
-        const boxW = metrics.width + 24;
-        const boxH = 26;
-        
-        ctx.fillStyle = "rgba(10, 10, 16, 0.85)";
-        ctx.strokeStyle = isNight ? "rgba(100, 100, 255, 0.5)" : "rgba(255, 200, 50, 0.5)";
-        ctx.lineWidth = 1.5;
-        
-        roundedRectPath(hudX - boxW / 2, hudY - boxH / 2, boxW, boxH, 6);
-        ctx.fill();
-        ctx.stroke();
-        
-        ctx.fillStyle = isNight ? "#a0b0ff" : "#ffd060";
-        ctx.fillText(hudText, hudX, hudY);
+        ctx.fillStyle = "#ffffff";
+        ctx.fillText(hudText, VIEW_W - 16, VIEW_H - 64);
         ctx.restore();
       }
       
