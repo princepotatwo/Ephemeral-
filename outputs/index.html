@@ -4529,7 +4529,7 @@
         drawFarmPatch();
         drawDepthSortedActors();
         
-        // Night shadow overlay & Flashlight (world space, using evenodd mask)
+        // Night shadow overlay & Soft Radial Flashlight (world space)
         if (state.timeOfDay === "night") {
           ctx.save();
           const pad = 100;
@@ -4538,53 +4538,27 @@
           
           const cx = state.x;
           const cy = state.y - 12;
-          const lightRadius = 90;
+          const outerRadius = 220;
           
-          // Draw night shadow mask with an organic wobbly hole using the evenodd fill rule
-          ctx.beginPath();
-          ctx.rect(state.cameraX - pad, state.cameraY - pad, w, h);
+          // Draw smooth dark night vignette centered on the player
+          const nightGrad = ctx.createRadialGradient(cx, cy, 35, cx, cy, outerRadius);
+          nightGrad.addColorStop(0, "rgba(3, 3, 12, 0.0)");       // fully clear around player
+          nightGrad.addColorStop(0.35, "rgba(3, 3, 12, 0.45)");   // soft shadow starts
+          nightGrad.addColorStop(0.75, "rgba(3, 3, 12, 0.88)");   // deep shadow
+          nightGrad.addColorStop(1.0, "rgba(3, 3, 12, 0.96)");    // dark at screen edges
           
-          // Draw wobbly counter-clockwise circle for organic light emission
-          const steps = 36;
-          for (let i = steps; i >= 0; i--) {
-            const angle = (i / steps) * Math.PI * 2;
-            const wobble = Math.sin(angle * 6 + performance.now() * 0.004) * 4.5 + Math.cos(angle * 3) * 2;
-            const r = lightRadius + wobble;
-            const px = cx + r * Math.cos(angle);
-            const py = cy + r * Math.sin(angle);
-            if (i === steps) {
-              ctx.moveTo(px, py);
-            } else {
-              ctx.lineTo(px, py);
-            }
-          }
-          ctx.closePath();
+          ctx.fillStyle = nightGrad;
+          ctx.fillRect(state.cameraX - pad, state.cameraY - pad, w, h);
           
-          ctx.fillStyle = "rgba(2, 2, 7, 0.96)"; // 2x darker night overlay (96% opacity)
-          ctx.fill("evenodd");
-          
-          // Draw warm yellowish flashlight overlay gradient inside the cleared circle
-          const yellowGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, lightRadius);
-          yellowGrad.addColorStop(0, "rgba(235, 185, 45, 0.44)"); // richer, darker yellow
-          yellowGrad.addColorStop(0.5, "rgba(200, 150, 30, 0.20)");
-          yellowGrad.addColorStop(1.0, "rgba(200, 150, 30, 0.0)");
+          // Draw warm yellowish soft spotlight gradient on top
+          const yellowGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, outerRadius * 0.8);
+          yellowGrad.addColorStop(0, "rgba(255, 220, 80, 0.26)");   // warm core glow
+          yellowGrad.addColorStop(0.4, "rgba(255, 190, 50, 0.09)");  // fading midglow
+          yellowGrad.addColorStop(1.0, "rgba(255, 190, 50, 0.0)");
           
           ctx.fillStyle = yellowGrad;
           ctx.beginPath();
-          // Draw matching wobbly circle for the yellow flashlight filter too!
-          for (let i = 0; i <= steps; i++) {
-            const angle = (i / steps) * Math.PI * 2;
-            const wobble = Math.sin(angle * 6 + performance.now() * 0.004) * 4.5 + Math.cos(angle * 3) * 2;
-            const r = lightRadius + wobble;
-            const px = cx + r * Math.cos(angle);
-            const py = cy + r * Math.sin(angle);
-            if (i === 0) {
-              ctx.moveTo(px, py);
-            } else {
-              ctx.lineTo(px, py);
-            }
-          }
-          ctx.closePath();
+          ctx.arc(cx, cy, outerRadius * 0.8, 0, Math.PI * 2);
           ctx.fill();
           
           ctx.restore();
