@@ -4527,19 +4527,20 @@
         drawAnimatedWater();
         drawAnimatedShoreline();
         drawFarmPatch();
+        drawDepthSortedActors();
         
-        // Night shadow overlay & Flashlight (world space, behind actors)
+        // Night shadow overlay & Flashlight (world space, on top of actors)
         if (state.timeOfDay === "night") {
           ctx.save();
           const pad = 100;
           const w = viewWorldW() + pad * 2;
           const h = viewWorldH() + pad * 2;
           
-          // Beautiful dark navy overlay with high visibility (68% opacity)
-          ctx.fillStyle = "rgba(6, 6, 22, 0.68)";
+          // Realistic dark night overlay (86% opacity)
+          ctx.fillStyle = "rgba(4, 4, 14, 0.86)";
           ctx.fillRect(state.cameraX - pad, state.cameraY - pad, w, h);
           
-          // Flashlight cutout (clears overlay under the character)
+          // Flashlight cutout (clears overlay under/around the character)
           const lightRadius = 90; // smaller, clean radius
           const grad = ctx.createRadialGradient(state.x, state.y - 10, 5, state.x, state.y - 10, lightRadius);
           grad.addColorStop(0, "rgba(0, 0, 0, 1.0)");
@@ -4552,11 +4553,11 @@
           ctx.arc(state.x, state.y - 10, lightRadius, 0, Math.PI * 2);
           ctx.fill();
           
-          // Warm yellowish soft spotlight halo on the ground (behind the character sprite)
+          // Warm yellowish soft spotlight halo on top of the cleared area
           ctx.globalCompositeOperation = "source-over";
           const yellowGrad = ctx.createRadialGradient(state.x, state.y - 10, 0, state.x, state.y - 10, lightRadius);
-          yellowGrad.addColorStop(0, "rgba(255, 230, 110, 0.26)");
-          yellowGrad.addColorStop(0.45, "rgba(255, 215, 80, 0.12)");
+          yellowGrad.addColorStop(0, "rgba(255, 230, 110, 0.22)");
+          yellowGrad.addColorStop(0.45, "rgba(255, 215, 80, 0.10)");
           yellowGrad.addColorStop(1.0, "rgba(255, 215, 80, 0.0)");
           
           ctx.fillStyle = yellowGrad;
@@ -4567,7 +4568,6 @@
           ctx.restore();
         }
         
-        drawDepthSortedActors();
         drawBuildGhost();
       }
       ctx.restore();
