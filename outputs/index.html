@@ -3415,18 +3415,31 @@
             const nextX = tree.x + stepX;
             const nextY = tree.y + stepY;
             
-            const obstacle = findTreeObstacle(nextX, nextY, tree);
-            if (obstacle) {
+            const obstacleX = findTreeObstacle(nextX, tree.y, tree);
+            const obstacleY = findTreeObstacle(tree.x, nextY, tree);
+            const obstacleBoth = findTreeObstacle(nextX, nextY, tree);
+            
+            const mainObstacle = obstacleBoth || obstacleX || obstacleY;
+            if (mainObstacle) {
               tree.isAttacking = true;
               tree.pauseUntil = now + 1400;
-              damageBuilding(obstacle, 1);
+              damageBuilding(mainObstacle, 1);
               const screenDist = Math.hypot(tree.x - state.x, tree.y - state.y);
               if (screenDist < 250) {
                 state.screenShakeUntil = now + 250;
               }
-            } else {
+            }
+            
+            let moved = false;
+            if (!obstacleX) {
               tree.x = nextX;
+              moved = true;
+            }
+            if (!obstacleY) {
               tree.y = nextY;
+              moved = true;
+            }
+            if (moved) {
               isMoving = true;
             }
           }
@@ -3976,12 +3989,31 @@
       }
     }
 
-    function spawnNewWildSlime(biomeId = "safe") {
-      const group = WILD_NPC_BIOMES.find(entry => entry.biomeId === biomeId) || WILD_NPC_BIOMES[0];
-      spawnWildNpcForGroup(group);
+    function findPetObstacle(x, y, pet) {
+      const feet = { x: x - 6, y: y - 5, w: 12, h: 7 };
+      return activeSprites().find(sprite => {
+        if (sprite === pet || sprite.tree || !sprite.solid) return false;
+        if (sprite.destroyed || sprite.dead) return false;
+        const solid = solidRectFor(sprite);
+        if (!solid) return false;
+        return aabb(feet.x, feet.y, feet.w, feet.h, solid.x, solid.y, solid.w, solid.h);
+      });
+    }
+
+    function movePetSlime(pet, stepX, stepY) {
+      const nextX = pet.x + stepX;
+      const nextY = pet.y + stepY;
+      if (!findPetObstacle(nextX, pet.y, pet)) {
+        pet.x = nextX;
+      }
+      if (!findPetObstacle(pet.x, nextY, pet)) {
+        pet.y = nextY;
+      }
     }
 
     function updatePetSlimes(now, dt) {
+      const isNight = state.timeOfDay === "night";
+      
       for (let i = petSlimes.length - 1; i >= 0; i--) {
         const pet = petSlimes[i];
         if (pet.hp <= 0 || pet.dead) {
@@ -3990,14 +4022,12 @@
           continue;
         }
         pet.t += dt;
-        // update heart particles
         pet.hearts = pet.hearts.filter(h => now - h.born < h.life);
         for (const h of pet.hearts) {
           h.x += h.vx * dt;
           h.y += h.vy * dt;
-          h.vy += 20 * dt; // gravity
+          h.vy += 20 * dt;
         }
-        // random excited heart puff
         if (pet.brainState === "excited" && Math.random() < 0.15) {
           pet.hearts.push({
             x: 0, y: -pet.y * 0.02,
@@ -4007,60 +4037,52 @@
             life: 400 + Math.random() * 300
           });
         }
-        // brain state machine
         if (now >= pet.brainUntil) {
           decidePetBrain(pet, now);
         }
-        const speed = PET_MOVE_SPEED_BASE;
+        
+        // Match player pacing at night (or catch up fast)
+        let speed = PET_MOVE_SPEED_BASE;
+        if (isNight) {
+          const playerDist = Math.hypot(state.x - pet.x, state.y - pet.y);
+          if (playerDist > 55) {
+            speed = MOVE_SPEED * 1.55;
+          } else {
+            speed = MOVE_SPEED;
+          }
+        }
+        
         const dx = pet.targetX - pet.x;
         const dy = pet.targetY - pet.y;
         const dist = Math.hypot(dx, dy);
+        
         if (pet.brainState === "attack" && pet.petTarget) {
           const target = pet.petTarget;
-          // Check if target is dead or too far FROM THE PET (not player)
           const targetDead = target.destroyed || target.dead || false;
           const targetFar = Math.hypot(target.x - pet.x, target.y - pet.y) > 350;
           if (targetDead || targetFar) {
-            // Target gone, go back to follow immediately
             pet.petTarget = null;
             pet.brainState = "follow";
             pet.brainUntil = now + 200;
             pet.mode = "idle";
           } else {
-            // Keep chasing the live target
             const tdx = target.x - pet.x;
             const tdy = target.y - pet.y;
             const tdist = Math.hypot(tdx, tdy);
             if (tdist > 30) {
-              // Not close enough, run toward target
-              pet.x += (tdx / tdist) * speed * 1.4 * dt;
-              pet.y += (tdy / tdist) * speed * 1.4 * dt;
+              movePetSlime(pet, (tdx / tdist) * speed * 1.4 * dt, (tdy / tdist) * speed * 1.4 * dt);
               pet.mode = "run";
             } else {
-              // Close enough, attack!
-              // But first check if target is still valid
-              const targetStillAlive = !target.destroyed && !target.dead;
-              if (!targetStillAlive) {
-                // Target died just as we arrived, abort
-                pet.petTarget = null;
-                pet.brainState = "follow";
-                pet.brainUntil = now + 200;
-                pet.mode = "idle";
-              } else {
-                pet.mode = "attack";
-                // Deal damage once per attack cycle (at the start of the attack)
-                const attackElapsed = now - pet.attackStarted;
-                if (attackElapsed < 50) {
-                  // Just started attacking, deal damage
-                  if (target.tree && !target.destroyed) {
-                    damageTree(target);
-                  } else if (target.hp !== undefined && !target.dead) {
-                    damageSlime(target, pet);
-                  }
-                  // Hit visual feedback
-                  pet.hitStarted = now;
-                  pet.hitDir = pet.dir === "left" ? -1 : 1;
+              pet.mode = "attack";
+              const attackElapsed = now - pet.attackStarted;
+              if (attackElapsed < 50) {
+                if (target.tree && !target.destroyed) {
+                  damageTree(target, pet);
+                } else if (target.hp !== undefined && !target.dead) {
+                  damageSlime(target, pet);
                 }
+                pet.hitStarted = now;
+                pet.hitDir = pet.dir === "left" ? -1 : 1;
               }
             }
             if (Math.abs(tdx) > Math.abs(tdy)) {
@@ -4068,7 +4090,6 @@
             } else {
               pet.dir = tdy > 0 ? "front" : "back";
             }
-            // When attack animation ends, re-trigger if target still alive
             if (now >= pet.attackUntil) {
               if (!targetDead && !targetFar) {
                 pet.attackStarted = now;
@@ -4085,8 +4106,7 @@
         } else if (pet.brainState === "hop") {
           pet.mode = "run";
           if (dist > 5) {
-            pet.x += (dx / dist) * speed * 1.6 * dt;
-            pet.y += (dy / dist) * speed * 1.6 * dt;
+            movePetSlime(pet, (dx / dist) * speed * 1.6 * dt, (dy / dist) * speed * 1.6 * dt);
           }
           if (now >= pet.brainUntil) {
             decidePetBrain(pet, now);
@@ -4094,8 +4114,7 @@
         } else if (pet.brainState === "follow" || pet.brainState === "tame") {
           pet.mode = dist > 20 ? "run" : "idle";
           if (dist > 5) {
-            pet.x += (dx / dist) * speed * dt;
-            pet.y += (dy / dist) * speed * dt;
+            movePetSlime(pet, (dx / dist) * speed * dt, (dy / dist) * speed * dt);
           }
           if (Math.abs(dx) > Math.abs(dy)) {
             pet.dir = dx > 0 ? "right" : "left";
@@ -4105,8 +4124,7 @@
         } else if (pet.brainState === "wander") {
           pet.mode = dist > 15 ? "run" : "idle";
           if (dist > 5) {
-            pet.x += (dx / dist) * speed * 0.7 * dt;
-            pet.y += (dy / dist) * speed * 0.7 * dt;
+            movePetSlime(pet, (dx / dist) * speed * 0.7 * dt, (dy / dist) * speed * 0.7 * dt);
           }
           if (now >= pet.brainUntil) {
             decidePetBrain(pet, now);
@@ -4117,7 +4135,6 @@
             decidePetBrain(pet, now);
           }
         }
-        // keep in world bounds
         pet.x = Math.max(40, Math.min(WORLD_W - 40, pet.x));
         pet.y = Math.max(40, Math.min(WORLD_H - 40, pet.y));
       }
