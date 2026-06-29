@@ -3157,11 +3157,11 @@
         .filter(entry => aabb(hit.x, hit.y, hit.w, hit.h, entry.rect.x, entry.rect.y, entry.rect.w, entry.rect.h))
         .sort((a, b) => a.dist - b.dist)[0]?.tree;
       if (!target) return null;
-      damageTree(target);
+      damageTree(target, state);
       return target;
     }
 
-    function damageTree(tree) {
+    function damageTree(tree, attacker = null) {
       const now = performance.now();
       if (!tree.maxHp) tree.maxHp = treeMaxHp(tree.treeType || "sprout", tree.w, tree.h, hash01(tree.x, tree.y, 48));
       tree.hp = Math.max(0, (tree.hp ?? tree.maxHp) - 1);
@@ -3169,6 +3169,14 @@
       tree.hitDir = state.attackDir === "left" ? -1 : 1;
       state.treeHits += 1;
       state.lastTreeHit = `${tree.name}:${tree.hp}/${tree.maxHp}`;
+      
+      // Update tree combat target based on last attacker
+      if (attacker && attacker !== state) {
+        tree.combatTarget = attacker;
+      } else {
+        tree.combatTarget = "player";
+      }
+      
       if (tree.hp > 0) return;
       tree.destroyed = true;
       tree.respawnAt = now + (tree.respawnMs || TREE_RESPAWN_MS) + hash01(tree.x, tree.y, 49) * TREE_RESPAWN_JITTER_MS;
@@ -3265,7 +3273,7 @@
       }
     }
 
-    function triggerScaryHit(dx, dy) {
+    function triggerScaryHit(dx, dy, tree = null) {
       const now = performance.now();
       state.screenShakeUntil = now + 450;
       state.screenFlashRedUntil = now + 180;
@@ -3291,6 +3299,11 @@
       const shout = shouts[Math.floor(Math.random() * shouts.length)];
       state.dialogueCooldownUntil = 0;
       sayDialogue(shout, 10, 1600);
+      
+      // Retaliate with pets
+      if (tree) {
+        triggerPetAttacks(tree);
+      }
     }
 
     function updateMovingTrees(now, dt) {
@@ -3300,6 +3313,7 @@
       if (!isNight) {
         for (const tree of allTreeSprites()) {
           tree.isAttacking = false;
+          tree.combatTarget = null;
         }
         return;
       }
@@ -3308,29 +3322,48 @@
       for (const tree of allTreeSprites()) {
         if (tree.destroyed) {
           tree.isAttacking = false;
+          tree.combatTarget = null;
           continue;
         }
-        const dist = Math.hypot(tree.x - state.x, tree.y - state.y);
+        
+        let targetX = state.x;
+        let targetY = state.y;
+        
+        if (!tree.combatTarget) {
+          tree.combatTarget = "player";
+        }
+        
+        if (tree.combatTarget !== "player") {
+          const pet = tree.combatTarget;
+          if (pet && petSlimes.includes(pet) && !pet.destroyed && !pet.dead) {
+            targetX = pet.x;
+            targetY = pet.y;
+          } else {
+            tree.combatTarget = "player";
+          }
+        }
+        
+        const dist = Math.hypot(tree.x - targetX, tree.y - targetY);
         if (dist > 350) {
           tree.isAttacking = false;
         }
         if (dist < 280) {
-          candidates.push({ tree, dist });
+          candidates.push({ tree, dist, targetX, targetY, combatTarget: tree.combatTarget });
         } else if (tree.isAttacking) {
-          candidates.push({ tree, dist });
+          candidates.push({ tree, dist, targetX, targetY, combatTarget: tree.combatTarget });
         }
       }
       
       candidates.sort((a, b) => a.dist - b.dist);
       
       for (let i = 0; i < candidates.length; i++) {
-        const { tree, dist } = candidates[i];
+        const { tree, dist, targetX, targetY, combatTarget } = candidates[i];
         if (i === 0) {
           tree.isAttacking = true;
           if (tree.pauseUntil && now < tree.pauseUntil) continue;
           
-          const dx = state.x - tree.x;
-          const dy = state.y - tree.y;
+          const dx = targetX - tree.x;
+          const dy = targetY - tree.y;
           
           if (dist > 18) {
             const speed = 12;
@@ -3340,7 +3373,11 @@
           
           if (dist < 38) {
             tree.pauseUntil = now + 1600;
-            triggerScaryHit(dx, dy);
+            if (combatTarget === "player") {
+              triggerScaryHit(dx, dy, tree);
+            } else {
+              damagePetSlime(combatTarget, tree);
+            }
           }
         } else {
           tree.isAttacking = false;
@@ -4187,6 +4224,16 @@
       pet.brainState = "excited";
       pet.brainUntil = now + 220;
       pet.mode = "attack";
+      
+      // Auto-retaliate against trees
+      if (attacker && attacker.tree && !attacker.destroyed) {
+        pet.petTarget = attacker;
+        pet.brainState = "attack";
+        pet.brainUntil = now + PET_ATTACK_MS;
+        pet.attackStarted = now;
+        pet.attackUntil = now + PET_ATTACK_MS;
+        pet.bangUntil = now + 700;
+      }
     }
 
     function setKey(key, on) {
@@ -4538,10 +4585,10 @@
           
           const cx = state.x;
           const cy = state.y - 12;
-          const outerRadius = 220;
+          const outerRadius = 110;
           
           // Draw smooth dark night vignette centered on the player
-          const nightGrad = ctx.createRadialGradient(cx, cy, 35, cx, cy, outerRadius);
+          const nightGrad = ctx.createRadialGradient(cx, cy, 18, cx, cy, outerRadius);
           nightGrad.addColorStop(0, "rgba(3, 3, 12, 0.0)");       // fully clear around player
           nightGrad.addColorStop(0.35, "rgba(3, 3, 12, 0.45)");   // soft shadow starts
           nightGrad.addColorStop(0.75, "rgba(3, 3, 12, 0.88)");   // deep shadow
