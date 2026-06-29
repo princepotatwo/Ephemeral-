@@ -2512,6 +2512,11 @@
     function updateStudyCapture(now) {
       const study = state.studyCapture;
       const currentBiomeId = state.scene === "outside" ? biomeAt(state.x, state.y).id : "";
+      
+      const isNearNight = state.timeOfDay === "day" && state.timeRemaining <= 10;
+      const isNight = state.timeOfDay === "night";
+      const isLocked = isNearNight || isNight;
+      
       if (state.scene !== "outside") {
         if (study.phase !== "idle") {
           study.phase = "idle";
@@ -2524,9 +2529,22 @@
         study.lastBiomeId = currentBiomeId;
         return;
       }
+      
       if (currentBiomeId && currentBiomeId !== study.lastBiomeId) {
         study.lastBiomeId = currentBiomeId;
         study.pendingBiomeId = currentBiomeId;
+      }
+      
+      if (isLocked) {
+        if (study.phase !== "idle") {
+          study.phase = "idle";
+          study.candidates = [];
+          study.target = null;
+          study.images = [];
+          study.scanIndex = 0;
+        }
+        study.pendingBiomeId = ""; // Discard pending biome entries during lock
+        return;
       }
       if (study.phase === "idle") {
         if (!study.pendingBiomeId || now < study.nextAt) return;
