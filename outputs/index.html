@@ -626,7 +626,9 @@
       ["rgs_base_square", "RGS Base Square"],
       ["rgs_hero_square", "RGS Hero Square"],
       ["rgs_skeleton_square", "RGS Skeleton Square"],
-      ["rgs_monster_square", "RGS Monster Square"]
+      ["rgs_monster_square", "RGS Monster Square"],
+      ["scary_monster", "Scary Monster"],
+      ["scary_zombie", "Scary Zombie"]
     ];
     const kenneyCharacters = [
       ["kenney_bear", "Kenney Bear"],
@@ -710,6 +712,8 @@
       ...Object.fromEntries(pipoyaCharacters.map(([name, label]) => [name, { label, kind: "forest", base: name, scale: 1.45, attackMs: 400 }])),
       ...Object.fromEntries(extraItchCharacters.map(([name, label]) => [name, { label, kind: "forest", base: name, scale: 1.55, attackMs: 420 }])),
       ...Object.fromEntries(kenneyCharacters.map(([name, label]) => [name, { label, kind: "forest", base: name, scale: 1.6, attackMs: 420 }])),
+      scary_monster: { label: "Scary Monster", kind: "forest", base: "scary_monster", scale: 1.15, attackMs: 480, sideView: true, smooth: true },
+      scary_zombie: { label: "Scary Zombie", kind: "forest", base: "scary_zombie", scale: 1.15, attackMs: 420, sideView: true, smooth: true },
       silksong_hornet_boss: { label: "Hornet Boss", kind: "forest", base: "silksong_hornet_boss", scale: 0.26, attackMs: 520 },
       silksong_silk_boss: { label: "Silk Boss", kind: "forest", base: "silksong_silk_boss", scale: 0.26, attackMs: 520 }
     };
@@ -1408,6 +1412,19 @@
       stopMode: "stop",
       moveStarted: 0,
       wasMoving: false,
+      timeOfDay: "day",
+      timeRemaining: 60,
+      announcement: "",
+      announcementTyped: "",
+      announcementStart: 0,
+      announcementVisible: 0,
+      announcementTypeSpeed: 30,
+      announced30: false,
+      announced10: false,
+      announcedNight30: false,
+      announcedNight10: false,
+      screenShakeUntil: 0,
+      screenFlashRedUntil: 0,
       treeHits: 0,
       treesDestroyed: 0,
       lastTreeHit: "",
@@ -2195,23 +2212,43 @@
       }
       const crop = plant.crop || { sx: 0, sy: 0, sw: img.width, sh: img.height };
       const rotateSteps = ((plant.rotateSteps || 0) % 4 + 4) % 4;
-      if (rotateSteps) {
+      let sway = 0;
+      if (plant.tree && plant.isAttacking) {
+        sway = Math.sin(performance.now() * 0.009) * 0.12;
+      }
+      if (rotateSteps || sway) {
         const drawW = plant.baseW || plant.w;
         const drawH = plant.baseH || plant.h;
         ctx.save();
-        ctx.translate(Math.round(plant.x + shake), Math.round(plant.y - plant.h / 2));
-        ctx.rotate(rotateSteps * Math.PI / 2);
-        ctx.drawImage(
-          img,
-          crop.sx,
-          crop.sy,
-          crop.sw,
-          crop.sh,
-          Math.round(-drawW / 2),
-          Math.round(-drawH / 2),
-          drawW,
-          drawH
-        );
+        ctx.translate(Math.round(plant.x + shake), Math.round(plant.y));
+        if (rotateSteps) {
+          ctx.translate(0, -plant.h / 2);
+          ctx.rotate(rotateSteps * Math.PI / 2);
+          ctx.drawImage(
+            img,
+            crop.sx,
+            crop.sy,
+            crop.sw,
+            crop.sh,
+            Math.round(-drawW / 2),
+            Math.round(-drawH / 2),
+            drawW,
+            drawH
+          );
+        } else {
+          ctx.rotate(sway);
+          ctx.drawImage(
+            img,
+            crop.sx,
+            crop.sy,
+            crop.sw,
+            crop.sh,
+            Math.round(-drawW / 2),
+            Math.round(-drawH),
+            drawW,
+            drawH
+          );
+        }
         ctx.restore();
         return;
       }
@@ -3163,6 +3200,137 @@
         tree.hitDir = 1;
       }
     }
+
+    function showAnnouncement(text, durationMs = 4000) {
+      state.announcement = text;
+      state.announcementTyped = "";
+      state.announcementStart = performance.now();
+      state.announcementVisible = performance.now() + durationMs;
+    }
+
+    function updateDayNightCycle(now, dt) {
+      if (state.scene !== "outside") return;
+      state.timeRemaining = Math.max(0, state.timeRemaining - dt);
+      
+      if (state.timeOfDay === "day") {
+        if (state.timeRemaining <= 30 && !state.announced30) {
+          showAnnouncement("30 seconds remaining of daylight...");
+          state.announced30 = true;
+        }
+        if (state.timeRemaining <= 10 && !state.announced10) {
+          showAnnouncement("10 seconds remaining! Find shelter!");
+          state.announced10 = true;
+        }
+        if (state.timeRemaining <= 0) {
+          state.timeOfDay = "night";
+          state.timeRemaining = 120;
+          state.announced30 = false;
+          state.announced10 = false;
+          showAnnouncement("NIGHT HAS FALLEN... SURVIVE!");
+          state.screenShakeUntil = now + 600;
+          state.screenFlashRedUntil = now + 400;
+        }
+      } else {
+        if (state.timeRemaining <= 30 && !state.announcedNight30) {
+          showAnnouncement("30 seconds remaining until morning...");
+          state.announcedNight30 = true;
+        }
+        if (state.timeRemaining <= 10 && !state.announcedNight10) {
+          showAnnouncement("10 seconds remaining... Sunrise is near!");
+          state.announcedNight10 = true;
+        }
+        if (state.timeRemaining <= 0) {
+          state.timeOfDay = "day";
+          state.timeRemaining = 60;
+          state.announcedNight30 = false;
+          state.announcedNight10 = false;
+          showAnnouncement("MORNING HAS COME. THE SHADOWS RETREAT.");
+          
+          for (const tree of allTreeSprites()) {
+            tree.isAttacking = false;
+          }
+          state.screenShakeUntil = now + 400;
+        }
+      }
+      
+      if (state.announcement) {
+        const elapsed = now - state.announcementStart;
+        const charCount = Math.min(state.announcement.length, Math.floor(elapsed / state.announcementTypeSpeed));
+        state.announcementTyped = state.announcement.slice(0, charCount);
+        
+        if (now > state.announcementVisible) {
+          state.announcement = "";
+          state.announcementTyped = "";
+        }
+      }
+    }
+
+    function triggerScaryHit(dx, dy) {
+      const now = performance.now();
+      state.screenShakeUntil = now + 450;
+      state.screenFlashRedUntil = now + 180;
+      
+      const len = Math.hypot(dx, dy) || 1;
+      const pushX = -(dx / len);
+      const pushY = -(dy / len);
+      const knockbackDist = 32;
+      
+      const targetX = Math.max(24, Math.min(WORLD_W - 24, state.x + pushX * knockbackDist));
+      const targetY = Math.max(34, Math.min(WORLD_H - 24, state.y + pushY * knockbackDist));
+      
+      if (!collides(targetX, state.y)) state.x = targetX;
+      if (!collides(state.x, targetY)) state.y = targetY;
+      
+      const shouts = [
+        "Aargh! The tree attacked me!",
+        "Watch out! They are moving!",
+        "Ouch! Stay back!",
+        "The forest... it's alive!",
+        "Run! The trees are awake!"
+      ];
+      const shout = shouts[Math.floor(Math.random() * shouts.length)];
+      state.dialogueCooldownUntil = 0;
+      sayDialogue(shout, 10, 1600);
+    }
+
+    function updateMovingTrees(now, dt) {
+      if (state.scene !== "outside") return;
+      const isNight = state.timeOfDay === "night";
+      
+      for (const tree of allTreeSprites()) {
+        if (tree.destroyed) {
+          tree.isAttacking = false;
+          continue;
+        }
+        
+        if (isNight) {
+          const dist = Math.hypot(tree.x - state.x, tree.y - state.y);
+          if (dist < 450) {
+            tree.isAttacking = true;
+          }
+          
+          if (tree.isAttacking) {
+            if (tree.pauseUntil && now < tree.pauseUntil) continue;
+            
+            const dx = state.x - tree.x;
+            const dy = state.y - tree.y;
+            const distToPlayer = Math.hypot(dx, dy);
+            
+            if (distToPlayer > 18) {
+              const speed = 26;
+              tree.x += (dx / distToPlayer) * speed * dt;
+              tree.y += (dy / distToPlayer) * speed * dt;
+            }
+            
+            if (distToPlayer < 38) {
+              tree.pauseUntil = now + 1400;
+              triggerScaryHit(dx, dy);
+            }
+          }
+        }
+      }
+    }
+
     window.demoTreeStats = () => {
       const trees = allTreeSprites();
       return {
@@ -4247,6 +4415,8 @@
       state.last = now;
       state.t += dt;
       updateTreeRespawns(now);
+      updateDayNightCycle(now, dt);
+      updateMovingTrees(now, dt);
 
       let dx = Number(pressed("arrowright", "d")) - Number(pressed("arrowleft", "a"));
       let dy = Number(pressed("arrowdown", "s")) - Number(pressed("arrowup", "w"));
@@ -4317,7 +4487,18 @@
       const now = performance.now();
       ctx.imageSmoothingEnabled = false;
       ctx.clearRect(0, 0, VIEW_W, VIEW_H);
+      
+      let shakeX = 0;
+      let shakeY = 0;
+      if (now < state.screenShakeUntil) {
+        const amt = 5;
+        shakeX = Math.round((Math.random() - 0.5) * amt * 2);
+        shakeY = Math.round((Math.random() - 0.5) * amt * 2);
+      }
+      
       ctx.save();
+      ctx.translate(shakeX, shakeY);
+      
       if (state.scene === "interior") {
         drawInteriorBase();
         drawDepthSortedActors();
@@ -4333,6 +4514,109 @@
         drawBuildGhost();
       }
       ctx.restore();
+      
+      // Night shadow overlay & Flashlight (screen space)
+      if (state.timeOfDay === "night" && state.scene === "outside") {
+        ctx.save();
+        const playerScreenX = Math.round((state.x - state.cameraX) * state.zoom);
+        const playerScreenY = Math.round((state.y - 12 - state.cameraY) * state.zoom);
+        
+        ctx.fillStyle = "rgba(4, 4, 15, 0.94)";
+        ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+        
+        const lightRadius = 135 * state.zoom;
+        const grad = ctx.createRadialGradient(playerScreenX, playerScreenY, 10, playerScreenX, playerScreenY, lightRadius);
+        grad.addColorStop(0, "rgba(0, 0, 0, 1.0)");
+        grad.addColorStop(0.3, "rgba(0, 0, 0, 0.85)");
+        grad.addColorStop(1.0, "rgba(0, 0, 0, 0.0)");
+        
+        ctx.globalCompositeOperation = "destination-out";
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(playerScreenX, playerScreenY, lightRadius, 0, Math.PI * 2);
+        ctx.fill();
+        
+        ctx.globalCompositeOperation = "source-over";
+        const beamGrad = ctx.createRadialGradient(playerScreenX, playerScreenY, 20, playerScreenX, playerScreenY, lightRadius);
+        beamGrad.addColorStop(0, "rgba(255, 235, 170, 0.09)");
+        beamGrad.addColorStop(0.5, "rgba(255, 220, 130, 0.04)");
+        beamGrad.addColorStop(1.0, "rgba(255, 220, 130, 0.0)");
+        ctx.fillStyle = beamGrad;
+        ctx.beginPath();
+        ctx.arc(playerScreenX, playerScreenY, lightRadius, 0, Math.PI * 2);
+        ctx.fill();
+        
+        ctx.restore();
+      }
+      
+      // Draw screen red flash if hit
+      if (now < state.screenFlashRedUntil) {
+        ctx.save();
+        ctx.fillStyle = "rgba(220, 10, 10, 0.32)";
+        ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+        ctx.restore();
+      }
+      
+      // Draw Day/Night HUD
+      if (state.scene === "outside") {
+        ctx.save();
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.font = "bold 13px 'Courier New', Courier, monospace";
+        
+        const isNight = state.timeOfDay === "night";
+        const icon = isNight ? "🌙" : "☀️";
+        const phaseLabel = isNight ? "NIGHT" : "DAY";
+        const secs = Math.ceil(state.timeRemaining);
+        const hudText = `${icon} ${phaseLabel}: ${secs}s`;
+        
+        const hudX = VIEW_W / 2;
+        const hudY = 20;
+        
+        const metrics = ctx.measureText(hudText);
+        const boxW = metrics.width + 24;
+        const boxH = 26;
+        
+        ctx.fillStyle = "rgba(10, 10, 16, 0.85)";
+        ctx.strokeStyle = isNight ? "rgba(100, 100, 255, 0.5)" : "rgba(255, 200, 50, 0.5)";
+        ctx.lineWidth = 1.5;
+        
+        roundedRectPath(hudX - boxW / 2, hudY - boxH / 2, boxW, boxH, 6);
+        ctx.fill();
+        ctx.stroke();
+        
+        ctx.fillStyle = isNight ? "#a0b0ff" : "#ffd060";
+        ctx.fillText(hudText, hudX, hudY);
+        ctx.restore();
+      }
+      
+      // Draw typewriter scary announcement
+      if (state.announcementTyped) {
+        ctx.save();
+        ctx.textAlign = "center";
+        ctx.font = "700 18px monospace";
+        ctx.textBaseline = "middle";
+        
+        const annX = VIEW_W / 2;
+        const annY = VIEW_H * 0.33;
+        
+        const annText = state.announcementTyped;
+        const metrics = ctx.measureText(annText);
+        const padX = 14;
+        const padY = 8;
+        
+        ctx.fillStyle = "rgba(0, 0, 0, 0.75)";
+        ctx.fillRect(annX - metrics.width / 2 - padX, annY - 12 - padY, metrics.width + padX * 2, 24 + padY * 2);
+        
+        ctx.strokeStyle = state.timeOfDay === "day" ? "rgba(255, 60, 60, 0.6)" : "rgba(255, 200, 40, 0.5)";
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(annX - metrics.width / 2 - padX, annY - 12 - padY, metrics.width + padX * 2, 24 + padY * 2);
+        
+        ctx.fillStyle = state.timeOfDay === "day" ? "#ff3838" : "#ffcc22";
+        ctx.fillText(annText, annX, annY);
+        ctx.restore();
+      }
+
       // drawJoystick(); // hidden but still functional
       captureStudySnapshot(now);
       drawBiomeScreenFilter();
