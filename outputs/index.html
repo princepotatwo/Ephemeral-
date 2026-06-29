@@ -4814,10 +4814,10 @@
       // Draw typewriter scary announcement (Glitching English/Indo Translation card, no box)
       if (state.announcement && now < state.announcementVisible) {
         ctx.save();
-        ctx.textAlign = "right";
+        ctx.textAlign = "left";
         ctx.textBaseline = "middle";
         
-        const cx = VIEW_W - 16;
+        const cx = VIEW_W - 320; // starts in the middle, prints left-to-right
         const cy = VIEW_H - 146; // stack upwards above safe bottom bar
         
         const elapsed = now - state.announcementStart;
