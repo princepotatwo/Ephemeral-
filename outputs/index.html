@@ -3074,7 +3074,9 @@
         x,
         y,
         built: true,
-        chestAnimStarted: 0
+        chestAnimStarted: 0,
+        maxHp: item.maxHp || 5,
+        hp: item.maxHp || 5
       };
       if (placed.tree || isTreeName(placed.name)) {
         placed.tree = true;
@@ -3306,6 +3308,43 @@
       }
     }
 
+    function findTreeObstacle(x, y, tree) {
+      const feet = { x: x - 9, y: y - 6, w: 18, h: 8 };
+      return activeSprites().find(sprite => {
+        if (sprite === tree || sprite.tree || !sprite.solid) return false;
+        if (sprite.destroyed || sprite.dead) return false;
+        const solid = solidRectFor(sprite);
+        if (!solid) return false;
+        return aabb(feet.x, feet.y, feet.w, feet.h, solid.x, solid.y, solid.w, solid.h);
+      });
+    }
+
+    function damageBuilding(building, amount = 1) {
+      if (building.hp === undefined) {
+        building.maxHp = building.maxHp || 5;
+        building.hp = building.maxHp;
+      }
+      building.hp = Math.max(0, building.hp - amount);
+      building.hitStarted = performance.now();
+      building.hitDir = Math.random() < 0.5 ? 1 : -1;
+      
+      if (building.hp <= 0) {
+        const placedIdx = placedSprites.indexOf(building);
+        if (placedIdx >= 0) {
+          placedSprites.splice(placedIdx, 1);
+          refreshWallConnections();
+        }
+        const plantIdx = plantSprites.indexOf(building);
+        if (plantIdx >= 0) {
+          plantSprites.splice(plantIdx, 1);
+        }
+        
+        const shout = `A tree broke my ${building.name || "structure"}!`;
+        state.dialogueCooldownUntil = 0;
+        sayDialogue(shout, 10, 1500);
+      }
+    }
+
     function updateMovingTrees(now, dt) {
       if (state.scene !== "outside") return;
       const isNight = state.timeOfDay === "night";
@@ -3314,6 +3353,7 @@
         for (const tree of allTreeSprites()) {
           tree.isAttacking = false;
           tree.combatTarget = null;
+          tree.stuckTicks = 0;
         }
         return;
       }
@@ -3323,6 +3363,7 @@
         if (tree.destroyed) {
           tree.isAttacking = false;
           tree.combatTarget = null;
+          tree.stuckTicks = 0;
           continue;
         }
         
@@ -3365,11 +3406,60 @@
           const dx = targetX - tree.x;
           const dy = targetY - tree.y;
           
+          let isMoving = false;
           if (dist > 18) {
             const speed = 12;
-            tree.x += (dx / dist) * speed * dt;
-            tree.y += (dy / dist) * speed * dt;
+            const stepX = (dx / dist) * speed * dt;
+            const stepY = (dy / dist) * speed * dt;
+            
+            const nextX = tree.x + stepX;
+            const nextY = tree.y + stepY;
+            
+            const obstacle = findTreeObstacle(nextX, nextY, tree);
+            if (obstacle) {
+              tree.isAttacking = true;
+              tree.pauseUntil = now + 1400;
+              damageBuilding(obstacle, 1);
+              const screenDist = Math.hypot(tree.x - state.x, tree.y - state.y);
+              if (screenDist < 250) {
+                state.screenShakeUntil = now + 250;
+              }
+            } else {
+              tree.x = nextX;
+              tree.y = nextY;
+              isMoving = true;
+            }
           }
+          
+          // Stuck detection fallback
+          if (isMoving) {
+            const movedDist = Math.hypot(tree.x - (tree.lastX ?? tree.x), tree.y - (tree.lastY ?? tree.y));
+            if (movedDist < 0.05) {
+              tree.stuckTicks = (tree.stuckTicks || 0) + 1;
+            } else {
+              tree.stuckTicks = 0;
+            }
+            
+            if ((tree.stuckTicks || 0) > 24) {
+              const escapeTarget = findTreeObstacle(tree.x, tree.y, tree) || 
+                                   activeSprites().find(sprite => {
+                                     if (sprite === tree || sprite.tree || !sprite.solid) return false;
+                                     if (sprite.destroyed || sprite.dead) return false;
+                                     return Math.hypot(tree.x - sprite.x, tree.y - sprite.y) < 36;
+                                   });
+              if (escapeTarget) {
+                tree.isAttacking = true;
+                tree.pauseUntil = now + 1400;
+                damageBuilding(escapeTarget, 1);
+              }
+              tree.stuckTicks = 0;
+            }
+          } else {
+            tree.stuckTicks = 0;
+          }
+          
+          tree.lastX = tree.x;
+          tree.lastY = tree.y;
           
           if (dist < 38) {
             tree.pauseUntil = now + 1600;
