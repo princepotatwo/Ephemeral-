@@ -142,7 +142,8 @@
       background: rgba(255, 250, 241, .9);
       box-shadow: 0 6px 18px rgba(83, 107, 101, .12);
     }
-    body.is-game-fullscreen .picker {
+    body.is-game-fullscreen .picker,
+    body.is-game-fullscreen .test-controls {
       display: none;
     }
     .pick {
@@ -523,6 +524,12 @@
         </div>
       </div>
     </main>
+    <div class="test-controls" style="margin-bottom: 8px; display: flex; gap: 8px; align-items: center;">
+      <button id="toggle-time-btn" class="time-toggle-btn" type="button" style="padding: 6px 12px; font-weight: 600; border-radius: 8px; border: 1px solid #c2b399; background: #fffcf8; color: #5c4b37; cursor: pointer; transition: all 0.2s ease;">
+        ☀️ Switch to Night
+      </button>
+      <span id="test-time-label" style="font-size: 11px; color: #7c6c56; font-family: monospace;">Current Phase: DAY (T-Minus 60s)</span>
+    </div>
     <div class="picker" id="picker" aria-label="Character switcher"></div>
     <div class="caption">Online sprite credits: inkBubi, PIPOYA, AxulArt, RGS_Dev, karsiori, Cup Nooble, Kettoman, Shaade, Tayziulei, Daniel Eddeland, Stephen Challener / PixelFarm, patvanmackelberg, Bouste, and Kenney.</div>
   </div>
@@ -630,7 +637,10 @@
       ["rgs_skeleton_square", "RGS Skeleton Square"],
       ["rgs_monster_square", "RGS Monster Square"],
       ["scary_monster", "Scary Monster"],
-      ["scary_zombie", "Scary Zombie"]
+      ["scary_zombie", "Scary Zombie"],
+      ["creature_bear", "Flesh Bear"],
+      ["creature_crawler", "Gore Crawler"],
+      ["creature_slasher", "Flesh Slasher"]
     ];
     const kenneyCharacters = [
       ["kenney_bear", "Kenney Bear"],
@@ -716,6 +726,9 @@
       ...Object.fromEntries(kenneyCharacters.map(([name, label]) => [name, { label, kind: "forest", base: name, scale: 1.6, attackMs: 420 }])),
       scary_monster: { label: "Scary Monster", kind: "forest", base: "scary_monster", scale: 1.15, attackMs: 480, sideView: true, smooth: true },
       scary_zombie: { label: "Scary Zombie", kind: "forest", base: "scary_zombie", scale: 1.15, attackMs: 420, sideView: true, smooth: true },
+      creature_bear: { label: "Flesh Bear", kind: "forest", base: "creature_bear", scale: 1.25, attackMs: 420, sideView: true, smooth: true },
+      creature_crawler: { label: "Gore Crawler", kind: "forest", base: "creature_crawler", scale: 1.15, attackMs: 480, sideView: true, smooth: true },
+      creature_slasher: { label: "Flesh Slasher", kind: "forest", base: "creature_slasher", scale: 1.15, attackMs: 480, sideView: true, smooth: true },
       silksong_hornet_boss: { label: "Hornet Boss", kind: "forest", base: "silksong_hornet_boss", scale: 0.26, attackMs: 520 },
       silksong_silk_boss: { label: "Silk Boss", kind: "forest", base: "silksong_silk_boss", scale: 0.26, attackMs: 520 }
     };
@@ -737,6 +750,9 @@
     const forestFrameCounts = {
       silksong_hornet: { idle: 6, run: 10, stop: 6, skid: 6, attack: 6 },
       silksong_moss_creep: { idle: 6, run: 3, stop: 6, attack: 6 },
+      creature_bear: { idle: 6, run: 6, attack: 6 },
+      creature_crawler: { idle: 7, run: 7, attack: 7 },
+      creature_slasher: { idle: 8, run: 8, attack: 8 },
       silksong_bone_worm: { idle: 4, run: 4, stop: 4, attack: 7 },
       silksong_moss_crawler: { idle: 3, run: 23, stop: 3, attack: 3 },
       silksong_staff_pilgrim: { idle: 6, run: 10, stop: 6, attack: 13 },
@@ -1834,6 +1850,7 @@
       const modes = ["idle", "run"];
       if (counts?.stop) modes.push("stop");
       if (counts?.skid) modes.push("skid");
+      if (counts?.die) modes.push("die");
       modes.push("attack");
       for (const mode of modes) {
         for (const dir of DIRECTIONS) {
@@ -1998,9 +2015,9 @@
         const isStopMode = state.mode === "stop" || state.mode === "skid";
         const mode = isStopMode && !forestFrames[cfg.base][`${state.mode}-${dir}`] ? "idle" : state.mode;
         const frames = forestFrames[cfg.base][`${mode}-${dir}`] || forestFrames[cfg.base][`idle-${dir}`];
-        const fps = mode === "attack" ? (cfg.attackFps || 9) : mode === "skid" ? (cfg.skidFps || cfg.stopFps || 12) : mode === "stop" ? (cfg.stopFps || 12) : mode === "run" ? (cfg.runFps || 9) : (cfg.idleFps || 5);
-        const started = mode === "attack" ? state.attackStarted : mode === "stop" || mode === "skid" ? state.stopStarted : 0;
-        const playOnce = mode === "attack" || mode === "stop" || mode === "skid";
+        const fps = mode === "attack" ? (cfg.attackFps || 9) : mode === "die" ? (cfg.dieFps || 6) : mode === "skid" ? (cfg.skidFps || cfg.stopFps || 12) : mode === "stop" ? (cfg.stopFps || 12) : mode === "run" ? (cfg.runFps || 9) : (cfg.idleFps || 5);
+        const started = mode === "attack" ? state.attackStarted : mode === "die" ? state.dieStarted : mode === "stop" || mode === "skid" ? state.stopStarted : 0;
+        const playOnce = mode === "attack" || mode === "stop" || mode === "skid" || mode === "die";
         const t = playOnce ? Math.max(0, performance.now() - started) / 1000 : state.t;
         const index = playOnce ? Math.min(frames.length - 1, Math.floor(t * fps)) : Math.floor(t * fps) % frames.length;
         const image = images[frames[index]];
@@ -2018,14 +2035,15 @@
       const mode = npc.mode;
       const frames = forestFrames[npc.base][`${mode}-${dir}`] || forestFrames[npc.base][`idle-${dir}`];
       if (!frames) return null;
-      const fps = mode === "attack" ? (cfg.attackFps || 9) : mode === "run" ? (cfg.runFps || 9) : (cfg.idleFps || 5);
+      const multiplier = (mode === "run" ? (npc.animSpeedOverride || 1.0) : 1.0);
+      const fps = (mode === "attack" ? (cfg.attackFps || 9) : mode === "run" ? (cfg.runFps || 9) : (cfg.idleFps || 5)) * multiplier;
       const started = mode === "attack" ? (npc.attackStarted || npc.t) : 0;
       const playOnce = mode === "attack";
       const t = playOnce ? Math.max(0, performance.now() - started) / 1000 : npc.t;
       const index = playOnce ? Math.min(frames.length - 1, Math.floor(t * fps)) : Math.floor(t * fps) % frames.length;
       const image = images[frames[index]];
       if (!image) return null;
-      return { image, sx: 0, sy: 0, sw: image.width, sh: image.height, scale: cfg.scale, smooth: cfg.smooth };
+      return { image, sx: 0, sy: 0, sw: image.width, sh: image.height, scale: npc.scaleOverride || cfg.scale, smooth: cfg.smooth };
     }
 
     function playerDrawSize(frame) {
@@ -2043,7 +2061,7 @@
       ctx.imageSmoothingEnabled = false;
     }
 
-    function drawEvaporatingNPC(frame, x, y, elapsed, shake = 0) {
+    function drawEvaporatingNPC(frame, x, y, elapsed, shake = 0, npc = null) {
       const { w, h } = playerDrawSize(frame);
       const p = Math.min(1, elapsed / NPC_EVAPORATE_MS);
       const alpha = 1 - p;
@@ -2058,17 +2076,30 @@
       ctx.imageSmoothingEnabled = Boolean(frame.smooth);
       ctx.drawImage(frame.image, frame.sx, frame.sy, frame.sw, frame.sh, drawX, drawY, drawW, drawH);
       ctx.imageSmoothingEnabled = false;
-      // dust particles
-      ctx.fillStyle = `rgba(180, 210, 180, ${alpha * 0.7})`;
+      
       const seed = Math.floor(x * 1000 + y);
-      const dustCount = 6 + Math.floor(p * 4);
-      for (let i = 0; i < dustCount; i++) {
-        const dx = (Math.sin(seed + i * 3.7) * 0.5 + 0.5) * drawW - drawW / 2;
-        const dy = (Math.cos(seed + i * 5.3) * 0.5 + 0.5) * drawH - drawH;
-        const px = Math.round(x + dx + (p * 8 * Math.sin(seed + i * 2.1)));
-        const py = Math.round(y + dy + driftY - p * 16 * (0.5 + (i % 3) * 0.25));
-        const size = Math.max(1, Math.round(2 - p * 1.5));
-        ctx.fillRect(px, py, size, size);
+      if (npc && npc.isSuicideSpider) {
+        ctx.fillStyle = `rgba(100, 240, 40, ${alpha * 0.85})`;
+        const particleCount = 18;
+        for (let i = 0; i < particleCount; i++) {
+          const angle = (i / particleCount) * Math.PI * 2 + seed;
+          const speed = p * 36;
+          const px = Math.round(x + Math.cos(angle) * speed);
+          const py = Math.round(y - h/2 + Math.sin(angle) * speed + driftY);
+          const size = Math.max(1, Math.round(3.5 - p * 2.5));
+          ctx.fillRect(px, py, size, size);
+        }
+      } else {
+        ctx.fillStyle = `rgba(180, 210, 180, ${alpha * 0.7})`;
+        const dustCount = 6 + Math.floor(p * 4);
+        for (let i = 0; i < dustCount; i++) {
+          const dx = (Math.sin(seed + i * 3.7) * 0.5 + 0.5) * drawW - drawW / 2;
+          const dy = (Math.cos(seed + i * 5.3) * 0.5 + 0.5) * drawH - drawH;
+          const px = Math.round(x + dx + (p * 8 * Math.sin(seed + i * 2.1)));
+          const py = Math.round(y + dy + driftY - p * 16 * (0.5 + (i % 3) * 0.25));
+          const size = Math.max(1, Math.round(2 - p * 1.5));
+          ctx.fillRect(px, py, size, size);
+        }
       }
       ctx.restore();
     }
@@ -2339,7 +2370,7 @@
             if (elapsed < NPC_EVAPORATE_MS) {
               actors.push({
                 y: npc.y,
-                draw: () => drawEvaporatingNPC(npcFrameObj, npc.x, npc.y, elapsed, shake)
+                draw: () => drawEvaporatingNPC(npcFrameObj, npc.x, npc.y, elapsed, shake, npc)
               });
             }
             continue;
@@ -3281,6 +3312,8 @@
           state.announced60 = false;
           state.announced30 = false;
           state.announced10 = false;
+          state.nightCount = (state.nightCount || 0) + 1;
+          spawnNightMonsters(now);
           
           showScaryAnnouncement(
             "LOG // MALAM (NIGHT)",
@@ -3288,7 +3321,7 @@
             "Night has fallen... survive!",
             "ROOT: m-l-m (noun) | PHASE: hostile entities active",
             "SIGNAL QUALITY: 15% (CORRUPTED) | THREAT SCALE: MAXIMAL",
-            "[SYSTEM STATE: NIGHT LOCKDOWN]"
+            `[SYSTEM STATE: NIGHT LOCKDOWN - NIGHT ${state.nightCount}]`
           );
           state.screenShakeUntil = now + 600;
           state.screenFlashRedUntil = now + 400;
@@ -3334,6 +3367,13 @@
           state.announcedNight30 = false;
           state.announcedNight10 = false;
           
+          // Clear all remaining night monsters when morning arrives!
+          for (let i = roamingNPCs.length - 1; i >= 0; i--) {
+            if (roamingNPCs[i].isNightMonster) {
+              roamingNPCs.splice(i, 1);
+            }
+          }
+          
           showScaryAnnouncement(
             "LOG // PAGI (MORNING)",
             "Pagi telah datang. Cahaya mengusir kegelapan.",
@@ -3347,7 +3387,23 @@
             tree.isAttacking = false;
           }
           state.screenShakeUntil = now + 400;
+        } else {
+          // Night 2: Spiders constantly spawn if all die
+          if ((state.nightCount || 1) % 3 === 2) {
+            const aliveSpiders = roamingNPCs.filter(n => n.isNightMonster && n.base === "creature_crawler" && !n.dead);
+            if (aliveSpiders.length === 0) {
+              spawnNightMonsters(now);
+            }
+          }
         }
+      }
+      
+      const btn = document.getElementById("toggle-time-btn");
+      const lbl = document.getElementById("test-time-label");
+      if (btn && lbl) {
+        const isNight = state.timeOfDay === "night";
+        btn.textContent = isNight ? "☀️ Switch to Day" : "🌙 Switch to Night";
+        lbl.textContent = `Phase: ${state.timeOfDay.toUpperCase()} (${Math.ceil(state.timeRemaining)}s remaining) | Night: ${state.nightCount || 0}`;
       }
       
       if (state.announcement) {
@@ -3357,36 +3413,34 @@
       }
     }
 
-    function triggerScaryHit(dx, dy, tree = null) {
+    function triggerScaryHit(dx, dy, source = null) {
       const now = performance.now();
       state.screenShakeUntil = now + 450;
       state.screenFlashRedUntil = now + 180;
       
-      const len = Math.hypot(dx, dy) || 1;
-      const pushX = -(dx / len);
-      const pushY = -(dy / len);
-      const knockbackDist = 32;
-      
-      const targetX = Math.max(24, Math.min(WORLD_W - 24, state.x + pushX * knockbackDist));
-      const targetY = Math.max(34, Math.min(WORLD_H - 24, state.y + pushY * knockbackDist));
-      
-      if (!collides(targetX, state.y)) state.x = targetX;
-      if (!collides(state.x, targetY)) state.y = targetY;
-      
-      const shouts = [
+      let shouts = [
         "Aargh! The tree attacked me!",
         "Watch out! They are moving!",
         "Ouch! Stay back!",
         "The forest... it's alive!",
         "Run! The trees are awake!"
       ];
+      if (source && source.isNightMonster) {
+        shouts = [
+          "Aargh! A monster!",
+          "Get back, beast!",
+          "It's tearing me apart!",
+          "Stay away from me!",
+          "Help! It's too strong!"
+        ];
+      }
       const shout = shouts[Math.floor(Math.random() * shouts.length)];
       state.dialogueCooldownUntil = 0;
       sayDialogue(shout, 10, 1600);
       
       // Retaliate with pets
-      if (tree) {
-        triggerPetAttacks(tree);
+      if (source) {
+        triggerPetAttacks(source);
       }
     }
 
@@ -3394,6 +3448,17 @@
       const feet = { x: x - 9, y: y - 6, w: 18, h: 8 };
       return activeSprites().find(sprite => {
         if (sprite === tree || sprite.tree || !sprite.solid) return false;
+        if (sprite.destroyed || sprite.dead) return false;
+        const solid = solidRectFor(sprite);
+        if (!solid) return false;
+        return aabb(feet.x, feet.y, feet.w, feet.h, solid.x, solid.y, solid.w, solid.h);
+      });
+    }
+
+    function findNpcObstacle(x, y, npc) {
+      const feet = { x: x - 8, y: y - 8, w: 16, h: 16 };
+      return activeSprites().find(sprite => {
+        if (sprite === npc || sprite.tree || !sprite.solid) return false;
         if (sprite.destroyed || sprite.dead) return false;
         const solid = solidRectFor(sprite);
         if (!solid) return false;
@@ -3570,6 +3635,161 @@
       }
     }
 
+    function findNearestPlayerOrPet(x, y) {
+      let bestTarget = "player";
+      let minDist = Math.hypot(state.x - x, state.y - y);
+      
+      for (const pet of petSlimes) {
+        if (!pet.destroyed && !pet.dead) {
+          const d = Math.hypot(pet.x - x, pet.y - y);
+          if (d < minDist) {
+            minDist = d;
+            bestTarget = pet;
+          }
+        }
+      }
+      return bestTarget;
+    }
+
+    function spawnNightMonsters(now) {
+      // Clear previous night monsters if any
+      for (let i = roamingNPCs.length - 1; i >= 0; i--) {
+        if (roamingNPCs[i].isNightMonster) {
+          roamingNPCs.splice(i, 1);
+        }
+      }
+      
+      const cycle = (state.nightCount || 1) % 3;
+      if (cycle === 1) {
+        // Night 1: Flesh Bear
+        for (let i = 0; i < 1; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const x = state.x + Math.cos(angle) * (260 + Math.random() * 60);
+          const y = state.y + Math.sin(angle) * (260 + Math.random() * 60);
+          const npc = createWildNpc("creature_bear", x, y, "forest");
+          if (npc) {
+            npc.isNightMonster = true;
+            npc.scaleOverride = 1.25 * 0.50; // 50% smaller bear
+            npc.speed = wildNpcStats("creature_bear").speed * 2.0; // 2x speed
+            npc.animSpeedOverride = 2.0; // 2x animation speed
+            npc.hp = 160;
+            npc.maxHp = 160;
+            npc.attackDamage = 18;
+            npc.aggroTarget = "player";
+            npc.aggroUntil = now + 999999;
+            roamingNPCs.push(npc);
+          }
+        }
+      } else if (cycle === 2) {
+        // Night 2: Spiders (small, explode on contact)
+        for (let i = 0; i < 8; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const x = state.x + Math.cos(angle) * (260 + Math.random() * 60);
+          const y = state.y + Math.sin(angle) * (260 + Math.random() * 60);
+          const npc = createWildNpc("creature_crawler", x, y, "forest");
+          if (npc) {
+            npc.isNightMonster = true;
+            npc.scaleOverride = 0.22; // even smaller!
+            npc.speed = 85; // fast!
+            npc.hp = 30;
+            npc.maxHp = 30;
+            npc.attackDamage = 25; // explosion damage
+            npc.isSuicideSpider = true;
+            npc.aggroTarget = "player";
+            npc.aggroUntil = now + 999999;
+            roamingNPCs.push(npc);
+          }
+        }
+      } else {
+        // Night 3: Slasher (35% smaller, 2x fast)
+        for (let i = 0; i < 1; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const x = state.x + Math.cos(angle) * (260 + Math.random() * 60);
+          const y = state.y + Math.sin(angle) * (260 + Math.random() * 60);
+          const npc = createWildNpc("creature_slasher", x, y, "forest");
+          if (npc) {
+            npc.isNightMonster = true;
+            npc.scaleOverride = 1.15 * 0.65; // 35% smaller
+            npc.speed = wildNpcStats("creature_slasher").speed * 3.0; // 3x speed
+            npc.animSpeedOverride = 3.0; // 3x animation speed
+            npc.hp = 100;
+            npc.maxHp = 100;
+            npc.attackDamage = 15;
+            npc.aggroTarget = "player";
+            npc.aggroUntil = now + 999999;
+            roamingNPCs.push(npc);
+          }
+        }
+      }
+    }
+
+    // drawNightExplosions removed as per request
+
+    function spawnBloodSplats(x, y, count) {
+      if (!state.bloodSplats) state.bloodSplats = [];
+      const now = performance.now();
+      const colors = ["#8a0303", "#6b0202", "#aa0d0d", "#5c0101"];
+      
+      for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 35 + Math.random() * 55;
+        const size = 1.5 + Math.random() * 2.0;
+        
+        state.bloodSplats.push({
+          x: x,
+          y: y - 10,
+          size: Math.round(size),
+          color: colors[Math.floor(Math.random() * colors.length)],
+          spawnedAt: now,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed * 0.7,
+          altitude: 4 + Math.random() * 8,
+          vAltitude: 15 + Math.random() * 25
+        });
+      }
+    }
+
+    function updateBloodSplats(dt) {
+      if (!state.bloodSplats) state.bloodSplats = [];
+      const now = performance.now();
+      
+      state.bloodSplats = state.bloodSplats.filter(splat => now - splat.spawnedAt < 180000);
+      
+      state.bloodSplats.forEach(splat => {
+        if (splat.altitude > 0) {
+          splat.x += splat.vx * dt;
+          splat.y += splat.vy * dt;
+          splat.vAltitude -= 140 * dt;
+          splat.altitude += splat.vAltitude * dt;
+          if (splat.altitude <= 0) {
+            splat.altitude = 0;
+            splat.vx = 0;
+            splat.vy = 0;
+          }
+        }
+      });
+    }
+
+    function drawBloodSplats() {
+      if (!state.bloodSplats) state.bloodSplats = [];
+      
+      ctx.save();
+      state.bloodSplats.forEach(splat => {
+        ctx.fillStyle = splat.color;
+        const drawX = splat.x;
+        const drawY = splat.y - splat.altitude;
+        
+        if (splat.altitude > 0) {
+          ctx.fillStyle = "rgba(0, 0, 0, 0.24)";
+          ctx.fillRect(splat.x - splat.size / 2, splat.y, splat.size, 1);
+          ctx.fillStyle = splat.color;
+        }
+        
+        ctx.fillRect(drawX - splat.size / 2, drawY - splat.size / 2, splat.size, splat.size);
+      });
+      ctx.restore();
+    }
+
     window.demoTreeStats = () => {
       const trees = allTreeSprites();
       return {
@@ -3702,6 +3922,16 @@
       const slimeTarget = hitSlimeInFront();
       const target = treeTarget || slimeTarget;
       triggerPetAttacks(target);
+    }
+
+    function triggerDie() {
+      const now = performance.now();
+      if (now < state.dieUntil) return;
+      state.demo = false;
+      state.dieStarted = now;
+      state.dieUntil = now + 1500;
+      state.stopUntil = 0;
+      sayDialogue("Agh! *Dying*", 5, 2300);
     }
 
     function triggerToolUse() {
@@ -3891,6 +4121,24 @@
         const npc = roamingNPCs[i];
         npc.t += dt;
         if (npc.dead) {
+          if (npc.isSuicideSpider && !npc.exploded) {
+            npc.exploded = true;
+            state.screenShakeUntil = now + 400;
+            state.screenFlashRedUntil = now + 200;
+            if (Math.hypot(state.x - npc.x, state.y - npc.y) <= 60) {
+              triggerScaryHit(state.x - npc.x, state.y - npc.y, npc);
+            }
+            for (const pet of petSlimes) {
+              if (!pet.destroyed && !pet.dead) {
+                if (Math.hypot(pet.x - npc.x, pet.y - npc.y) <= 60) {
+                  damagePetSlime(pet, npc);
+                  pet.hitStarted = now;
+                  pet.hitDir = Math.random() < 0.5 ? 1 : -1;
+                }
+              }
+            }
+          }
+          
           const elapsed = now - npc.deadAt;
           if (elapsed < NPC_EVAPORATE_MS) {
             // Still evaporating, keep in array for drawing
@@ -3926,28 +4174,216 @@
           roamingNPCs.splice(i, 1);
           continue;
         }
-        if (npc.aggroTarget && (!petSlimes.includes(npc.aggroTarget) || npc.aggroTarget.hp <= 0)) {
+
+        // Slasher teleport timer
+        if (npc.base === "creature_slasher" && npc.slasherState === "invisible") {
+          if (now >= npc.slasherInvisibleUntil) {
+            npc.slasherState = "charge";
+            npc.x = npc.tpX;
+            npc.y = npc.tpY;
+            spawnBloodSplats(npc.x, npc.y, 100); // Reappear blood splash (5x!)
+            npc.mode = "run";
+          }
+          continue;
+        }
+        
+        // Active suicide spider countdown
+        if (npc.isSuicideSpider && npc.suicideTriggeredAt) {
+          const elapsed = now - npc.suicideTriggeredAt;
+          npc.mode = "attack";
+          if (elapsed >= (roster.creature_crawler.attackMs || 480)) {
+            npc.dead = true;
+            npc.deadAt = now;
+            npc.playerKilled = false;
+            
+            state.screenShakeUntil = now + 400;
+            state.screenFlashRedUntil = now + 200;
+            
+            if (Math.hypot(state.x - npc.x, state.y - npc.y) <= 60) {
+              triggerScaryHit(state.x - npc.x, state.y - npc.y, npc);
+            }
+            for (const pet of petSlimes) {
+              if (!pet.destroyed && !pet.dead) {
+                if (Math.hypot(pet.x - npc.x, pet.y - npc.y) <= 60) {
+                  damagePetSlime(pet, npc);
+                  pet.hitStarted = now;
+                  pet.hitDir = Math.random() < 0.5 ? 1 : -1;
+                }
+              }
+            }
+          }
+          continue;
+        }
+        
+        if (npc.isNightMonster && !npc.dead) {
+          if (npc.base === "creature_slasher" && npc.slasherState === "retreat") {
+            if (now >= npc.retreatUntil || Math.hypot(npc.x - npc.retreatX, npc.y - npc.retreatY) <= 20) {
+              npc.slasherState = "charge";
+            } else {
+              const dx = npc.retreatX - npc.x;
+              const dy = npc.retreatY - npc.y;
+              const dist = Math.hypot(dx, dy) || 1;
+              const speed = npc.speed;
+              const stepX = (dx / dist) * speed * dt;
+              const stepY = (dy / dist) * speed * dt;
+              
+              const nextX = npc.x + stepX;
+              const nextY = npc.y + stepY;
+              
+              const obstacleX = findNpcObstacle(nextX, npc.y, npc);
+              const obstacleY = findNpcObstacle(npc.x, nextY, npc);
+              
+              npc.mode = "run";
+              if (!obstacleX) npc.x = Math.max(60, Math.min(WORLD_W - 60, nextX));
+              if (!obstacleY) npc.y = Math.max(60, Math.min(WORLD_H - 60, nextY));
+              
+              const cfg = roster[npc.base];
+              if (cfg && cfg.sideView) {
+                if (Math.abs(dx) > 0.1) npc.dir = dx > 0 ? "right" : "left";
+              } else {
+                npc.dir = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? "right" : "left") : (dy > 0 ? "front" : "back");
+              }
+              continue;
+            }
+          }
+          npc.aggroTarget = findNearestPlayerOrPet(npc.x, npc.y);
+          npc.aggroUntil = now + 5000;
+        }
+        
+        const isPlayerTarget = npc.aggroTarget === "player";
+        const isPetTarget = npc.aggroTarget && petSlimes.includes(npc.aggroTarget) && !npc.aggroTarget.dead;
+        if (npc.aggroTarget && !isPlayerTarget && !isPetTarget) {
           npc.aggroTarget = null;
         }
         if (npc.aggroTarget && now < npc.aggroUntil) {
           const target = npc.aggroTarget;
-          const dx = target.x - npc.x;
-          const dy = target.y - npc.y;
+          const targetX = target === "player" ? state.x : target.x;
+          const targetY = target === "player" ? state.y : target.y;
+          const dx = targetX - npc.x;
+          const dy = targetY - npc.y;
           const dist = Math.hypot(dx, dy);
-          if (dist > 30) {
-            npc.mode = "run";
-            npc.x = Math.max(60, Math.min(WORLD_W - 60, npc.x + (dx / dist) * npc.speed * 1.15 * dt));
-            npc.y = Math.max(60, Math.min(WORLD_H - 60, npc.y + (dy / dist) * npc.speed * 1.15 * dt));
+          
+          if (npc.base === "creature_slasher" && npc.slasherAttacking) {
+            npc.mode = "attack";
+            if (now >= npc.attackUntil) {
+              npc.slasherAttacking = false;
+              
+              // Melt effect!
+              spawnBloodSplats(npc.x, npc.y, 210); // massive blood splatter (5x!)
+              
+              const angle = Math.atan2(npc.y - targetY, npc.x - targetX) + (Math.random() - 0.5) * 0.8;
+              const fleeDist = 380 + Math.random() * 80;
+              npc.tpX = Math.max(60, Math.min(WORLD_W - 60, targetX + Math.cos(angle) * fleeDist));
+              npc.tpY = Math.max(60, Math.min(WORLD_H - 60, targetY + Math.sin(angle) * fleeDist));
+              
+              npc.slasherState = "invisible";
+              npc.slasherInvisibleUntil = now + 3000; // 3 seconds off-screen
+              
+              // Teleport off-world immediately so player/pets lose track
+              npc.x = -1000;
+              npc.y = -1000;
+            }
+            continue;
+          }
+          
+          if (npc.isSuicideSpider && dist <= 28) {
+            if (!npc.suicideTriggeredAt) {
+              npc.suicideTriggeredAt = now;
+              npc.mode = "attack";
+              npc.attackStarted = now;
+              npc.attackUntil = now + (roster.creature_crawler.attackMs || 480);
+              npc.nextAttackAt = now + (roster.creature_crawler.attackMs || 480);
+            }
+            continue;
+          }
+          
+          if (dist > 24) {
+            if (npc.isNightMonster) {
+              const speed = npc.speed;
+              const stepX = (dx / dist) * speed * dt;
+              const stepY = (dy / dist) * speed * dt;
+              
+              const nextX = npc.x + stepX;
+              const nextY = npc.y + stepY;
+              
+              const obstacleX = findNpcObstacle(nextX, npc.y, npc);
+              const obstacleY = findNpcObstacle(npc.x, nextY, npc);
+              const obstacleBoth = findNpcObstacle(nextX, nextY, npc);
+              const mainObstacle = obstacleBoth || obstacleX || obstacleY;
+              
+              if (mainObstacle) {
+                npc.mode = "attack";
+                npc.attackStarted = now;
+                npc.attackUntil = now + 1200;
+                npc.nextAttackAt = now + 1200;
+                damageBuilding(mainObstacle, 1);
+                npc.nextDecisionAt = now + 1200;
+                continue;
+              }
+              
+              npc.mode = "run";
+              if (!obstacleX) npc.x = Math.max(60, Math.min(WORLD_W - 60, nextX));
+              if (!obstacleY) npc.y = Math.max(60, Math.min(WORLD_H - 60, nextY));
+            } else {
+              npc.mode = "run";
+              npc.x = Math.max(60, Math.min(WORLD_W - 60, npc.x + (dx / dist) * npc.speed * 1.15 * dt));
+              npc.y = Math.max(60, Math.min(WORLD_H - 60, npc.y + (dy / dist) * npc.speed * 1.15 * dt));
+            }
           } else {
             npc.mode = "attack";
-            if (now >= npc.nextAttackAt) {
-              npc.attackStarted = now;
-              npc.attackUntil = now + NPC_ATTACK_MS;
-              npc.nextAttackAt = now + NPC_ATTACK_MS;
-              damagePetSlime(target, npc);
+            if (npc.base === "creature_slasher") {
+              if (!npc.slasherAttacking) {
+                npc.mode = "attack";
+                npc.attackStarted = now;
+                npc.attackUntil = now + 480; // Slasher attack duration
+                npc.nextAttackAt = now + 480;
+                npc.slasherAttacking = true;
+                if (target === "player") {
+                  triggerScaryHit(dx, dy, npc);
+                } else {
+                  damagePetSlime(target, npc);
+                }
+              } else if (now >= npc.attackUntil) {
+                npc.slasherAttacking = false;
+                
+                // Melt effect!
+                spawnBloodSplats(npc.x, npc.y, 210); // massive blood splatter (5x!)
+                
+                const targetX = target === "player" ? state.x : target.x;
+                const targetY = target === "player" ? state.y : target.y;
+                const angle = Math.atan2(npc.y - targetY, npc.x - targetX) + (Math.random() - 0.5) * 0.8;
+                const dist = 380 + Math.random() * 80;
+                npc.tpX = Math.max(60, Math.min(WORLD_W - 60, targetX + Math.cos(angle) * dist));
+                npc.tpY = Math.max(60, Math.min(WORLD_H - 60, targetY + Math.sin(angle) * dist));
+                
+                npc.slasherState = "invisible";
+                npc.slasherInvisibleUntil = now + 3000; // 3 seconds off-screen
+                
+                npc.x = -1000;
+                npc.y = -1000;
+              }
+            } else {
+              npc.mode = "attack";
+              if (now >= npc.nextAttackAt) {
+                npc.attackStarted = now;
+                npc.attackUntil = now + NPC_ATTACK_MS;
+                npc.nextAttackAt = now + NPC_ATTACK_MS;
+                if (target === "player") {
+                  triggerScaryHit(dx, dy, npc);
+                } else {
+                  damagePetSlime(target, npc);
+                }
+              }
             }
           }
-          npc.dir = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? "right" : "left") : (dy > 0 ? "front" : "back");
+          const cfg = roster[npc.base];
+          if (cfg && cfg.sideView) {
+            if (Math.abs(dx) > 0.1) {
+              npc.dir = dx > 0 ? "right" : "left";
+            }
+          } else {
+            npc.dir = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? "right" : "left") : (dy > 0 ? "front" : "back");
+          }
           continue;
         }
         if (now >= npc.nextDecisionAt) {
@@ -4359,6 +4795,12 @@
     function damageSlime(slime, attacker = null) {
       if (slime.dead || slime.hp <= 0) return;
       const now = performance.now();
+      
+      // Spawn blood splats if hitting one of the three new night monsters
+      if (["creature_bear", "creature_crawler", "creature_slasher"].includes(slime.base)) {
+        spawnBloodSplats(slime.x, slime.y, 10 + Math.floor(Math.random() * 6));
+      }
+      
       slime.hp = Math.max(0, slime.hp - (attacker?.attackDamage || PET_DAMAGE));
       slime.hitStarted = now;
       slime.hitDir = state.attackDir === "left" ? -1 : 1;
@@ -4441,6 +4883,10 @@
       }
       if ((k === " " || k === "space" || k === "k" || k === "!") && on) {
         triggerAttack();
+        return;
+      }
+      if ((k === "x" || k === "h" || k === "g") && on) {
+        triggerDie();
         return;
       }
       if (["arrowup", "arrowdown", "arrowleft", "arrowright", "w", "a", "s", "d"].includes(k)) {
@@ -4667,6 +5113,7 @@
       const dt = Math.min((now - state.last) / 1000, 0.05);
       state.last = now;
       state.t += dt;
+      updateBloodSplats(dt);
       updateTreeRespawns(now);
       updateDayNightCycle(now, dt);
       updateMovingTrees(now, dt);
@@ -4724,8 +5171,9 @@
         }
       }
       state.wasMoving = Boolean(moving);
-      const stopping = !attacking && !moving && now < state.stopUntil;
-      state.mode = attacking ? "attack" : moving ? "run" : stopping ? state.stopMode : "idle";
+      const dying = now < state.dieUntil;
+      const stopping = !dying && !attacking && !moving && now < state.stopUntil;
+      state.mode = dying ? "die" : attacking ? "attack" : moving ? "run" : stopping ? state.stopMode : "idle";
 
       updateRoamingNPCs(now, dt);
       updatePetSlimes(now, dt);
@@ -4763,6 +5211,7 @@
         drawAnimatedWater();
         drawAnimatedShoreline();
         drawFarmPatch();
+        drawBloodSplats();
         drawDepthSortedActors();
         
         // Night shadow overlay & Soft Radial Flashlight (world space)
@@ -4774,23 +5223,23 @@
           
           const cx = state.x;
           const cy = state.y - 12;
-          const outerRadius = 110;
+          const outerRadius = 110; // restored flashlight view size
           
-          // Draw smooth dark night vignette centered on the player
+          // Draw smooth dark night vignette centered on the player (medium density)
           const nightGrad = ctx.createRadialGradient(cx, cy, 18, cx, cy, outerRadius);
-          nightGrad.addColorStop(0, "rgba(3, 3, 12, 0.0)");       // fully clear around player
-          nightGrad.addColorStop(0.35, "rgba(3, 3, 12, 0.45)");   // soft shadow starts
-          nightGrad.addColorStop(0.75, "rgba(3, 3, 12, 0.88)");   // deep shadow
-          nightGrad.addColorStop(1.0, "rgba(3, 3, 12, 0.96)");    // dark at screen edges
+          nightGrad.addColorStop(0, "rgba(3, 3, 12, 0.0)");
+          nightGrad.addColorStop(0.35, "rgba(3, 3, 12, 0.28)");
+          nightGrad.addColorStop(0.75, "rgba(3, 3, 12, 0.65)");
+          nightGrad.addColorStop(1.0, "rgba(3, 3, 12, 0.82)");
           
           ctx.fillStyle = nightGrad;
           ctx.fillRect(state.cameraX - pad, state.cameraY - pad, w, h);
           
           // Draw warm yellowish soft spotlight gradient on top
           const yellowGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, outerRadius * 0.8);
-          yellowGrad.addColorStop(0, "rgba(255, 220, 80, 0.26)");   // warm core glow
-          yellowGrad.addColorStop(0.4, "rgba(255, 190, 50, 0.09)");  // fading midglow
-          yellowGrad.addColorStop(1.0, "rgba(255, 190, 50, 0.0)");
+          yellowGrad.addColorStop(0, "rgba(255, 210, 80, 0.18)");   // warm core glow
+          yellowGrad.addColorStop(0.4, "rgba(255, 180, 50, 0.05)");  // fading midglow
+          yellowGrad.addColorStop(1.0, "rgba(255, 180, 50, 0.0)");
           
           ctx.fillStyle = yellowGrad;
           ctx.beginPath();
@@ -4814,11 +5263,11 @@
       // Draw typewriter scary announcement (Glitching English/Indo Translation card, no box)
       if (state.announcement && now < state.announcementVisible) {
         ctx.save();
-        ctx.textAlign = "left";
+        ctx.textAlign = "right";
         ctx.textBaseline = "middle";
         
-        const cx = VIEW_W - 320; // starts in the middle, prints left-to-right
-        const cy = VIEW_H - 146; // stack upwards above safe bottom bar
+        const cx = VIEW_W - 16; // bottom-right corner, aligns right-to-left
+        const cy = VIEW_H - 140; // stack upward above the buildbar
         
         const elapsed = now - state.announcementStart;
         const totalChars = Math.floor(elapsed / 18);
@@ -5137,6 +5586,52 @@
     });
     addEventListener("keydown", e => setKey(e.key, true));
     addEventListener("keyup", e => setKey(e.key, false));
+    
+    document.getElementById("toggle-time-btn").addEventListener("click", () => {
+      const now = performance.now();
+      if (state.timeOfDay === "day") {
+        state.timeOfDay = "night";
+        state.timeRemaining = 120;
+        state.announcedNight60 = false;
+        state.announcedNight30 = false;
+        state.announcedNight10 = false;
+        state.nightCount = (state.nightCount || 0) + 1;
+        spawnNightMonsters(now);
+        
+        showScaryAnnouncement(
+          "LOG // MALAM (NIGHT)",
+          "Malam telah tiba... bertahan hidup lah!",
+          "Night has fallen... survive!",
+          "ROOT: m-l-m (noun) | PHASE: hostile entities active",
+          "SIGNAL QUALITY: 15% (CORRUPTED) | THREAT SCALE: MAXIMAL",
+          `[SYSTEM STATE: NIGHT LOCKDOWN - NIGHT ${state.nightCount}]`
+        );
+        state.screenShakeUntil = now + 600;
+        state.screenFlashRedUntil = now + 400;
+      } else {
+        state.timeOfDay = "day";
+        state.timeRemaining = 60;
+        state.announced60 = false;
+        state.announced30 = false;
+        state.announced10 = false;
+        
+        // Clear all remaining night monsters when morning arrives!
+        for (let i = roamingNPCs.length - 1; i >= 0; i--) {
+          if (roamingNPCs[i].isNightMonster) {
+            roamingNPCs.splice(i, 1);
+          }
+        }
+        
+        showScaryAnnouncement(
+          "LOG // PAGI (MORNING)",
+          "Pagi telah datang. Cahaya mengusir kegelapan.",
+          "Morning has come. The light banishes the darkness.",
+          "ROOT: p-g-i (noun) | PHASE: normal activity resumed",
+          "SIGNAL QUALITY: 100% | THREAT SCALE: NONE",
+          "[SYSTEM STATE: ACTIVE]"
+        );
+      }
+    });
     buildbarClose.addEventListener("click", () => {
       setBuildUiOpen(false);
       state.demo = false;
