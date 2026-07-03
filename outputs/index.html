@@ -1318,7 +1318,7 @@
     const roamingNPCs = [];
     const petSlimes = [];
     const ASSET_REV = "one-tree-biomes-water-v55";
-    const APP_VERSION = "1.1.25";
+    const APP_VERSION = "1.1.26";
 
     // ── Auto-refresh on new version ───────────────────────
     // Stores the version in localStorage. If it changed, clears caches and reloads.
@@ -3164,9 +3164,89 @@
         .sort((a, b) => a.dist - b.dist)[0]?.item;
     }
 
+    const GACHA_TIERS = [
+      { chance: 50, wood: 1 },    // 50% - 1 wood
+      { chance: 30, wood: 2 },    // 30% - 2 wood
+      { chance: 10, wood: 5 },    // 10% - 5 wood
+      { chance: 5, wood: 10 },    // 5% - 10 wood
+      { chance: 3, wood: 20 },    // 3% - 20 wood
+      { chance: 1, wood: 50 },    // 1% - 50 wood
+      { chance: 0.5, wood: 100 }, // 0.5% - 100 wood
+      { chance: 0.25, wood: 250 },// 0.25% - 250 wood
+      { chance: 0.125, wood: 1000 } // 0.125% - 1000 wood
+    ];
+
+    function spawnGachaChest() {
+      const now = performance.now();
+      const angle = Math.random() * Math.PI * 2;
+      const dist = 120 + Math.random() * 180;
+      const cx = Math.max(80, Math.min(WORLD_W - 80, state.x + Math.cos(angle) * dist));
+      const cy = Math.max(80, Math.min(WORLD_H - 80, state.y + Math.sin(angle) * dist));
+      placedSprites.push({
+        scene: "outside",
+        buildId: "gacha-chest",
+        name: "prop_sprout_chest",
+        count: 5,
+        fps: 12,
+        w: 44,
+        h: 44,
+        x: cx,
+        y: cy,
+        solid: { x: -14, y: -14, w: 28, h: 18 },
+        chest: true,
+        gachaChest: true,
+        open: false,
+        chestAnimStarted: 0,
+        built: true
+      });
+    }
+
+    function clearGachaChests() {
+      for (let i = placedSprites.length - 1; i >= 0; i--) {
+        if (placedSprites[i].gachaChest) {
+          placedSprites.splice(i, 1);
+        }
+      }
+    }
+
     function toggleNearestChest() {
       const chest = nearestChest();
       if (!chest) return false;
+      if (chest.gachaChest) {
+        if (chest.open) return true;
+        chest.open = true;
+        chest.chestAnimStarted = performance.now();
+        const roll = Math.random() * 100;
+        let cumulative = 0;
+        let prize = 0;
+        for (const tier of GACHA_TIERS) {
+          cumulative += tier.chance;
+          if (roll < cumulative) {
+            prize = tier.wood;
+            break;
+          }
+        }
+        state.logs += prize;
+        updateCurrencyHud();
+        const rarityLabels = ["Common", "Common", "Uncommon", "Rare", "Rare", "Epic", "Epic", "Legendary", "MYTHIC"];
+        const tierIdx = GACHA_TIERS.findIndex(t => t.wood === prize);
+        const rarity = rarityLabels[tierIdx] || "Common";
+        showScaryAnnouncement(
+          `GACHA CHEST OPENED!`,
+          `Kamu mendapatkan ${prize} wood!`,
+          `You got ${prize} wood!`,
+          `RARITY: ${rarity} | ROLL: ${roll.toFixed(3)}%`,
+          `[LOGS: ${state.logs}]`,
+          "",
+          4000
+        );
+        setTimeout(() => {
+          const idx = placedSprites.indexOf(chest);
+          if (idx >= 0) placedSprites.splice(idx, 1);
+        }, 1200);
+        state.demo = false;
+        return true;
+      }
       chest.open = !chest.open;
       chest.chestAnimStarted = performance.now();
       state.demo = false;
@@ -3373,6 +3453,8 @@
               roamingNPCs.splice(i, 1);
             }
           }
+          // Clear any unopened gacha chests at morning
+          clearGachaChests();
           
           showScaryAnnouncement(
             "LOG // PAGI (MORNING)",
@@ -3721,6 +3803,8 @@
           }
         }
       }
+      // Spawn a gacha chest every night
+      spawnGachaChest();
     }
 
     // drawNightExplosions removed as per request
