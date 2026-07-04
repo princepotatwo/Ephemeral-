@@ -5102,6 +5102,7 @@
           const dx = targetX - npc.x;
           const dy = targetY - npc.y;
           const dist = Math.hypot(dx, dy);
+          const cfg = roster[npc.base];
           
           if (npc.base === "creature_slasher" && npc.slasherAttacking) {
             npc.mode = "attack";
@@ -5169,7 +5170,6 @@
               npc.x = Math.max(60, Math.min(WORLD_W - 60, npc.x + (dx / dist) * npc.speed * 1.15 * dt));
               npc.y = Math.max(60, Math.min(WORLD_H - 60, npc.y + (dy / dist) * npc.speed * 1.15 * dt));
             }
-            const cfg = roster[npc.base];
             if (cfg && cfg.sideView) {
               if (Math.abs(dx) > 0.1) npc.dir = dx > 0 ? "right" : "left";
             } else {
