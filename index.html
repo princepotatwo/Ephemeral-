@@ -706,20 +706,12 @@
     ];
     const silksongStudyCharacters = [
       ["silksong_hornet", "Hornet Study", 0.24],
-      ["silksong_moss_creep", "Moss Creep", 0.19],
       ["silksong_bone_worm", "Bone Worm", 0.16],
-      ["silksong_moss_crawler", "Moss Crawler", 0.34],
-      ["silksong_staff_pilgrim", "Staff Pilgrim", 0.18],
-      ["silksong_pilgrim_hiker", "Pilgrim Hiker", 0.28],
-      ["silksong_ladybug", "Ladybug", 0.2],
-      ["silksong_lifeblood_worm", "Lifeblood Worm", 0.13],
-      ["silksong_shakra_rest", "Shakra Rest", 0.27],
-      ["silksong_bell_shop", "Bell Shop", 0.57]
+      ["silksong_moss_crawler", "Moss Crawler", 0.34]
     ];
 
     const forestAnimals = [
       ...silksongStudyCharacters.map(([name]) => name),
-      "silksong_hornet_boss", "silksong_silk_boss",
       "fox", "frog", "owl", "doe", "squirle", "bunny", "chicken", "turtle", "cow", "sheep", "pig",
       "sprout_cat", "sprout_chicken", "sprout_cow",
       "green_slime", "blue_slime", "pink_slime", "split_slime", "gold_slime", "shadow_slime", "galaxy_slime", "huge_split_slime",
@@ -758,9 +750,7 @@
       scary_zombie: { label: "Scary Zombie", kind: "forest", base: "scary_zombie", scale: 1.15, attackMs: 420, sideView: true, smooth: true },
       creature_bear: { label: "Flesh Bear", kind: "forest", base: "creature_bear", scale: 1.25, attackMs: 420, sideView: true, smooth: true },
       creature_crawler: { label: "Gore Crawler", kind: "forest", base: "creature_crawler", scale: 1.15, attackMs: 480, sideView: true, smooth: true },
-      creature_slasher: { label: "Flesh Slasher", kind: "forest", base: "creature_slasher", scale: 1.15, attackMs: 480, sideView: true, smooth: true },
-      silksong_hornet_boss: { label: "Hornet Boss", kind: "forest", base: "silksong_hornet_boss", scale: 0.26, attackMs: 520 },
-      silksong_silk_boss: { label: "Silk Boss", kind: "forest", base: "silksong_silk_boss", scale: 0.26, attackMs: 520 }
+      creature_slasher: { label: "Flesh Slasher", kind: "forest", base: "creature_slasher", scale: 1.15, attackMs: 480, sideView: true, smooth: true }
     };
     silksongStudyCharacters.forEach(([name]) => {
       roster[name].sideView = true;
