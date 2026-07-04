@@ -5168,6 +5168,12 @@
               npc.x = Math.max(60, Math.min(WORLD_W - 60, npc.x + (dx / dist) * npc.speed * 1.15 * dt));
               npc.y = Math.max(60, Math.min(WORLD_H - 60, npc.y + (dy / dist) * npc.speed * 1.15 * dt));
             }
+            const cfg = roster[npc.base];
+            if (cfg && cfg.sideView) {
+              if (Math.abs(dx) > 0.1) npc.dir = dx > 0 ? "right" : "left";
+            } else {
+              npc.dir = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? "right" : "left") : (dy > 0 ? "front" : "back");
+            }
           } else {
             npc.mode = "attack";
             if (npc.base === "creature_slasher") {
