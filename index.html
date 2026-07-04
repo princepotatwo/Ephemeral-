@@ -2,9 +2,29 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Grass Animal Tester</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Grass Tester">
+  <meta name="theme-color" content="#9fca65">
+  <link rel="apple-touch-icon" href="assets/icon-192.png">
   <style>
+    /* Force true fullscreen on installed PWA — no browser chrome */
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      /* Extend into safe areas (iPhone notch, Android cutouts) */
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+      padding-left: env(safe-area-inset-left);
+      padding-right: env(safe-area-inset-right);
+    }
     :root {
       --paper: #fff8ec;
       --ink: #534c41;
@@ -31,6 +51,32 @@
       display: grid;
       gap: 10px;
     }
+    body.is-game-fullscreen {
+      padding: 0;
+      background: #000;
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    body.is-game-fullscreen .shell,
+    body.is-game-fullscreen .stage,
+    .stage:fullscreen {
+      width: 100vw;
+      height: 100dvh;
+      max-width: none;
+      gap: 0;
+    }
+    body.is-game-fullscreen .caption {
+      display: none;
+    }
+    body.is-game-fullscreen .stage,
+    .stage:fullscreen {
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
+      background: #000;
+    }
     .stage {
       position: relative;
       overflow: hidden;
@@ -54,6 +100,19 @@
     }
     .stage::before { top: 0; }
     .stage::after { bottom: 0; }
+    .bar-zone {
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: clamp(22px, 7.5vw, 52px);
+      z-index: 3;
+      pointer-events: auto;
+      touch-action: none;
+      user-select: none;
+      cursor: pointer;
+    }
+    .bar-zone-top { top: 0; }
+    .bar-zone-bottom { bottom: 0; }
     #scene {
       display: block;
       width: 100%;
@@ -62,11 +121,18 @@
       touch-action: none;
       user-select: none;
     }
+    body.is-game-fullscreen #scene,
+    .stage:fullscreen #scene {
+      height: 100%;
+      aspect-ratio: auto;
+    }
     .hud {
       display: none;
     }
     .picker {
       width: 100%;
+      max-height: 180px;
+      overflow-y: auto;
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
@@ -75,6 +141,10 @@
       border-radius: 12px;
       background: rgba(255, 250, 241, .9);
       box-shadow: 0 6px 18px rgba(83, 107, 101, .12);
+    }
+    body.is-game-fullscreen .picker,
+    body.is-game-fullscreen .test-controls {
+      display: none;
     }
     .pick {
       min-width: 68px;
@@ -113,15 +183,19 @@
       left: 14px;
       right: 14px;
       display: none;
-      gap: 6px;
       align-items: center;
-      justify-content: center;
       padding: 1px 6px;
       border: 0;
       border-radius: 0;
       background: transparent;
       box-shadow: none;
       z-index: 4;
+      /* Grid: left-bar grows | fixed center button | right-bar grows */
+      grid-template-columns: 1fr auto 1fr;
+      gap: 6px;
+    }
+    .buildbar-line.open {
+      display: grid;
     }
     .buildbar-line-top {
       top: 10px;
@@ -129,13 +203,8 @@
     .buildbar-line-bottom {
       bottom: 10px;
     }
-    .buildbar-line.open {
-      display: flex;
-    }
     .buildbar {
       min-width: 0;
-      width: calc((100% - 112px) / 2);
-      max-width: 480px;
       display: flex;
       gap: 6px;
       align-items: center;
@@ -143,13 +212,33 @@
       scrollbar-width: none;
     }
     .buildbar-left {
+      /* items pack toward the RIGHT (toward center button) */
       justify-content: flex-start;
+    }
+    .buildbar-left > :first-child {
+      margin-left: auto;
     }
     .buildbar-right {
       justify-content: flex-start;
     }
     .buildbar::-webkit-scrollbar {
       display: none;
+    }
+    .buildbar-center {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+    .buildbar-right-container {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      min-width: 0;
+      justify-content: flex-start;
+      flex: 1;
+    }
+    .buildbar-right-container .buildbar-right {
+      flex: 1;
     }
     .buildbar-action {
       flex: 0 0 96px;
@@ -205,9 +294,6 @@
         left: 8px;
         right: 8px;
       }
-      .buildbar {
-        width: calc((100% - 104px) / 2);
-      }
       .build-tool {
         flex-basis: 27px;
         width: 27px;
@@ -218,26 +304,234 @@
         max-height: 22px;
       }
     }
+
+    /* ── Currency HUD ──────────────────────────────────── */
+    .currency-hud {
+      position: absolute;
+      top: 58px;
+      right: 10px;
+      display: none;
+      gap: 8px;
+      z-index: 5;
+      align-items: center;
+    }
+    .currency-hud.show {
+      display: flex;
+    }
+    .currency-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      background: rgba(20, 18, 16, 0.72);
+      color: #fff;
+      border-radius: 8px;
+      font: 700 12px/1 system-ui, sans-serif;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      user-select: none;
+      min-width: 44px;
+      justify-content: center;
+    }
+    .currency-icon {
+      font-size: 14px;
+    }
+
+    /* ── Pet HUD ──────────────────────────────────────── */
+    .pet-hud {
+      position: absolute;
+      top: 58px;
+      right: 10px;
+      display: none;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      background: rgba(20, 18, 16, 0.72);
+      color: #fff;
+      border-radius: 8px;
+      font: 700 12px/1 system-ui, sans-serif;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      user-select: none;
+      z-index: 5;
+      min-width: 44px;
+      justify-content: center;
+    }
+    .pet-hud.show {
+      display: flex;
+    }
+    .pet-icon {
+      font-size: 14px;
+    }
+
+    /* ── Loading screen ──────────────────────────────────── */
+    #loading-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      background: linear-gradient(180deg, #dff4ff 0%, #f8f5e8 36%, #e7f4cc 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: Georgia, serif;
+      transition: opacity 0.5s ease;
+    }
+    #loading-screen.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+    #loading-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      width: min(88vw, 340px);
+    }
+    #loading-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #3a5a2a;
+    }
+    #loading-sub {
+      font-size: 13px;
+      color: #6d685e;
+      min-height: 18px;
+    }
+    #loading-bar-wrap {
+      width: 100%;
+      height: 14px;
+      background: rgba(255,255,255,0.6);
+      border: 1px solid #b8d9a0;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    #loading-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #6abf5e, #90d39f);
+      border-radius: 999px;
+      transition: width 0.15s ease;
+    }
+    #loading-pct {
+      font-size: 13px;
+      color: #6d685e;
+    }
+
+    /* ── Install / Add to Home Screen button ─────────────── */
+    #install-btn {
+      position: fixed;
+      bottom: 18px;
+      right: 18px;
+      z-index: 8888;
+      display: none;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 16px;
+      background: rgba(20, 36, 20, 0.88);
+      color: #cef0a8;
+      border: 1px solid rgba(144, 211, 159, 0.5);
+      border-radius: 999px;
+      font: 700 13px/1 system-ui, sans-serif;
+      cursor: pointer;
+      box-shadow: 0 4px 18px rgba(0,0,0,.45);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+    #install-btn.show { display: flex; }
+    #install-btn span { font-size: 18px; }
+    /* iOS-specific install instructions toast */
+    #ios-install-toast {
+      position: fixed;
+      bottom: 72px;
+      right: 18px;
+      z-index: 8889;
+      display: none;
+      flex-direction: column;
+      gap: 6px;
+      max-width: 240px;
+      padding: 12px 14px;
+      background: rgba(20, 36, 20, 0.94);
+      color: #cef0a8;
+      border: 1px solid rgba(144, 211, 159, 0.45);
+      border-radius: 14px;
+      font: 13px/1.5 system-ui, sans-serif;
+      box-shadow: 0 4px 18px rgba(0,0,0,.5);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+    }
+    #ios-install-toast.show { display: flex; }
+    #ios-install-toast strong { font-size: 13px; display: block; margin-bottom: 4px; }
+    #ios-install-toast-close {
+      align-self: flex-end;
+      background: none;
+      border: none;
+      color: #cef0a8;
+      font-size: 18px;
+      line-height: 1;
+      cursor: pointer;
+      padding: 0;
+      margin-top: 4px;
+    }
   </style>
 </head>
 <body>
+  <!-- Loading screen -->
+  <div id="loading-screen">
+    <div id="loading-box">
+      <div id="loading-title">🌿 Grass Animal Tester</div>
+      <div id="loading-sub">Loading assets…</div>
+      <div id="loading-bar-wrap"><div id="loading-bar"></div></div>
+      <div id="loading-pct">0%</div>
+    </div>
+  </div>
+  <!-- Add to Home Screen / Install button -->
+  <button id="install-btn" type="button" aria-label="Add to Home Screen">
+    <span aria-hidden="true">⊕</span> Add to Home Screen
+  </button>
+  <!-- iOS install instructions toast -->
+  <div id="ios-install-toast" role="status">
+    <strong>Add to Home Screen (iOS)</strong>
+    Tap the <strong>Share</strong> button (□↑) in Safari, then choose <strong>"Add to Home Screen"</strong>.
+    <button id="ios-install-toast-close" aria-label="Dismiss">✕</button>
+  </div>
+
   <div class="shell">
     <main class="stage" aria-label="Cute overworld map">
       <canvas id="scene" width="640" height="360"></canvas>
+      <div class="bar-zone bar-zone-top" id="bar-zone-top"></div>
+      <div class="bar-zone bar-zone-bottom" id="bar-zone-bottom"></div>
       <div class="hud" id="hud" aria-live="polite"></div>
+      <div class="currency-hud" id="currency-hud">
+        <div class="currency-item"><span class="currency-icon">🪵</span><span id="currency-logs">0</span></div>
+        <div class="currency-item"><span class="currency-icon">💧</span><span id="currency-blood">0</span></div>
+      </div>
+      <div class="pet-hud" id="pet-hud">
+        <span class="pet-icon">🐾</span><span id="pet-count">0</span>
+      </div>
       <div class="buildbar-line buildbar-line-top" id="buildrow-buildings" aria-label="Buildings">
         <div class="buildbar buildbar-left" id="buildbar-buildings-left"></div>
-        <button class="buildbar-action" id="buildbar-close" type="button">Close this</button>
+        <div class="buildbar-center">
+          <button class="buildbar-action" id="buildbar-close" type="button">Close this</button>
+        </div>
         <div class="buildbar buildbar-right" id="buildbar-buildings"></div>
       </div>
       <div class="buildbar-line buildbar-line-bottom" id="buildrow-tools" aria-label="Tools and usable items">
         <div class="buildbar buildbar-left" id="buildbar-tools-left"></div>
         <button class="buildbar-action" id="buildbar-rotate" type="button">Rotate</button>
-        <div class="buildbar buildbar-right" id="buildbar-tools"></div>
+        <div class="buildbar-right-container">
+          <div class="buildbar buildbar-right" id="buildbar-tools"></div>
+          <button class="build-tool" id="buildbar-fullscreen" type="button"></button>
+        </div>
       </div>
     </main>
+    <div class="test-controls" style="margin-bottom: 8px; display: flex; gap: 8px; align-items: center;">
+      <button id="toggle-time-btn" class="time-toggle-btn" type="button" style="padding: 6px 12px; font-weight: 600; border-radius: 8px; border: 1px solid #c2b399; background: #fffcf8; color: #5c4b37; cursor: pointer; transition: all 0.2s ease;">
+        ☀️ Switch to Night
+      </button>
+      <span id="test-time-label" style="font-size: 11px; color: #7c6c56; font-family: monospace;">Current Phase: DAY (T-Minus 60s)</span>
+    </div>
     <div class="picker" id="picker" aria-label="Character switcher"></div>
-    <div class="caption">Online sprite credits: inkBubi, PIPOYA, AxulArt, RGS_Dev, karsiori, Cup Nooble, Kettoman, Shaade, Tayziulei, Daniel Eddeland, Stephen Challener / PixelFarm, patvanmackelberg, and Bouste.</div>
+    <div class="caption">Online sprite credits: inkBubi, PIPOYA, AxulArt, RGS_Dev, karsiori, Cup Nooble, Kettoman, Shaade, Tayziulei, Daniel Eddeland, Stephen Challener / PixelFarm, patvanmackelberg, Bouste, and Kenney.</div>
   </div>
   <script>
     const VIEW_W = 640;
@@ -341,7 +635,44 @@
       ["rgs_base_square", "RGS Base Square"],
       ["rgs_hero_square", "RGS Hero Square"],
       ["rgs_skeleton_square", "RGS Skeleton Square"],
-      ["rgs_monster_square", "RGS Monster Square"]
+      ["rgs_monster_square", "RGS Monster Square"],
+      ["scary_monster", "Scary Monster"],
+      ["scary_zombie", "Scary Zombie"],
+      ["creature_bear", "Flesh Bear"],
+      ["creature_crawler", "Gore Crawler"],
+      ["creature_slasher", "Flesh Slasher"]
+    ];
+    const kenneyCharacters = [
+      ["kenney_bear", "Kenney Bear"],
+      ["kenney_buffalo", "Kenney Buffalo"],
+      ["kenney_chick", "Kenney Chick"],
+      ["kenney_chicken", "Kenney Chicken"],
+      ["kenney_cow", "Kenney Cow"],
+      ["kenney_crocodile", "Kenney Crocodile"],
+      ["kenney_dog", "Kenney Dog"],
+      ["kenney_duck", "Kenney Duck"],
+      ["kenney_elephant", "Kenney Elephant"],
+      ["kenney_frog", "Kenney Frog"],
+      ["kenney_giraffe", "Kenney Giraffe"],
+      ["kenney_goat", "Kenney Goat"],
+      ["kenney_gorilla", "Kenney Gorilla"],
+      ["kenney_hippo", "Kenney Hippo"],
+      ["kenney_horse", "Kenney Horse"],
+      ["kenney_monkey", "Kenney Monkey"],
+      ["kenney_moose", "Kenney Moose"],
+      ["kenney_narwhal", "Kenney Narwhal"],
+      ["kenney_owl", "Kenney Owl"],
+      ["kenney_panda", "Kenney Panda"],
+      ["kenney_parrot", "Kenney Parrot"],
+      ["kenney_penguin", "Kenney Penguin"],
+      ["kenney_pig", "Kenney Pig"],
+      ["kenney_rabbit", "Kenney Rabbit"],
+      ["kenney_rhino", "Kenney Rhino"],
+      ["kenney_sloth", "Kenney Sloth"],
+      ["kenney_snake", "Kenney Snake"],
+      ["kenney_walrus", "Kenney Walrus"],
+      ["kenney_whale", "Kenney Whale"],
+      ["kenney_zebra", "Kenney Zebra"]
     ];
     const silksongStudyCharacters = [
       ["silksong_hornet", "Hornet Study", 0.24],
@@ -358,11 +689,13 @@
 
     const forestAnimals = [
       ...silksongStudyCharacters.map(([name]) => name),
+      "silksong_hornet_boss", "silksong_silk_boss",
       "fox", "frog", "owl", "doe", "squirle", "bunny", "chicken", "turtle", "cow", "sheep", "pig",
       "sprout_cat", "sprout_chicken", "sprout_cow",
       "green_slime", "blue_slime", "pink_slime", "split_slime", "gold_slime", "shadow_slime", "galaxy_slime", "huge_split_slime",
       ...pipoyaCharacters.map(([name]) => name),
-      ...extraItchCharacters.map(([name]) => name)
+      ...extraItchCharacters.map(([name]) => name),
+      ...kenneyCharacters.map(([name]) => name)
     ];
     const roster = {
       ...Object.fromEntries(silksongStudyCharacters.map(([name, label, scale]) => [name, { label, kind: "forest", base: name, scale, attackMs: 520, smooth: true }])),
@@ -389,7 +722,15 @@
       galaxy_slime: { label: "Galaxy Slime", rarity: "Divine", kind: "forest", base: "galaxy_slime", scale: 1.18, attackMs: 480 },
       huge_split_slime: { label: "Huge Split", rarity: "Secret", kind: "forest", base: "huge_split_slime", scale: 1.28, attackMs: 520 },
       ...Object.fromEntries(pipoyaCharacters.map(([name, label]) => [name, { label, kind: "forest", base: name, scale: 1.45, attackMs: 400 }])),
-      ...Object.fromEntries(extraItchCharacters.map(([name, label]) => [name, { label, kind: "forest", base: name, scale: 1.55, attackMs: 420 }]))
+      ...Object.fromEntries(extraItchCharacters.map(([name, label]) => [name, { label, kind: "forest", base: name, scale: 1.55, attackMs: 420 }])),
+      ...Object.fromEntries(kenneyCharacters.map(([name, label]) => [name, { label, kind: "forest", base: name, scale: 1.6, attackMs: 420 }])),
+      scary_monster: { label: "Scary Monster", kind: "forest", base: "scary_monster", scale: 1.15, attackMs: 480, sideView: true, smooth: true },
+      scary_zombie: { label: "Scary Zombie", kind: "forest", base: "scary_zombie", scale: 1.15, attackMs: 420, sideView: true, smooth: true },
+      creature_bear: { label: "Flesh Bear", kind: "forest", base: "creature_bear", scale: 1.25, attackMs: 420, sideView: true, smooth: true },
+      creature_crawler: { label: "Gore Crawler", kind: "forest", base: "creature_crawler", scale: 11.5, attackMs: 480, sideView: true, smooth: true },
+      creature_slasher: { label: "Flesh Slasher", kind: "forest", base: "creature_slasher", scale: 5.75, attackMs: 880, sideView: true, smooth: true },
+      silksong_hornet_boss: { label: "Hornet Boss", kind: "forest", base: "silksong_hornet_boss", scale: 0.26, attackMs: 520 },
+      silksong_silk_boss: { label: "Silk Boss", kind: "forest", base: "silksong_silk_boss", scale: 0.26, attackMs: 520 }
     };
     silksongStudyCharacters.forEach(([name]) => {
       roster[name].sideView = true;
@@ -404,11 +745,14 @@
       grass: "assets/forest/sprout_grass.png",
       water: "assets/forest/sprout_water.png",
       farmSoil: "assets/plants/farm_soil_tilled.png",
-      toolSheet: "../work/plants/sproutlands/basic/Sprout Lands - Sprites - Basic pack/Characters/Tools.png"
+      toolSheet: "assets/Tools.png"
     };
     const forestFrameCounts = {
       silksong_hornet: { idle: 6, run: 10, stop: 6, skid: 6, attack: 6 },
       silksong_moss_creep: { idle: 6, run: 3, stop: 6, attack: 6 },
+      creature_bear: { idle: 6, run: 6, attack: 6 },
+      creature_crawler: { idle: 7, run: 7, attack: 7 },
+      creature_slasher: { idle: 8, run: 8, attack: 8 },
       silksong_bone_worm: { idle: 4, run: 4, stop: 4, attack: 7 },
       silksong_moss_crawler: { idle: 3, run: 23, stop: 3, attack: 3 },
       silksong_staff_pilgrim: { idle: 6, run: 10, stop: 6, attack: 13 },
@@ -456,11 +800,11 @@
       tiny: { name: "plant_tiny_spruce_tree_green", count: 12, fps: 9, w: 40, h: 68, hits: 5, solid: { x: -7, y: -15, w: 14, h: 16 } }
     };
     const biomeLayers = [
-      { id: "safe", radius: SAFE_RADIUS, tree: "sprout", density: 0.08, tint: null, detail: "meadow" },
-      { id: "shadow", radius: 2300, tree: "shadow", density: 0.62, tint: { a: [76, 54, 33, .38], b: [20, 18, 16, .18] }, detail: "dead" },
-      { id: "goldwood", radius: 3650, tree: "yellow", density: 0.54, tint: { a: [101, 78, 34, .3], b: [46, 34, 18, .1] }, detail: "dry" },
-      { id: "bluewater", radius: 5050, tree: "cold", density: 0.56, tint: { a: [42, 86, 106, .34], b: [13, 33, 47, .14] }, detail: "water" },
-      { id: "deepteal", radius: 99999, tree: "teal", density: 0.68, tint: { a: [24, 75, 63, .34], b: [7, 18, 16, .2] }, detail: "deep" }
+      { id: "safe", displayName: "Meadow", radius: SAFE_RADIUS, tree: "sprout", density: 0.08, tint: null, detail: "meadow" },
+      { id: "shadow", displayName: "Gloomy Woods", radius: 2300, tree: "shadow", density: 0.62, tint: { a: [76, 54, 33, .38], b: [20, 18, 16, .18] }, detail: "dead" },
+      { id: "goldwood", displayName: "Amber Grove", radius: 3650, tree: "yellow", density: 0.54, tint: { a: [101, 78, 34, .3], b: [46, 34, 18, .1] }, detail: "dry" },
+      { id: "bluewater", displayName: "Frost Lake", radius: 5050, tree: "cold", density: 0.56, tint: { a: [42, 86, 106, .34], b: [13, 33, 47, .14] }, detail: "water" },
+      { id: "deepteal", displayName: "Deep Mire", radius: 99999, tree: "teal", density: 0.68, tint: { a: [24, 75, 63, .34], b: [7, 18, 16, .2] }, detail: "deep" }
     ];
     const plantSprites = [
       { name: "plant_tiny_spruce_tree_green", count: 12, fps: 9, w: 40, h: 68, x: 328, y: 390, solid: { x: -7, y: -15, w: 14, h: 16 } },
@@ -532,6 +876,10 @@
     function biomeAt(x, y) {
       const distance = biomeDistanceAt(x, y);
       return biomeLayers.find(layer => distance < layer.radius) || biomeLayers[biomeLayers.length - 1];
+    }
+
+    function biomeDisplayName(id) {
+      return biomeLayers.find(l => l.id === id)?.displayName || id;
     }
 
     function biomeBlendAt(x, y) {
@@ -854,6 +1202,7 @@
     });
 
     const scene = document.getElementById("scene");
+    const stage = scene.closest(".stage");
     const ctx = scene.getContext("2d");
     function resizeSceneCanvas() {
       const rect = scene.getBoundingClientRect();
@@ -876,17 +1225,117 @@
     const buildbarToolsLeft = document.getElementById("buildbar-tools-left");
     const buildbarTools = document.getElementById("buildbar-tools");
     const buildbarClose = document.getElementById("buildbar-close");
+    const buildbarFullscreen = document.getElementById("buildbar-fullscreen");
     const buildbarRotate = document.getElementById("buildbar-rotate");
+    const barZoneTop = document.getElementById("bar-zone-top");
+    const barZoneBottom = document.getElementById("bar-zone-bottom");
+    const currencyHud = document.getElementById("currency-hud");
+    const currencyLogsEl = document.getElementById("currency-logs");
+    const currencyBloodEl = document.getElementById("currency-blood");
+    const petHud = document.getElementById("pet-hud");
+    const petCountEl = document.getElementById("pet-count");
+    let fullscreenBusy = false;
+    let manualFullscreen = null;
+    function isMobileView() {
+      return Math.min(window.innerWidth, window.innerHeight) < 720;
+    }
+    function isLandscapeView() {
+      return window.innerWidth > window.innerHeight;
+    }
+    function wantsFullscreen() {
+      if (manualFullscreen !== null) return manualFullscreen;
+      return isMobileView() && isLandscapeView();
+    }
+    function syncFullscreenClass() {
+      if (!isLandscapeView() && manualFullscreen === false) {
+        manualFullscreen = null;
+      }
+      const isFull = wantsFullscreen() || document.fullscreenElement === stage;
+      document.body.classList.toggle("is-game-fullscreen", isFull);
+      resizeSceneCanvas();
+      updateFullscreenButton();
+    }
+    function updateFullscreenButton() {
+      const isFull = document.fullscreenElement === stage || document.body.classList.contains("is-game-fullscreen");
+      buildbarFullscreen.innerHTML = isFull
+        ? `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 4H4V7M11 4H14V7M7 14H4V11M14 11V14H11"/></svg>`
+        : `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V4H7M11 4H14V7M4 11V14H7M14 11V14H11"/></svg>`;
+      buildbarFullscreen.title = isFull ? "Exit fullscreen" : "Enter fullscreen";
+      buildbarFullscreen.setAttribute("aria-label", isFull ? "Exit fullscreen" : "Enter fullscreen");
+    }
+    function toggleFullscreenManual() {
+      state.demo = false;
+      const isFull = document.fullscreenElement === stage || document.body.classList.contains("is-game-fullscreen");
+      if (isFull) {
+        manualFullscreen = false;
+        if (document.fullscreenElement && document.exitFullscreen) {
+          document.exitFullscreen().catch(() => {});
+        }
+        if (screen.orientation?.unlock) {
+          screen.orientation.unlock();
+        }
+        if (isMobileView() && screen.orientation?.lock) {
+          screen.orientation.lock('portrait').catch(() => {});
+        }
+      } else {
+        manualFullscreen = true;
+        if (stage.requestFullscreen) {
+          stage.requestFullscreen().catch(() => {});
+        }
+        if (isMobileView() && screen.orientation?.lock) {
+          screen.orientation.lock('landscape').catch(() => {});
+        }
+      }
+      syncFullscreenClass();
+    }
+    async function setOrientationFullscreen() {
+      if (fullscreenBusy) return;
+      fullscreenBusy = true;
+      try {
+        const wantsFull = wantsFullscreen();
+        const isCurrentlyFull = document.fullscreenElement === stage;
+        if (wantsFull && !isCurrentlyFull && stage?.requestFullscreen) {
+          history.pushState({ gameFullscreen: true }, "");
+          await stage.requestFullscreen();
+        } else if (!wantsFull && isCurrentlyFull && document.exitFullscreen) {
+          await document.exitFullscreen();
+          if (history.state?.gameFullscreen) history.back();
+        }
+      } catch (_) {
+        // Some browsers need a tap before fullscreen; pointerdown retries.
+      } finally {
+        fullscreenBusy = false;
+        syncFullscreenClass();
+      }
+    }
     const keys = new Set();
-    let tapTimes = [];
-    let pendingBuildTap = 0;
     const images = {};
     const imagePromises = {};
     const forestFrames = {};
     let staticMap;
     const placedSprites = [];
     const farmPlots = [];
-    const ASSET_REV = "one-tree-biomes-water-v55";
+    const roamingNPCs = [];
+    const petSlimes = [];
+    const ASSET_REV = "one-tree-biomes-water-v59";
+    const APP_VERSION = "1.1.30";
+
+    // ── Auto-refresh on new version ───────────────────────
+    // Stores the version in localStorage. If it changed, clears caches and reloads.
+    (async function checkVersion() {
+      const stored = localStorage.getItem("app_version");
+      if (stored && stored !== APP_VERSION) {
+        // New version detected — clear SW cache and hard reload
+        localStorage.setItem("app_version", APP_VERSION);
+        if ("caches" in window) {
+          const keys = await caches.keys();
+          await Promise.all(keys.map(k => caches.delete(k)));
+        }
+        location.reload(true);
+        return;
+      }
+      localStorage.setItem("app_version", APP_VERSION);
+    })();
     const STUDY_CAPTURE_COOLDOWN_MS = 10000;
     const STUDY_CAPTURE_SCAN_STEP_MS = 1450;
     const STUDY_CAPTURE_SHOW_MS = 6500;
@@ -981,6 +1430,19 @@
       stopMode: "stop",
       moveStarted: 0,
       wasMoving: false,
+      timeOfDay: "day",
+      timeRemaining: 60,
+      announcement: null,
+      announcementStart: 0,
+      announcementVisible: 0,
+      announced60: false,
+      announced30: false,
+      announced10: false,
+      announcedNight60: false,
+      announcedNight30: false,
+      announcedNight10: false,
+      screenShakeUntil: 0,
+      screenFlashRedUntil: 0,
       treeHits: 0,
       treesDestroyed: 0,
       lastTreeHit: "",
@@ -1014,11 +1476,15 @@
         pointerId: null,
         startX: 0,
         startY: 0,
+        baseX: 0,
+        baseY: 0,
         x: 0,
         y: 0,
         maxDistance: 76,
         moved: false
       },
+      logs: 0,
+      blood: 0,
       studyCapture: {
         phase: "idle",
         nextAt: performance.now() + STUDY_CAPTURE_COOLDOWN_MS,
@@ -1048,13 +1514,20 @@
       });
     }
 
-    function loadImageCached(src) {
+    function loadImageCached(src, retries = 2) {
       if (images[src]) return Promise.resolve(images[src]);
       if (!imagePromises[src]) {
-        imagePromises[src] = loadImage(src).then(img => {
+        const attempt = (tries) => loadImage(src).then(img => {
           images[src] = img;
           return img;
+        }).catch(err => {
+          if (tries > 0) {
+            // wait 400ms then retry
+            return new Promise(r => setTimeout(r, 400)).then(() => attempt(tries - 1));
+          }
+          return null; // give up silently
         });
+        imagePromises[src] = attempt(retries);
       }
       return imagePromises[src];
     }
@@ -1284,17 +1757,66 @@
       }
     }
 
-	    function buildStaticMap() {
-      staticMap = document.createElement("canvas");
-      staticMap.width = WORLD_W;
-      staticMap.height = WORLD_H;
-      const m = staticMap.getContext("2d");
+    // ── Chunk-based tile cache ─────────────────────────────
+    const CHUNK_PX = 512; // size of each cached chunk in pixels
+    const chunkCache = new Map(); // key: "cx,cy" → offscreen canvas
+
+    function getChunk(cx, cy) {
+      const key = `${cx},${cy}`;
+      if (chunkCache.has(key)) return chunkCache.get(key);
+      // Build this chunk synchronously — only ~18×16 tiles per chunk
+      const chunkX = cx * CHUNK_PX;
+      const chunkY = cy * CHUNK_PX;
+      const chunkW = Math.min(CHUNK_PX, WORLD_W - chunkX);
+      const chunkH = Math.min(CHUNK_PX, WORLD_H - chunkY);
+      if (chunkW <= 0 || chunkH <= 0) return null;
+      const offscreen = document.createElement("canvas");
+      offscreen.width = chunkW;
+      offscreen.height = chunkH;
+      const m = offscreen.getContext("2d");
       m.imageSmoothingEnabled = false;
       const grass = images[assets.grass];
+      for (let row = 0; row < chunkH; row += TILE) {
+        for (let col = 0; col < chunkW; col += TILE) {
+          const wx = chunkX + col;
+          const wy = chunkY + row;
+          // drawGrassTile uses world coords for hash/biome, draws into m at (wx,wy)
+          // We need to translate so it draws at chunk-local coords
+          m.save();
+          m.translate(-chunkX, -chunkY);
+          drawGrassTile(m, grass, wx, wy, (wx / TILE) * 5 + (wy / TILE) * 3);
+          m.restore();
+        }
+      }
+      chunkCache.set(key, offscreen);
+      return offscreen;
+    }
 
-      for (let y = 0; y < WORLD_H; y += TILE) {
-        for (let x = 0; x < WORLD_W; x += TILE) {
-          drawGrassTile(m, grass, x, y, (x / TILE) * 5 + (y / TILE) * 3);
+    function buildStaticMap() {
+      // No-op — chunks are built on demand in drawVisibleGrass
+    }
+
+    function drawVisibleGrass() {
+      const camX = state.cameraX;
+      const camY = state.cameraY;
+      const vw = viewWorldW();
+      const vh = viewWorldH();
+
+      // Which chunks overlap the viewport?
+      const startCX = Math.floor(camX / CHUNK_PX);
+      const startCY = Math.floor(camY / CHUNK_PX);
+      const endCX = Math.floor((camX + vw) / CHUNK_PX);
+      const endCY = Math.floor((camY + vh) / CHUNK_PX);
+
+      for (let cy = startCY; cy <= endCY; cy++) {
+        for (let cx = startCX; cx <= endCX; cx++) {
+          const chunk = getChunk(cx, cy);
+          if (!chunk) continue;
+          // World position of this chunk's top-left corner
+          const wx = cx * CHUNK_PX;
+          const wy = cy * CHUNK_PX;
+          // Screen position (ctx is already translated by camera in the render loop)
+          ctx.drawImage(chunk, wx, wy);
         }
       }
     }
@@ -1328,6 +1850,7 @@
       const modes = ["idle", "run"];
       if (counts?.stop) modes.push("stop");
       if (counts?.skid) modes.push("skid");
+      if (counts?.die) modes.push("die");
       modes.push("attack");
       for (const mode of modes) {
         for (const dir of DIRECTIONS) {
@@ -1341,7 +1864,11 @@
     async function loadForestAnimal(base) {
       if (!forestFrames[base]) forestFrames[base] = getForestFramePaths(base);
       if (forestFrames[base].loaded) return;
-      await Promise.all(Object.values(forestFrames[base]).flat().map(loadImageCached));
+      await Promise.all(
+        Object.values(forestFrames[base]).flat().map(src =>
+          loadImageCached(src).catch(() => null)
+        )
+      );
       forestFrames[base].loaded = true;
     }
 
@@ -1488,9 +2015,9 @@
         const isStopMode = state.mode === "stop" || state.mode === "skid";
         const mode = isStopMode && !forestFrames[cfg.base][`${state.mode}-${dir}`] ? "idle" : state.mode;
         const frames = forestFrames[cfg.base][`${mode}-${dir}`] || forestFrames[cfg.base][`idle-${dir}`];
-        const fps = mode === "attack" ? (cfg.attackFps || 9) : mode === "skid" ? (cfg.skidFps || cfg.stopFps || 12) : mode === "stop" ? (cfg.stopFps || 12) : mode === "run" ? (cfg.runFps || 9) : (cfg.idleFps || 5);
-        const started = mode === "attack" ? state.attackStarted : mode === "stop" || mode === "skid" ? state.stopStarted : 0;
-        const playOnce = mode === "attack" || mode === "stop" || mode === "skid";
+        const fps = mode === "attack" ? (cfg.attackFps || 9) : mode === "die" ? (cfg.dieFps || 6) : mode === "skid" ? (cfg.skidFps || cfg.stopFps || 12) : mode === "stop" ? (cfg.stopFps || 12) : mode === "run" ? (cfg.runFps || 9) : (cfg.idleFps || 5);
+        const started = mode === "attack" ? state.attackStarted : mode === "die" ? state.dieStarted : mode === "stop" || mode === "skid" ? state.stopStarted : 0;
+        const playOnce = mode === "attack" || mode === "stop" || mode === "skid" || mode === "die";
         const t = playOnce ? Math.max(0, performance.now() - started) / 1000 : state.t;
         const index = playOnce ? Math.min(frames.length - 1, Math.floor(t * fps)) : Math.floor(t * fps) % frames.length;
         const image = images[frames[index]];
@@ -1501,17 +2028,80 @@
       return { image: images[cfg.src], sx, sy, sw: cfg.frameW, sh: cfg.frameH, scale: cfg.scale };
     }
 
+    function npcFrame(npc) {
+      const cfg = roster[npc.base];
+      if (!cfg || cfg.kind !== "forest") return null;
+      const dir = cfg.sideView ? sideFacingDir(npc.dir) : npc.dir;
+      const mode = npc.mode;
+      const frames = forestFrames[npc.base][`${mode}-${dir}`] || forestFrames[npc.base][`idle-${dir}`];
+      if (!frames) return null;
+      const multiplier = (mode === "run" ? (npc.animSpeedOverride || 1.0) : 1.0);
+      const fps = (mode === "attack" ? (cfg.attackFps || 9) : mode === "run" ? (cfg.runFps || 9) : (cfg.idleFps || 5)) * multiplier;
+      const started = mode === "attack" ? (npc.attackStarted || npc.t) : 0;
+      const playOnce = mode === "attack";
+      const t = playOnce ? Math.max(0, performance.now() - started) / 1000 : npc.t;
+      const index = playOnce ? Math.min(frames.length - 1, Math.floor(t * fps)) : Math.floor(t * fps) % frames.length;
+      const image = images[frames[index]];
+      if (!image) return null;
+      return { image, sx: 0, sy: 0, sw: image.width, sh: image.height, scale: npc.scaleOverride || cfg.scale, smooth: cfg.smooth };
+    }
+
     function playerDrawSize(frame) {
       const w = Math.round(frame.sw * frame.scale * CHARACTER_WORLD_SCALE);
       const h = Math.round(frame.sh * frame.scale * CHARACTER_WORLD_SCALE);
       return { w, h };
     }
 
-    function drawPlayerAt(frame, x, y) {
+    function drawPlayerAt(frame, x, y, shake = 0, scaleFactor = 1) {
       const { w, h } = playerDrawSize(frame);
+      const drawW = Math.round(w * scaleFactor);
+      const drawH = Math.round(h * scaleFactor);
       ctx.imageSmoothingEnabled = Boolean(frame.smooth);
-      ctx.drawImage(frame.image, frame.sx, frame.sy, frame.sw, frame.sh, Math.round(x - w / 2), Math.round(y - h + 10), w, h);
+      ctx.drawImage(frame.image, frame.sx, frame.sy, frame.sw, frame.sh, Math.round(x - drawW / 2 + shake), Math.round(y - drawH + 10), drawW, drawH);
       ctx.imageSmoothingEnabled = false;
+    }
+
+    function drawEvaporatingNPC(frame, x, y, elapsed, shake = 0, npc = null) {
+      const { w, h } = playerDrawSize(frame);
+      const p = Math.min(1, elapsed / NPC_EVAPORATE_MS);
+      const alpha = 1 - p;
+      const scale = 1 - p * 0.25;
+      const driftY = -p * 12;
+      const drawW = Math.round(w * scale);
+      const drawH = Math.round(h * scale);
+      const drawX = Math.round(x - drawW / 2 + shake);
+      const drawY = Math.round(y - drawH + 10 + driftY);
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.imageSmoothingEnabled = Boolean(frame.smooth);
+      ctx.drawImage(frame.image, frame.sx, frame.sy, frame.sw, frame.sh, drawX, drawY, drawW, drawH);
+      ctx.imageSmoothingEnabled = false;
+      
+      const seed = Math.floor(x * 1000 + y);
+      if (npc && npc.isSuicideSpider) {
+        ctx.fillStyle = `rgba(100, 240, 40, ${alpha * 0.85})`;
+        const particleCount = 18;
+        for (let i = 0; i < particleCount; i++) {
+          const angle = (i / particleCount) * Math.PI * 2 + seed;
+          const speed = p * 36;
+          const px = Math.round(x + Math.cos(angle) * speed);
+          const py = Math.round(y - h/2 + Math.sin(angle) * speed + driftY);
+          const size = Math.max(1, Math.round(3.5 - p * 2.5));
+          ctx.fillRect(px, py, size, size);
+        }
+      } else {
+        ctx.fillStyle = `rgba(180, 210, 180, ${alpha * 0.7})`;
+        const dustCount = 6 + Math.floor(p * 4);
+        for (let i = 0; i < dustCount; i++) {
+          const dx = (Math.sin(seed + i * 3.7) * 0.5 + 0.5) * drawW - drawW / 2;
+          const dy = (Math.cos(seed + i * 5.3) * 0.5 + 0.5) * drawH - drawH;
+          const px = Math.round(x + dx + (p * 8 * Math.sin(seed + i * 2.1)));
+          const py = Math.round(y + dy + driftY - p * 16 * (0.5 + (i % 3) * 0.25));
+          const size = Math.max(1, Math.round(2 - p * 1.5));
+          ctx.fillRect(px, py, size, size);
+        }
+      }
+      ctx.restore();
     }
 
     function wrapDialogueText(text, maxChars) {
@@ -1634,7 +2224,15 @@
     }
 
     function drawPlant(plant) {
-      const index = plant.chest ? chestFrameIndex(plant) : Math.floor((state.t + plant.x * 0.003) * plant.fps) % plant.count;
+      let index;
+      if (plant.chest) {
+        index = chestFrameIndex(plant);
+      } else if (plant.tree && Math.hypot(plant.x - state.x, plant.y - state.y) > 550) {
+        // Far tree: freeze at a static frame to save animation calc
+        index = Math.floor(plant.x * 0.003 * plant.fps) % plant.count;
+      } else {
+        index = Math.floor((state.t + plant.x * 0.003) * plant.fps) % plant.count;
+      }
       const img = images[`assets/plants/${plant.name}/frame_${index}.png`];
       if (!img) return;
       let shake = 0;
@@ -1647,23 +2245,43 @@
       }
       const crop = plant.crop || { sx: 0, sy: 0, sw: img.width, sh: img.height };
       const rotateSteps = ((plant.rotateSteps || 0) % 4 + 4) % 4;
-      if (rotateSteps) {
+      let sway = 0;
+      if (plant.tree && plant.isAttacking) {
+        sway = Math.sin(performance.now() * 0.009) * 0.12;
+      }
+      if (rotateSteps || sway) {
         const drawW = plant.baseW || plant.w;
         const drawH = plant.baseH || plant.h;
         ctx.save();
-        ctx.translate(Math.round(plant.x + shake), Math.round(plant.y - plant.h / 2));
-        ctx.rotate(rotateSteps * Math.PI / 2);
-        ctx.drawImage(
-          img,
-          crop.sx,
-          crop.sy,
-          crop.sw,
-          crop.sh,
-          Math.round(-drawW / 2),
-          Math.round(-drawH / 2),
-          drawW,
-          drawH
-        );
+        ctx.translate(Math.round(plant.x + shake), Math.round(plant.y));
+        if (rotateSteps) {
+          ctx.translate(0, -plant.h / 2);
+          ctx.rotate(rotateSteps * Math.PI / 2);
+          ctx.drawImage(
+            img,
+            crop.sx,
+            crop.sy,
+            crop.sw,
+            crop.sh,
+            Math.round(-drawW / 2),
+            Math.round(-drawH / 2),
+            drawW,
+            drawH
+          );
+        } else {
+          ctx.rotate(sway);
+          ctx.drawImage(
+            img,
+            crop.sx,
+            crop.sy,
+            crop.sw,
+            crop.sh,
+            Math.round(-drawW / 2),
+            Math.round(-drawH),
+            drawW,
+            drawH
+          );
+        }
         ctx.restore();
         return;
       }
@@ -1730,6 +2348,59 @@
           actors.push({
             y: -100000 + plot.y * 0.001,
             draw: () => drawFarmCrop(plot, stage)
+          });
+        }
+        // Add roaming NPCs (slimes) to the depth-sorted draw list
+        for (const npc of roamingNPCs) {
+          const npcFrameObj = npcFrame(npc);
+          if (!npcFrameObj) continue;
+          const pad = 180;
+          const onScreen = npc.x + 40 > state.cameraX - pad && npc.x - 40 < state.cameraX + viewWorldW() + pad && npc.y + 40 > state.cameraY - pad && npc.y - 40 < state.cameraY + viewWorldH() + pad;
+          if (!onScreen) continue;
+          let shake = 0;
+          if (npc.hitStarted) {
+            const elapsed = performance.now() - npc.hitStarted;
+            if (elapsed < NPC_HIT_SHAKE_MS) {
+              const p = elapsed / NPC_HIT_SHAKE_MS;
+              shake = Math.sin(p * Math.PI * 10) * (1 - p) * 6 * (npc.hitDir || 1);
+            }
+          }
+          if (npc.dead) {
+            const elapsed = performance.now() - npc.deadAt;
+            if (elapsed < NPC_EVAPORATE_MS) {
+              actors.push({
+                y: npc.y,
+                draw: () => drawEvaporatingNPC(npcFrameObj, npc.x, npc.y, elapsed, shake, npc)
+              });
+            }
+            continue;
+          }
+          actors.push({
+            y: npc.y,
+            draw: () => drawPlayerAt(npcFrameObj, npc.x, npc.y, shake)
+          });
+        }
+        // Add pet slimes to the depth-sorted draw list
+        for (const pet of petSlimes) {
+          const petFrameObj = npcFrame(pet);
+          if (!petFrameObj) continue;
+          const pad = 180;
+          const onScreen = pet.x + 40 > state.cameraX - pad && pet.x - 40 < state.cameraX + viewWorldW() + pad && pet.y + 40 > state.cameraY - pad && pet.y - 40 < state.cameraY + viewWorldH() + pad;
+          if (!onScreen) continue;
+          let shake = 0;
+          if (pet.hitStarted) {
+            const elapsed = performance.now() - pet.hitStarted;
+            if (elapsed < NPC_HIT_SHAKE_MS) {
+              const p = elapsed / NPC_HIT_SHAKE_MS;
+              shake = Math.sin(p * Math.PI * 10) * (1 - p) * 6 * (pet.hitDir || 1);
+            }
+          }
+          actors.push({
+            y: pet.y,
+            draw: () => {
+              drawPlayerAt(petFrameObj, pet.x, pet.y, shake, pet.scale || 1);
+              drawPetIndicator(pet, pet.x, pet.y);
+            }
           });
         }
       }
@@ -1874,6 +2545,11 @@
     function updateStudyCapture(now) {
       const study = state.studyCapture;
       const currentBiomeId = state.scene === "outside" ? biomeAt(state.x, state.y).id : "";
+      
+      const isNearNight = state.timeOfDay === "day" && state.timeRemaining <= 10;
+      const isNight = state.timeOfDay === "night";
+      const isLocked = isNearNight || isNight;
+      
       if (state.scene !== "outside") {
         if (study.phase !== "idle") {
           study.phase = "idle";
@@ -1886,9 +2562,22 @@
         study.lastBiomeId = currentBiomeId;
         return;
       }
+      
       if (currentBiomeId && currentBiomeId !== study.lastBiomeId) {
         study.lastBiomeId = currentBiomeId;
         study.pendingBiomeId = currentBiomeId;
+      }
+      
+      if (isLocked) {
+        if (study.phase !== "idle") {
+          study.phase = "idle";
+          study.candidates = [];
+          study.target = null;
+          study.images = [];
+          study.scanIndex = 0;
+        }
+        study.pendingBiomeId = ""; // Discard pending biome entries during lock
+        return;
       }
       if (study.phase === "idle") {
         if (!study.pendingBiomeId || now < study.nextAt) return;
@@ -2264,7 +2953,19 @@
       state.buildUiOpen = open;
       buildrowBuildings.classList.toggle("open", state.buildUiOpen);
       buildrowTools.classList.toggle("open", state.buildUiOpen);
+      if (currencyHud) currencyHud.classList.toggle("show", state.buildUiOpen);
+      if (petHud) petHud.classList.toggle("show", petSlimes.length > 0 && state.buildUiOpen);
       if (!state.buildUiOpen) state.buildHover.active = false;
+    }
+
+    function updateCurrencyHud() {
+      if (currencyLogsEl) currencyLogsEl.textContent = state.logs;
+      if (currencyBloodEl) currencyBloodEl.textContent = state.blood;
+      const maxLevel = petSlimes.reduce((max, pet) => Math.max(max, pet.level || 1), 1);
+      if (petCountEl) {
+        petCountEl.textContent = petSlimes.length > 0 ? `${petSlimes.length} (Max Lv. ${maxLevel})` : "0";
+      }
+      if (petHud) petHud.classList.toggle("show", petSlimes.length > 0 && state.buildUiOpen);
     }
 
     function toggleBuildUi() {
@@ -2424,7 +3125,9 @@
         x,
         y,
         built: true,
-        chestAnimStarted: 0
+        chestAnimStarted: 0,
+        maxHp: item.maxHp || 5,
+        hp: item.maxHp || 5
       };
       if (placed.tree || isTreeName(placed.name)) {
         placed.tree = true;
@@ -2453,6 +3156,51 @@
       return placedSprites.find(item => item.scene === sceneName && item.buildId === "wall" && item.x === x && item.y === y);
     }
 
+    const GACHA_TIERS = [
+      { chance: 50, wood: 1 },    // 50% - 1 wood
+      { chance: 30, wood: 2 },    // 30% - 2 wood
+      { chance: 10, wood: 5 },    // 10% - 5 wood
+      { chance: 5, wood: 10 },    // 5% - 10 wood
+      { chance: 3, wood: 20 },    // 3% - 20 wood
+      { chance: 1, wood: 50 },    // 1% - 50 wood
+      { chance: 0.5, wood: 100 }, // 0.5% - 100 wood
+      { chance: 0.25, wood: 250 },// 0.25% - 250 wood
+      { chance: 0.125, wood: 1000 } // 0.125% - 1000 wood
+    ];
+
+    function spawnGachaChest() {
+      const now = performance.now();
+      const angle = Math.random() * Math.PI * 2;
+      const dist = 120 + Math.random() * 180;
+      const cx = Math.max(80, Math.min(WORLD_W - 80, state.x + Math.cos(angle) * dist));
+      const cy = Math.max(80, Math.min(WORLD_H - 80, state.y + Math.sin(angle) * dist));
+      placedSprites.push({
+        scene: "outside",
+        buildId: "gacha-chest",
+        name: "prop_sprout_chest",
+        count: 5,
+        fps: 12,
+        w: 44,
+        h: 44,
+        x: cx,
+        y: cy,
+        solid: { x: -14, y: -14, w: 28, h: 18 },
+        chest: true,
+        gachaChest: true,
+        open: false,
+        chestAnimStarted: 0,
+        built: true
+      });
+    }
+
+    function clearGachaChests() {
+      for (let i = placedSprites.length - 1; i >= 0; i--) {
+        if (placedSprites[i].gachaChest) {
+          placedSprites.splice(i, 1);
+        }
+      }
+    }
+
     function nearestChest() {
       return activeSprites()
         .filter(item => item.chest)
@@ -2464,6 +3212,41 @@
     function toggleNearestChest() {
       const chest = nearestChest();
       if (!chest) return false;
+      if (chest.gachaChest) {
+        if (chest.open) return true;
+        chest.open = true;
+        chest.chestAnimStarted = performance.now();
+        const roll = Math.random() * 100;
+        let cumulative = 0;
+        let prize = 0;
+        for (const tier of GACHA_TIERS) {
+          cumulative += tier.chance;
+          if (roll < cumulative) {
+            prize = tier.wood;
+            break;
+          }
+        }
+        state.logs += prize;
+        updateCurrencyHud();
+        const rarityLabels = ["Common", "Common", "Uncommon", "Rare", "Rare", "Epic", "Epic", "Legendary", "MYTHIC"];
+        const tierIdx = GACHA_TIERS.findIndex(t => t.wood === prize);
+        const rarity = rarityLabels[tierIdx] || "Common";
+        showScaryAnnouncement(
+          `GACHA CHEST OPENED!`,
+          `Kamu mendapatkan ${prize} wood!`,
+          `You got ${prize} wood!`,
+          `RARITY: ${rarity} | ROLL: ${roll.toFixed(3)}%`,
+          `[LOGS: ${state.logs}]`,
+          "",
+          4000
+        );
+        setTimeout(() => {
+          const idx = placedSprites.indexOf(chest);
+          if (idx >= 0) placedSprites.splice(idx, 1);
+        }, 1200);
+        state.demo = false;
+        return true;
+      }
       chest.open = !chest.open;
       chest.chestAnimStarted = performance.now();
       state.demo = false;
@@ -2499,19 +3282,19 @@
     }
 
     function hitTreeInFront() {
-      if (state.scene !== "outside") return false;
+      if (state.scene !== "outside") return null;
       const hit = attackTargetRect();
       const target = allTreeSprites()
         .filter(tree => !tree.destroyed)
         .map(tree => ({ tree, rect: treeTargetRect(tree), dist: Math.hypot(tree.x - state.x, tree.y - state.y) }))
         .filter(entry => aabb(hit.x, hit.y, hit.w, hit.h, entry.rect.x, entry.rect.y, entry.rect.w, entry.rect.h))
         .sort((a, b) => a.dist - b.dist)[0]?.tree;
-      if (!target) return false;
-      damageTree(target);
-      return true;
+      if (!target) return null;
+      damageTree(target, state);
+      return target;
     }
 
-    function damageTree(tree) {
+    function damageTree(tree, attacker = null) {
       const now = performance.now();
       if (!tree.maxHp) tree.maxHp = treeMaxHp(tree.treeType || "sprout", tree.w, tree.h, hash01(tree.x, tree.y, 48));
       tree.hp = Math.max(0, (tree.hp ?? tree.maxHp) - 1);
@@ -2519,10 +3302,20 @@
       tree.hitDir = state.attackDir === "left" ? -1 : 1;
       state.treeHits += 1;
       state.lastTreeHit = `${tree.name}:${tree.hp}/${tree.maxHp}`;
+      
+      // Update tree combat target based on last attacker
+      if (attacker && attacker !== state) {
+        tree.combatTarget = attacker;
+      } else {
+        tree.combatTarget = "player";
+      }
+      
       if (tree.hp > 0) return;
       tree.destroyed = true;
       tree.respawnAt = now + (tree.respawnMs || TREE_RESPAWN_MS) + hash01(tree.x, tree.y, 49) * TREE_RESPAWN_JITTER_MS;
       state.treesDestroyed += 1;
+      state.logs += 1;
+      updateCurrencyHud();
     }
 
     function updateTreeRespawns(now) {
@@ -2548,6 +3341,536 @@
         tree.hitDir = 1;
       }
     }
+
+    function showScaryAnnouncement(title, sentence, english, info, status, extra, durationMs = 8000) {
+      state.announcement = { title, sentence, english, info, status, extra };
+      state.announcementStart = performance.now();
+      state.announcementVisible = performance.now() + durationMs;
+    }
+
+    function updateDayNightCycle(now, dt) {
+      if (state.scene !== "outside") return;
+      state.timeRemaining = Math.max(0, state.timeRemaining - dt);
+      
+      if (state.timeOfDay === "day") {
+        if (state.timeRemaining <= 60 && !state.announced60) {
+          showScaryAnnouncement(
+            "LOG // SENJA (TWILIGHT)",
+            "Senja telah tiba, kegelapan mulai memanggil.",
+            "Twilight has arrived, darkness begins to call.",
+            "ROOT: s-n-j-a (noun) | PHASE: transition to hostile environment",
+            "SIGNAL QUALITY: 92% | THREAT SCALE: MODERATE",
+            "[T-MINUS: 60 SECONDS]"
+          );
+          state.announced60 = true;
+        }
+        if (state.timeRemaining <= 30 && !state.announced30) {
+          showScaryAnnouncement(
+            "LOG // MALAPETAKA (CALAMITY)",
+            "Malapetaka mendekat dalam tiga puluh detik.",
+            "Doom approaches in thirty seconds.",
+            "ROOT: m-l-p-t-k (noun) | PHASE: evacuation window closing",
+            "SIGNAL QUALITY: 74% | THREAT SCALE: HIGH",
+            "[T-MINUS: 30 SECONDS]"
+          );
+          state.announced30 = true;
+        }
+        if (state.timeRemaining <= 10 && !state.announced10) {
+          showScaryAnnouncement(
+            "LOG // KEMATIAN (DEATH)",
+            "Kematian menanti di dalam kegelapan malam.",
+            "Death awaits in the dark of night.",
+            "ROOT: k-m-t-n (noun) | PHASE: lock down fences immediately",
+            "SIGNAL QUALITY: 41% | THREAT SCALE: CRITICAL",
+            "[T-MINUS: 10 SECONDS]"
+          );
+          state.announced10 = true;
+        }
+        if (state.timeRemaining <= 0) {
+          state.timeOfDay = "night";
+          state.timeRemaining = 120;
+          state.announced60 = false;
+          state.announced30 = false;
+          state.announced10 = false;
+          state.nightCount = (state.nightCount || 0) + 1;
+          spawnNightMonsters(now);
+          spawnGachaChest();
+          
+          showScaryAnnouncement(
+            "LOG // MALAM (NIGHT)",
+            "Malam telah tiba... bertahan hidup lah!",
+            "Night has fallen... survive!",
+            "ROOT: m-l-m (noun) | PHASE: hostile entities active",
+            "SIGNAL QUALITY: 15% (CORRUPTED) | THREAT SCALE: MAXIMAL",
+            `[SYSTEM STATE: NIGHT LOCKDOWN - NIGHT ${state.nightCount}]`
+          );
+          state.screenShakeUntil = now + 600;
+          state.screenFlashRedUntil = now + 400;
+        }
+      } else {
+        if (state.timeRemaining <= 60 && !state.announcedNight60) {
+          showScaryAnnouncement(
+            "LOG // FAJAR (DAWN)",
+            "Fajar akan menyingsing, bertahanlah satu menit lagi.",
+            "Dawn will break, survive one more minute.",
+            "ROOT: f-j-r (noun) | PHASE: ambient light recovery commencing",
+            "SIGNAL QUALITY: 45% | THREAT SCALE: DECREASING",
+            "[T-MINUS: 60 SECONDS]"
+          );
+          state.announcedNight60 = true;
+        }
+        if (state.timeRemaining <= 30 && !state.announcedNight30) {
+          showScaryAnnouncement(
+            "LOG // HARAPAN (HOPE)",
+            "Harapan kembali dalam tiga puluh detik.",
+            "Hope returns in thirty seconds.",
+            "ROOT: h-r-p-n (noun) | PHASE: entity retreat protocol active",
+            "SIGNAL QUALITY: 68% | THREAT SCALE: LOW",
+            "[T-MINUS: 30 SECONDS]"
+          );
+          state.announcedNight30 = true;
+        }
+        if (state.timeRemaining <= 10 && !state.announcedNight10) {
+          showScaryAnnouncement(
+            "LOG // CAHAYA (LIGHT)",
+            "Cahaya pagi akan segera menyelamatkanmu.",
+            "The morning light will save you shortly.",
+            "ROOT: c-h-y (noun) | PHASE: sunrise sequence initiated",
+            "SIGNAL QUALITY: 89% | THREAT SCALE: MINIMAL",
+            "[T-MINUS: 10 SECONDS]"
+          );
+          state.announcedNight10 = true;
+        }
+        if (state.timeRemaining <= 0) {
+          // Clear all remaining night monsters when morning arrives!
+          for (let i = roamingNPCs.length - 1; i >= 0; i--) {
+            if (roamingNPCs[i].isNightMonster) {
+              roamingNPCs.splice(i, 1);
+            }
+          }
+          clearGachaChests();
+          state.timeOfDay = "day";
+          state.timeRemaining = 60;
+          state.announcedNight60 = false;
+          state.announcedNight30 = false;
+          state.announcedNight10 = false;
+          
+          showScaryAnnouncement(
+            "LOG // PAGI (MORNING)",
+            "Pagi telah datang. Cahaya mengusir kegelapan.",
+            "Morning has come. The light banishes the darkness.",
+            "ROOT: p-g-i (noun) | PHASE: ambient shadows cleared",
+            "SIGNAL QUALITY: 99% (STABLE) | THREAT SCALE: SAFE",
+            "[SYSTEM STATE: SAFE MODE]"
+          );
+          
+          for (const tree of allTreeSprites()) {
+            tree.isAttacking = false;
+          }
+          state.screenShakeUntil = now + 400;
+        } else {
+          // Night 2: Spiders constantly spawn if all die
+          if ((state.nightCount || 1) % 3 === 2) {
+            const aliveSpiders = roamingNPCs.filter(n => n.isNightMonster && n.base === "creature_crawler" && !n.dead);
+            if (aliveSpiders.length === 0) {
+              spawnNightMonsters(now);
+            }
+          }
+        }
+      }
+      
+      const btn = document.getElementById("toggle-time-btn");
+      const lbl = document.getElementById("test-time-label");
+      if (btn && lbl) {
+        const isNight = state.timeOfDay === "night";
+        btn.textContent = isNight ? "☀️ Switch to Day" : "🌙 Switch to Night";
+        lbl.textContent = `Phase: ${state.timeOfDay.toUpperCase()} (${Math.ceil(state.timeRemaining)}s remaining) | Night: ${state.nightCount || 0}`;
+      }
+      
+      if (state.announcement) {
+        if (now > state.announcementVisible) {
+          state.announcement = null;
+        }
+      }
+    }
+
+    function triggerScaryHit(dx, dy, source = null) {
+      const now = performance.now();
+      state.screenShakeUntil = now + 450;
+      state.screenFlashRedUntil = now + 180;
+      
+      let shouts = [
+        "Aargh! The tree attacked me!",
+        "Watch out! They are moving!",
+        "Ouch! Stay back!",
+        "The forest... it's alive!",
+        "Run! The trees are awake!"
+      ];
+      if (source && source.isNightMonster) {
+        shouts = [
+          "Aargh! A monster!",
+          "Get back, beast!",
+          "It's tearing me apart!",
+          "Stay away from me!",
+          "Help! It's too strong!"
+        ];
+      }
+      const shout = shouts[Math.floor(Math.random() * shouts.length)];
+      state.dialogueCooldownUntil = 0;
+      sayDialogue(shout, 10, 1600);
+      
+      // Retaliate with pets
+      if (source) {
+        triggerPetAttacks(source);
+      }
+    }
+
+    function findTreeObstacle(x, y, tree) {
+      const feet = { x: x - 9, y: y - 6, w: 18, h: 8 };
+      return activeSprites().find(sprite => {
+        if (sprite === tree || sprite.tree || !sprite.solid) return false;
+        if (sprite.destroyed || sprite.dead) return false;
+        const solid = solidRectFor(sprite);
+        if (!solid) return false;
+        return aabb(feet.x, feet.y, feet.w, feet.h, solid.x, solid.y, solid.w, solid.h);
+      });
+    }
+
+    function findNpcObstacle(x, y, npc) {
+      const feet = { x: x - 8, y: y - 8, w: 16, h: 16 };
+      return activeSprites().find(sprite => {
+        if (sprite === npc || sprite.tree || !sprite.solid) return false;
+        if (sprite.destroyed || sprite.dead) return false;
+        const solid = solidRectFor(sprite);
+        if (!solid) return false;
+        return aabb(feet.x, feet.y, feet.w, feet.h, solid.x, solid.y, solid.w, solid.h);
+      });
+    }
+
+    function damageBuilding(building, amount = 1) {
+      if (building.hp === undefined) {
+        building.maxHp = building.maxHp || 5;
+        building.hp = building.maxHp;
+      }
+      building.hp = Math.max(0, building.hp - amount);
+      building.hitStarted = performance.now();
+      building.hitDir = Math.random() < 0.5 ? 1 : -1;
+      
+      if (building.hp <= 0) {
+        const placedIdx = placedSprites.indexOf(building);
+        if (placedIdx >= 0) {
+          placedSprites.splice(placedIdx, 1);
+          refreshWallConnections();
+        }
+        const plantIdx = plantSprites.indexOf(building);
+        if (plantIdx >= 0) {
+          plantSprites.splice(plantIdx, 1);
+        }
+        
+        const shout = `A tree broke my ${building.name || "structure"}!`;
+        state.dialogueCooldownUntil = 0;
+        sayDialogue(shout, 10, 1500);
+      }
+    }
+
+    function updateMovingTrees(now, dt) {
+      if (state.scene !== "outside") return;
+      const isNight = state.timeOfDay === "night";
+      
+      if (!isNight) {
+        for (const tree of allTreeSprites()) {
+          tree.isAttacking = false;
+          tree.combatTarget = null;
+          tree.stuckTicks = 0;
+        }
+        return;
+      }
+      
+      const candidates = [];
+      for (const tree of allTreeSprites()) {
+        if (tree.destroyed) {
+          tree.isAttacking = false;
+          tree.combatTarget = null;
+          tree.stuckTicks = 0;
+          continue;
+        }
+        
+        let targetX = state.x;
+        let targetY = state.y;
+        
+        if (!tree.combatTarget) {
+          tree.combatTarget = "player";
+        }
+        
+        if (tree.combatTarget !== "player") {
+          const pet = tree.combatTarget;
+          if (pet && petSlimes.includes(pet) && !pet.destroyed && !pet.dead) {
+            targetX = pet.x;
+            targetY = pet.y;
+          } else {
+            tree.combatTarget = "player";
+          }
+        }
+        
+        const dist = Math.hypot(tree.x - targetX, tree.y - targetY);
+        if (dist > 350) {
+          tree.isAttacking = false;
+        }
+        if (dist < 280) {
+          candidates.push({ tree, dist, targetX, targetY, combatTarget: tree.combatTarget });
+        } else if (tree.isAttacking) {
+          candidates.push({ tree, dist, targetX, targetY, combatTarget: tree.combatTarget });
+        }
+      }
+      
+      candidates.sort((a, b) => a.dist - b.dist);
+      
+      for (let i = 0; i < candidates.length; i++) {
+        const { tree, dist, targetX, targetY, combatTarget } = candidates[i];
+        if (i === 0) {
+          tree.isAttacking = true;
+          if (tree.pauseUntil && now < tree.pauseUntil) continue;
+          
+          const dx = targetX - tree.x;
+          const dy = targetY - tree.y;
+          
+          let isMoving = false;
+          if (dist > 18) {
+            const speed = 12;
+            const stepX = (dx / dist) * speed * dt;
+            const stepY = (dy / dist) * speed * dt;
+            
+            const nextX = tree.x + stepX;
+            const nextY = tree.y + stepY;
+            
+            const obstacleX = findTreeObstacle(nextX, tree.y, tree);
+            const obstacleY = findTreeObstacle(tree.x, nextY, tree);
+            const obstacleBoth = findTreeObstacle(nextX, nextY, tree);
+            
+            const mainObstacle = obstacleBoth || obstacleX || obstacleY;
+            if (mainObstacle) {
+              tree.isAttacking = true;
+              tree.pauseUntil = now + 1400;
+              damageBuilding(mainObstacle, 1);
+              const screenDist = Math.hypot(tree.x - state.x, tree.y - state.y);
+              if (screenDist < 250) {
+                state.screenShakeUntil = now + 250;
+              }
+            }
+            
+            let moved = false;
+            if (!obstacleX) {
+              tree.x = nextX;
+              moved = true;
+            }
+            if (!obstacleY) {
+              tree.y = nextY;
+              moved = true;
+            }
+            if (moved) {
+              isMoving = true;
+            }
+          }
+          
+          // Stuck detection fallback
+          if (isMoving) {
+            const movedDist = Math.hypot(tree.x - (tree.lastX ?? tree.x), tree.y - (tree.lastY ?? tree.y));
+            if (movedDist < 0.05) {
+              tree.stuckTicks = (tree.stuckTicks || 0) + 1;
+            } else {
+              tree.stuckTicks = 0;
+            }
+            
+            if ((tree.stuckTicks || 0) > 24) {
+              const escapeTarget = findTreeObstacle(tree.x, tree.y, tree) || 
+                                   activeSprites().find(sprite => {
+                                     if (sprite === tree || sprite.tree || !sprite.solid) return false;
+                                     if (sprite.destroyed || sprite.dead) return false;
+                                     return Math.hypot(tree.x - sprite.x, tree.y - sprite.y) < 36;
+                                   });
+              if (escapeTarget) {
+                tree.isAttacking = true;
+                tree.pauseUntil = now + 1400;
+                damageBuilding(escapeTarget, 1);
+              }
+              tree.stuckTicks = 0;
+            }
+          } else {
+            tree.stuckTicks = 0;
+          }
+          
+          tree.lastX = tree.x;
+          tree.lastY = tree.y;
+          
+          if (dist < 38) {
+            tree.pauseUntil = now + 1600;
+            if (combatTarget === "player") {
+              triggerScaryHit(dx, dy, tree);
+            } else {
+              damagePetSlime(combatTarget, tree);
+            }
+          }
+        } else {
+          tree.isAttacking = false;
+        }
+      }
+    }
+
+    function findNearestPlayerOrPet(x, y) {
+      let bestTarget = "player";
+      let minDist = Math.hypot(state.x - x, state.y - y);
+      
+      for (const pet of petSlimes) {
+        if (!pet.destroyed && !pet.dead) {
+          const d = Math.hypot(pet.x - x, pet.y - y);
+          if (d < minDist) {
+            minDist = d;
+            bestTarget = pet;
+          }
+        }
+      }
+      return bestTarget;
+    }
+
+    function spawnNightMonsters(now) {
+      // Clear previous night monsters if any
+      for (let i = roamingNPCs.length - 1; i >= 0; i--) {
+        if (roamingNPCs[i].isNightMonster) {
+          roamingNPCs.splice(i, 1);
+        }
+      }
+      
+      const cycle = (state.nightCount || 1) % 3;
+      if (cycle === 1) {
+        // Night 1: Flesh Bear
+        for (let i = 0; i < 1; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const x = state.x + Math.cos(angle) * (260 + Math.random() * 60);
+          const y = state.y + Math.sin(angle) * (260 + Math.random() * 60);
+          const npc = createWildNpc("creature_bear", x, y, "forest");
+          if (npc) {
+            npc.isNightMonster = true;
+            npc.scaleOverride = 1.25 * 0.50; // 50% smaller bear
+            npc.speed = wildNpcStats("creature_bear").speed * 2.0; // 2x speed
+            npc.animSpeedOverride = 2.0; // 2x animation speed
+            npc.hp = 160;
+            npc.maxHp = 160;
+            npc.attackDamage = 18;
+            npc.aggroTarget = "player";
+            npc.aggroUntil = now + 999999;
+            roamingNPCs.push(npc);
+          }
+        }
+      } else if (cycle === 2) {
+        // Night 2: Spiders (small, explode on contact)
+        for (let i = 0; i < 8; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const x = state.x + Math.cos(angle) * (260 + Math.random() * 60);
+          const y = state.y + Math.sin(angle) * (260 + Math.random() * 60);
+          const npc = createWildNpc("creature_crawler", x, y, "forest");
+          if (npc) {
+            npc.isNightMonster = true;
+            npc.scaleOverride = 2.2; // 10x original size (0.22 * 10)
+            npc.speed = 85; // fast!
+            npc.hp = 30;
+            npc.maxHp = 30;
+            npc.attackDamage = 25; // explosion damage
+            npc.isSuicideSpider = true;
+            npc.aggroTarget = "player";
+            npc.aggroUntil = now + 999999;
+            roamingNPCs.push(npc);
+          }
+        }
+      } else {
+        // Night 3: Slasher (35% smaller, 2x fast)
+        for (let i = 0; i < 1; i++) {
+          const angle = Math.random() * Math.PI * 2;
+          const x = state.x + Math.cos(angle) * (260 + Math.random() * 60);
+          const y = state.y + Math.sin(angle) * (260 + Math.random() * 60);
+          const npc = createWildNpc("creature_slasher", x, y, "forest");
+          if (npc) {
+            npc.isNightMonster = true;
+            npc.scaleOverride = 3.74; // 5x original size ((1.15 * 0.65) * 5)
+            npc.speed = wildNpcStats("creature_slasher").speed * 3.0; // 3x speed
+            npc.animSpeedOverride = 3.0; // 3x animation speed
+            npc.hp = 100;
+            npc.maxHp = 100;
+            npc.attackDamage = 15;
+            npc.aggroTarget = "player";
+            npc.aggroUntil = now + 999999;
+            roamingNPCs.push(npc);
+          }
+        }
+      }
+    }
+
+    // drawNightExplosions removed as per request
+
+    function spawnBloodSplats(x, y, count) {
+      if (!state.bloodSplats) state.bloodSplats = [];
+      const now = performance.now();
+      const colors = ["#8a0303", "#6b0202", "#aa0d0d", "#5c0101"];
+      
+      for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 35 + Math.random() * 55;
+        const size = 1.5 + Math.random() * 2.0;
+        
+        state.bloodSplats.push({
+          x: x,
+          y: y - 10,
+          size: Math.round(size),
+          color: colors[Math.floor(Math.random() * colors.length)],
+          spawnedAt: now,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed * 0.7,
+          altitude: 4 + Math.random() * 8,
+          vAltitude: 15 + Math.random() * 25
+        });
+      }
+    }
+
+    function updateBloodSplats(dt) {
+      if (!state.bloodSplats) state.bloodSplats = [];
+      const now = performance.now();
+      
+      state.bloodSplats = state.bloodSplats.filter(splat => now - splat.spawnedAt < 180000);
+      
+      state.bloodSplats.forEach(splat => {
+        if (splat.altitude > 0) {
+          splat.x += splat.vx * dt;
+          splat.y += splat.vy * dt;
+          splat.vAltitude -= 140 * dt;
+          splat.altitude += splat.vAltitude * dt;
+          if (splat.altitude <= 0) {
+            splat.altitude = 0;
+            splat.vx = 0;
+            splat.vy = 0;
+          }
+        }
+      });
+    }
+
+    function drawBloodSplats() {
+      if (!state.bloodSplats) state.bloodSplats = [];
+      
+      ctx.save();
+      state.bloodSplats.forEach(splat => {
+        ctx.fillStyle = splat.color;
+        const drawX = splat.x;
+        const drawY = splat.y - splat.altitude;
+        
+        if (splat.altitude > 0) {
+          ctx.fillStyle = "rgba(0, 0, 0, 0.24)";
+          ctx.fillRect(splat.x - splat.size / 2, splat.y, splat.size, 1);
+          ctx.fillStyle = splat.color;
+        }
+        
+        ctx.fillRect(drawX - splat.size / 2, drawY - splat.size / 2, splat.size, splat.size);
+      });
+      ctx.restore();
+    }
+
     window.demoTreeStats = () => {
       const trees = allTreeSprites();
       return {
@@ -2664,17 +3987,32 @@
 
     function triggerAttack() {
       if (toggleNearestChest()) return;
+      const now = performance.now();
+      if (now < state.attackUntil) return;
       if (state.equippedTool) {
         triggerToolUse();
         return;
       }
       state.demo = false;
-      state.attackStarted = performance.now();
+      state.attackStarted = now;
       state.attackDir = currentFacingDir();
       state.attackUntil = state.attackStarted + (roster[state.current].attackMs || 420);
       state.stopUntil = 0;
       sayDialogue(pickDialogue("attack"), 5, 2300);
-      hitTreeInFront();
+      const treeTarget = hitTreeInFront();
+      const slimeTarget = hitSlimeInFront();
+      const target = treeTarget || slimeTarget;
+      triggerPetAttacks(target);
+    }
+
+    function triggerDie() {
+      const now = performance.now();
+      if (now < state.dieUntil) return;
+      state.demo = false;
+      state.dieStarted = now;
+      state.dieUntil = now + 1500;
+      state.stopUntil = 0;
+      sayDialogue("Agh! *Dying*", 5, 2300);
     }
 
     function triggerToolUse() {
@@ -2749,6 +4087,867 @@
       }));
     }
 
+    // ── Roaming NPCs (slimes) ────────────────────────────
+    const NPC_MOVE_SPEED = 56; // 50% of player speed (112)
+    const PET_DAMAGE = 1;
+    const NPC_HP = 50; // 5x bigger (was 10)
+    const NPC_ATTACK_DAMAGE = 2; // 2x pet damage
+    const NPC_ATTACK_MS = 800; // wild slime attack interval
+    const NPC_AGGRO_MS = 4000; // how long wild slimes stay angry after being hit
+    const NPC_RESPAWN_MS = 8000;
+    const NPC_HIT_SHAKE_MS = 220;
+    const NPC_EVAPORATE_MS = 400;
+
+    // ── Pet Slime System ─────────────────────────────────
+    const PET_HP = 25; // 5x bigger (was 5)
+    const PET_PERSONALITIES = [
+      { name: "eager", followDist: 35, speedMult: 1.3, wanderChance: 0.08, hopChance: 0.15, label: "Eager" },
+      { name: "lazy", followDist: 80, speedMult: 0.7, wanderChance: 0.04, hopChance: 0.05, label: "Lazy" },
+      { name: "playful", followDist: 55, speedMult: 1.1, wanderChance: 0.22, hopChance: 0.28, label: "Playful" },
+      { name: "loyal", followDist: 25, speedMult: 1.0, wanderChance: 0.03, hopChance: 0.08, label: "Loyal" },
+      { name: "shy", followDist: 100, speedMult: 0.85, wanderChance: 0.06, hopChance: 0.04, label: "Shy" }
+    ];
+    const PET_MOVE_SPEED_BASE = MOVE_SPEED * 0.8;
+    const PET_ATTACK_MS = 350;
+    const PET_ATTACK_RANGE = 80;
+    const PET_BRAIN_DECISION_MIN = 400;
+    const PET_BRAIN_DECISION_MAX = 1600;
+    const PET_HOP_DURATION = 280;
+    const PET_TAME_HEART_COUNT = 6;
+
+    const WILD_NPC_BIOMES = [
+      { biomeId: "safe", center: { x: SAFE_CENTER_X, y: SAFE_CENTER_Y }, bases: ["green_slime", "blue_slime", "pink_slime"], count: 6, spread: 600 },
+      { biomeId: "darkwood", center: startPositions.dark, bases: ["doe"], count: 4, spread: 760 },
+      { biomeId: "goldwood", center: startPositions.gold, bases: ["squirle"], count: 4, spread: 760 },
+      { biomeId: "bluewater", center: startPositions.blue, bases: ["frog"], count: 4, spread: 760 },
+      { biomeId: "deepteal", center: startPositions.deep, bases: ["fox"], count: 4, spread: 760 }
+    ];
+    const WILD_NPC_STATS = {
+      green_slime: { npcHp: 50, npcDamage: 2, speed: 56 },
+      blue_slime: { npcHp: 50, npcDamage: 2, speed: 56 },
+      pink_slime: { npcHp: 50, npcDamage: 2, speed: 56 },
+      doe: { npcHp: 100, npcDamage: 4, speed: 58 },
+      squirle: { npcHp: 70, npcDamage: 3, speed: 70 },
+      frog: { npcHp: 80, npcDamage: 3, speed: 62 },
+      fox: { npcHp: 90, npcDamage: 4, speed: 76 }
+    };
+
+    function wildNpcStats(base) {
+      const stats = WILD_NPC_STATS[base] || { npcHp: NPC_HP, npcDamage: NPC_ATTACK_DAMAGE, speed: NPC_MOVE_SPEED };
+      return {
+        ...stats,
+        petHp: Math.max(1, Math.ceil(stats.npcHp / 2)),
+        petDamage: Math.max(1, stats.npcDamage / 2)
+      };
+    }
+
+    function randomNpcPoint(group) {
+      for (let tries = 0; tries < 80; tries++) {
+        const angle = Math.random() * Math.PI * 2;
+        const dist = Math.random() * group.spread;
+        const x = Math.max(80, Math.min(WORLD_W - 80, group.center.x + Math.cos(angle) * dist));
+        const y = Math.max(80, Math.min(WORLD_H - 80, group.center.y + Math.sin(angle) * dist));
+        if (isWaterAtWorldPoint(x, y)) continue;
+        if (biomeAt(x, y).id !== group.biomeId) continue;
+        return { x, y };
+      }
+      return { x: group.center.x, y: group.center.y };
+    }
+
+    function createWildNpc(base, x, y, biomeId) {
+      const cfg = roster[base];
+      if (!cfg || cfg.kind !== "forest") return null;
+      const now = performance.now();
+      const stats = wildNpcStats(base);
+      return {
+        x, y,
+        base,
+        biomeId,
+        dir: Math.random() > 0.5 ? "right" : "left",
+        mode: "idle",
+        t: Math.random() * 10,
+        hp: stats.npcHp,
+        maxHp: stats.npcHp,
+        attackDamage: stats.npcDamage,
+        petHp: stats.petHp,
+        petDamage: stats.petDamage,
+        hitStarted: 0,
+        hitDir: 1,
+        aggroTarget: null,
+        aggroUntil: 0,
+        nextAttackAt: 0,
+        dead: false,
+        deadAt: 0,
+        nextDecisionAt: now + Math.random() * 2000,
+        moveDir: { x: 0, y: 0 },
+        speed: stats.speed
+      };
+    }
+
+    function spawnWildNpcForGroup(group) {
+      const base = group.bases[Math.floor(Math.random() * group.bases.length)];
+      const point = randomNpcPoint(group);
+      const npc = createWildNpc(base, point.x, point.y, group.biomeId);
+      if (npc) roamingNPCs.push(npc);
+    }
+
+    function initRoamingNPCs() {
+      WILD_NPC_BIOMES.forEach(group => {
+        for (let i = 0; i < group.count; i++) spawnWildNpcForGroup(group);
+      });
+    }
+
+    function updateRoamingNPCs(now, dt) {
+      for (let i = roamingNPCs.length - 1; i >= 0; i--) {
+        const npc = roamingNPCs[i];
+        npc.t += dt;
+        if (npc.dead) {
+          if (npc.isSuicideSpider && !npc.exploded) {
+            npc.exploded = true;
+            state.screenShakeUntil = now + 400;
+            state.screenFlashRedUntil = now + 200;
+            if (Math.hypot(state.x - npc.x, state.y - npc.y) <= 60) {
+              triggerScaryHit(state.x - npc.x, state.y - npc.y, npc);
+            }
+            for (const pet of petSlimes) {
+              if (!pet.destroyed && !pet.dead) {
+                if (Math.hypot(pet.x - npc.x, pet.y - npc.y) <= 60) {
+                  damagePetSlime(pet, npc);
+                  pet.hitStarted = now;
+                  pet.hitDir = Math.random() < 0.5 ? 1 : -1;
+                }
+              }
+            }
+          }
+          
+          const elapsed = now - npc.deadAt;
+          if (elapsed < NPC_EVAPORATE_MS) {
+            // Still evaporating, keep in array for drawing
+            continue;
+          }
+          // Evaporate finished - convert to pet if player's side killed it (with 20% gacha chance)
+          if (npc.playerKilled) {
+            const roll = Math.random();
+            if (roll < 0.20) {
+              // 20% chance: tame!
+              convertSlimeToPet(npc, now);
+            } else {
+              // 80% chance: XP!
+              const xpAmount = Math.max(5, Math.floor(npc.maxHp / 5));
+              const killer = npc.killer;
+              if (killer && petSlimes.includes(killer)) {
+                awardPetXp(killer, xpAmount, now);
+              } else {
+                // Player kill: distribute to all active pets
+                for (const pet of petSlimes) {
+                  awardPetXp(pet, xpAmount, now);
+                }
+              }
+            }
+          }
+          
+          // Always queue a delayed respawn for the wild NPC to keep the world populated
+          const biomeId = npc.biomeId || "safe";
+          setTimeout(() => {
+            spawnNewWildSlime(biomeId);
+          }, NPC_RESPAWN_MS + Math.random() * 4000); // 8-12 seconds delay
+
+          roamingNPCs.splice(i, 1);
+          continue;
+        }
+
+        // Slasher teleport timer
+        if (npc.base === "creature_slasher" && npc.slasherState === "invisible") {
+          if (now >= npc.slasherInvisibleUntil) {
+            npc.slasherState = "charge";
+            npc.x = npc.tpX;
+            npc.y = npc.tpY;
+            spawnBloodSplats(npc.x, npc.y, 100); // Reappear blood splash (5x!)
+            npc.mode = "run";
+          }
+          continue;
+        }
+        
+        // Active suicide spider countdown
+        if (npc.isSuicideSpider && npc.suicideTriggeredAt) {
+          const elapsed = now - npc.suicideTriggeredAt;
+          npc.mode = "attack";
+          if (elapsed >= (roster.creature_crawler.attackMs || 480)) {
+            npc.dead = true;
+            npc.deadAt = now;
+            npc.playerKilled = false;
+            
+            state.screenShakeUntil = now + 400;
+            state.screenFlashRedUntil = now + 200;
+            
+            if (Math.hypot(state.x - npc.x, state.y - npc.y) <= 60) {
+              triggerScaryHit(state.x - npc.x, state.y - npc.y, npc);
+            }
+            for (const pet of petSlimes) {
+              if (!pet.destroyed && !pet.dead) {
+                if (Math.hypot(pet.x - npc.x, pet.y - npc.y) <= 60) {
+                  damagePetSlime(pet, npc);
+                  pet.hitStarted = now;
+                  pet.hitDir = Math.random() < 0.5 ? 1 : -1;
+                }
+              }
+            }
+          }
+          continue;
+        }
+        
+        if (npc.isNightMonster && !npc.dead) {
+          if (npc.base === "creature_slasher" && npc.slasherState === "retreat") {
+            if (now >= npc.retreatUntil || Math.hypot(npc.x - npc.retreatX, npc.y - npc.retreatY) <= 20) {
+              npc.slasherState = "charge";
+            } else {
+              const dx = npc.retreatX - npc.x;
+              const dy = npc.retreatY - npc.y;
+              const dist = Math.hypot(dx, dy) || 1;
+              const speed = npc.speed;
+              const stepX = (dx / dist) * speed * dt;
+              const stepY = (dy / dist) * speed * dt;
+              
+              const nextX = npc.x + stepX;
+              const nextY = npc.y + stepY;
+              
+              const obstacleX = findNpcObstacle(nextX, npc.y, npc);
+              const obstacleY = findNpcObstacle(npc.x, nextY, npc);
+              
+              npc.mode = "run";
+              if (!obstacleX) npc.x = Math.max(60, Math.min(WORLD_W - 60, nextX));
+              if (!obstacleY) npc.y = Math.max(60, Math.min(WORLD_H - 60, nextY));
+              
+              const cfg = roster[npc.base];
+              if (cfg && cfg.sideView) {
+                if (Math.abs(dx) > 0.1) npc.dir = dx > 0 ? "right" : "left";
+              } else {
+                npc.dir = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? "right" : "left") : (dy > 0 ? "front" : "back");
+              }
+              continue;
+            }
+          }
+          npc.aggroTarget = findNearestPlayerOrPet(npc.x, npc.y);
+          npc.aggroUntil = now + 5000;
+        }
+        
+        const isPlayerTarget = npc.aggroTarget === "player";
+        const isPetTarget = npc.aggroTarget && petSlimes.includes(npc.aggroTarget) && !npc.aggroTarget.dead;
+        if (npc.aggroTarget && !isPlayerTarget && !isPetTarget) {
+          npc.aggroTarget = null;
+        }
+        if (npc.aggroTarget && now < npc.aggroUntil) {
+          const target = npc.aggroTarget;
+          const targetX = target === "player" ? state.x : target.x;
+          const targetY = target === "player" ? state.y : target.y;
+          const dx = targetX - npc.x;
+          const dy = targetY - npc.y;
+          const dist = Math.hypot(dx, dy);
+          
+          if (npc.base === "creature_slasher" && npc.slasherAttacking) {
+            npc.mode = "attack";
+            if (now >= npc.attackUntil) {
+              npc.slasherAttacking = false;
+              
+              // Melt effect!
+              spawnBloodSplats(npc.x, npc.y, 210); // massive blood splatter (5x!)
+              
+              const angle = Math.atan2(npc.y - targetY, npc.x - targetX) + (Math.random() - 0.5) * 0.8;
+              const fleeDist = 380 + Math.random() * 80;
+              npc.tpX = Math.max(60, Math.min(WORLD_W - 60, targetX + Math.cos(angle) * fleeDist));
+              npc.tpY = Math.max(60, Math.min(WORLD_H - 60, targetY + Math.sin(angle) * fleeDist));
+              
+              npc.slasherState = "invisible";
+              npc.slasherInvisibleUntil = now + 3000; // 3 seconds off-screen
+              
+              // Teleport off-world immediately so player/pets lose track
+              npc.x = -1000;
+              npc.y = -1000;
+            }
+            continue;
+          }
+          
+          if (npc.isSuicideSpider && dist <= 28) {
+            if (!npc.suicideTriggeredAt) {
+              npc.suicideTriggeredAt = now;
+              npc.mode = "attack";
+              npc.attackStarted = now;
+              npc.attackUntil = now + (roster.creature_crawler.attackMs || 480);
+              npc.nextAttackAt = now + (roster.creature_crawler.attackMs || 480);
+            }
+            continue;
+          }
+          
+          if (dist > 24) {
+            if (npc.isNightMonster) {
+              const speed = npc.speed;
+              const stepX = (dx / dist) * speed * dt;
+              const stepY = (dy / dist) * speed * dt;
+              
+              const nextX = npc.x + stepX;
+              const nextY = npc.y + stepY;
+              
+              const obstacleX = findNpcObstacle(nextX, npc.y, npc);
+              const obstacleY = findNpcObstacle(npc.x, nextY, npc);
+              const obstacleBoth = findNpcObstacle(nextX, nextY, npc);
+              const mainObstacle = obstacleBoth || obstacleX || obstacleY;
+              
+              if (mainObstacle) {
+                npc.mode = "attack";
+                npc.attackStarted = now;
+                npc.attackUntil = now + 1200;
+                npc.nextAttackAt = now + 1200;
+                damageBuilding(mainObstacle, 1);
+                npc.nextDecisionAt = now + 1200;
+                continue;
+              }
+              
+              npc.mode = "run";
+              if (!obstacleX) npc.x = Math.max(60, Math.min(WORLD_W - 60, nextX));
+              if (!obstacleY) npc.y = Math.max(60, Math.min(WORLD_H - 60, nextY));
+            } else {
+              npc.mode = "run";
+              npc.x = Math.max(60, Math.min(WORLD_W - 60, npc.x + (dx / dist) * npc.speed * 1.15 * dt));
+              npc.y = Math.max(60, Math.min(WORLD_H - 60, npc.y + (dy / dist) * npc.speed * 1.15 * dt));
+            }
+          } else {
+            npc.mode = "attack";
+            if (npc.base === "creature_slasher") {
+              if (!npc.slasherAttacking) {
+                npc.mode = "attack";
+                npc.attackStarted = now;
+                npc.attackUntil = now + 880; // Slasher attack duration
+                npc.nextAttackAt = now + 880;
+                npc.slasherAttacking = true;
+                if (target === "player") {
+                  triggerScaryHit(dx, dy, npc);
+                } else {
+                  damagePetSlime(target, npc);
+                }
+              } else if (now >= npc.attackUntil) {
+                npc.slasherAttacking = false;
+                
+                // Melt effect!
+                spawnBloodSplats(npc.x, npc.y, 210); // massive blood splatter (5x!)
+                
+                const targetX = target === "player" ? state.x : target.x;
+                const targetY = target === "player" ? state.y : target.y;
+                const angle = Math.atan2(npc.y - targetY, npc.x - targetX) + (Math.random() - 0.5) * 0.8;
+                const dist = 380 + Math.random() * 80;
+                npc.tpX = Math.max(60, Math.min(WORLD_W - 60, targetX + Math.cos(angle) * dist));
+                npc.tpY = Math.max(60, Math.min(WORLD_H - 60, targetY + Math.sin(angle) * dist));
+                
+                npc.slasherState = "invisible";
+                npc.slasherInvisibleUntil = now + 3000; // 3 seconds off-screen
+                
+                npc.x = -1000;
+                npc.y = -1000;
+              }
+            } else {
+              npc.mode = "attack";
+              if (now >= npc.nextAttackAt) {
+                npc.attackStarted = now;
+                npc.attackUntil = now + NPC_ATTACK_MS;
+                npc.nextAttackAt = now + NPC_ATTACK_MS;
+                if (target === "player") {
+                  triggerScaryHit(dx, dy, npc);
+                } else {
+                  damagePetSlime(target, npc);
+                }
+              }
+            }
+          }
+          const cfg = roster[npc.base];
+          if (cfg && cfg.sideView) {
+            if (Math.abs(dx) > 0.1) {
+              npc.dir = dx > 0 ? "right" : "left";
+            }
+          } else {
+            npc.dir = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? "right" : "left") : (dy > 0 ? "front" : "back");
+          }
+          continue;
+        }
+        if (now >= npc.nextDecisionAt) {
+          const isMoving = Math.random() > 0.35;
+          if (isMoving) {
+            npc.mode = "run";
+            const moveAngle = Math.random() * Math.PI * 2;
+            npc.moveDir = { x: Math.cos(moveAngle), y: Math.sin(moveAngle) };
+            npc.nextDecisionAt = now + 600 + Math.random() * 2400;
+          } else {
+            npc.mode = "idle";
+            npc.moveDir = { x: 0, y: 0 };
+            npc.nextDecisionAt = now + 400 + Math.random() * 1800;
+          }
+        }
+        if (npc.mode === "run") {
+          const nextX = npc.x + npc.moveDir.x * npc.speed * dt;
+          const nextY = npc.y + npc.moveDir.y * npc.speed * dt;
+          let bounced = false;
+          if (nextX < 60 || nextX > WORLD_W - 60) {
+            npc.moveDir.x *= -1;
+            bounced = true;
+          }
+          if (nextY < 60 || nextY > WORLD_H - 60) {
+            npc.moveDir.y *= -1;
+            bounced = true;
+          }
+          if (bounced) {
+            npc.nextDecisionAt = now + 200 + Math.random() * 600;
+          }
+          npc.x = Math.max(60, Math.min(WORLD_W - 60, npc.x + npc.moveDir.x * npc.speed * dt));
+          npc.y = Math.max(60, Math.min(WORLD_H - 60, npc.y + npc.moveDir.y * npc.speed * dt));
+          if (Math.abs(npc.moveDir.x) > Math.abs(npc.moveDir.y)) {
+            npc.dir = npc.moveDir.x > 0 ? "right" : "left";
+          } else {
+            npc.dir = npc.moveDir.y > 0 ? "front" : "back";
+          }
+        }
+      }
+    }
+
+    function convertSlimeToPet(slime, now) {
+      const personality = PET_PERSONALITIES[Math.floor(Math.random() * PET_PERSONALITIES.length)];
+      const pet = {
+        x: slime.x,
+        y: slime.y,
+        base: slime.base,
+        biomeId: slime.biomeId || "safe",
+        dir: slime.dir,
+        mode: "idle",
+        t: slime.t,
+        personality,
+        hp: slime.petHp || wildNpcStats(slime.base).petHp,
+        maxHp: slime.petHp || wildNpcStats(slime.base).petHp,
+        attackDamage: slime.petDamage || wildNpcStats(slime.base).petDamage,
+        dead: false,
+        deadAt: 0,
+        brainState: "tame", // tame, idle, follow, wander, hop, attack, excited
+        brainUntil: now + 800,
+        targetX: slime.x,
+        targetY: slime.y,
+        attackTarget: null,
+        petTarget: null,
+        bangUntil: 0,
+        attackStarted: 0,
+        attackUntil: 0,
+        hitStarted: 0,
+        hitDir: 1,
+        hearts: [], // heart particle effects
+        loveBurst: now, // tame heart burst timer
+        level: 1,
+        xp: 0,
+        scale: 1.0
+      };
+      // spawn heart burst
+      for (let i = 0; i < PET_TAME_HEART_COUNT; i++) {
+        pet.hearts.push({
+          x: 0, y: 0,
+          vx: (Math.random() - 0.5) * 30,
+          vy: -Math.random() * 20 - 10,
+          born: now,
+          life: 600 + Math.random() * 400
+        });
+      }
+      petSlimes.push(pet);
+      state.blood += 2;
+      updateCurrencyHud();
+    }
+
+    function awardPetXp(pet, amount, now) {
+      if (!pet.level) pet.level = 1;
+      if (!pet.xp) pet.xp = 0;
+      pet.xp += amount;
+      
+      let leveledUp = false;
+      while (pet.xp >= pet.level * 100) {
+        pet.xp -= pet.level * 100;
+        pet.level += 1;
+        leveledUp = true;
+        
+        // Increase stats
+        pet.maxHp = Math.round(pet.maxHp * 1.25); // +25% max HP per level
+        pet.hp = pet.maxHp; // Heal to full
+        pet.attackDamage = Math.round(pet.attackDamage * 1.2); // +20% damage per level
+        pet.scale = 1 + (pet.level - 1) * 0.15; // 15% larger per level
+      }
+      
+      if (leveledUp) {
+        // Show excited particles / visual feedback for leveling up
+        pet.brainState = "excited";
+        pet.brainUntil = now + 1500; // Be excited for 1.5s
+        for (let i = 0; i < 15; i++) {
+          pet.hearts.push({
+            x: 0, y: 0,
+            vx: (Math.random() - 0.5) * 45,
+            vy: -Math.random() * 30 - 15,
+            born: now,
+            life: 800 + Math.random() * 400
+          });
+        }
+      }
+    }
+
+    function findPetObstacle(x, y, pet) {
+      const feet = { x: x - 6, y: y - 5, w: 12, h: 7 };
+      return activeSprites().find(sprite => {
+        if (sprite === pet || sprite.tree || !sprite.solid) return false;
+        if (sprite.destroyed || sprite.dead) return false;
+        const solid = solidRectFor(sprite);
+        if (!solid) return false;
+        return aabb(feet.x, feet.y, feet.w, feet.h, solid.x, solid.y, solid.w, solid.h);
+      });
+    }
+
+    function movePetSlime(pet, stepX, stepY) {
+      const nextX = pet.x + stepX;
+      const nextY = pet.y + stepY;
+      if (!findPetObstacle(nextX, pet.y, pet)) {
+        pet.x = nextX;
+      }
+      if (!findPetObstacle(pet.x, nextY, pet)) {
+        pet.y = nextY;
+      }
+    }
+
+    function updatePetSlimes(now, dt) {
+      const isNight = state.timeOfDay === "night";
+      
+      for (let i = petSlimes.length - 1; i >= 0; i--) {
+        const pet = petSlimes[i];
+        if (pet.hp <= 0 || pet.dead) {
+          petSlimes.splice(i, 1);
+          updateCurrencyHud();
+          continue;
+        }
+        pet.t += dt;
+        pet.hearts = pet.hearts.filter(h => now - h.born < h.life);
+        for (const h of pet.hearts) {
+          h.x += h.vx * dt;
+          h.y += h.vy * dt;
+          h.vy += 20 * dt;
+        }
+        if (pet.brainState === "excited" && Math.random() < 0.15) {
+          pet.hearts.push({
+            x: 0, y: -pet.y * 0.02,
+            vx: (Math.random() - 0.5) * 16,
+            vy: -Math.random() * 12 - 6,
+            born: now,
+            life: 400 + Math.random() * 300
+          });
+        }
+        if (now >= pet.brainUntil) {
+          decidePetBrain(pet, now);
+        }
+        
+        // Match player pacing at night (or catch up fast)
+        let speed = PET_MOVE_SPEED_BASE;
+        if (isNight) {
+          const playerDist = Math.hypot(state.x - pet.x, state.y - pet.y);
+          if (playerDist > 55) {
+            speed = MOVE_SPEED * 1.55;
+          } else {
+            speed = MOVE_SPEED;
+          }
+        }
+        
+        const dx = pet.targetX - pet.x;
+        const dy = pet.targetY - pet.y;
+        const dist = Math.hypot(dx, dy);
+        
+        if (pet.brainState === "attack" && pet.petTarget) {
+          const target = pet.petTarget;
+          const targetDead = target.destroyed || target.dead || false;
+          const targetFar = Math.hypot(target.x - pet.x, target.y - pet.y) > 350;
+          if (targetDead || targetFar) {
+            pet.petTarget = null;
+            pet.brainState = "follow";
+            pet.brainUntil = now + 200;
+            pet.mode = "idle";
+          } else {
+            const tdx = target.x - pet.x;
+            const tdy = target.y - pet.y;
+            const tdist = Math.hypot(tdx, tdy);
+            if (tdist > 30) {
+              movePetSlime(pet, (tdx / tdist) * speed * 1.4 * dt, (tdy / tdist) * speed * 1.4 * dt);
+              pet.mode = "run";
+            } else {
+              pet.mode = "attack";
+              const attackElapsed = now - pet.attackStarted;
+              if (attackElapsed < 50) {
+                if (target.tree && !target.destroyed) {
+                  damageTree(target, pet);
+                } else if (target.hp !== undefined && !target.dead) {
+                  damageSlime(target, pet);
+                }
+                pet.hitStarted = now;
+                pet.hitDir = pet.dir === "left" ? -1 : 1;
+              }
+            }
+            if (Math.abs(tdx) > Math.abs(tdy)) {
+              pet.dir = tdx > 0 ? "right" : "left";
+            } else {
+              pet.dir = tdy > 0 ? "front" : "back";
+            }
+            if (now >= pet.attackUntil) {
+              if (!targetDead && !targetFar) {
+                pet.attackStarted = now;
+                pet.attackUntil = now + PET_ATTACK_MS;
+                pet.brainUntil = now + PET_ATTACK_MS;
+              } else {
+                pet.petTarget = null;
+                pet.brainState = "follow";
+                pet.brainUntil = now + 200;
+                pet.mode = "idle";
+              }
+            }
+          }
+        } else if (pet.brainState === "hop") {
+          pet.mode = "run";
+          if (dist > 5) {
+            movePetSlime(pet, (dx / dist) * speed * 1.6 * dt, (dy / dist) * speed * 1.6 * dt);
+          }
+          if (now >= pet.brainUntil) {
+            decidePetBrain(pet, now);
+          }
+        } else if (pet.brainState === "follow" || pet.brainState === "tame") {
+          pet.mode = dist > 20 ? "run" : "idle";
+          if (dist > 5) {
+            movePetSlime(pet, (dx / dist) * speed * dt, (dy / dist) * speed * dt);
+          }
+          if (Math.abs(dx) > Math.abs(dy)) {
+            pet.dir = dx > 0 ? "right" : "left";
+          } else {
+            pet.dir = dy > 0 ? "front" : "back";
+          }
+        } else if (pet.brainState === "wander") {
+          pet.mode = dist > 15 ? "run" : "idle";
+          if (dist > 5) {
+            movePetSlime(pet, (dx / dist) * speed * 0.7 * dt, (dy / dist) * speed * 0.7 * dt);
+          }
+          if (now >= pet.brainUntil) {
+            decidePetBrain(pet, now);
+          }
+        } else if (pet.brainState === "idle" || pet.brainState === "excited") {
+          pet.mode = "idle";
+          if (now >= pet.brainUntil) {
+            decidePetBrain(pet, now);
+          }
+        }
+        pet.x = Math.max(40, Math.min(WORLD_W - 40, pet.x));
+        pet.y = Math.max(40, Math.min(WORLD_H - 40, pet.y));
+      }
+    }
+
+    function decidePetBrain(pet, now) {
+      const p = pet.personality;
+      const px = state.x;
+      const py = state.y;
+      const followDist = p.followDist;
+      const angle = Math.random() * Math.PI * 2;
+      const dist = followDist + (Math.random() - 0.5) * followDist * 0.8;
+      // Check if pet has a persistent target that's still alive and near the pet
+      if (pet.petTarget) {
+        const target = pet.petTarget;
+        const targetDead = target.destroyed || target.dead || false;
+        const targetFar = Math.hypot(target.x - pet.x, target.y - pet.y) > 350;
+        if (!targetDead && !targetFar) {
+          // Re-attack the same target
+          pet.brainState = "attack";
+          pet.brainUntil = now + PET_ATTACK_MS;
+          pet.attackStarted = now;
+          pet.attackUntil = now + PET_ATTACK_MS;
+          pet.bangUntil = now + 700;
+          return;
+        }
+        pet.petTarget = null; // clear dead/far target
+      }
+      // personality-driven behavior roll
+      const roll = Math.random();
+      if (roll < p.hopChance) {
+        pet.brainState = "hop";
+        pet.brainUntil = now + PET_HOP_DURATION;
+        pet.targetX = px + Math.cos(angle) * dist * 0.5;
+        pet.targetY = py + Math.sin(angle) * dist * 0.5;
+      } else if (roll < p.hopChance + p.wanderChance) {
+        pet.brainState = "wander";
+        pet.brainUntil = now + PET_BRAIN_DECISION_MIN + Math.random() * PET_BRAIN_DECISION_MAX;
+        pet.targetX = px + Math.cos(angle) * (dist * 1.5);
+        pet.targetY = py + Math.sin(angle) * (dist * 1.5);
+      } else if (Math.random() < 0.25) {
+        pet.brainState = "excited";
+        pet.brainUntil = now + 300 + Math.random() * 500;
+        pet.targetX = px + Math.cos(angle) * dist;
+        pet.targetY = py + Math.sin(angle) * dist;
+      } else {
+        pet.brainState = "follow";
+        pet.brainUntil = now + PET_BRAIN_DECISION_MIN + Math.random() * PET_BRAIN_DECISION_MAX;
+        pet.targetX = px + Math.cos(angle) * dist;
+        pet.targetY = py + Math.sin(angle) * dist;
+      }
+    }
+
+    function triggerPetAttacks(target) {
+      if (!target) return; // player missed, pets don't attack empty air
+      const now = performance.now();
+      for (const pet of petSlimes) {
+        if (Math.hypot(pet.x - state.x, pet.y - state.y) > 250) continue;
+        pet.brainState = "attack";
+        pet.brainUntil = now + PET_ATTACK_MS;
+        pet.attackStarted = now;
+        pet.attackUntil = now + PET_ATTACK_MS;
+        pet.petTarget = target;
+        pet.bangUntil = now + 700;
+      }
+    }
+
+    function drawPetIndicator(pet, x, y) {
+      const now = performance.now();
+      const scale = pet.scale || 1;
+      
+      // Level indicator
+      const level = pet.level || 1;
+      ctx.save();
+      ctx.fillStyle = "#ffffff";
+      ctx.strokeStyle = "#2f2a24";
+      ctx.lineWidth = 2;
+      ctx.font = "800 8px system-ui, sans-serif";
+      ctx.textAlign = "center";
+      const txt = `Lv.${level}`;
+      const lx = Math.round(x);
+      const ly = Math.round(y - 26 * scale);
+      ctx.strokeText(txt, lx, ly);
+      ctx.fillText(txt, lx, ly);
+      ctx.restore();
+
+      // draw floating hearts above pet
+      for (const h of pet.hearts) {
+        const age = now - h.born;
+        if (age < 0 || age > h.life) continue;
+        const alpha = Math.min(1, age / 120) * Math.min(1, (h.life - age) / 200);
+        ctx.save();
+        ctx.globalAlpha = alpha * 0.85;
+        ctx.fillStyle = "#ff8eb7";
+        ctx.font = "700 10px system-ui, sans-serif";
+        ctx.fillText("♥", Math.round(x + h.x), Math.round(y - 36 * scale + h.y));
+        ctx.restore();
+      }
+      // small heart badge above head
+      if (pet.brainState === "excited" || pet.brainState === "tame") {
+        const pulse = 1 + Math.sin(now * 0.012) * 0.15;
+        ctx.save();
+        ctx.globalAlpha = 0.7;
+        ctx.fillStyle = "#ff8eb7";
+        ctx.font = `700 ${Math.round(10 * pulse)}px system-ui, sans-serif`;
+        ctx.fillText("♥", Math.round(x - 4), Math.round(y - 38 * scale));
+        ctx.restore();
+      }
+      // "!" attack trigger indicator
+      if (pet.bangUntil && now < pet.bangUntil) {
+        const age = now - (pet.bangUntil - 700);
+        const alpha = Math.min(1, age / 100) * Math.min(1, (pet.bangUntil - now) / 200);
+        const bounce = Math.sin(age * 0.02) * 3;
+        ctx.save();
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = "#ffee55";
+        ctx.font = "700 14px system-ui, sans-serif";
+        ctx.fillText("!", Math.round(x - 3), Math.round(y - 44 * scale + bounce));
+        ctx.restore();
+      }
+    }
+
+    function slimeTargetRect(slime) {
+      return { x: slime.x - 14, y: slime.y - 28, w: 28, h: 32 };
+    }
+
+    function hitSlimeInFront() {
+      if (state.scene !== "outside") return null;
+      const hit = attackTargetRect();
+      const target = roamingNPCs
+        .filter(npc => !npc.dead)
+        .map(npc => ({ npc, rect: slimeTargetRect(npc), dist: Math.hypot(npc.x - state.x, npc.y - state.y) }))
+        .filter(entry => aabb(hit.x, hit.y, hit.w, hit.h, entry.rect.x, entry.rect.y, entry.rect.w, entry.rect.h))
+        .sort((a, b) => a.dist - b.dist)[0]?.npc;
+      if (!target) return null;
+      damageSlime(target, state);
+      return target;
+    }
+
+    function damageSlime(slime, attacker = null) {
+      if (slime.dead || slime.hp <= 0) return;
+      const now = performance.now();
+      
+      // Spawn blood splats if hitting one of the three new night monsters
+      if (["creature_bear", "creature_crawler", "creature_slasher"].includes(slime.base)) {
+        spawnBloodSplats(slime.x, slime.y, 10 + Math.floor(Math.random() * 6));
+      }
+      
+      slime.hp = Math.max(0, slime.hp - (attacker?.attackDamage || PET_DAMAGE));
+      slime.hitStarted = now;
+      slime.hitDir = state.attackDir === "left" ? -1 : 1;
+      if (attacker && petSlimes.includes(attacker)) {
+        slime.aggroTarget = attacker;
+        slime.aggroUntil = now + NPC_AGGRO_MS;
+        slime.nextAttackAt = now + 160;
+      }
+      state.blood += 1;
+      updateCurrencyHud();
+      if (slime.hp > 0) return;
+      slime.dead = true;
+      slime.deadAt = now;
+      slime.killer = attacker;
+      
+      // Heal pet to full and spawn hearts when it kills an NPC!
+      if (attacker && petSlimes.includes(attacker)) {
+        attacker.hp = attacker.maxHp;
+        for (let j = 0; j < 6; j++) {
+          attacker.hearts.push({
+            x: 0, y: 0,
+            vx: (Math.random() - 0.5) * 20,
+            vy: -Math.random() * 12 - 6,
+            born: now,
+            life: 600 + Math.random() * 400
+          });
+        }
+      }
+
+      slime.playerKilled = attacker === state || attacker === null || petSlimes.includes(attacker);
+      const isDirectPlayerKill = attacker === state || attacker === null;
+      if (isDirectPlayerKill) {
+        state.blood += 2; // bonus for player kill
+        updateCurrencyHud();
+      } else {
+        state.blood += 1; // small bonus for pet helping
+        updateCurrencyHud();
+      }
+    }
+
+    function damagePetSlime(pet, attacker = null) {
+      const now = performance.now();
+      pet.hp = Math.max(0, pet.hp - (attacker?.attackDamage || NPC_ATTACK_DAMAGE));
+      pet.hitStarted = now;
+      pet.hitDir = attacker && attacker.x < pet.x ? 1 : -1;
+      if (pet.hp <= 0) {
+        pet.dead = true;
+        pet.deadAt = now;
+        pet.petTarget = null;
+        return;
+      }
+      pet.brainState = "excited";
+      pet.brainUntil = now + 220;
+      pet.mode = "attack";
+      
+      // Auto-retaliate against trees
+      if (attacker && attacker.tree && !attacker.destroyed) {
+        pet.petTarget = attacker;
+        pet.brainState = "attack";
+        pet.brainUntil = now + PET_ATTACK_MS;
+        pet.attackStarted = now;
+        pet.attackUntil = now + PET_ATTACK_MS;
+        pet.bangUntil = now + 700;
+      }
+    }
+
     function setKey(key, on) {
       const k = key.toLowerCase();
       if (on && k === "e") {
@@ -2767,6 +4966,10 @@
         triggerAttack();
         return;
       }
+      if ((k === "x" || k === "h" || k === "g") && on) {
+        triggerDie();
+        return;
+      }
       if (["arrowup", "arrowdown", "arrowleft", "arrowright", "w", "a", "s", "d"].includes(k)) {
         if (on) state.demo = false;
         on ? keys.add(k) : keys.delete(k);
@@ -2777,10 +4980,18 @@
       return names.some(name => keys.has(name));
     }
 
+    // Token to cancel in-flight setCurrent loads when a new one starts
+    let setCurrentToken = 0;
+
     async function setCurrent(name) {
+      const token = ++setCurrentToken;
       const cfg = roster[name];
+      // Switch the picker highlight immediately so it feels responsive
+      document.querySelectorAll(".pick").forEach(btn => btn.classList.toggle("active", btn.dataset.name === name));
       if (cfg.kind === "forest") await loadForestAnimal(cfg.base);
       else await loadImageCached(cfg.src);
+      // If another setCurrent was called while we were loading, bail out
+      if (token !== setCurrentToken) return;
       state.current = name;
       if (cfg.sideView) state.dir = sideFacingDir(state.dir);
       state.attackDir = currentFacingDir();
@@ -2789,7 +5000,6 @@
       state.stopMode = "stop";
       state.moveStarted = 0;
       state.wasMoving = false;
-      document.querySelectorAll(".pick").forEach(btn => btn.classList.toggle("active", btn.dataset.name === name));
       const rarity = roster[name].rarity ? `<br>${roster[name].rarity}` : "";
       const equipped = state.equippedTool ? `<br>Tool: ${toolLabel(state.equippedTool)}` : "";
       hud.innerHTML = `${roster[name].label}${rarity}${equipped}`;
@@ -2824,6 +5034,7 @@
         const midpoint = Math.ceil(items.length / 2);
         leftNode.innerHTML = items.slice(0, midpoint).map(buttonFor).join("");
         rightNode.innerHTML = items.slice(midpoint).map(buttonFor).join("");
+        // Left bar: scroll to end so items appear flush against center button
         leftNode.scrollLeft = leftNode.scrollWidth;
       };
       renderSplitRow(
@@ -2836,7 +5047,7 @@
         buildbarToolsLeft,
         buildbarTools
       );
-      document.querySelectorAll(".build-tool").forEach(btn => btn.addEventListener("click", () => {
+      document.querySelectorAll(".build-tool[data-build]").forEach(btn => btn.addEventListener("click", () => {
         state.buildTool = btn.dataset.build;
         const item = currentBuildItem();
         if (item.equipTool) {
@@ -2877,47 +5088,52 @@
       stick.y = rawY / distance * strength;
     }
 
-    function registerQuickTap(clientX, clientY) {
-      const now = performance.now();
-      updateBuildHover(clientX, clientY);
-      if (state.buildUiOpen) {
-        clearTimeout(pendingBuildTap);
-        pendingBuildTap = 0;
-        tapTimes = [];
-        placeBuildItem();
-        return;
-      }
-      tapTimes = tapTimes.filter(time => now - time < 650);
-      tapTimes.push(now);
-      if (tapTimes.length >= 3) {
-        clearTimeout(pendingBuildTap);
-        pendingBuildTap = 0;
-        tapTimes = [];
-        toggleBuildUi();
-      }
-    }
-
     function beginCanvasPointer(e) {
-      updateBuildHover(e.clientX, e.clientY);
       if (e.button === 2) {
-        if (state.buildUiOpen) removePlacedAt(state.buildHover.x, state.buildHover.y);
+        if (state.buildUiOpen) {
+          updateBuildHover(e.clientX, e.clientY);
+          removePlacedAt(state.buildHover.x, state.buildHover.y);
+        }
         return;
       }
       if (e.button !== 0) return;
       state.demo = false;
-      state.joystick.active = true;
-      state.joystick.pointerId = e.pointerId;
-      state.joystick.startX = e.clientX;
-      state.joystick.startY = e.clientY;
-      state.joystick.x = 0;
-      state.joystick.y = 0;
-      state.joystick.moved = false;
-      scene.setPointerCapture(e.pointerId);
-      e.preventDefault();
+      const rect = scene.getBoundingClientRect();
+      const relX = e.clientX - rect.left;
+      const isLeft = relX < rect.width / 2;
+      // Always update build hover when build mode is on (so left-side taps can build too)
+      if (state.buildUiOpen) {
+        updateBuildHover(e.clientX, e.clientY);
+      }
+      if (isLeft) {
+        // Left side always starts joystick (for movement)
+        state.joystick.active = true;
+        state.joystick.pointerId = e.pointerId;
+        state.joystick.startX = e.clientX;
+        state.joystick.startY = e.clientY;
+        state.joystick.x = 0;
+        state.joystick.y = 0;
+        state.joystick.moved = false;
+        const scaleX = VIEW_W / rect.width;
+        const scaleY = VIEW_H / rect.height;
+        state.joystick.baseX = relX * scaleX;
+        state.joystick.baseY = (e.clientY - rect.top) * scaleY;
+        scene.setPointerCapture(e.pointerId);
+        e.preventDefault();
+      } else {
+        // Right side: place build when build mode ON, attack when OFF
+        if (state.buildUiOpen) {
+          placeBuildItem();
+        } else {
+          triggerAttack();
+        }
+      }
     }
 
     function moveCanvasPointer(e) {
-      updateBuildHover(e.clientX, e.clientY);
+      if (!(state.joystick.active && e.pointerId === state.joystick.pointerId)) {
+        updateBuildHover(e.clientX, e.clientY);
+      }
       updateJoystickFromPointer(e);
       if (state.joystick.active && e.pointerId === state.joystick.pointerId) e.preventDefault();
     }
@@ -2925,13 +5141,42 @@
     function endCanvasPointer(e) {
       if (!state.joystick.active || e.pointerId !== state.joystick.pointerId) return;
       updateJoystickFromPointer(e);
-      const wasTap = !state.joystick.moved && Math.hypot(e.clientX - state.joystick.startX, e.clientY - state.joystick.startY) < 12;
+      // If build mode is on and this was a tap (not a swipe), place a build item
+      if (state.buildUiOpen && !state.joystick.moved) {
+        placeBuildItem();
+      }
       resetJoystick();
-      if (wasTap) registerQuickTap(e.clientX, e.clientY);
       try {
         scene.releasePointerCapture(e.pointerId);
       } catch (_) {}
       e.preventDefault();
+    }
+
+    function drawJoystick() {
+      const stick = state.joystick;
+      if (!stick.active) return;
+      const rect = scene.getBoundingClientRect();
+      const scale = VIEW_W / rect.width;
+      const baseX = stick.baseX;
+      const baseY = stick.baseY;
+      const maxR = stick.maxDistance * scale;
+      const thumbX = baseX + stick.x * maxR;
+      const thumbY = baseY + stick.y * maxR;
+      ctx.save();
+      ctx.globalAlpha = 0.55;
+      ctx.fillStyle = "rgba(255, 255, 255, 0.18)";
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.55)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(baseX, baseY, maxR, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.globalAlpha = 0.85;
+      ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+      ctx.beginPath();
+      ctx.arc(thumbX, thumbY, 8, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
     }
 
     function updateCamera() {
@@ -2949,7 +5194,10 @@
       const dt = Math.min((now - state.last) / 1000, 0.05);
       state.last = now;
       state.t += dt;
+      updateBloodSplats(dt);
       updateTreeRespawns(now);
+      updateDayNightCycle(now, dt);
+      updateMovingTrees(now, dt);
 
       let dx = Number(pressed("arrowright", "d")) - Number(pressed("arrowleft", "a"));
       let dy = Number(pressed("arrowdown", "s")) - Number(pressed("arrowup", "w"));
@@ -2965,32 +5213,28 @@
       }
 
       const attacking = now < state.attackUntil;
-      const moving = !attacking && (dx || dy);
+      const moving = dx || dy;
       const wasMoving = state.wasMoving;
       if (moving && !wasMoving) state.moveStarted = now;
       const len = Math.hypot(dx, dy) || 1;
-      if (!attacking) {
-        const maxX = state.scene === "interior" ? INTERIOR_W - 34 : WORLD_W - 24;
-        const maxY = state.scene === "interior" ? INTERIOR_H - 24 : WORLD_H - 24;
-        const nextX = Math.max(24, Math.min(maxX, state.x + dx / len * MOVE_SPEED * dt));
-        const nextY = Math.max(34, Math.min(maxY, state.y + dy / len * MOVE_SPEED * dt));
-        if (!collides(nextX, state.y)) state.x = nextX;
-        if (!collides(state.x, nextY)) state.y = nextY;
-      }
+      const maxX = state.scene === "interior" ? INTERIOR_W - 34 : WORLD_W - 24;
+      const maxY = state.scene === "interior" ? INTERIOR_H - 24 : WORLD_H - 24;
+      const nextX = Math.max(24, Math.min(maxX, state.x + dx / len * MOVE_SPEED * dt));
+      const nextY = Math.max(34, Math.min(maxY, state.y + dy / len * MOVE_SPEED * dt));
+      if (!collides(nextX, state.y)) state.x = nextX;
+      if (!collides(state.x, nextY)) state.y = nextY;
       resolvePlayerOverlap();
       maybeTeleport();
       updateDialogue(now, Boolean(moving), Boolean(attacking));
 
-      if (!attacking) {
-        const cfg = roster[state.current];
-        if (cfg.sideView) {
-          if (dx) state.dir = dx > 0 ? "right" : "left";
-          else state.dir = sideFacingDir(state.dir);
-        } else if (Math.abs(dy) > Math.abs(dx)) {
-          state.dir = dy > 0 ? "front" : "back";
-        } else if (dx) {
-          state.dir = dx > 0 ? "right" : "left";
-        }
+      const cfg = roster[state.current];
+      if (cfg.sideView) {
+        if (dx) state.dir = dx > 0 ? "right" : "left";
+        else state.dir = sideFacingDir(state.dir);
+      } else if (Math.abs(dy) > Math.abs(dx)) {
+        state.dir = dy > 0 ? "front" : "back";
+      } else if (dx) {
+        state.dir = dx > 0 ? "right" : "left";
       }
       if (attacking) {
         state.stopUntil = 0;
@@ -3008,9 +5252,12 @@
         }
       }
       state.wasMoving = Boolean(moving);
-      const stopping = !attacking && !moving && now < state.stopUntil;
-      state.mode = attacking ? "attack" : moving ? "run" : stopping ? state.stopMode : "idle";
+      const dying = now < state.dieUntil;
+      const stopping = !dying && !attacking && !moving && now < state.stopUntil;
+      state.mode = dying ? "die" : attacking ? "attack" : moving ? "run" : stopping ? state.stopMode : "idle";
 
+      updateRoamingNPCs(now, dt);
+      updatePetSlimes(now, dt);
       updateCamera();
       updateStudyCapture(now);
       draw();
@@ -3018,54 +5265,223 @@
     }
 
     function draw() {
-      resizeSceneCanvas();
-      scene.dataset.x = state.x.toFixed(2);
-      scene.dataset.y = state.y.toFixed(2);
-      scene.dataset.cameraX = state.cameraX.toFixed(2);
-      scene.dataset.cameraY = state.cameraY.toFixed(2);
-      scene.dataset.character = state.current;
-      scene.dataset.mode = state.mode;
-      scene.dataset.stopMode = state.stopMode;
-      scene.dataset.dir = state.dir;
-      scene.dataset.attackDir = state.attackDir;
-      scene.dataset.scene = state.scene;
-      scene.dataset.transition = state.transitionText;
-      scene.dataset.placed = placedSprites.length;
-      scene.dataset.treeHits = state.treeHits;
-      scene.dataset.treesDestroyed = state.treesDestroyed;
-      scene.dataset.lastTreeHit = state.lastTreeHit;
-      scene.dataset.dialogue = state.dialogueText;
-      scene.dataset.studyCapture = state.studyCapture.phase;
-      scene.dataset.studyWord = state.studyCapture.target ? studyVocabulary[state.studyCapture.target.kind]?.word || "" : "";
-      scene.dataset.buildUiOpen = state.buildUiOpen ? "true" : "false";
-      scene.dataset.joystick = state.joystick.active ? `${state.joystick.x.toFixed(2)},${state.joystick.y.toFixed(2)}` : "0,0";
-      scene.dataset.zoom = state.zoom.toFixed(2);
-      scene.dataset.seed = WORLD_SEED;
+      // dataset writes are cheap debug info — skip on mobile for perf
       const now = performance.now();
       ctx.imageSmoothingEnabled = false;
       ctx.clearRect(0, 0, VIEW_W, VIEW_H);
+      
+      let shakeX = 0;
+      let shakeY = 0;
+      if (now < state.screenShakeUntil) {
+        const amt = 5;
+        shakeX = Math.round((Math.random() - 0.5) * amt * 2);
+        shakeY = Math.round((Math.random() - 0.5) * amt * 2);
+      }
+      
       ctx.save();
+      ctx.translate(shakeX, shakeY);
+      
       if (state.scene === "interior") {
         drawInteriorBase();
         drawDepthSortedActors();
         drawBuildGhost();
       } else {
-	        ctx.scale(state.zoom, state.zoom);
-	        ctx.translate(-Math.round(state.cameraX), -Math.round(state.cameraY));
-	        ctx.drawImage(staticMap, 0, 0);
-	        drawAnimatedWater();
-	        drawAnimatedShoreline();
-	        drawFarmPatch();
-	        drawDepthSortedActors();
-	        drawBuildGhost();
-	      }
-	      ctx.restore();
-	      captureStudySnapshot(now);
-	      drawBiomeScreenFilter();
-	      drawAnimeColorGrade();
-	      drawTransition();
-	      drawStudyCaptureOverlay(now);
-	    }
+        ctx.scale(state.zoom, state.zoom);
+        ctx.translate(-Math.round(state.cameraX), -Math.round(state.cameraY));
+        drawVisibleGrass();
+        drawAnimatedWater();
+        drawAnimatedShoreline();
+        drawFarmPatch();
+        drawBloodSplats();
+        drawDepthSortedActors();
+        
+        // Night shadow overlay & Soft Radial Flashlight (world space)
+        if (state.timeOfDay === "night") {
+          ctx.save();
+          const pad = 100;
+          const w = viewWorldW() + pad * 2;
+          const h = viewWorldH() + pad * 2;
+          
+          const cx = state.x;
+          const cy = state.y - 12;
+          const outerRadius = 110; // restored flashlight view size
+          
+          // Draw smooth dark night vignette centered on the player (medium density)
+          const nightGrad = ctx.createRadialGradient(cx, cy, 18, cx, cy, outerRadius);
+          nightGrad.addColorStop(0, "rgba(3, 3, 12, 0.0)");
+          nightGrad.addColorStop(0.35, "rgba(3, 3, 12, 0.28)");
+          nightGrad.addColorStop(0.75, "rgba(3, 3, 12, 0.65)");
+          nightGrad.addColorStop(1.0, "rgba(3, 3, 12, 0.82)");
+          
+          ctx.fillStyle = nightGrad;
+          ctx.fillRect(state.cameraX - pad, state.cameraY - pad, w, h);
+          
+          // Draw warm yellowish soft spotlight gradient on top
+          const yellowGrad = ctx.createRadialGradient(cx, cy, 0, cx, cy, outerRadius * 0.8);
+          yellowGrad.addColorStop(0, "rgba(255, 210, 80, 0.18)");   // warm core glow
+          yellowGrad.addColorStop(0.4, "rgba(255, 180, 50, 0.05)");  // fading midglow
+          yellowGrad.addColorStop(1.0, "rgba(255, 180, 50, 0.0)");
+          
+          ctx.fillStyle = yellowGrad;
+          ctx.beginPath();
+          ctx.arc(cx, cy, outerRadius * 0.8, 0, Math.PI * 2);
+          ctx.fill();
+          
+          ctx.restore();
+        }
+        drawBuildGhost();
+      }
+      ctx.restore();
+      
+      // Draw screen red flash if hit
+      if (now < state.screenFlashRedUntil) {
+        ctx.save();
+        ctx.fillStyle = "rgba(220, 10, 10, 0.32)";
+        ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+        ctx.restore();
+      }
+      
+      // Draw typewriter scary announcement (Glitching English/Indo Translation card, no box)
+      if (state.announcement && now < state.announcementVisible) {
+        ctx.save();
+        ctx.textAlign = "right";
+        ctx.textBaseline = "middle";
+        
+        const cx = VIEW_W - 16; // bottom-right corner, aligns right-to-left
+        const cy = VIEW_H - 140; // stack upward above the buildbar
+        
+        const elapsed = now - state.announcementStart;
+        const totalChars = Math.floor(elapsed / 18);
+        
+        let remaining = totalChars;
+        const titleTyped = state.announcement.title.slice(0, Math.max(0, remaining));
+        remaining -= state.announcement.title.length;
+        
+        const sentenceTyped = state.announcement.sentence.slice(0, Math.max(0, remaining));
+        remaining -= state.announcement.sentence.length;
+        
+        const englishTyped = state.announcement.english.slice(0, Math.max(0, remaining));
+        remaining -= state.announcement.english.length;
+        
+        const infoTyped = state.announcement.info.slice(0, Math.max(0, remaining));
+        remaining -= state.announcement.info.length;
+        
+        const statusTyped = state.announcement.status.slice(0, Math.max(0, remaining));
+        remaining -= state.announcement.status.length;
+        
+        const extraTyped = state.announcement.extra.slice(0, Math.max(0, remaining));
+        
+        // Glitch metrics: only happen when about to exit (last 1200ms of display!)
+        const msLeft = state.announcementVisible - now;
+        const isExitPhase = msLeft < 1200;
+        const isGlitching = isExitPhase && (Math.random() < 0.45);
+        const glitchX = isGlitching ? (Math.random() - 0.5) * 6 : 0;
+        const glitchY = isGlitching ? (Math.random() - 0.5) * 3 : 0;
+        
+        const corruptText = (txt) => {
+          if (!txt) return "";
+          if (!isGlitching || Math.random() < 0.35) return txt;
+          let res = "";
+          const chars = "@#%$_&?";
+          for (let i = 0; i < txt.length; i++) {
+            if (Math.random() < 0.28) {
+              res += chars[Math.floor(Math.random() * chars.length)];
+            } else {
+              res += txt[i];
+            }
+          }
+          return res;
+        };
+        
+        const drawGlitchText = (text, x, y, font, colorDefault) => {
+          if (!text) return;
+          ctx.font = font;
+          const displayTxt = corruptText(text);
+          if (isGlitching && Math.random() < 0.6) {
+            ctx.fillStyle = "rgba(0, 240, 240, 0.7)";
+            ctx.fillText(displayTxt, x - 2 + (Math.random() - 0.5) * 3, y);
+            
+            ctx.fillStyle = "rgba(255, 30, 30, 0.7)";
+            ctx.fillText(displayTxt, x + 2 + (Math.random() - 0.5) * 3, y);
+            
+            ctx.fillStyle = "#ffffff";
+            ctx.fillText(displayTxt, x, y);
+          } else {
+            ctx.fillStyle = colorDefault;
+            ctx.fillText(displayTxt, x, y);
+          }
+        };
+        
+        if (titleTyped) {
+          drawGlitchText(
+            titleTyped,
+            cx + glitchX,
+            cy + glitchY,
+            "700 13px Georgia, serif",
+            state.timeOfDay === "day" ? "#ff3c3c" : "#ffcc22"
+          );
+        }
+        
+        if (sentenceTyped) {
+          drawGlitchText(
+            sentenceTyped,
+            cx - glitchX * 0.5,
+            cy + 15 + glitchY,
+            "italic 9px Georgia, serif",
+            "#e0e0e0"
+          );
+        }
+        
+        if (englishTyped) {
+          drawGlitchText(
+            `(${englishTyped})`,
+            cx + glitchX * 0.3,
+            cy + 27 + glitchY,
+            "8px Georgia, serif",
+            "#a0a0a0"
+          );
+        }
+        
+        if (infoTyped) {
+          drawGlitchText(
+            infoTyped,
+            cx - glitchX * 0.2,
+            cy + 39 + glitchY,
+            "8px Georgia, serif",
+            "#909090"
+          );
+        }
+        
+        if (statusTyped) {
+          drawGlitchText(
+            statusTyped,
+            cx + glitchX * 0.4,
+            cy + 51 + glitchY,
+            "8px Georgia, serif",
+            "#909090"
+          );
+        }
+        
+        if (extraTyped) {
+          drawGlitchText(
+            extraTyped,
+            cx - glitchX * 0.2,
+            cy + 65 + glitchY,
+            "bold 9px 'Courier New', monospace",
+            "#ffffff"
+          );
+        }
+        
+        ctx.restore();
+      }
+
+      // drawJoystick(); // hidden but still functional
+      captureStudySnapshot(now);
+      drawBiomeScreenFilter();
+      drawAnimeColorGrade();
+      drawTransition();
+      drawStudyCaptureOverlay(now);
+    }
 
     function drawTransition() {
       const elapsed = performance.now() - state.transitionStarted;
@@ -3088,27 +5504,220 @@
       ctx.restore();
     }
 
+    const ditherPatterns = {};
+    function initDitherPatterns() {
+      const createPatternCanvas = (pixels) => {
+        const canvas = document.createElement("canvas");
+        canvas.width = 4;
+        canvas.height = 4;
+        const pCtx = canvas.getContext("2d");
+        const imgData = pCtx.createImageData(4, 4);
+        for (let i = 0; i < 16; i++) {
+          const val = pixels[i] ? 255 : 0;
+          const idx = i * 4;
+          imgData.data[idx] = 0;
+          imgData.data[idx+1] = 0;
+          imgData.data[idx+2] = 0;
+          imgData.data[idx+3] = val;
+        }
+        pCtx.putImageData(imgData, 0, 0);
+        return ctx.createPattern(canvas, "repeat");
+      };
+      
+      ditherPatterns.d25 = createPatternCanvas([
+        1, 0, 0, 0,
+        0, 0, 1, 0,
+        0, 1, 0, 0,
+        0, 0, 0, 1
+      ]);
+      
+      ditherPatterns.d50 = createPatternCanvas([
+        1, 0, 1, 0,
+        0, 1, 0, 1,
+        1, 0, 1, 0,
+        0, 1, 0, 1
+      ]);
+      
+      ditherPatterns.d75 = createPatternCanvas([
+        1, 1, 0, 1,
+        0, 1, 1, 1,
+        1, 0, 1, 1,
+        1, 1, 1, 0
+      ]);
+    }
+
     async function start() {
+      initDitherPatterns();
       resizeSceneCanvas();
-      await Promise.all(Object.values(assets).map(loadImageCached));
-      await loadPlants();
-      await loadForestAnimal("fox");
+
+      const loadingScreen = document.getElementById("loading-screen");
+      const loadingBar = document.getElementById("loading-bar");
+      const loadingPct = document.getElementById("loading-pct");
+      const loadingSub = document.getElementById("loading-sub");
+      // Show version on loading title
+      document.getElementById("loading-title").textContent = `🌿 Grass Animal Tester v${APP_VERSION}`;
+
+      // ── Step 1: collect all srcs ──────────────────────────
+      function allCharacterSrcs() {
+        const srcs = new Set();
+        for (const [, cfg] of Object.entries(roster)) {
+          if (cfg.kind === "forest") {
+            const paths = getForestFramePaths(cfg.base);
+            Object.values(paths).flat().forEach(s => srcs.add(s));
+          } else if (cfg.src) {
+            srcs.add(cfg.src);
+          }
+        }
+        return [...srcs];
+      }
+
+      const coreSrcs = Object.values(assets);
+      const plantSrcs = (() => {
+        const out = new Set();
+        const uniquePlants = new Map();
+        [...plantSprites, ...biomeTrees, ...interiorSprites,
+         ...buildPalette.filter(i => !i.erase), ...buildConnectionSprites]
+          .forEach(item => uniquePlants.set(`${item.name}:${item.count}`, item));
+        [...uniquePlants.values()].forEach(plant => {
+          [plant, ...(plant.variants || [])].forEach(item => {
+            Array.from({ length: item.count || plant.count || 1 }, (_, i) =>
+              out.add(`assets/plants/${item.name}/frame_${i}.png`)
+            );
+          });
+        });
+        Object.values(farmCrops).forEach(crop =>
+          Array.from({ length: crop.stages }, (_, i) =>
+            out.add(`assets/plants/${crop.name}/frame_${i}.png`)
+          )
+        );
+        return [...out];
+      })();
+
+      const charSrcs = allCharacterSrcs();
+      const allSrcs = [...new Set([...coreSrcs, ...plantSrcs, ...charSrcs])];
+      const mapStrips = Math.ceil(WORLD_H / 512);
+      const total = allSrcs.length + mapStrips;
+      let loaded = 0;
+
+      function onProgress(name) {
+        loaded++;
+        const pct = Math.round((loaded / total) * 100);
+        loadingBar.style.width = pct + "%";
+        loadingPct.textContent = pct + "%";
+        const match = name.match(/assets\/([^/]+)\//);
+        if (match) loadingSub.textContent = `Loading ${match[1].replace(/_/g, " ")}…`;
+      }
+
+      // ── Step 2: load assets in batches ────────────────────
+      const BATCH = 8; // smaller batches = more UI updates on mobile
+      for (let i = 0; i < allSrcs.length; i += BATCH) {
+        const batch = allSrcs.slice(i, i + BATCH);
+        await Promise.all(batch.map(src =>
+          loadImageCached(src).then(() => onProgress(src)).catch(() => onProgress(src))
+        ));
+      }
+
+      // Mark all forest animals as fully loaded
+      for (const [, cfg] of Object.entries(roster)) {
+        if (cfg.kind === "forest") {
+          if (!forestFrames[cfg.base]) forestFrames[cfg.base] = getForestFramePaths(cfg.base);
+          forestFrames[cfg.base].loaded = true;
+        }
+      }
+
+      // ── Step 3: skip full-world pre-render — chunks built on demand ──
+      loadingSub.textContent = "Generating map…";
+      await new Promise(resolve => setTimeout(resolve, 30));
+      // Advance progress bar to account for skipped map strips
+      loaded += mapStrips;
+      const mapPct = Math.round((loaded / total) * 100);
+      loadingBar.style.width = mapPct + "%";
+      loadingPct.textContent = mapPct + "%";
+
+      loadingBar.style.width = "100%";
+      loadingPct.textContent = "100%";
+      loadingSub.textContent = `Ready! v${APP_VERSION}`;
+      await new Promise(resolve => setTimeout(resolve, 120));
 
       renderPicker();
       renderBuildbar();
-      buildStaticMap();
+      updateFullscreenButton();
       seedDemoFarm();
+      initRoamingNPCs();
       await setCurrent("fox");
       requestAnimationFrame(update);
+
+      // Fade out loading screen
+      loadingScreen.classList.add("fade-out");
+      setTimeout(() => loadingScreen.remove(), 550);
     }
 
     addEventListener("resize", resizeSceneCanvas);
+    addEventListener("resize", setOrientationFullscreen);
+    addEventListener("orientationchange", setOrientationFullscreen);
+    addEventListener("popstate", () => {
+      if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+      syncFullscreenClass();
+    });
+    document.addEventListener("fullscreenchange", () => {
+      if (!document.fullscreenElement) {
+        manualFullscreen = false;
+      }
+      syncFullscreenClass();
+    });
     addEventListener("keydown", e => setKey(e.key, true));
     addEventListener("keyup", e => setKey(e.key, false));
+    
+    document.getElementById("toggle-time-btn").addEventListener("click", () => {
+      const now = performance.now();
+      if (state.timeOfDay === "day") {
+        state.timeOfDay = "night";
+        state.timeRemaining = 120;
+        state.announcedNight60 = false;
+        state.announcedNight30 = false;
+        state.announcedNight10 = false;
+        state.nightCount = (state.nightCount || 0) + 1;
+        spawnNightMonsters(now);
+        
+        showScaryAnnouncement(
+          "LOG // MALAM (NIGHT)",
+          "Malam telah tiba... bertahan hidup lah!",
+          "Night has fallen... survive!",
+          "ROOT: m-l-m (noun) | PHASE: hostile entities active",
+          "SIGNAL QUALITY: 15% (CORRUPTED) | THREAT SCALE: MAXIMAL",
+          `[SYSTEM STATE: NIGHT LOCKDOWN - NIGHT ${state.nightCount}]`
+        );
+        state.screenShakeUntil = now + 600;
+        state.screenFlashRedUntil = now + 400;
+      } else {
+        state.timeOfDay = "day";
+        state.timeRemaining = 60;
+        state.announced60 = false;
+        state.announced30 = false;
+        state.announced10 = false;
+        
+        // Clear all remaining night monsters when morning arrives!
+        for (let i = roamingNPCs.length - 1; i >= 0; i--) {
+          if (roamingNPCs[i].isNightMonster) {
+            roamingNPCs.splice(i, 1);
+          }
+        }
+        
+        showScaryAnnouncement(
+          "LOG // PAGI (MORNING)",
+          "Pagi telah datang. Cahaya mengusir kegelapan.",
+          "Morning has come. The light banishes the darkness.",
+          "ROOT: p-g-i (noun) | PHASE: normal activity resumed",
+          "SIGNAL QUALITY: 100% | THREAT SCALE: NONE",
+          "[SYSTEM STATE: ACTIVE]"
+        );
+      }
+    });
     buildbarClose.addEventListener("click", () => {
       setBuildUiOpen(false);
       state.demo = false;
     });
+    buildbarFullscreen.addEventListener("click", toggleFullscreenManual);
     buildbarRotate.addEventListener("click", rotateBuildItem);
     scene.addEventListener("pointermove", moveCanvasPointer);
     scene.addEventListener("pointerleave", () => {
@@ -3116,6 +5725,7 @@
       resetJoystick();
     });
     scene.addEventListener("pointerdown", beginCanvasPointer);
+    scene.addEventListener("pointerdown", setOrientationFullscreen);
     scene.addEventListener("pointerup", endCanvasPointer);
     scene.addEventListener("pointercancel", resetJoystick);
     scene.addEventListener("wheel", e => {
@@ -3125,10 +5735,65 @@
       setZoom(state.zoom * Math.exp(-e.deltaY * zoomStep), e.clientX, e.clientY);
     }, { passive: false });
     scene.addEventListener("contextmenu", e => e.preventDefault());
+    barZoneTop.addEventListener("pointerdown", e => {
+      e.preventDefault();
+      toggleBuildUi();
+    });
+    barZoneBottom.addEventListener("pointerdown", e => {
+      e.preventDefault();
+      toggleBuildUi();
+    });
 
     start().catch(err => {
       hud.textContent = `Asset load failed: ${err.message}`;
     });
+    setOrientationFullscreen();
+
+    // ── PWA / Add to Home Screen ──────────────────────────
+    const installBtn = document.getElementById("install-btn");
+    const iosToast = document.getElementById("ios-install-toast");
+    const iosToastClose = document.getElementById("ios-install-toast-close");
+
+    // Detect iOS Safari
+    const isIos = /iphone|ipad|ipod/i.test(navigator.userAgent) && !window.MSStream;
+    const isInStandaloneMode = window.navigator.standalone === true ||
+      window.matchMedia("(display-mode: standalone)").matches;
+
+    if (isIos && !isInStandaloneMode) {
+      // Show the button for iOS; tapping opens instructions toast
+      installBtn.classList.add("show");
+      installBtn.addEventListener("click", () => {
+        iosToast.classList.toggle("show");
+      });
+      iosToastClose.addEventListener("click", () => {
+        iosToast.classList.remove("show");
+      });
+    }
+
+    // Android / Chrome: listen for the beforeinstallprompt event
+    let deferredInstallPrompt = null;
+    window.addEventListener("beforeinstallprompt", e => {
+      e.preventDefault();
+      deferredInstallPrompt = e;
+      installBtn.classList.add("show");
+    });
+    installBtn.addEventListener("click", () => {
+      if (!deferredInstallPrompt) return;
+      deferredInstallPrompt.prompt();
+      deferredInstallPrompt.userChoice.then(() => {
+        deferredInstallPrompt = null;
+        installBtn.classList.remove("show");
+      });
+    });
+    window.addEventListener("appinstalled", () => {
+      installBtn.classList.remove("show");
+      deferredInstallPrompt = null;
+    });
+
+    // ── Service Worker (offline support) ─────────────────
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("sw.js").catch(() => {});
+    }
   </script>
 </body>
 </html>
