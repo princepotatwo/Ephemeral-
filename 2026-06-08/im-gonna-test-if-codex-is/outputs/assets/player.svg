@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" shape-rendering="crispEdges">
+  <rect width="64" height="64" fill="none"/>
+  <g id="shadow">
+    <rect x="18" y="56" width="28" height="4" fill="#1b1f24" opacity=".28"/>
+  </g>
+  <g id="body">
+    <rect x="22" y="18" width="20" height="28" fill="#2f9e74"/>
+    <rect x="18" y="24" width="4" height="16" fill="#267a5d"/>
+    <rect x="42" y="24" width="4" height="16" fill="#267a5d"/>
+    <rect x="22" y="46" width="8" height="8" fill="#243b53"/>
+    <rect x="34" y="46" width="8" height="8" fill="#243b53"/>
+  </g>
+  <g id="head">
+    <rect x="20" y="8" width="24" height="16" fill="#f3b17b"/>
+    <rect x="16" y="4" width="32" height="8" fill="#5f2f18"/>
+    <rect x="20" y="12" width="4" height="4" fill="#111827"/>
+    <rect x="40" y="12" width="4" height="4" fill="#111827"/>
+    <rect x="28" y="18" width="8" height="2" fill="#8f3b26"/>
+  </g>
+  <rect x="46" y="28" width="10" height="4" fill="#a47148"/>
+  <rect x="54" y="24" width="4" height="12" fill="#c2c7cc"/>
+</svg>
