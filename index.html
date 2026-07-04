@@ -750,7 +750,7 @@
       scary_zombie: { label: "Scary Zombie", kind: "forest", base: "scary_zombie", scale: 1.15, attackMs: 420, sideView: true, smooth: true },
       creature_bear: { label: "Flesh Bear", kind: "forest", base: "creature_bear", scale: 1.25, attackMs: 420, sideView: true, smooth: true },
       creature_crawler: { label: "Gore Crawler", kind: "forest", base: "creature_crawler", scale: 1.15, attackMs: 480, sideView: true, smooth: true },
-      creature_slasher: { label: "Flesh Slasher", kind: "forest", base: "creature_slasher", scale: 1.15, attackMs: 480, sideView: true, smooth: true }
+      creature_slasher: { label: "Flesh Slasher", kind: "forest", base: "creature_slasher", scale: 1.15, attackMs: 800, sideView: true, smooth: true }
     };
     silksongStudyCharacters.forEach(([name]) => {
       roster[name].sideView = true;
@@ -760,6 +760,7 @@
     roster.silksong_hornet.stopFps = 12;
     roster.silksong_hornet.skidFps = 12;
     roster.silksong_hornet.attackFps = 12;
+    roster.creature_slasher.attackFps = 15;
 
     const assets = {
       grass: "assets/forest/sprout_grass.png",
@@ -772,7 +773,7 @@
       silksong_moss_creep: { idle: 6, run: 3, stop: 6, attack: 6 },
       creature_bear: { idle: 6, run: 6, attack: 6, die: 8 },
       creature_crawler: { idle: 7, run: 7, attack: 7, die: 7 },
-      creature_slasher: { idle: 8, run: 8, attack: 8, die: 8 },
+      creature_slasher: { idle: 8, run: 8, attack: 12, die: 8 },
       silksong_bone_worm: { idle: 4, run: 4, stop: 4, attack: 7 },
       silksong_moss_crawler: { idle: 3, run: 23, stop: 3, attack: 3 },
       silksong_staff_pilgrim: { idle: 6, run: 10, stop: 6, attack: 13 },
@@ -5180,8 +5181,8 @@
               if (!npc.slasherAttacking) {
                 npc.mode = "attack";
                 npc.attackStarted = now;
-                npc.attackUntil = now + 480; // Slasher attack duration
-                npc.nextAttackAt = now + 480;
+                npc.attackUntil = now + (cfg.attackMs || 480);
+                npc.nextAttackAt = now + (cfg.attackMs || 480);
                 npc.slasherAttacking = true;
                 
                 npc.damageDealt = false;
