@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Grass Animal Tester</title>
+  <title>Ethereal RPG</title>
   <link rel="manifest" href="manifest.json">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Grass Tester">
+  <meta name="apple-mobile-web-app-title" content="Ethereal">
   <meta name="theme-color" content="#9fca65">
   <link rel="apple-touch-icon" href="assets/icon-192.png">
   <style>
@@ -120,6 +120,8 @@
       background: #9fca65;
       touch-action: none;
       user-select: none;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
     }
     body.is-game-fullscreen #scene,
     .stage:fullscreen #scene {
@@ -478,7 +480,7 @@
   <!-- Loading screen -->
   <div id="loading-screen">
     <div id="loading-box">
-      <div id="loading-title">🌿 Grass Animal Tester</div>
+      <div id="loading-title">✨ Ethereal RPG</div>
       <div id="loading-sub">Loading assets…</div>
       <div id="loading-bar-wrap"><div id="loading-bar"></div></div>
       <div id="loading-pct">0%</div>
@@ -498,6 +500,13 @@
   <div class="shell">
     <main class="stage" aria-label="Cute overworld map">
       <canvas id="scene" width="640" height="360"></canvas>
+      
+      <!-- Preloaded Sound Effect Assets -->
+      <audio id="sfx-swing" src="sounds/swing.mp3" preload="auto"></audio>
+      <audio id="sfx-hit" src="sounds/hit.mp3" preload="auto"></audio>
+      <audio id="sfx-hurt" src="sounds/hurt.mp3" preload="auto"></audio>
+      <audio id="sfx-click" src="sounds/click.mp3" preload="auto"></audio>
+      <audio id="sfx-chop" src="sounds/chop.mp3" preload="auto"></audio>
       <div class="bar-zone bar-zone-top" id="bar-zone-top"></div>
       <div class="bar-zone bar-zone-bottom" id="bar-zone-bottom"></div>
       <div class="hud" id="hud" aria-live="polite"></div>
@@ -524,11 +533,32 @@
         </div>
       </div>
     </main>
-    <div class="test-controls" style="margin-bottom: 8px; display: flex; gap: 8px; align-items: center;">
-      <button id="toggle-time-btn" class="time-toggle-btn" type="button" style="padding: 6px 12px; font-weight: 600; border-radius: 8px; border: 1px solid #c2b399; background: #fffcf8; color: #5c4b37; cursor: pointer; transition: all 0.2s ease;">
-        ☀️ Switch to Night
-      </button>
-      <span id="test-time-label" style="font-size: 11px; color: #7c6c56; font-family: monospace;">Current Phase: DAY (T-Minus 60s)</span>
+    <div class="test-controls" style="margin-bottom: 8px; padding: 10px 14px; border: 1.5px solid #d4c4a8; border-radius: 12px; background: #faf5ec; display: flex; flex-direction: column; gap: 8px; box-shadow: 0 2px 8px rgba(92, 75, 55, 0.06);">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e8dec9; padding-bottom: 6px; margin-bottom: 4px;">
+        <span style="font-family: monospace; font-size: 12px; font-weight: bold; color: #5c4b37; text-transform: uppercase; letter-spacing: 0.5px;">⚙️ Game Settings</span>
+        <span id="fps-counter" style="font-family: monospace; font-size: 12px; font-weight: bold; color: #8e785b;">FPS: --</span>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; gap: 14px; align-items: center;">
+        <button id="toggle-time-btn" class="time-toggle-btn" type="button" style="padding: 6px 12px; font-weight: 600; border-radius: 8px; border: 1px solid #c2b399; background: #fffcf8; color: #5c4b37; cursor: pointer; transition: all 0.2s ease; font-family: monospace; font-size: 11px;">
+          ☀️ Switch to Night
+        </button>
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <label for="night-darkness-slider" style="font-size: 11px; color: #7c6c56; font-family: monospace; font-weight: bold; user-select: none;">Night Darkness:</label>
+          <input id="night-darkness-slider" type="range" min="0.0" max="1.0" step="0.02" value="0.82" style="width: 90px; cursor: pointer; accent-color: #5c4b37; outline: none; margin: 0;">
+          <span id="night-darkness-value" style="font-size: 11px; color: #7c6c56; font-family: monospace; width: 32px; font-weight: bold;">82%</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <label for="player-damage-slider" style="font-size: 11px; color: #7c6c56; font-family: monospace; font-weight: bold; user-select: none;">Player Damage:</label>
+          <input id="player-damage-slider" type="range" min="1" max="250" step="1" value="1" style="width: 90px; cursor: pointer; accent-color: #5c4b37; outline: none; margin: 0;">
+          <span id="player-damage-value" style="font-size: 11px; color: #7c6c56; font-family: monospace; width: 32px; font-weight: bold;">1</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <label for="pet-chance-slider" style="font-size: 11px; color: #7c6c56; font-family: monospace; font-weight: bold; user-select: none;">Pet Chance:</label>
+          <input id="pet-chance-slider" type="range" min="0" max="100" step="5" value="20" style="width: 90px; cursor: pointer; accent-color: #5c4b37; outline: none; margin: 0;">
+          <span id="pet-chance-value" style="font-size: 11px; color: #7c6c56; font-family: monospace; width: 32px; font-weight: bold;">20%</span>
+        </div>
+        <span id="test-time-label" style="font-size: 11px; color: #7c6c56; font-family: monospace; margin-left: auto;">Current Phase: DAY (T-Minus 60s)</span>
+      </div>
     </div>
     <div class="picker" id="picker" aria-label="Character switcher"></div>
     <div class="caption">Online sprite credits: inkBubi, PIPOYA, AxulArt, RGS_Dev, karsiori, Cup Nooble, Kettoman, Shaade, Tayziulei, Daniel Eddeland, Stephen Challener / PixelFarm, patvanmackelberg, Bouste, and Kenney.</div>
@@ -727,8 +757,8 @@
       scary_monster: { label: "Scary Monster", kind: "forest", base: "scary_monster", scale: 1.15, attackMs: 480, sideView: true, smooth: true },
       scary_zombie: { label: "Scary Zombie", kind: "forest", base: "scary_zombie", scale: 1.15, attackMs: 420, sideView: true, smooth: true },
       creature_bear: { label: "Flesh Bear", kind: "forest", base: "creature_bear", scale: 1.25, attackMs: 420, sideView: true, smooth: true },
-      creature_crawler: { label: "Gore Crawler", kind: "forest", base: "creature_crawler", scale: 11.5, attackMs: 480, sideView: true, smooth: true },
-      creature_slasher: { label: "Flesh Slasher", kind: "forest", base: "creature_slasher", scale: 5.75, attackMs: 880, sideView: true, smooth: true },
+      creature_crawler: { label: "Gore Crawler", kind: "forest", base: "creature_crawler", scale: 1.15, attackMs: 480, sideView: true, smooth: true },
+      creature_slasher: { label: "Flesh Slasher", kind: "forest", base: "creature_slasher", scale: 1.15, attackMs: 480, sideView: true, smooth: true },
       silksong_hornet_boss: { label: "Hornet Boss", kind: "forest", base: "silksong_hornet_boss", scale: 0.26, attackMs: 520 },
       silksong_silk_boss: { label: "Silk Boss", kind: "forest", base: "silksong_silk_boss", scale: 0.26, attackMs: 520 }
     };
@@ -750,9 +780,9 @@
     const forestFrameCounts = {
       silksong_hornet: { idle: 6, run: 10, stop: 6, skid: 6, attack: 6 },
       silksong_moss_creep: { idle: 6, run: 3, stop: 6, attack: 6 },
-      creature_bear: { idle: 6, run: 6, attack: 6 },
-      creature_crawler: { idle: 7, run: 7, attack: 7 },
-      creature_slasher: { idle: 8, run: 8, attack: 8 },
+      creature_bear: { idle: 6, run: 6, attack: 6, die: 8 },
+      creature_crawler: { idle: 7, run: 7, attack: 7, die: 7 },
+      creature_slasher: { idle: 8, run: 8, attack: 8, die: 8 },
       silksong_bone_worm: { idle: 4, run: 4, stop: 4, attack: 7 },
       silksong_moss_crawler: { idle: 3, run: 23, stop: 3, attack: 3 },
       silksong_staff_pilgrim: { idle: 6, run: 10, stop: 6, attack: 13 },
@@ -909,10 +939,18 @@
       };
     }
 
+    const waterCache = new Map();
     function waterTileAt(x, y) {
+      const key = `${x},${y}`;
+      if (waterCache.has(key)) return waterCache.get(key);
       const mask = waterMaskAt(x, y);
-      if (!mask.water) return null;
-      return { biome: mask.biome, seed: Math.floor(hash01(x, y, 74) * 4) };
+      if (!mask.water) {
+        waterCache.set(key, null);
+        return null;
+      }
+      const val = { biome: mask.biome, seed: Math.floor(hash01(x, y, 74) * 4) };
+      waterCache.set(key, val);
+      return val;
     }
 
     function isWaterAtWorldPoint(x, y) {
@@ -1206,7 +1244,9 @@
     const ctx = scene.getContext("2d");
     function resizeSceneCanvas() {
       const rect = scene.getBoundingClientRect();
-      const dpr = Math.max(1, Math.min(3, window.devicePixelRatio || 1));
+      // Cap DPR to 1.0 for pixel art rendering to avoid 4K viewport scaling bottlenecks.
+      // Upscaling is handled cleanly and efficiently by CSS pixelated image-rendering.
+      const dpr = 1.0;
       const targetW = Math.max(1, Math.round(rect.width * dpr));
       const targetH = Math.max(1, Math.round(rect.height * dpr));
       if (scene.width !== targetW || scene.height !== targetH) {
@@ -1317,8 +1357,8 @@
     const farmPlots = [];
     const roamingNPCs = [];
     const petSlimes = [];
-    const ASSET_REV = "one-tree-biomes-water-v59";
-    const APP_VERSION = "1.1.30";
+    const ASSET_REV = "one-tree-biomes-water-v55";
+    const APP_VERSION = "1.1.25";
 
     // ── Auto-refresh on new version ───────────────────────
     // Stores the version in localStorage. If it changed, clears caches and reloads.
@@ -1432,6 +1472,11 @@
       wasMoving: false,
       timeOfDay: "day",
       timeRemaining: 60,
+      nightDarkness: 0.82,
+      attackDamage: 1,
+      petChance: 0.20,
+      burnUntil: 0,
+      lastBurnTick: 0,
       announcement: null,
       announcementStart: 0,
       announcementVisible: 0,
@@ -1729,68 +1774,119 @@
 	    function drawAnimatedWater() {
 	      const water = images[assets.water];
 	      if (!water) return;
-	      const startX = Math.max(0, Math.floor(state.cameraX / TILE) * TILE - TILE);
-	      const startY = Math.max(0, Math.floor(state.cameraY / TILE) * TILE - TILE);
-	      const endX = Math.min(WORLD_W, state.cameraX + viewWorldW() + TILE * 2);
-	      const endY = Math.min(WORLD_H, state.cameraY + viewWorldH() + TILE * 2);
+	      
+	      const camX = state.cameraX;
+	      const camY = state.cameraY;
+	      const vw = viewWorldW();
+	      const vh = viewWorldH();
+
+	      const startCX = Math.floor(camX / CHUNK_PX);
+	      const startCY = Math.floor(camY / CHUNK_PX);
+	      const endCX = Math.floor((camX + vw) / CHUNK_PX);
+	      const endCY = Math.floor((camY + vh) / CHUNK_PX);
+
 	      const timeFrame = Math.floor(state.t * 4) % 4;
-	      for (let y = startY; y < endY; y += TILE) {
-	        for (let x = startX; x < endX; x += TILE) {
-	          const waterTile = waterTileAt(x, y);
-	          if (!waterTile) continue;
-	          const frame = (waterTile.seed + timeFrame) % 4;
-	          ctx.drawImage(water, frame * TILE, 0, TILE, TILE, x, y, TILE, TILE);
-	          drawWaterTintOverlay(ctx, x, y, waterTile);
+
+	      for (let cy = startCY; cy <= endCY; cy++) {
+	        for (let cx = startCX; cx <= endCX; cx++) {
+	          const chunk = getChunk(cx, cy);
+	          if (!chunk || !chunk.waterTiles) continue;
+	          
+	          const len = chunk.waterTiles.length;
+	          for (let i = 0; i < len; i++) {
+	            const tile = chunk.waterTiles[i];
+	            const frame = (tile.seed + timeFrame) % 4;
+	            ctx.drawImage(water, frame * TILE, 0, TILE, TILE, tile.x, tile.y, TILE, TILE);
+	            drawWaterTintOverlay(ctx, tile.x, tile.y, tile);
+	          }
 	        }
 	      }
 	    }
 
-    function drawAnimatedShoreline() {
-      if (!images[assets.grass] || !images[assets.water]) return;
-      const startX = Math.max(0, Math.floor(state.cameraX / TILE) * TILE - TILE);
-      const startY = Math.max(0, Math.floor(state.cameraY / TILE) * TILE - TILE);
-      const endX = Math.min(WORLD_W, state.cameraX + viewWorldW() + TILE * 2);
-      const endY = Math.min(WORLD_H, state.cameraY + viewWorldH() + TILE * 2);
-      const timeFrame = Math.floor(state.t * 4) % 4;
-      for (let y = startY; y < endY; y += TILE) {
-        for (let x = startX; x < endX; x += TILE) drawShorelineTile(ctx, x, y, timeFrame);
-      }
-    }
+	    function drawAnimatedShoreline() {
+	      if (!images[assets.grass] || !images[assets.water]) return;
+	      
+	      const camX = state.cameraX;
+	      const camY = state.cameraY;
+	      const vw = viewWorldW();
+	      const vh = viewWorldH();
 
-    // ── Chunk-based tile cache ─────────────────────────────
-    const CHUNK_PX = 512; // size of each cached chunk in pixels
-    const chunkCache = new Map(); // key: "cx,cy" → offscreen canvas
+	      const startCX = Math.floor(camX / CHUNK_PX);
+	      const startCY = Math.floor(camY / CHUNK_PX);
+	      const endCX = Math.floor((camX + vw) / CHUNK_PX);
+	      const endCY = Math.floor((camY + vh) / CHUNK_PX);
 
-    function getChunk(cx, cy) {
-      const key = `${cx},${cy}`;
-      if (chunkCache.has(key)) return chunkCache.get(key);
-      // Build this chunk synchronously — only ~18×16 tiles per chunk
-      const chunkX = cx * CHUNK_PX;
-      const chunkY = cy * CHUNK_PX;
-      const chunkW = Math.min(CHUNK_PX, WORLD_W - chunkX);
-      const chunkH = Math.min(CHUNK_PX, WORLD_H - chunkY);
-      if (chunkW <= 0 || chunkH <= 0) return null;
-      const offscreen = document.createElement("canvas");
-      offscreen.width = chunkW;
-      offscreen.height = chunkH;
-      const m = offscreen.getContext("2d");
-      m.imageSmoothingEnabled = false;
-      const grass = images[assets.grass];
-      for (let row = 0; row < chunkH; row += TILE) {
-        for (let col = 0; col < chunkW; col += TILE) {
-          const wx = chunkX + col;
-          const wy = chunkY + row;
-          // drawGrassTile uses world coords for hash/biome, draws into m at (wx,wy)
-          // We need to translate so it draws at chunk-local coords
-          m.save();
-          m.translate(-chunkX, -chunkY);
-          drawGrassTile(m, grass, wx, wy, (wx / TILE) * 5 + (wy / TILE) * 3);
-          m.restore();
-        }
-      }
-      chunkCache.set(key, offscreen);
-      return offscreen;
-    }
+	      const timeFrame = Math.floor(state.t * 4) % 4;
+	      const grass = images[assets.grass];
+
+	      for (let cy = startCY; cy <= endCY; cy++) {
+	        for (let cx = startCX; cx <= endCX; cx++) {
+	          const chunk = getChunk(cx, cy);
+	          if (!chunk || !chunk.shorelineTiles) continue;
+	          
+	          const len = chunk.shorelineTiles.length;
+	          for (let i = 0; i < len; i++) {
+	            const tile = chunk.shorelineTiles[i];
+	            if (drawWaterBaseTile(ctx, tile.x, tile.y, timeFrame)) {
+	              drawTintedGrassTile(ctx, grass, tile.tile[0] * TILE, tile.tile[1] * TILE, tile.x, tile.y);
+	            }
+	          }
+	        }
+	      }
+	    }
+
+	    // ── Chunk-based tile cache ─────────────────────────────
+	    const CHUNK_PX = 512; // size of each cached chunk in pixels
+	    const chunkCache = new Map(); // key: "cx,cy" → offscreen canvas
+
+	    function getChunk(cx, cy) {
+	      const key = `${cx},${cy}`;
+	      if (chunkCache.has(key)) return chunkCache.get(key);
+	      // Build this chunk synchronously — only ~18×16 tiles per chunk
+	      const chunkX = cx * CHUNK_PX;
+	      const chunkY = cy * CHUNK_PX;
+	      const chunkW = Math.min(CHUNK_PX, WORLD_W - chunkX);
+	      const chunkH = Math.min(CHUNK_PX, WORLD_H - chunkY);
+	      if (chunkW <= 0 || chunkH <= 0) return null;
+	      
+	      const offscreen = document.createElement("canvas");
+	      offscreen.width = chunkW;
+	      offscreen.height = chunkH;
+	      const m = offscreen.getContext("2d");
+	      m.imageSmoothingEnabled = false;
+	      const grass = images[assets.grass];
+	      
+	      const chunkWater = [];
+	      const chunkShoreline = [];
+	      
+	      for (let row = 0; row < chunkH; row += TILE) {
+	        for (let col = 0; col < chunkW; col += TILE) {
+	          const wx = chunkX + col;
+	          const wy = chunkY + row;
+	          m.save();
+	          m.translate(-chunkX, -chunkY);
+	          drawGrassTile(m, grass, wx, wy, (wx / TILE) * 5 + (wy / TILE) * 3);
+	          m.restore();
+	          
+	          // Pre-calculate water and shoreline tiles inside this chunk
+	          const waterTile = waterTileAt(wx, wy);
+	          if (waterTile) {
+	            chunkWater.push({ x: wx, y: wy, seed: waterTile.seed, biome: waterTile.biome });
+	          } else {
+	            const shoreTile = shorelineTileAt(wx, wy);
+	            if (shoreTile) {
+	              chunkShoreline.push({ x: wx, y: wy, tile: shoreTile });
+	            }
+	          }
+	        }
+	      }
+	      
+	      offscreen.waterTiles = chunkWater;
+	      offscreen.shorelineTiles = chunkShoreline;
+	      
+	      chunkCache.set(key, offscreen);
+	      return offscreen;
+	    }
 
     function buildStaticMap() {
       // No-op — chunks are built on demand in drawVisibleGrass
@@ -2323,16 +2419,37 @@
       const right = state.cameraX + viewWorldW() + pad;
       const top = state.cameraY - pad;
       const bottom = state.cameraY + viewWorldH() + pad;
-      const visible = item => !item.destroyed &&
-        item.x + item.w / 2 > left &&
-        item.x - item.w / 2 < right &&
-        item.y > top &&
-        item.y - item.h < bottom;
-      return [
-        ...plantSprites.filter(visible),
-        ...biomeTrees.filter(visible),
-        ...placedSprites.filter(item => item.scene === "outside" && visible(item))
-      ];
+      
+      const out = [];
+      
+      // Filter biome trees (flat loop to avoid function allocation overhead)
+      const treesLen = biomeTrees.length;
+      for (let i = 0; i < treesLen; i++) {
+        const item = biomeTrees[i];
+        if (!item.destroyed &&
+            item.x + item.w / 2 > left &&
+            item.x - item.w / 2 < right &&
+            item.y > top &&
+            item.y - item.h < bottom) {
+          out.push(item);
+        }
+      }
+      
+      // Filter placed sprites
+      const placedLen = placedSprites.length;
+      for (let i = 0; i < placedLen; i++) {
+        const item = placedSprites[i];
+        if (item.scene === "outside" &&
+            !item.destroyed &&
+            item.x + item.w / 2 > left &&
+            item.x - item.w / 2 < right &&
+            item.y > top &&
+            item.y - item.h < bottom) {
+          out.push(item);
+        }
+      }
+      
+      return out;
     }
 
     function drawDepthSortedActors() {
@@ -2342,7 +2459,16 @@
         draw: () => drawPlant(plant)
       }));
       if (state.scene === "outside") {
+        const pad = 180;
+        const left = state.cameraX - pad;
+        const right = state.cameraX + viewWorldW() + pad;
+        const top = state.cameraY - pad;
+        const bottom = state.cameraY + viewWorldH() + pad;
+
         for (const plot of farmPlots) {
+          if (plot.x + 16 < left || plot.x - 16 > right || plot.y + 16 < top || plot.y - 16 > bottom) {
+            continue;
+          }
           const stage = cropStage(plot);
           if (stage < 0) continue;
           actors.push({
@@ -2410,6 +2536,18 @@
           if (state.toolActionDir === "back") drawToolUseAt(state.x, state.y);
           drawPlayerAt(frame, state.x, state.y);
           if (state.toolActionDir !== "back") drawToolUseAt(state.x, state.y);
+          
+          // Draw fire particles if player is burning
+          if (state.burnUntil && performance.now() < state.burnUntil) {
+            const pNow = performance.now();
+            ctx.save();
+            ctx.fillStyle = Math.random() < 0.5 ? "#ff5500" : "#ffaa00";
+            ctx.font = "9px system-ui, sans-serif";
+            const flameOffset = Math.sin(pNow * 0.01 + state.x) * 4;
+            const bounce = Math.sin(pNow * 0.02) * 2;
+            ctx.fillText("🔥", Math.round(state.x + flameOffset), Math.round(state.y - 12 + bounce));
+            ctx.restore();
+          }
         }
       });
       actors.sort((a, b) => a.y - b.y);
@@ -3113,6 +3251,7 @@
       }
       if (item.erase) {
         removePlacedAt(x, y);
+        playChopSound();
         return;
       }
       if (wouldBlockPlayer(item, x, y)) return;
@@ -3137,6 +3276,7 @@
         placed.respawnMs = TREE_RESPAWN_MS + TREE_RESPAWN_JITTER_MS * 0.5;
       }
       placedSprites.push(placed);
+      playBuildSound();
       refreshWallConnections();
     }
 
@@ -3164,89 +3304,9 @@
         .sort((a, b) => a.dist - b.dist)[0]?.item;
     }
 
-    const GACHA_TIERS = [
-      { chance: 50, wood: 1 },    // 50% - 1 wood
-      { chance: 30, wood: 2 },    // 30% - 2 wood
-      { chance: 10, wood: 5 },    // 10% - 5 wood
-      { chance: 5, wood: 10 },    // 5% - 10 wood
-      { chance: 3, wood: 20 },    // 3% - 20 wood
-      { chance: 1, wood: 50 },    // 1% - 50 wood
-      { chance: 0.5, wood: 100 }, // 0.5% - 100 wood
-      { chance: 0.25, wood: 250 },// 0.25% - 250 wood
-      { chance: 0.125, wood: 1000 } // 0.125% - 1000 wood
-    ];
-
-    function spawnGachaChest() {
-      const now = performance.now();
-      const angle = Math.random() * Math.PI * 2;
-      const dist = 120 + Math.random() * 180;
-      const cx = Math.max(80, Math.min(WORLD_W - 80, state.x + Math.cos(angle) * dist));
-      const cy = Math.max(80, Math.min(WORLD_H - 80, state.y + Math.sin(angle) * dist));
-      placedSprites.push({
-        scene: "outside",
-        buildId: "gacha-chest",
-        name: "prop_sprout_chest",
-        count: 5,
-        fps: 12,
-        w: 44,
-        h: 44,
-        x: cx,
-        y: cy,
-        solid: { x: -14, y: -14, w: 28, h: 18 },
-        chest: true,
-        gachaChest: true,
-        open: false,
-        chestAnimStarted: 0,
-        built: true
-      });
-    }
-
-    function clearGachaChests() {
-      for (let i = placedSprites.length - 1; i >= 0; i--) {
-        if (placedSprites[i].gachaChest) {
-          placedSprites.splice(i, 1);
-        }
-      }
-    }
-
     function toggleNearestChest() {
       const chest = nearestChest();
       if (!chest) return false;
-      if (chest.gachaChest) {
-        if (chest.open) return true;
-        chest.open = true;
-        chest.chestAnimStarted = performance.now();
-        const roll = Math.random() * 100;
-        let cumulative = 0;
-        let prize = 0;
-        for (const tier of GACHA_TIERS) {
-          cumulative += tier.chance;
-          if (roll < cumulative) {
-            prize = tier.wood;
-            break;
-          }
-        }
-        state.logs += prize;
-        updateCurrencyHud();
-        const rarityLabels = ["Common", "Common", "Uncommon", "Rare", "Rare", "Epic", "Epic", "Legendary", "MYTHIC"];
-        const tierIdx = GACHA_TIERS.findIndex(t => t.wood === prize);
-        const rarity = rarityLabels[tierIdx] || "Common";
-        showScaryAnnouncement(
-          `GACHA CHEST OPENED!`,
-          `Kamu mendapatkan ${prize} wood!`,
-          `You got ${prize} wood!`,
-          `RARITY: ${rarity} | ROLL: ${roll.toFixed(3)}%`,
-          `[LOGS: ${state.logs}]`,
-          "",
-          4000
-        );
-        setTimeout(() => {
-          const idx = placedSprites.indexOf(chest);
-          if (idx >= 0) placedSprites.splice(idx, 1);
-        }, 1200);
-        state.demo = false;
-        return true;
-      }
       chest.open = !chest.open;
       chest.chestAnimStarted = performance.now();
       state.demo = false;
@@ -3254,7 +3314,7 @@
     }
 
     function allTreeSprites() {
-      return [...plantSprites, ...biomeTrees].filter(item => item.tree);
+      return biomeTrees;
     }
 
     function attackTargetRect() {
@@ -3297,7 +3357,8 @@
     function damageTree(tree, attacker = null) {
       const now = performance.now();
       if (!tree.maxHp) tree.maxHp = treeMaxHp(tree.treeType || "sprout", tree.w, tree.h, hash01(tree.x, tree.y, 48));
-      tree.hp = Math.max(0, (tree.hp ?? tree.maxHp) - 1);
+      tree.hp = Math.max(0, (tree.hp ?? tree.maxHp) - (state.attackDamage || 1));
+      playChopSound();
       tree.hitStarted = now;
       tree.hitDir = state.attackDir === "left" ? -1 : 1;
       state.treeHits += 1;
@@ -3385,6 +3446,7 @@
             "[T-MINUS: 10 SECONDS]"
           );
           state.announced10 = true;
+          playSpookyGong();
         }
         if (state.timeRemaining <= 0) {
           state.timeOfDay = "night";
@@ -3405,6 +3467,9 @@
           );
           state.screenShakeUntil = now + 600;
           state.screenFlashRedUntil = now + 400;
+          stopDayAmbiance();
+          startNightAmbiance();
+          playSpookyGong();
         }
       } else {
         if (state.timeRemaining <= 60 && !state.announcedNight60) {
@@ -3453,8 +3518,9 @@
               roamingNPCs.splice(i, 1);
             }
           }
-          // Clear any unopened gacha chests at morning
-          clearGachaChests();
+          
+          stopNightAmbiance();
+          startDayAmbiance();
           
           showScaryAnnouncement(
             "LOG // PAGI (MORNING)",
@@ -3499,6 +3565,13 @@
       const now = performance.now();
       state.screenShakeUntil = now + 450;
       state.screenFlashRedUntil = now + 180;
+      playSfx("sfx-hurt", 0.28);
+      
+      // If hit by a Flesh Bear, apply burn to player!
+      if (source && source.base === "creature_bear") {
+        state.burnUntil = now + 3000;
+        state.lastBurnTick = now;
+      }
       
       let shouts = [
         "Aargh! The tree attacked me!",
@@ -3743,12 +3816,14 @@
       
       const cycle = (state.nightCount || 1) % 3;
       if (cycle === 1) {
-        // Night 1: Flesh Bear
-        for (let i = 0; i < 1; i++) {
-          const angle = Math.random() * Math.PI * 2;
-          const x = state.x + Math.cos(angle) * (260 + Math.random() * 60);
-          const y = state.y + Math.sin(angle) * (260 + Math.random() * 60);
-          const npc = createWildNpc("creature_bear", x, y, "forest");
+        // Night 1: Spawn 3 dormant Flesh Bears at different locations
+        const locations = [
+          { x: 1200, y: 1200 },
+          { x: 4500, y: 3000 },
+          { x: 7800, y: 1500 }
+        ];
+        locations.forEach(loc => {
+          const npc = createWildNpc("creature_bear", loc.x, loc.y, "forest");
           if (npc) {
             npc.isNightMonster = true;
             npc.scaleOverride = 1.25 * 0.50; // 50% smaller bear
@@ -3756,14 +3831,17 @@
             npc.animSpeedOverride = 2.0; // 2x animation speed
             npc.hp = 160;
             npc.maxHp = 160;
-            npc.attackDamage = 18;
-            npc.aggroTarget = "player";
-            npc.aggroUntil = now + 999999;
+            npc.attackDamage = 2; // same damage as slime
+            npc.isDormant = true;
+            npc.triggerRadius = 450;
+            npc.aggroTarget = null;
+            npc.aggroUntil = 0;
             roamingNPCs.push(npc);
           }
-        }
+        });
       } else if (cycle === 2) {
         // Night 2: Spiders (small, explode on contact)
+        // Spiders around player
         for (let i = 0; i < 8; i++) {
           const angle = Math.random() * Math.PI * 2;
           const x = state.x + Math.cos(angle) * (260 + Math.random() * 60);
@@ -3771,43 +3849,640 @@
           const npc = createWildNpc("creature_crawler", x, y, "forest");
           if (npc) {
             npc.isNightMonster = true;
-            npc.scaleOverride = 2.2; // 10x original size (0.22 * 10)
+            npc.scaleOverride = 0.22; // even smaller!
             npc.speed = 85; // fast!
             npc.hp = 30;
             npc.maxHp = 30;
-            npc.attackDamage = 25; // explosion damage
+            npc.attackDamage = 2; // same damage as slime
             npc.isSuicideSpider = true;
             npc.aggroTarget = "player";
             npc.aggroUntil = now + 999999;
             roamingNPCs.push(npc);
           }
         }
-      } else {
-        // Night 3: Slasher (35% smaller, 2x fast)
-        for (let i = 0; i < 1; i++) {
-          const angle = Math.random() * Math.PI * 2;
-          const x = state.x + Math.cos(angle) * (260 + Math.random() * 60);
-          const y = state.y + Math.sin(angle) * (260 + Math.random() * 60);
-          const npc = createWildNpc("creature_slasher", x, y, "forest");
+        // Spiders everywhere else
+        for (let i = 0; i < 15; i++) {
+          const x = 200 + Math.random() * (WORLD_W - 400);
+          const y = 200 + Math.random() * (WORLD_H - 400);
+          const npc = createWildNpc("creature_crawler", x, y, "forest");
           if (npc) {
             npc.isNightMonster = true;
-            npc.scaleOverride = 3.74; // 5x original size ((1.15 * 0.65) * 5)
-            npc.speed = wildNpcStats("creature_slasher").speed * 3.0; // 3x speed
-            npc.animSpeedOverride = 3.0; // 3x animation speed
-            npc.hp = 100;
-            npc.maxHp = 100;
-            npc.attackDamage = 15;
-            npc.aggroTarget = "player";
-            npc.aggroUntil = now + 999999;
+            npc.scaleOverride = 0.22;
+            npc.speed = 85;
+            npc.hp = 30;
+            npc.maxHp = 30;
+            npc.attackDamage = 2; // same damage as slime
+            npc.isSuicideSpider = true;
+            npc.aggroTarget = null;
+            npc.aggroUntil = 0;
             roamingNPCs.push(npc);
           }
         }
+      } else {
+        // Night 3: Only 1 Slasher at a remote location
+        const npc = createWildNpc("creature_slasher", 3200, 1900, "forest");
+        if (npc) {
+          npc.isNightMonster = true;
+          npc.scaleOverride = 1.15 * 0.65; // 35% smaller
+          npc.speed = wildNpcStats("creature_slasher").speed * 3.0; // 3x speed
+          npc.animSpeedOverride = 3.0; // 3x animation speed
+          npc.hp = 100;
+          npc.maxHp = 100;
+          npc.attackDamage = 10; // 5x slime damage (5 * 2)
+          npc.isDormant = true;
+          npc.triggerRadius = 450;
+          npc.aggroTarget = null;
+          npc.aggroUntil = 0;
+          roamingNPCs.push(npc);
+        }
       }
-      // Spawn a gacha chest every night
-      spawnGachaChest();
     }
 
     // drawNightExplosions removed as per request
+
+    let audioCtx = null;
+    let nightDroneSource = null;
+    let nightWindSource = null;
+    let nightDroneGain = null;
+    let nightWindGain = null;
+
+    function initAudio() {
+      if (audioCtx) return;
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (state.timeOfDay === "day") {
+        startDayAmbiance();
+      } else {
+        startNightAmbiance();
+      }
+    }
+
+    function playSpookyGong() {
+      initAudio();
+      if (!audioCtx) return;
+      const osc1 = audioCtx.createOscillator();
+      const osc2 = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      
+      osc1.type = "sine";
+      osc1.frequency.setValueAtTime(90, audioCtx.currentTime);
+      osc1.frequency.exponentialRampToValueAtTime(45, audioCtx.currentTime + 3.0);
+      
+      osc2.type = "sawtooth";
+      osc2.frequency.setValueAtTime(45, audioCtx.currentTime);
+      osc2.frequency.exponentialRampToValueAtTime(22.5, audioCtx.currentTime + 3.0);
+      
+      const filter = audioCtx.createBiquadFilter();
+      filter.type = "lowpass";
+      filter.frequency.setValueAtTime(140, audioCtx.currentTime);
+      
+      gainNode.gain.setValueAtTime(0.24, audioCtx.currentTime);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 3.5);
+      
+      osc1.connect(filter);
+      osc2.connect(filter);
+      filter.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      
+      osc1.start();
+      osc2.start();
+      osc1.stop(audioCtx.currentTime + 4.0);
+      osc2.stop(audioCtx.currentTime + 4.0);
+    }
+
+    let nightTimerId = null;
+
+    function playCricketChirp() {
+      initAudio();
+      if (!audioCtx) return;
+      const now = audioCtx.currentTime;
+      
+      const numPulses = 3 + Math.floor(Math.random() * 2);
+      const pulseDuration = 0.015;
+      const pulseSpacing = 0.035;
+      
+      for (let i = 0; i < numPulses; i++) {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(4400 + Math.random() * 200, now + i * pulseSpacing);
+        
+        gain.gain.setValueAtTime(0, now + i * pulseSpacing);
+        gain.gain.linearRampToValueAtTime(0.009, now + i * pulseSpacing + 0.002);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * pulseSpacing + pulseDuration);
+        
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        
+        osc.start(now + i * pulseSpacing);
+        osc.stop(now + i * pulseSpacing + pulseDuration + 0.01);
+      }
+    }
+
+    function playOwlHoot() {
+      initAudio();
+      if (!audioCtx) return;
+      const now = audioCtx.currentTime;
+      
+      const hoots = [
+        { time: 0.0, dur: 0.28, freq: 240 },
+        { time: 0.45, dur: 0.20, freq: 230 },
+        { time: 0.70, dur: 0.35, freq: 220 }
+      ];
+      
+      hoots.forEach(h => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        const filter = audioCtx.createBiquadFilter();
+        
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(h.freq, now + h.time);
+        osc.frequency.exponentialRampToValueAtTime(h.freq - 15, now + h.time + h.dur);
+        
+        filter.type = "lowpass";
+        filter.frequency.setValueAtTime(320, now + h.time);
+        
+        gain.gain.setValueAtTime(0, now + h.time);
+        gain.gain.linearRampToValueAtTime(0.02, now + h.time + 0.08);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + h.time + h.dur);
+        
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(audioCtx.destination);
+        
+        osc.start(now + h.time);
+        osc.stop(now + h.time + h.dur + 0.05);
+      });
+    }
+
+    function playBatSqueak() {
+      initAudio();
+      if (!audioCtx) return;
+      const now = audioCtx.currentTime;
+      
+      const numSqueaks = 2 + Math.floor(Math.random() * 2);
+      const spacing = 0.12;
+      
+      for (let i = 0; i < numSqueaks; i++) {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(11000, now + i * spacing);
+        osc.frequency.exponentialRampToValueAtTime(6500, now + i * spacing + 0.03);
+        
+        gain.gain.setValueAtTime(0, now + i * spacing);
+        gain.gain.linearRampToValueAtTime(0.006, now + i * spacing + 0.002);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * spacing + 0.03);
+        
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        
+        osc.start(now + i * spacing);
+        osc.stop(now + i * spacing + 0.04);
+      }
+    }
+
+    let dayTimerId = null;
+
+    function startDayAmbiance() {
+      initAudio();
+      if (!audioCtx) return;
+      if (dayTimerId) return;
+      
+      playPeacefulChord();
+      dayTimerId = setInterval(() => {
+        // Peaceful Chords (25% chance every 1.6s)
+        if (Math.random() < 0.25) {
+          playPeacefulChord();
+        }
+        // Birds tweeting (35% chance every 1.6s)
+        if (Math.random() < 0.35) {
+          playBirdTweet();
+        }
+      }, 1600);
+    }
+
+    function stopDayAmbiance() {
+      if (dayTimerId) {
+        clearInterval(dayTimerId);
+        dayTimerId = null;
+      }
+    }
+
+    function startNightAmbiance() {
+      initAudio();
+      if (!audioCtx) return;
+      if (nightTimerId) return;
+      
+      nightTimerId = setInterval(() => {
+        // Crickets (65% chance every 1.6s)
+        if (Math.random() < 0.65) {
+          playCricketChirp();
+        }
+        // Owls (5% chance every 1.6s)
+        if (Math.random() < 0.05) {
+          playOwlHoot();
+        }
+        // Bats (7% chance every 1.6s)
+        if (Math.random() < 0.07) {
+          playBatSqueak();
+        }
+      }, 1600);
+    }
+
+    function stopNightAmbiance() {
+      if (nightTimerId) {
+        clearInterval(nightTimerId);
+        nightTimerId = null;
+      }
+    }
+
+    function playSfx(id, volume = 0.22) {
+      const original = document.getElementById(id);
+      if (!original) return;
+      const clone = original.cloneNode(true);
+      clone.volume = volume;
+      clone.play().catch(() => {});
+      clone.addEventListener("ended", () => {
+        clone.remove();
+      });
+    }
+
+    function playSwingSound() {
+      try {
+        playSfx("sfx-swing", 0.16);
+      } catch (e) {
+        initAudio();
+        if (!audioCtx) return;
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = "triangle";
+        osc.frequency.setValueAtTime(350, now);
+        osc.frequency.exponentialRampToValueAtTime(80, now + 0.15);
+        gain.gain.setValueAtTime(0.08, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.2);
+      }
+    }
+
+    function playChopSound() {
+      try {
+        playSfx("sfx-chop", 0.22);
+      } catch (e) {
+        initAudio();
+        if (!audioCtx) return;
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = "sawtooth";
+        osc.frequency.setValueAtTime(160, now);
+        osc.frequency.exponentialRampToValueAtTime(50, now + 0.08);
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = "lowpass";
+        filter.frequency.setValueAtTime(300, now);
+        gain.gain.setValueAtTime(0.18, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.1);
+      }
+    }
+
+    function playHitSound() {
+      try {
+        playSfx("sfx-hit", 0.20);
+      } catch (e) {
+        initAudio();
+        if (!audioCtx) return;
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(300, now);
+        osc.frequency.exponentialRampToValueAtTime(80, now + 0.1);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.1);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.12);
+      }
+    }
+
+    function playBuildSound() {
+      initAudio();
+      if (!audioCtx) return;
+      const now = audioCtx.currentTime;
+      
+      const osc1 = audioCtx.createOscillator();
+      const gain1 = audioCtx.createGain();
+      osc1.type = "triangle";
+      osc1.frequency.setValueAtTime(180, now);
+      osc1.frequency.exponentialRampToValueAtTime(60, now + 0.08);
+      gain1.gain.setValueAtTime(0.15, now);
+      gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+      osc1.connect(gain1);
+      gain1.connect(audioCtx.destination);
+      osc1.start(now);
+      osc1.stop(now + 0.1);
+      
+      const osc2 = audioCtx.createOscillator();
+      const gain2 = audioCtx.createGain();
+      osc2.type = "triangle";
+      osc2.frequency.setValueAtTime(140, now + 0.06);
+      osc2.frequency.exponentialRampToValueAtTime(40, now + 0.14);
+      gain2.gain.setValueAtTime(0.12, now + 0.06);
+      gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.14);
+      osc2.connect(gain2);
+      gain2.connect(audioCtx.destination);
+      osc2.start(now + 0.06);
+      osc2.stop(now + 0.16);
+    }
+
+    function playDeathSound() {
+      initAudio();
+      if (!audioCtx) return;
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(220, now);
+      osc.frequency.linearRampToValueAtTime(40, now + 0.28);
+      
+      gain.gain.setValueAtTime(0.15, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+      
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(now);
+      osc.stop(now + 0.32);
+    }
+
+    function playMonsterDeathSound() {
+      initAudio();
+      if (!audioCtx) return;
+      const now = audioCtx.currentTime;
+      const osc1 = audioCtx.createOscillator();
+      const osc2 = audioCtx.createOscillator();
+      const gainNode = audioCtx.createGain();
+      
+      osc1.type = "sawtooth";
+      osc1.frequency.setValueAtTime(90, now);
+      osc1.frequency.linearRampToValueAtTime(30, now + 0.45);
+      
+      osc2.type = "triangle";
+      osc2.frequency.setValueAtTime(45, now);
+      osc2.frequency.linearRampToValueAtTime(20, now + 0.45);
+      
+      const filter = audioCtx.createBiquadFilter();
+      filter.type = "lowpass";
+      filter.frequency.setValueAtTime(150, now);
+      
+      gainNode.gain.setValueAtTime(0.25, now);
+      gainNode.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+      
+      osc1.connect(filter);
+      osc2.connect(filter);
+      filter.connect(gainNode);
+      gainNode.connect(audioCtx.destination);
+      
+      osc1.start(now);
+      osc2.start(now);
+      osc1.stop(now + 0.55);
+      osc2.stop(now + 0.55);
+    }
+
+    function playLevelUpSound() {
+      initAudio();
+      if (!audioCtx) return;
+      const now = audioCtx.currentTime;
+      
+      const notes = [261.63, 329.63, 392.00, 523.25];
+      notes.forEach((freq, i) => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, now + i * 0.08);
+        
+        gain.gain.setValueAtTime(0, now + i * 0.08);
+        gain.gain.linearRampToValueAtTime(0.05, now + i * 0.08 + 0.02);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.25);
+        
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        
+        osc.start(now + i * 0.08);
+        osc.stop(now + i * 0.08 + 0.3);
+      });
+    }
+
+    function playUiClickSound() {
+      try {
+        playSfx("sfx-click", 0.18);
+      } catch (e) {
+        initAudio();
+        if (!audioCtx) return;
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(800, now);
+        gain.gain.setValueAtTime(0.04, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(now);
+        osc.stop(now + 0.05);
+      }
+    }
+
+    function playSlasherGrowl(volume = 0.08) {
+      initAudio();
+      if (!audioCtx) return;
+      const now = audioCtx.currentTime;
+      
+      // Deep dinosaur rumble
+      const oscGrowl = audioCtx.createOscillator();
+      const gainGrowl = audioCtx.createGain();
+      oscGrowl.type = "sawtooth";
+      oscGrowl.frequency.setValueAtTime(90, now);
+      oscGrowl.frequency.exponentialRampToValueAtTime(35, now + 0.6);
+      
+      const filter = audioCtx.createBiquadFilter();
+      filter.type = "lowpass";
+      filter.frequency.setValueAtTime(160, now);
+      
+      gainGrowl.gain.setValueAtTime(volume * 0.8, now);
+      gainGrowl.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+      
+      oscGrowl.connect(filter);
+      filter.connect(gainGrowl);
+      
+      // Creepy hyena laugh (4 fast high stutters)
+      const delayNode = audioCtx.createDelay();
+      delayNode.delayTime.value = 0.08;
+      
+      const delayFeedback = audioCtx.createGain();
+      delayFeedback.gain.value = 0.4; // reverb echo feedback
+      
+      const gainLaugh = audioCtx.createGain();
+      gainLaugh.gain.setValueAtTime(0, now);
+      
+      const numLaughs = 4;
+      const pulseSpacing = 0.06;
+      for (let i = 0; i < numLaughs; i++) {
+        const oscL = audioCtx.createOscillator();
+        const gainL = audioCtx.createGain();
+        
+        oscL.type = "sawtooth";
+        oscL.frequency.setValueAtTime(450 + i * 80, now + i * pulseSpacing);
+        oscL.frequency.exponentialRampToValueAtTime(600 + i * 80, now + i * pulseSpacing + 0.04);
+        
+        gainL.gain.setValueAtTime(0, now + i * pulseSpacing);
+        gainL.gain.linearRampToValueAtTime(volume * 0.22, now + i * pulseSpacing + 0.002);
+        gainL.gain.exponentialRampToValueAtTime(0.001, now + i * pulseSpacing + 0.04);
+        
+        oscL.connect(gainL);
+        gainL.connect(gainLaugh);
+        
+        oscL.start(now + i * pulseSpacing);
+        oscL.stop(now + i * pulseSpacing + 0.05);
+      }
+      
+      // Reverb/Delay connections
+      gainLaugh.connect(audioCtx.destination);
+      gainLaugh.connect(delayNode);
+      delayNode.connect(delayFeedback);
+      delayFeedback.connect(delayNode);
+      delayFeedback.connect(audioCtx.destination);
+      
+      gainGrowl.connect(audioCtx.destination);
+      gainGrowl.connect(delayNode);
+      
+      oscGrowl.start(now);
+      oscGrowl.stop(now + 0.65);
+    }
+
+    function playSpiderSkitter() {
+      initAudio();
+      if (!audioCtx) return;
+      const ctxTime = audioCtx.currentTime;
+      
+      const bufferSize = audioCtx.sampleRate * 0.015;
+      const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = Math.random() * 2 - 1;
+      }
+      
+      const noise = audioCtx.createBufferSource();
+      noise.buffer = buffer;
+      
+      const filter = audioCtx.createBiquadFilter();
+      filter.type = "bandpass";
+      filter.frequency.setValueAtTime(4500, ctxTime);
+      filter.Q.setValueAtTime(4, ctxTime);
+      
+      const gain = audioCtx.createGain();
+      gain.gain.setValueAtTime(0.08, ctxTime); // Raised volume to 0.08 (clearly audible!)
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctxTime + 0.012);
+      
+      noise.connect(filter);
+      filter.connect(gain);
+      gain.connect(audioCtx.destination);
+      
+      noise.start(ctxTime);
+    }
+
+    function playBirdTweet() {
+      initAudio();
+      if (!audioCtx) return;
+      const now = audioCtx.currentTime;
+      
+      const numTweets = 2 + Math.floor(Math.random() * 2);
+      const spacing = 0.15;
+      
+      for (let i = 0; i < numTweets; i++) {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        
+        osc.type = "sine";
+        const startFreq = 2000 + Math.random() * 800;
+        osc.frequency.setValueAtTime(startFreq, now + i * spacing);
+        osc.frequency.exponentialRampToValueAtTime(startFreq + 1000, now + i * spacing + 0.08);
+        
+        gain.gain.setValueAtTime(0, now + i * spacing);
+        gain.gain.linearRampToValueAtTime(0.008, now + i * spacing + 0.01);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + i * spacing + 0.08);
+        
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        
+        osc.start(now + i * spacing);
+        osc.stop(now + i * spacing + 0.1);
+      }
+    }
+
+    function playPeacefulChord() {
+      initAudio();
+      if (!audioCtx) return;
+      const now = audioCtx.currentTime;
+      
+      const freqs = [130.81, 196.00, 261.63, 329.63, 493.88];
+      
+      freqs.forEach(freq => {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(freq, now);
+        
+        const filter = audioCtx.createBiquadFilter();
+        filter.type = "lowpass";
+        filter.frequency.setValueAtTime(350, now);
+        
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(0.014, now + 2.5);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + 6.0);
+        
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(audioCtx.destination);
+        
+        osc.start(now);
+        osc.stop(now + 6.5);
+      });
+    }
+
+    function playSlimeHopSound() {
+      initAudio();
+      if (!audioCtx) return;
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(140, now);
+      osc.frequency.exponentialRampToValueAtTime(240, now + 0.05);
+      osc.frequency.exponentialRampToValueAtTime(90, now + 0.12);
+      
+      gain.gain.setValueAtTime(0.015, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+      
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(now);
+      osc.stop(now + 0.15);
+    }
 
     function spawnBloodSplats(x, y, count) {
       if (!state.bloodSplats) state.bloodSplats = [];
@@ -3830,6 +4505,11 @@
           altitude: 4 + Math.random() * 8,
           vAltitude: 15 + Math.random() * 25
         });
+      }
+      
+      // Cap maximum blood splats to 600 to guarantee solid 60 FPS
+      if (state.bloodSplats.length > 600) {
+        state.bloodSplats = state.bloodSplats.slice(state.bloodSplats.length - 600);
       }
     }
 
@@ -3857,8 +4537,18 @@
     function drawBloodSplats() {
       if (!state.bloodSplats) state.bloodSplats = [];
       
+      const left = state.cameraX;
+      const right = state.cameraX + viewWorldW();
+      const top = state.cameraY;
+      const bottom = state.cameraY + viewWorldH();
+
       ctx.save();
-      state.bloodSplats.forEach(splat => {
+      const len = state.bloodSplats.length;
+      for (let i = 0; i < len; i++) {
+        const splat = state.bloodSplats[i];
+        if (splat.x + 4 < left || splat.x - 4 > right || splat.y + 4 < top || splat.y - 4 > bottom) {
+          continue;
+        }
         ctx.fillStyle = splat.color;
         const drawX = splat.x;
         const drawY = splat.y - splat.altitude;
@@ -3870,7 +4560,7 @@
         }
         
         ctx.fillRect(drawX - splat.size / 2, drawY - splat.size / 2, splat.size, splat.size);
-      });
+      }
       ctx.restore();
     }
 
@@ -3992,6 +4682,7 @@
       if (toggleNearestChest()) return;
       const now = performance.now();
       if (now < state.attackUntil) return;
+      playSwingSound();
       if (state.equippedTool) {
         triggerToolUse();
         return;
@@ -4194,6 +4885,11 @@
       if (npc) roamingNPCs.push(npc);
     }
 
+    function spawnNewWildSlime(biomeId = "safe") {
+      const group = WILD_NPC_BIOMES.find(entry => entry.biomeId === biomeId) || WILD_NPC_BIOMES[0];
+      spawnWildNpcForGroup(group);
+    }
+
     function initRoamingNPCs() {
       WILD_NPC_BIOMES.forEach(group => {
         for (let i = 0; i < group.count; i++) spawnWildNpcForGroup(group);
@@ -4204,6 +4900,34 @@
       for (let i = roamingNPCs.length - 1; i >= 0; i--) {
         const npc = roamingNPCs[i];
         npc.t += dt;
+        
+        // Creepy background sounds for Slasher charge/run and Spider skitter
+        if (!npc.dead) {
+          if (npc.base === "creature_slasher" && npc.mode === "run" && (!npc.lastGrowlAt || now - npc.lastGrowlAt > 350)) {
+            npc.lastGrowlAt = now;
+            const dist = Math.hypot(npc.x - state.x, npc.y - state.y);
+            if (dist <= 500) {
+              const volume = Math.max(0.01, (1.0 - (dist / 500)) * 0.18);
+              playSlasherGrowl(volume);
+            }
+          }
+          if (npc.base === "creature_crawler" && (npc.mode === "run" || npc.mode === "attack") && (!npc.lastSkitterAt || now - npc.lastSkitterAt > 220)) {
+            npc.lastSkitterAt = now;
+            const dist = Math.hypot(npc.x - state.x, npc.y - state.y);
+            if (dist <= 380) {
+              playSpiderSkitter();
+            }
+          }
+          // Slime hop sound for wild slimes
+          if (!npc.isNightMonster && npc.mode === "run" && (!npc.lastHopSoundAt || now - npc.lastHopSoundAt > 320)) {
+            npc.lastHopSoundAt = now;
+            const dist = Math.hypot(npc.x - state.x, npc.y - state.y);
+            if (dist <= 300) {
+              playSlimeHopSound();
+            }
+          }
+        }
+        
         if (npc.dead) {
           if (npc.isSuicideSpider && !npc.exploded) {
             npc.exploded = true;
@@ -4223,16 +4947,20 @@
             }
           }
           
+          const counts = forestFrameCounts[npc.base];
+          const dieDuration = (counts && counts.die) ? ((counts.die / (roster[npc.base].dieFps || 9)) * 1000) : 400;
           const elapsed = now - npc.deadAt;
-          if (elapsed < NPC_EVAPORATE_MS) {
+          if (elapsed < dieDuration) {
             // Still evaporating, keep in array for drawing
             continue;
           }
-          // Evaporate finished - convert to pet if player's side killed it (with 20% gacha chance)
-          if (npc.playerKilled) {
+          // Evaporate finished - convert to pet if player's side killed it (with gacha chance)
+          // Night mobs (Bear, Slasher, Spider) cannot become pets!
+          const canBePet = !["creature_bear", "creature_crawler", "creature_slasher"].includes(npc.base);
+          if (npc.playerKilled && canBePet) {
             const roll = Math.random();
-            if (roll < 0.20) {
-              // 20% chance: tame!
+            if (roll < state.petChance) {
+              // tame!
               convertSlimeToPet(npc, now);
             } else {
               // 80% chance: XP!
@@ -4271,17 +4999,43 @@
           continue;
         }
         
+        // Handle last-frame damage for attacks
+        if (npc.mode === "attack" && npc.damageTarget && !npc.damageDealt) {
+          const cfg = roster[npc.base];
+          if (cfg && cfg.kind === "forest") {
+            const frames = (forestFrames[npc.base] && forestFrames[npc.base]["attack-" + npc.dir]) || [];
+            const fps = (cfg.attackFps || 9) * (npc.animSpeedOverride || 1.0);
+            const index = Math.floor(((now - npc.attackStarted) / 1000) * fps);
+            if (frames.length === 0 || index >= frames.length - 1 || now >= npc.attackUntil) {
+              npc.damageDealt = true;
+              const tTarget = npc.damageTarget;
+              if (tTarget === "player") {
+                triggerScaryHit(npc.damageDx, npc.damageDy, npc);
+              } else {
+                if (!tTarget.dead && !tTarget.destroyed) {
+                  damagePetSlime(tTarget, npc);
+                }
+              }
+            }
+          }
+        }
+        
         // Active suicide spider countdown
         if (npc.isSuicideSpider && npc.suicideTriggeredAt) {
           const elapsed = now - npc.suicideTriggeredAt;
           npc.mode = "attack";
-          if (elapsed >= (roster.creature_crawler.attackMs || 480)) {
+          
+          // Trigger explosion damage & death at the 2nd frame of the attack animation (70ms)
+          if (!npc.dead && elapsed >= 70) {
             npc.dead = true;
             npc.deadAt = now;
+            npc.mode = "die";
             npc.playerKilled = false;
             
             state.screenShakeUntil = now + 400;
             state.screenFlashRedUntil = now + 200;
+            
+            playMonsterDeathSound(); // Play massive explosion sound!
             
             if (Math.hypot(state.x - npc.x, state.y - npc.y) <= 60) {
               triggerScaryHit(state.x - npc.x, state.y - npc.y, npc);
@@ -4295,6 +5049,17 @@
                 }
               }
             }
+          }
+          
+          if (npc.dead) {
+            const counts = forestFrameCounts[npc.base];
+            const dieDuration = (counts && counts.die) ? ((counts.die / (roster[npc.base].dieFps || 9)) * 1000) : 400;
+            const deadElapsed = now - npc.deadAt;
+            if (deadElapsed < dieDuration) {
+              continue;
+            }
+            roamingNPCs.splice(i, 1);
+            continue;
           }
           continue;
         }
@@ -4419,14 +5184,14 @@
               if (!npc.slasherAttacking) {
                 npc.mode = "attack";
                 npc.attackStarted = now;
-                npc.attackUntil = now + 880; // Slasher attack duration
-                npc.nextAttackAt = now + 880;
+                npc.attackUntil = now + 480; // Slasher attack duration
+                npc.nextAttackAt = now + 480;
                 npc.slasherAttacking = true;
-                if (target === "player") {
-                  triggerScaryHit(dx, dy, npc);
-                } else {
-                  damagePetSlime(target, npc);
-                }
+                
+                npc.damageDealt = false;
+                npc.damageTarget = target;
+                npc.damageDx = dx;
+                npc.damageDy = dy;
               } else if (now >= npc.attackUntil) {
                 npc.slasherAttacking = false;
                 
@@ -4452,11 +5217,11 @@
                 npc.attackStarted = now;
                 npc.attackUntil = now + NPC_ATTACK_MS;
                 npc.nextAttackAt = now + NPC_ATTACK_MS;
-                if (target === "player") {
-                  triggerScaryHit(dx, dy, npc);
-                } else {
-                  damagePetSlime(target, npc);
-                }
+                
+                npc.damageDealt = false;
+                npc.damageTarget = target;
+                npc.damageDx = dx;
+                npc.damageDy = dy;
               }
             }
           }
@@ -4577,6 +5342,7 @@
       
       if (leveledUp) {
         // Show excited particles / visual feedback for leveling up
+        playLevelUpSound();
         pet.brainState = "excited";
         pet.brainUntil = now + 1500; // Be excited for 1.5s
         for (let i = 0; i < 15; i++) {
@@ -4622,6 +5388,16 @@
           petSlimes.splice(i, 1);
           updateCurrencyHud();
           continue;
+        }
+        
+        // Tick pet burn damage if hit by a Flesh Bear
+        if (pet.burnUntil && now < pet.burnUntil) {
+          if (!pet.lastBurnTick) pet.lastBurnTick = now;
+          if (now - pet.lastBurnTick >= 500) {
+            pet.hp = Math.max(0, pet.hp - 2); // 2 HP per tick (12 HP total over 3 seconds)
+            pet.lastBurnTick = now;
+            spawnBloodSplats(pet.x, pet.y, 2);
+          }
         }
         pet.t += dt;
         pet.hearts = pet.hearts.filter(h => now - h.born < h.life);
@@ -4678,6 +5454,7 @@
               pet.mode = "attack";
               const attackElapsed = now - pet.attackStarted;
               if (attackElapsed < 50) {
+                playSfx("sfx-swing", 0.12);
                 if (target.tree && !target.destroyed) {
                   damageTree(target, pet);
                 } else if (target.hp !== undefined && !target.dead) {
@@ -4737,6 +5514,13 @@
             decidePetBrain(pet, now);
           }
         }
+        
+        // Slime hop sound for pet slimes
+        if (pet.mode === "run" && (!pet.lastHopSoundAt || now - pet.lastHopSoundAt > 280)) {
+          pet.lastHopSoundAt = now;
+          playSlimeHopSound();
+        }
+        
         pet.x = Math.max(40, Math.min(WORLD_W - 40, pet.x));
         pet.y = Math.max(40, Math.min(WORLD_H - 40, pet.y));
       }
@@ -4749,6 +5533,26 @@
       const followDist = p.followDist;
       const angle = Math.random() * Math.PI * 2;
       const dist = followDist + (Math.random() - 0.5) * followDist * 0.8;
+      
+      // Proactively protect player if an active night monster or hostile NPC is near player (within 220px)
+      const threat = roamingNPCs.find(npc => {
+        if (npc.dead || npc.isDormant) return false;
+        const isAggressive = npc.isNightMonster || (npc.aggroTarget === "player" || petSlimes.includes(npc.aggroTarget));
+        if (!isAggressive) return false;
+        
+        const distToPlayer = Math.hypot(npc.x - px, npc.y - py);
+        return distToPlayer <= 220;
+      });
+      if (threat) {
+        pet.brainState = "attack";
+        pet.brainUntil = now + PET_ATTACK_MS;
+        pet.attackStarted = now;
+        pet.attackUntil = now + PET_ATTACK_MS;
+        pet.petTarget = threat;
+        pet.bangUntil = now + 700;
+        return;
+      }
+      
       // Check if pet has a persistent target that's still alive and near the pet
       if (pet.petTarget) {
         const target = pet.petTarget;
@@ -4823,6 +5627,18 @@
       ctx.fillText(txt, lx, ly);
       ctx.restore();
 
+      // Draw fire particles if pet is burning
+      if (pet.burnUntil && performance.now() < pet.burnUntil) {
+        const pNow = performance.now();
+        ctx.save();
+        ctx.fillStyle = Math.random() < 0.5 ? "#ff5500" : "#ffaa00";
+        ctx.font = "9px system-ui, sans-serif";
+        const flameOffset = Math.sin(pNow * 0.01 + pet.x) * 4;
+        const bounce = Math.sin(pNow * 0.02) * 2;
+        ctx.fillText("🔥", Math.round(x + flameOffset), Math.round(y - 12 * scale + bounce));
+        ctx.restore();
+      }
+
       // draw floating hearts above pet
       for (const h of pet.hearts) {
         const age = now - h.born;
@@ -4886,6 +5702,7 @@
       }
       
       slime.hp = Math.max(0, slime.hp - (attacker?.attackDamage || PET_DAMAGE));
+      playHitSound();
       slime.hitStarted = now;
       slime.hitDir = state.attackDir === "left" ? -1 : 1;
       if (attacker && petSlimes.includes(attacker)) {
@@ -4899,6 +5716,11 @@
       slime.dead = true;
       slime.deadAt = now;
       slime.killer = attacker;
+      if (["creature_bear", "creature_crawler", "creature_slasher"].includes(slime.base)) {
+        playMonsterDeathSound();
+      } else {
+        playDeathSound();
+      }
       
       // Heal pet to full and spawn hearts when it kills an NPC!
       if (attacker && petSlimes.includes(attacker)) {
@@ -4928,15 +5750,49 @@
     function damagePetSlime(pet, attacker = null) {
       const now = performance.now();
       pet.hp = Math.max(0, pet.hp - (attacker?.attackDamage || NPC_ATTACK_DAMAGE));
+      playHitSound();
       pet.hitStarted = now;
       pet.hitDir = attacker && attacker.x < pet.x ? 1 : -1;
+      
+      // If hit by a Flesh Bear, apply burn!
+      if (attacker && attacker.base === "creature_bear") {
+        pet.burnUntil = now + 3000;
+        pet.lastBurnTick = now;
+      }
+      
       if (pet.hp <= 0) {
         pet.dead = true;
         pet.deadAt = now;
         pet.petTarget = null;
+        playDeathSound();
         return;
       }
-      pet.brainState = "excited";
+      
+      // Retaliate and protect sibling pets if attacked
+      if (attacker && attacker !== state) {
+        pet.brainState = "attack";
+        pet.brainUntil = now + PET_ATTACK_MS;
+        pet.attackStarted = now;
+        pet.attackUntil = now + PET_ATTACK_MS;
+        pet.petTarget = attacker;
+        pet.bangUntil = now + 700;
+        
+        // Sibling protection logic
+        for (const sibling of petSlimes) {
+          if (sibling === pet || sibling.dead || sibling.hp <= 0) continue;
+          const distToSibling = Math.hypot(sibling.x - pet.x, sibling.y - pet.y);
+          if (distToSibling <= 250) {
+            sibling.brainState = "attack";
+            sibling.brainUntil = now + PET_ATTACK_MS;
+            sibling.attackStarted = now;
+            sibling.attackUntil = now + PET_ATTACK_MS;
+            sibling.petTarget = attacker;
+            sibling.bangUntil = now + 700;
+          }
+        }
+      } else {
+        pet.brainState = "excited";
+      }
       pet.brainUntil = now + 220;
       pet.mode = "attack";
       
@@ -5013,9 +5869,12 @@
       picker.innerHTML = Object.entries(roster).map(([name, cfg]) =>
         `<button class="pick${rarityClass(cfg)}${name === state.current ? " active" : ""}" data-name="${name}">${cfg.label}</button>`
       ).join("");
-      picker.querySelectorAll(".pick").forEach(btn => btn.addEventListener("click", () => setCurrent(btn.dataset.name).catch(err => {
-        hud.textContent = `Asset load failed: ${err.message}`;
-      })));
+      picker.querySelectorAll(".pick").forEach(btn => btn.addEventListener("click", () => {
+        playUiClickSound();
+        setCurrent(btn.dataset.name).catch(err => {
+          hud.textContent = `Asset load failed: ${err.message}`;
+        });
+      }));
     }
 
     function renderBuildbar() {
@@ -5051,6 +5910,7 @@
         buildbarTools
       );
       document.querySelectorAll(".build-tool[data-build]").forEach(btn => btn.addEventListener("click", () => {
+        playUiClickSound();
         state.buildTool = btn.dataset.build;
         const item = currentBuildItem();
         if (item.equipTool) {
@@ -5194,9 +6054,35 @@
     }
 
     function update(now) {
+      // FPS calculation
+      if (!state.fpsLastTime) {
+        state.fpsLastTime = now;
+        state.fpsFrames = 0;
+      }
+      state.fpsFrames++;
+      if (now - state.fpsLastTime >= 1000) {
+        const fpsVal = Math.round((state.fpsFrames * 1000) / (now - state.fpsLastTime));
+        const counterEl = document.getElementById("fps-counter");
+        if (counterEl) {
+          counterEl.textContent = `FPS: ${fpsVal}`;
+        }
+        state.fpsFrames = 0;
+        state.fpsLastTime = now;
+      }
+
       const dt = Math.min((now - state.last) / 1000, 0.05);
       state.last = now;
       state.t += dt;
+      
+      // Player burn visual tick
+      if (state.burnUntil && now < state.burnUntil) {
+        if (!state.lastBurnTick) state.lastBurnTick = now;
+        if (now - state.lastBurnTick >= 500) {
+          state.lastBurnTick = now;
+          spawnBloodSplats(state.x, state.y, 2);
+        }
+      }
+      
       updateBloodSplats(dt);
       updateTreeRespawns(now);
       updateDayNightCycle(now, dt);
@@ -5312,9 +6198,9 @@
           // Draw smooth dark night vignette centered on the player (medium density)
           const nightGrad = ctx.createRadialGradient(cx, cy, 18, cx, cy, outerRadius);
           nightGrad.addColorStop(0, "rgba(3, 3, 12, 0.0)");
-          nightGrad.addColorStop(0.35, "rgba(3, 3, 12, 0.28)");
-          nightGrad.addColorStop(0.75, "rgba(3, 3, 12, 0.65)");
-          nightGrad.addColorStop(1.0, "rgba(3, 3, 12, 0.82)");
+          nightGrad.addColorStop(0.35, `rgba(3, 3, 12, ${(0.34 * state.nightDarkness).toFixed(3)})`);
+          nightGrad.addColorStop(0.75, `rgba(3, 3, 12, ${(0.79 * state.nightDarkness).toFixed(3)})`);
+          nightGrad.addColorStop(1.0, `rgba(3, 3, 12, ${state.nightDarkness.toFixed(3)})`);
           
           ctx.fillStyle = nightGrad;
           ctx.fillRect(state.cameraX - pad, state.cameraY - pad, w, h);
@@ -5478,6 +6364,27 @@
         ctx.restore();
       }
 
+      // Draw real-time HUD threat warning on the right side if a dormant night creature is pursuing the player
+      const activeThreats = roamingNPCs.filter(n => n.isNightMonster && !n.dead && !n.isDormant && n.aggroTarget === "player" && (n.base === "creature_bear" || n.base === "creature_slasher"));
+      if (activeThreats.length > 0) {
+        ctx.save();
+        ctx.textAlign = "right";
+        ctx.font = "bold 9px 'Courier New', monospace";
+        ctx.fillStyle = (Math.floor(now / 220) % 2 === 0) ? "rgba(255, 30, 30, 0.9)" : "rgba(180, 20, 20, 0.5)";
+        ctx.fillText("⚠️ CRITICAL THREAT DETECTED", VIEW_W - 16, 40);
+        
+        ctx.fillStyle = "rgba(230, 210, 180, 0.85)";
+        ctx.font = "8px 'Courier New', monospace";
+        let yOffset = 50;
+        activeThreats.forEach(threat => {
+          const name = threat.base === "creature_bear" ? "FLESH BEAR" : "FLESH SLASHER";
+          const dist = Math.round(Math.hypot(state.x - threat.x, state.y - threat.y));
+          ctx.fillText(`» ${name} (DIST: ${dist}m)`, VIEW_W - 16, yOffset);
+          yOffset += 10;
+        });
+        ctx.restore();
+      }
+
       // drawJoystick(); // hidden but still functional
       captureStudySnapshot(now);
       drawBiomeScreenFilter();
@@ -5558,7 +6465,7 @@
       const loadingPct = document.getElementById("loading-pct");
       const loadingSub = document.getElementById("loading-sub");
       // Show version on loading title
-      document.getElementById("loading-title").textContent = `🌿 Grass Animal Tester v${APP_VERSION}`;
+      document.getElementById("loading-title").textContent = `✨ Ethereal RPG v${APP_VERSION}`;
 
       // ── Step 1: collect all srcs ──────────────────────────
       function allCharacterSrcs() {
@@ -5672,6 +6579,7 @@
     addEventListener("keyup", e => setKey(e.key, false));
     
     document.getElementById("toggle-time-btn").addEventListener("click", () => {
+      playUiClickSound();
       const now = performance.now();
       if (state.timeOfDay === "day") {
         state.timeOfDay = "night";
@@ -5692,6 +6600,8 @@
         );
         state.screenShakeUntil = now + 600;
         state.screenFlashRedUntil = now + 400;
+        startNightAmbiance();
+        playSpookyGong();
       } else {
         state.timeOfDay = "day";
         state.timeRemaining = 60;
@@ -5706,6 +6616,8 @@
           }
         }
         
+        stopNightAmbiance();
+        
         showScaryAnnouncement(
           "LOG // PAGI (MORNING)",
           "Pagi telah datang. Cahaya mengusir kegelapan.",
@@ -5716,12 +6628,50 @@
         );
       }
     });
+
+    const darknessSlider = document.getElementById("night-darkness-slider");
+    const darknessVal = document.getElementById("night-darkness-value");
+    if (darknessSlider && darknessVal) {
+      darknessSlider.addEventListener("input", (e) => {
+        const val = parseFloat(e.target.value);
+        state.nightDarkness = val;
+        darknessVal.textContent = `${Math.round(val * 100)}%`;
+      });
+    }
+    
+    const damageSlider = document.getElementById("player-damage-slider");
+    const damageVal = document.getElementById("player-damage-value");
+    if (damageSlider && damageVal) {
+      damageSlider.addEventListener("input", (e) => {
+        const val = parseInt(e.target.value, 10);
+        state.attackDamage = val;
+        damageVal.textContent = val;
+      });
+    }
+    
+    const petChanceSlider = document.getElementById("pet-chance-slider");
+    const petChanceVal = document.getElementById("pet-chance-value");
+    if (petChanceSlider && petChanceVal) {
+      petChanceSlider.addEventListener("input", (e) => {
+        const val = parseInt(e.target.value, 10);
+        state.petChance = val / 100;
+        petChanceVal.textContent = `${val}%`;
+      });
+    }
+    
     buildbarClose.addEventListener("click", () => {
+      playUiClickSound();
       setBuildUiOpen(false);
       state.demo = false;
     });
-    buildbarFullscreen.addEventListener("click", toggleFullscreenManual);
-    buildbarRotate.addEventListener("click", rotateBuildItem);
+    buildbarFullscreen.addEventListener("click", () => {
+      playUiClickSound();
+      toggleFullscreenManual();
+    });
+    buildbarRotate.addEventListener("click", () => {
+      playUiClickSound();
+      rotateBuildItem();
+    });
     scene.addEventListener("pointermove", moveCanvasPointer);
     scene.addEventListener("pointerleave", () => {
       state.buildHover.active = false;

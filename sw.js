@@ -1,5 +1,5 @@
-// Service Worker — Offline-first cache for Grass Animal Tester
-const CACHE_NAME = "grass-tester-v3";
+// Service Worker — Offline-first cache for Ethereal RPG
+const CACHE_NAME = "ethereal-v3";
 
 // Shell files to precache on install
 const PRECACHE = [

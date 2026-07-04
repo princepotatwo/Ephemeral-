@@ -1,6 +1,6 @@
 {
-  "name": "Grass Animal Tester",
-  "short_name": "Grass Tester",
+  "name": "Ethereal RPG",
+  "short_name": "Ethereal",
   "description": "Cute overworld map with animals and biomes.",
   "start_url": "./index.html",
   "scope": "./",
