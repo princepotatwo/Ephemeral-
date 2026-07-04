@@ -3156,6 +3156,14 @@
       return placedSprites.find(item => item.scene === sceneName && item.buildId === "wall" && item.x === x && item.y === y);
     }
 
+    function nearestChest() {
+      return activeSprites()
+        .filter(item => item.chest)
+        .map(item => ({ item, dist: Math.hypot(item.x - state.x, item.y - state.y) }))
+        .filter(entry => entry.dist < 54)
+        .sort((a, b) => a.dist - b.dist)[0]?.item;
+    }
+
     const GACHA_TIERS = [
       { chance: 50, wood: 1 },    // 50% - 1 wood
       { chance: 30, wood: 2 },    // 30% - 2 wood
@@ -3199,14 +3207,6 @@
           placedSprites.splice(i, 1);
         }
       }
-    }
-
-    function nearestChest() {
-      return activeSprites()
-        .filter(item => item.chest)
-        .map(item => ({ item, dist: Math.hypot(item.x - state.x, item.y - state.y) }))
-        .filter(entry => entry.dist < 54)
-        .sort((a, b) => a.dist - b.dist)[0]?.item;
     }
 
     function toggleNearestChest() {
@@ -3394,7 +3394,6 @@
           state.announced10 = false;
           state.nightCount = (state.nightCount || 0) + 1;
           spawnNightMonsters(now);
-          spawnGachaChest();
           
           showScaryAnnouncement(
             "LOG // MALAM (NIGHT)",
@@ -3442,18 +3441,20 @@
           state.announcedNight10 = true;
         }
         if (state.timeRemaining <= 0) {
+          state.timeOfDay = "day";
+          state.timeRemaining = 60;
+          state.announcedNight60 = false;
+          state.announcedNight30 = false;
+          state.announcedNight10 = false;
+          
           // Clear all remaining night monsters when morning arrives!
           for (let i = roamingNPCs.length - 1; i >= 0; i--) {
             if (roamingNPCs[i].isNightMonster) {
               roamingNPCs.splice(i, 1);
             }
           }
+          // Clear any unopened gacha chests at morning
           clearGachaChests();
-          state.timeOfDay = "day";
-          state.timeRemaining = 60;
-          state.announcedNight60 = false;
-          state.announcedNight30 = false;
-          state.announcedNight10 = false;
           
           showScaryAnnouncement(
             "LOG // PAGI (MORNING)",
@@ -3802,6 +3803,8 @@
           }
         }
       }
+      // Spawn a gacha chest every night
+      spawnGachaChest();
     }
 
     // drawNightExplosions removed as per request
