@@ -1,5 +1,5 @@
 // Service Worker — Offline-first cache for Ethereal RPG
-const CACHE_NAME = "ethereal-v3";
+const CACHE_NAME = "ethereal-v4";
 
 // Shell files to precache on install
 const PRECACHE = [
@@ -31,6 +31,11 @@ self.addEventListener("activate", event => {
 self.addEventListener("fetch", event => {
   const url = new URL(event.request.url);
   if (event.request.method !== "GET" || url.origin !== self.location.origin) return;
+  
+  // Skip caching individual frame assets to prevent disk I/O bottlenecks
+  if (url.pathname.includes("/assets/")) {
+    return;
+  }
 
   event.respondWith(
     caches.match(event.request).then(cached => {
