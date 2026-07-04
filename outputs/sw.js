@@ -27,39 +27,20 @@ self.addEventListener("activate", event => {
   );
 });
 
-// Cache-first for assets, but network-first for index.html/entry pages
+// Cache-first for all same-origin GET requests
 self.addEventListener("fetch", event => {
   const url = new URL(event.request.url);
   if (event.request.method !== "GET" || url.origin !== self.location.origin) return;
 
-  const isHtml = url.pathname.endsWith("/") || url.pathname.endsWith("/index.html");
-
-  if (isHtml) {
-    // Network-first: try network first, fallback to cache if offline
-    event.respondWith(
-      fetch(event.request).then(response => {
-        if (response && response.status === 200) {
-          const toCache = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, toCache));
-          return response;
-        }
+  event.respondWith(
+    caches.match(event.request).then(cached => {
+      if (cached) return cached;
+      return fetch(event.request).then(response => {
+        if (!response || response.status !== 200 || response.type !== "basic") return response;
+        const toCache = response.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(event.request, toCache));
         return response;
-      }).catch(() => {
-        return caches.match(event.request).then(cached => cached || new Response("", { status: 204 }));
-      })
-    );
-  } else {
-    // Cache-first for same-origin static assets
-    event.respondWith(
-      caches.match(event.request).then(cached => {
-        if (cached) return cached;
-        return fetch(event.request).then(response => {
-          if (!response || response.status !== 200 || response.type !== "basic") return response;
-          const toCache = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, toCache));
-          return response;
-        }).catch(() => new Response("", { status: 204 }));
-      })
-    );
-  }
+      }).catch(() => new Response("", { status: 204 }));
+    })
+  );
 });
