@@ -6504,7 +6504,16 @@
       })();
 
       const charSrcs = allCharacterSrcs();
-      const allSrcs = [...new Set([...coreSrcs, ...plantSrcs, ...charSrcs])];
+      const allSrcs = (() => {
+        const combined = [...new Set([...coreSrcs, ...plantSrcs, ...charSrcs])];
+        return combined.sort((a, b) => {
+          const aSilksong = a.includes("silksong_");
+          const bSilksong = b.includes("silksong_");
+          if (aSilksong && !bSilksong) return 1;
+          if (!aSilksong && bSilksong) return -1;
+          return 0;
+        });
+      })();
       const mapStrips = Math.ceil(WORLD_H / 512);
       const total = allSrcs.length + mapStrips;
       let loaded = 0;
