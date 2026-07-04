@@ -34,6 +34,7 @@ self.addEventListener("fetch", event => {
   
   // Skip caching individual frame assets to prevent disk I/O bottlenecks
   if (url.pathname.includes("/assets/")) {
+    event.respondWith(fetch(event.request));
     return;
   }
 
