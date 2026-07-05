@@ -2408,15 +2408,17 @@
     }
 
     function chestFrameIndex(chest) {
-      const elapsed = Math.max(0, performance.now() - (chest.chestAnimStarted || 0));
+      if (!chest.chestAnimStarted) return chest.open ? 4 : 0;
+      const elapsed = Math.max(0, performance.now() - chest.chestAnimStarted);
       const step = Math.min(4, Math.floor(elapsed / 70));
       return chest.open ? step : 4 - step;
     }
 
     function doorFrameIndex(door) {
-      const elapsed = Math.max(0, performance.now() - (door.doorAnimStarted || 0));
-      const step = Math.min(2, Math.floor(elapsed / 100)); // 3 frames: 0, 1, 2
-      return door.open ? step : 2 - step;
+      if (!door.doorAnimStarted) return door.open ? 0 : 3;
+      const elapsed = Math.max(0, performance.now() - door.doorAnimStarted);
+      const step = Math.min(3, Math.floor(elapsed / 80)); // 4 frames: 0, 1, 2, 3
+      return door.open ? 3 - step : step;
     }
 
     function activeSprites() {
@@ -3190,8 +3192,9 @@
     function collisionHits(x, y) {
       const feet = playerFeetAt(x, y);
       return activeSprites().filter(plant => {
-        if (!plant.solid) return false;
+        if (!plant || !plant.solid) return false;
         const solid = solidRectFor(plant);
+        if (!solid) return false;
         return aabb(feet.x, feet.y, feet.w, feet.h, solid.x, solid.y, solid.w, solid.h);
       });
     }
@@ -3364,10 +3367,24 @@
           const startY = r * CHUNK_PX;
           
           const pad = 40;
-          const cx = Math.max(80, Math.min(WORLD_W - 80, startX + pad + Math.random() * (CHUNK_PX - pad * 2)));
-          const cy = Math.max(80, Math.min(WORLD_H - 80, startY + pad + Math.random() * (CHUNK_PX - pad * 2)));
-          
-          spawnGachaChestAt(cx, cy);
+          let cx = 0, cy = 0;
+          let foundLand = false;
+          for (let attempt = 0; attempt < 25; attempt++) {
+            cx = Math.max(80, Math.min(WORLD_W - 80, startX + pad + Math.random() * (CHUNK_PX - pad * 2)));
+            cy = Math.max(80, Math.min(WORLD_H - 80, startY + pad + Math.random() * (CHUNK_PX - pad * 2)));
+            const overlapsWater = isWaterAtWorldPoint(cx, cy) ||
+                                  isWaterAtWorldPoint(cx - 16, cy - 16) ||
+                                  isWaterAtWorldPoint(cx + 16, cy - 16) ||
+                                  isWaterAtWorldPoint(cx - 16, cy + 16) ||
+                                  isWaterAtWorldPoint(cx + 16, cy + 16);
+            if (!overlapsWater) {
+              foundLand = true;
+              break;
+            }
+          }
+          if (foundLand) {
+            spawnGachaChestAt(cx, cy);
+          }
         }
       }
     }
@@ -3434,29 +3451,38 @@
         if (progress > 0.75) {
           opacity = 1 - (progress - 0.75) / 0.25;
         }
+
+        // Draw pixelated particles / retro grid glow
+        const pixelSize = 4;
+        const radius = 22 + Math.sin(now * 0.008) * 3;
+        ctx.fillStyle = item.glowColor;
+        for (let gx = -radius; gx <= radius; gx += pixelSize) {
+          for (let gy = -radius; gy <= radius; gy += pixelSize) {
+            const distSq = gx * gx + gy * gy;
+            if (distSq <= radius * radius) {
+              const alpha = (1 - Math.sqrt(distSq) / radius) * opacity * 0.7;
+              if (alpha > 0.06) {
+                ctx.globalAlpha = alpha;
+                ctx.fillRect(Math.floor(item.x + gx), Math.floor(item.y + gy), pixelSize, pixelSize);
+              }
+            }
+          }
+        }
+
         ctx.globalAlpha = opacity;
-
-        const radius = 25 + Math.sin(now * 0.01) * 4;
-        const grad = ctx.createRadialGradient(item.x, item.y, 2, item.x, item.y, radius);
-        grad.addColorStop(0, item.glowColor);
-        grad.addColorStop(1, "rgba(0, 0, 0, 0)");
-        ctx.fillStyle = grad;
-        ctx.beginPath();
-        ctx.arc(item.x, item.y, radius, 0, Math.PI * 2);
-        ctx.fill();
-
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.font = "bold 8px 'Outfit', 'Inter', sans-serif";
-        ctx.fillStyle = item.color;
-        ctx.shadowColor = "#000000";
-        ctx.shadowBlur = 4;
-        ctx.fillText(item.rarity.toUpperCase(), item.x, item.y - 12);
 
-        ctx.font = "bold 12px 'Outfit', 'Inter', sans-serif";
-        ctx.fillStyle = "#ffffff";
-        ctx.fillText(`🪵 +${item.prize}`, item.x, item.y + 2);
-        ctx.shadowBlur = 0;
+        // Pixelated styling for Wood text
+        ctx.font = "bold 10px 'Courier New', monospace";
+        
+        // 8-bit solid text shadow
+        ctx.fillStyle = "#000000";
+        ctx.fillText(`🪵 +${item.prize}`, Math.floor(item.x) + 1, Math.floor(item.y) + 1);
+        
+        // Foreground in rarity color
+        ctx.fillStyle = item.color;
+        ctx.fillText(`🪵 +${item.prize}`, Math.floor(item.x), Math.floor(item.y));
       });
       ctx.restore();
     }
@@ -3488,15 +3514,6 @@
         const tierIdx = GACHA_TIERS.findIndex(t => t.wood === prize);
         const rarity = rarityLabels[tierIdx] || "Common";
         spawnFloatingItem(chest.x, chest.y, prize, rarity);
-        showScaryAnnouncement(
-          `GACHA CHEST OPENED!`,
-          `Kamu mendapatkan ${prize} wood!`,
-          `You got ${prize} wood!`,
-          `RARITY: ${rarity} | ROLL: ${roll.toFixed(3)}%`,
-          `[LOGS: ${state.logs}]`,
-          "",
-          4000
-        );
         setTimeout(() => {
           const idx = placedSprites.indexOf(chest);
           if (idx >= 0) placedSprites.splice(idx, 1);
@@ -4701,6 +4718,40 @@
       osc.stop(now + 0.15);
     }
 
+    let lastWaterWalkSoundAt = 0;
+    function playWaterWalkSound() {
+      initAudio();
+      if (!audioCtx) return;
+      const now = audioCtx.currentTime;
+      
+      const bufferSize = audioCtx.sampleRate * 0.12;
+      const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        data[i] = Math.random() * 2 - 1;
+      }
+      
+      const noise = audioCtx.createBufferSource();
+      noise.buffer = buffer;
+      
+      const filter = audioCtx.createBiquadFilter();
+      filter.type = "bandpass";
+      filter.frequency.setValueAtTime(320, now);
+      filter.frequency.exponentialRampToValueAtTime(140, now + 0.12);
+      filter.Q.setValueAtTime(8, now);
+      
+      const gain = audioCtx.createGain();
+      gain.gain.setValueAtTime(0.05, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+      
+      noise.connect(filter);
+      filter.connect(gain);
+      gain.connect(audioCtx.destination);
+      
+      noise.start(now);
+      noise.stop(now + 0.15);
+    }
+
     function spawnBloodSplats(x, y, count) {
       if (!state.bloodSplats) state.bloodSplats = [];
       const now = performance.now();
@@ -5223,6 +5274,9 @@
     function updateRoamingNPCs(now, dt) {
       for (let i = roamingNPCs.length - 1; i >= 0; i--) {
         const npc = roamingNPCs[i];
+        const npcInWater = state.scene === "outside" && waterTileAt(npc.x, npc.y);
+        const speedMult = npcInWater ? 0.5 : 1.0;
+        const npcSpeed = npc.speed * speedMult;
         npc.t += dt;
         
         // Creepy background sounds for Slasher charge/run and Spider skitter
@@ -5400,7 +5454,7 @@
               const dx = npc.retreatX - npc.x;
               const dy = npc.retreatY - npc.y;
               const dist = Math.hypot(dx, dy) || 1;
-              const speed = npc.speed;
+              const speed = npcSpeed;
               const stepX = (dx / dist) * speed * dt;
               const stepY = (dy / dist) * speed * dt;
               
@@ -5477,7 +5531,7 @@
           
           if (dist > 24) {
             if (npc.isNightMonster) {
-              const speed = npc.speed;
+              const speed = npcSpeed;
               const stepX = (dx / dist) * speed * dt;
               const stepY = (dy / dist) * speed * dt;
               
@@ -5504,8 +5558,8 @@
               if (!obstacleY) npc.y = Math.max(60, Math.min(WORLD_H - 60, nextY));
             } else {
               npc.mode = "run";
-              npc.x = Math.max(60, Math.min(WORLD_W - 60, npc.x + (dx / dist) * npc.speed * 1.15 * dt));
-              npc.y = Math.max(60, Math.min(WORLD_H - 60, npc.y + (dy / dist) * npc.speed * 1.15 * dt));
+              npc.x = Math.max(60, Math.min(WORLD_W - 60, npc.x + (dx / dist) * npcSpeed * 1.15 * dt));
+              npc.y = Math.max(60, Math.min(WORLD_H - 60, npc.y + (dy / dist) * npcSpeed * 1.15 * dt));
             }
             if (cfg && cfg.sideView) {
               if (Math.abs(dx) > 0.1) npc.dir = dx > 0 ? "right" : "left";
@@ -5582,8 +5636,8 @@
           }
         }
         if (npc.mode === "run") {
-          const nextX = npc.x + npc.moveDir.x * npc.speed * dt;
-          const nextY = npc.y + npc.moveDir.y * npc.speed * dt;
+          const nextX = npc.x + npc.moveDir.x * npcSpeed * dt;
+          const nextY = npc.y + npc.moveDir.y * npcSpeed * dt;
           let bounced = false;
           if (nextX < 60 || nextX > WORLD_W - 60) {
             npc.moveDir.x *= -1;
@@ -5596,8 +5650,8 @@
           if (bounced) {
             npc.nextDecisionAt = now + 200 + Math.random() * 600;
           }
-          npc.x = Math.max(60, Math.min(WORLD_W - 60, npc.x + npc.moveDir.x * npc.speed * dt));
-          npc.y = Math.max(60, Math.min(WORLD_H - 60, npc.y + npc.moveDir.y * npc.speed * dt));
+          npc.x = Math.max(60, Math.min(WORLD_W - 60, npc.x + npc.moveDir.x * npcSpeed * dt));
+          npc.y = Math.max(60, Math.min(WORLD_H - 60, npc.y + npc.moveDir.y * npcSpeed * dt));
           if (Math.abs(npc.moveDir.x) > Math.abs(npc.moveDir.y)) {
             npc.dir = npc.moveDir.x > 0 ? "right" : "left";
           } else {
@@ -5702,8 +5756,10 @@
     }
 
     function movePetSlime(pet, stepX, stepY) {
-      const nextX = pet.x + stepX;
-      const nextY = pet.y + stepY;
+      const petInWater = state.scene === "outside" && waterTileAt(pet.x, pet.y);
+      const mult = petInWater ? 0.5 : 1.0;
+      const nextX = pet.x + stepX * mult;
+      const nextY = pet.y + stepY * mult;
       if (!findPetObstacle(nextX, pet.y, pet)) {
         pet.x = nextX;
       }
@@ -6222,7 +6278,11 @@
               : ""
           : "";
         const rotateStyle = active && display.rotateSteps ? ` style="transform: rotate(${display.rotateSteps * 90}deg)"` : "";
-        const body = item.erase ? "<span>×</span>" : `<img src="${assetUrl(`assets/plants/${display.name}/frame_0.png`)}" alt=""${rotateStyle}>`;
+        let frameUrl = `assets/plants/${display.name}/frame_0.png`;
+        if (display.name && display.name.startsWith("build_house_door")) {
+          frameUrl = `assets/plants/build_house_door_0_3/frame_0.png`;
+        }
+        const body = item.erase ? "<span>×</span>" : `<img src="${assetUrl(frameUrl)}" alt=""${rotateStyle}>`;
         return `<button class="build-tool${active}" data-build="${item.id}" title="${item.label}${rotation}" aria-label="${item.label}${rotation}">${body}</button>`;
       };
       const renderSplitRow = (items, leftNode, rightNode) => {
@@ -6443,10 +6503,19 @@
       const len = Math.hypot(dx, dy) || 1;
       const maxX = state.scene === "interior" ? INTERIOR_W - 34 : WORLD_W - 24;
       const maxY = state.scene === "interior" ? INTERIOR_H - 24 : WORLD_H - 24;
-      const nextX = Math.max(24, Math.min(maxX, state.x + dx / len * MOVE_SPEED * dt));
-      const nextY = Math.max(34, Math.min(maxY, state.y + dy / len * MOVE_SPEED * dt));
+      const inWater = state.scene === "outside" && waterTileAt(state.x, state.y);
+      const speedMult = inWater ? 0.5 : 1.0;
+      const nextX = Math.max(24, Math.min(maxX, state.x + dx / len * MOVE_SPEED * speedMult * dt));
+      const nextY = Math.max(34, Math.min(maxY, state.y + dy / len * MOVE_SPEED * speedMult * dt));
       if (!collides(nextX, state.y)) state.x = nextX;
       if (!collides(state.x, nextY)) state.y = nextY;
+      
+      if (moving && inWater) {
+        if (now - lastWaterWalkSoundAt > 320) {
+          playWaterWalkSound();
+          lastWaterWalkSoundAt = now;
+        }
+      }
       resolvePlayerOverlap();
       maybeTeleport();
       updateDialogue(now, Boolean(moving), Boolean(attacking));
