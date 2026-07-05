@@ -750,7 +750,7 @@
       scary_zombie: { label: "Scary Zombie", kind: "forest", base: "scary_zombie", scale: 1.15, attackMs: 420, sideView: true, smooth: true },
       creature_bear: { label: "Flesh Bear", kind: "forest", base: "creature_bear", scale: 1.25, attackMs: 420, sideView: true, smooth: true },
       creature_crawler: { label: "Gore Crawler", kind: "forest", base: "creature_crawler", scale: 1.15, attackMs: 480, sideView: true, smooth: true },
-      creature_slasher: { label: "Flesh Slasher", kind: "forest", base: "creature_slasher", scale: 1.15, attackMs: 800, sideView: true, smooth: true }
+      creature_slasher: { label: "Flesh Slasher", kind: "forest", base: "creature_slasher", scale: 1.15, attackMs: 730, sideView: true, smooth: true }
     };
     silksongStudyCharacters.forEach(([name]) => {
       roster[name].sideView = true;
@@ -773,7 +773,7 @@
       silksong_moss_creep: { idle: 6, run: 3, stop: 6, attack: 6 },
       creature_bear: { idle: 6, run: 6, attack: 6, die: 8 },
       creature_crawler: { idle: 7, run: 7, attack: 7, die: 7 },
-      creature_slasher: { idle: 8, run: 8, attack: 12, die: 8 },
+      creature_slasher: { idle: 8, run: 8, attack: 11, die: 8 },
       silksong_bone_worm: { idle: 4, run: 4, stop: 4, attack: 7 },
       silksong_moss_crawler: { idle: 3, run: 23, stop: 3, attack: 3 },
       silksong_staff_pilgrim: { idle: 6, run: 10, stop: 6, attack: 13 },
@@ -4555,6 +4555,107 @@
       ctx.restore();
     }
 
+    function spawnAcidSplats(x, y, count) {
+      if (!state.acidSplats) state.acidSplats = [];
+      const now = performance.now();
+      const colors = ["#39ff14", "#32cd32", "#00ff00", "#7fff00", "#55d43f"];
+      
+      for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 25 + Math.random() * 45;
+        const size = 1.8 + Math.random() * 2.2;
+        
+        state.acidSplats.push({
+          x: x,
+          y: y - 8,
+          size: Math.round(size),
+          color: colors[Math.floor(Math.random() * colors.length)],
+          spawnedAt: now,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed * 0.7,
+          altitude: 3 + Math.random() * 6,
+          vAltitude: 12 + Math.random() * 20
+        });
+      }
+      
+      // Cap maximum acid splats to 500
+      if (state.acidSplats.length > 500) {
+        state.acidSplats = state.acidSplats.slice(state.acidSplats.length - 500);
+      }
+    }
+
+    function updateAcidSplats(dt) {
+      if (!state.acidSplats) state.acidSplats = [];
+      const now = performance.now();
+      
+      // Acid splats dissolve and disappear after 10 seconds
+      state.acidSplats = state.acidSplats.filter(splat => now - splat.spawnedAt < 10000);
+      
+      let playerTouchedAcid = false;
+      
+      state.acidSplats.forEach(splat => {
+        if (splat.altitude > 0) {
+          splat.x += splat.vx * dt;
+          splat.y += splat.vy * dt;
+          splat.vAltitude -= 140 * dt;
+          splat.altitude += splat.vAltitude * dt;
+          if (splat.altitude <= 0) {
+            splat.altitude = 0;
+            splat.vx = 0;
+            splat.vy = 0;
+          }
+        } else {
+          // Check player distance to acid puddle on the ground
+          const dist = Math.hypot(state.x - splat.x, state.y - splat.y);
+          if (dist < 12) {
+            playerTouchedAcid = true;
+          }
+        }
+      });
+      
+      if (playerTouchedAcid && !state.dead) {
+        if (!state.lastAcidDamageTick || now - state.lastAcidDamageTick >= 280) {
+          state.lastAcidDamageTick = now;
+          state.screenFlashGreenUntil = now + 150;
+          state.screenShakeUntil = now + 180;
+          playSfx("sfx-hurt", 0.22);
+          
+          // Stepping on acid spawns minor splash splats
+          spawnAcidSplats(state.x, state.y, 1);
+        }
+      }
+    }
+
+    function drawAcidSplats() {
+      if (!state.acidSplats) state.acidSplats = [];
+      
+      const left = state.cameraX;
+      const right = state.cameraX + viewWorldW();
+      const top = state.cameraY;
+      const bottom = state.cameraY + viewWorldH();
+
+      ctx.save();
+      const len = state.acidSplats.length;
+      for (let i = 0; i < len; i++) {
+        const splat = state.acidSplats[i];
+        if (splat.x + 4 < left || splat.x - 4 > right || splat.y + 4 < top || splat.y - 4 > bottom) {
+          continue;
+        }
+        ctx.fillStyle = splat.color;
+        const drawX = splat.x;
+        const drawY = splat.y - splat.altitude;
+        
+        if (splat.altitude > 0) {
+          ctx.fillStyle = "rgba(0, 0, 0, 0.24)";
+          ctx.fillRect(splat.x - splat.size / 2, splat.y, splat.size, 1);
+          ctx.fillStyle = splat.color;
+        }
+        
+        ctx.fillRect(drawX - splat.size / 2, drawY - splat.size / 2, splat.size, splat.size);
+      }
+      ctx.restore();
+    }
+
     window.demoTreeStats = () => {
       const trees = allTreeSprites();
       return {
@@ -4908,6 +5009,9 @@
             if (dist <= 380) {
               playSpiderSkitter();
             }
+            if (Math.random() < 0.48) {
+              spawnAcidSplats(npc.x + (Math.random() - 0.5) * 8, npc.y + (Math.random() - 0.5) * 8, 1);
+            }
           }
           // Slime hop sound for wild slimes
           if (!npc.isNightMonster && npc.mode === "run" && (!npc.lastHopSoundAt || now - npc.lastHopSoundAt > 320)) {
@@ -5027,6 +5131,7 @@
             state.screenFlashRedUntil = now + 200;
             
             playMonsterDeathSound(); // Play massive explosion sound!
+            spawnAcidSplats(npc.x, npc.y, 45); // spawn massive green acid splat!
             
             if (Math.hypot(state.x - npc.x, state.y - npc.y) <= 60) {
               triggerScaryHit(state.x - npc.x, state.y - npc.y, npc);
@@ -6080,6 +6185,7 @@
       }
       
       updateBloodSplats(dt);
+      updateAcidSplats(dt);
       updateTreeRespawns(now);
       updateDayNightCycle(now, dt);
       updateMovingTrees(now, dt);
@@ -6178,6 +6284,7 @@
         drawAnimatedShoreline();
         drawFarmPatch();
         drawBloodSplats();
+        drawAcidSplats();
         drawDepthSortedActors();
         
         // Night shadow overlay & Soft Radial Flashlight (world space)
@@ -6222,6 +6329,14 @@
       if (now < state.screenFlashRedUntil) {
         ctx.save();
         ctx.fillStyle = "rgba(220, 10, 10, 0.32)";
+        ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+        ctx.restore();
+      }
+      
+      // Draw screen green flash if acid hit
+      if (now < state.screenFlashGreenUntil) {
+        ctx.save();
+        ctx.fillStyle = "rgba(10, 220, 10, 0.28)";
         ctx.fillRect(0, 0, VIEW_W, VIEW_H);
         ctx.restore();
       }
