@@ -905,11 +905,11 @@
     function approxBiomeIdAt(x, y) {
       const dx = x - SAFE_CENTER_X;
       const dy = (y - SAFE_CENTER_Y) * 1.12;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      if (dist < 900) return "safe";
-      if (dist < 2300) return "shadow";
-      if (dist < 3650) return "goldwood";
-      if (dist < 5050) return "bluewater";
+      const distSq = dx * dx + dy * dy;
+      if (distSq < 810000) return "safe";
+      if (distSq < 5290000) return "shadow";
+      if (distSq < 13322500) return "goldwood";
+      if (distSq < 25502500) return "bluewater";
       return "deepteal";
     }
 
@@ -2709,7 +2709,7 @@
 
     function updateStudyCapture(now) {
       const study = state.studyCapture;
-      const currentBiomeId = state.scene === "outside" ? biomeAt(state.x, state.y).id : "";
+      const currentBiomeId = state.scene === "outside" ? approxBiomeIdAt(state.x, state.y) : "";
       
       const isNearNight = state.timeOfDay === "day" && state.timeRemaining <= 10;
       const isNight = state.timeOfDay === "night";
@@ -5173,7 +5173,7 @@
       if (moved < 180) state.dialogueMoveDistance += moved;
       else state.dialogueMoveDistance = 0;
 
-      const biomeId = state.scene === "outside" ? biomeAt(state.x, state.y).id : "inside";
+      const biomeId = state.scene === "outside" ? approxBiomeIdAt(state.x, state.y) : "inside";
       if (!state.dialogueBiome) {
         state.dialogueBiome = biomeId;
       } else if (biomeId !== state.dialogueBiome) {
