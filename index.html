@@ -3751,6 +3751,8 @@
       state.announcement = { title, sentence, english, info, status, extra };
       state.announcementStart = performance.now();
       state.announcementVisible = performance.now() + durationMs;
+      notifySubject0OfText(sentence);
+      notifySubject0OfText(english);
     }
 
     function updateDayNightCycle(now, dt) {
@@ -5402,10 +5404,27 @@
           niceness: 0.5,
           intelligence: 0.5,
           awareness: 0.1,
-          vocabulary: new Set(["hello", "hi", "what", "is", "that", "why", "who", "are", "you", "am", "i"]),
+          vocabulary: new Set(["hello", "hi", "what", "is", "that", "why", "who", "are", "you", "am", "i", "the", "near", "tree", "slime", "plant", "water", "farm", "crop", "wood", "stone", "night", "day"]),
           learnedRules: [],
           learnedAnswers: {},
-          lastQuestion: null
+          lastQuestion: null,
+          transitions: {
+            "hello": { "player": 1 },
+            "i": { "am": 3, "saw": 2 },
+            "am": { "near": 2, "learning": 2 },
+            "near": { "the": 3 },
+            "what": { "is": 3 },
+            "who": { "are": 2 },
+            "are": { "you": 2 }
+          },
+          dialogueTemplates: [
+            "i am near the tree",
+            "i saw you chop tree",
+            "what is tree",
+            "hello player",
+            "who are you",
+            "i am learning words"
+          ]
         };
         roamingNPCs.push(sub0);
       }
@@ -5472,6 +5491,20 @@
         }
       });
 
+      // Update transitions matrix for consecutively typed words
+      for (let i = 0; i < words.length - 1; i++) {
+        const w1 = words[i];
+        const w2 = words[i+1];
+        if (!sub0.personality.transitions[w1]) sub0.personality.transitions[w1] = {};
+        sub0.personality.transitions[w1][w2] = (sub0.personality.transitions[w1][w2] || 0) + 1;
+      }
+      
+      // Store player sentence pattern as a template
+      sub0.personality.dialogueTemplates.push(playerText);
+      if (sub0.personality.dialogueTemplates.length > 15) {
+        sub0.personality.dialogueTemplates.shift();
+      }
+
       // Formulate a response after a tiny delay
       setTimeout(() => {
         const cleanText = playerText.toLowerCase().trim().replace(/[^a-z0-9\s]/g, "");
@@ -5527,9 +5560,69 @@
           const answersSize = Object.keys(sub0.personality.learnedAnswers).length;
           reply = `i am growing aware. my brain has ${vocabSize} words, ${rulesSize} rules, and ${answersSize} learned answers.`;
         } else {
-          // If we don't know the answer, trigger learning state
-          sub0.personality.lastQuestion = cleanText;
-          reply = `i do not know how to respond to "${playerText}". teach me: what does it mean?`;
+          // Attempt statistical sentence synthesis!
+          // Try to seed the generation using one of the words the player typed
+          let seedWord = null;
+          if (words.length > 0) {
+            const candidates = words.filter(w => sub0.personality.transitions[w]);
+            if (candidates.length > 0) {
+              seedWord = candidates[Math.floor(Math.random() * candidates.length)];
+            }
+          }
+          if (!seedWord) {
+            const keysWithTransitions = Object.keys(sub0.personality.transitions);
+            seedWord = keysWithTransitions[Math.floor(Math.random() * keysWithTransitions.length)];
+          }
+          
+          // Generate a sentence of up to 6 words
+          const generatedWords = [seedWord];
+          for (let len = 0; len < 5; len++) {
+            const last = generatedWords[generatedWords.length - 1];
+            const nextMap = sub0.personality.transitions[last];
+            if (!nextMap) break;
+            
+            const nextWords = Object.keys(nextMap);
+            const weights = Object.values(nextMap);
+            const totalWeight = weights.reduce((a, b) => a + b, 0);
+            let rnd = Math.random() * totalWeight;
+            let chosen = nextWords[0];
+            for (let j = 0; j < nextWords.length; j++) {
+              rnd -= weights[j];
+              if (rnd <= 0) {
+                chosen = nextWords[j];
+                break;
+              }
+            }
+            generatedWords.push(chosen);
+          }
+          
+          let rawReply = generatedWords.join(" ");
+          
+          let nearestEntity = "the grass";
+          let minDist = 300;
+          roamingNPCs.forEach(n => {
+            if (n.isSubject0 || n.dead) return;
+            const dist = Math.hypot(n.x - sub0.x, n.y - sub0.y);
+            if (dist < minDist) {
+              minDist = dist;
+              nearestEntity = roster[n.base].label.toLowerCase();
+            }
+          });
+          const playerDist = Math.hypot(state.x - sub0.x, state.y - sub0.y);
+          if (playerDist < minDist) {
+            minDist = playerDist;
+            nearestEntity = "you";
+          }
+          
+          reply = rawReply.replace(/\b(tree|slime|crop|grass|player)\b/gi, (match) => {
+            if (match.toLowerCase() === "player") return "you";
+            return nearestEntity;
+          });
+          
+          if (reply.split(/\s+/).length < 2) {
+            sub0.personality.lastQuestion = cleanText;
+            reply = `i do not know how to respond to "${playerText}". teach me: what does it mean?`;
+          }
         }
         
         addChatMessage("subject0", reply);
@@ -5576,6 +5669,29 @@
             }, 1200);
           }
         }
+      }
+    }
+
+    function notifySubject0OfText(text) {
+      if (!text) return;
+      const sub0 = roamingNPCs.find(n => n.isSubject0);
+      if (!sub0 || sub0.dead) return;
+      
+      const words = text.toLowerCase().replace(/[^a-z0-9\s]/g, "").split(/\s+/).filter(w => w.length > 1);
+      words.forEach(w => {
+        sub0.personality.vocabulary.add(w);
+      });
+      
+      for (let i = 0; i < words.length - 1; i++) {
+        const w1 = words[i];
+        const w2 = words[i+1];
+        if (!sub0.personality.transitions[w1]) sub0.personality.transitions[w1] = {};
+        sub0.personality.transitions[w1][w2] = (sub0.personality.transitions[w1][w2] || 0) + 1;
+      }
+      
+      sub0.personality.dialogueTemplates.push(text);
+      if (sub0.personality.dialogueTemplates.length > 15) {
+        sub0.personality.dialogueTemplates.shift();
       }
     }
 
