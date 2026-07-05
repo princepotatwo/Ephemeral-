@@ -2415,10 +2415,10 @@
     }
 
     function doorFrameIndex(door) {
-      if (!door.doorAnimStarted) return door.open ? 0 : 3;
+      if (!door.doorAnimStarted) return door.open ? 3 : 0;
       const elapsed = Math.max(0, performance.now() - door.doorAnimStarted);
       const step = Math.min(3, Math.floor(elapsed / 80)); // 4 frames: 0, 1, 2, 3
-      return door.open ? 3 - step : step;
+      return door.open ? step : 3 - step;
     }
 
     function activeSprites() {
@@ -6278,11 +6278,7 @@
               : ""
           : "";
         const rotateStyle = active && display.rotateSteps ? ` style="transform: rotate(${display.rotateSteps * 90}deg)"` : "";
-        let frameUrl = `assets/plants/${display.name}/frame_0.png`;
-        if (display.name && display.name.startsWith("build_house_door")) {
-          frameUrl = `assets/plants/build_house_door_0_3/frame_0.png`;
-        }
-        const body = item.erase ? "<span>×</span>" : `<img src="${assetUrl(frameUrl)}" alt=""${rotateStyle}>`;
+        const body = item.erase ? "<span>×</span>" : `<img src="${assetUrl(`assets/plants/${display.name}/frame_0.png`)}" alt=""${rotateStyle}>`;
         return `<button class="build-tool${active}" data-build="${item.id}" title="${item.label}${rotation}" aria-label="${item.label}${rotation}">${body}</button>`;
       };
       const renderSplitRow = (items, leftNode, rightNode) => {
