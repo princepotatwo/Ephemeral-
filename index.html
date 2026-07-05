@@ -3365,6 +3365,87 @@
       }
     }
 
+    function spawnFloatingItem(x, y, prize, rarity) {
+      if (!state.floatingItems) state.floatingItems = [];
+      const colors = {
+        "Common": "#d4d4d4",
+        "Uncommon": "#39ff14",
+        "Rare": "#00d2ff",
+        "Epic": "#d000ff",
+        "Legendary": "#ff9900",
+        "MYTHIC": "#ff0055"
+      };
+      const glowColors = {
+        "Common": "rgba(220, 220, 220, 0.45)",
+        "Uncommon": "rgba(100, 255, 100, 0.55)",
+        "Rare": "rgba(50, 210, 255, 0.65)",
+        "Epic": "rgba(220, 50, 255, 0.75)",
+        "Legendary": "rgba(255, 180, 50, 0.85)",
+        "MYTHIC": "rgba(255, 30, 80, 0.95)"
+      };
+      state.floatingItems.push({
+        x: x,
+        y: y - 10,
+        startY: y - 10,
+        prize: prize,
+        rarity: rarity,
+        color: colors[rarity] || "#ffffff",
+        glowColor: glowColors[rarity] || "rgba(255,255,255,0.5)",
+        spawnedAt: performance.now(),
+        duration: 1600
+      });
+    }
+
+    function updateFloatingItems(dt) {
+      if (!state.floatingItems) state.floatingItems = [];
+      const now = performance.now();
+      state.floatingItems = state.floatingItems.filter(item => now - item.spawnedAt < item.duration);
+      state.floatingItems.forEach(item => {
+        const elapsed = now - item.spawnedAt;
+        const progress = elapsed / item.duration;
+        const easeOut = 1 - Math.pow(1 - progress, 3);
+        item.y = item.startY - 48 * easeOut;
+      });
+    }
+
+    function drawFloatingItems() {
+      if (!state.floatingItems || state.floatingItems.length === 0) return;
+      const now = performance.now();
+      ctx.save();
+      state.floatingItems.forEach(item => {
+        const elapsed = now - item.spawnedAt;
+        const progress = elapsed / item.duration;
+        let opacity = 1;
+        if (progress > 0.75) {
+          opacity = 1 - (progress - 0.75) / 0.25;
+        }
+        ctx.globalAlpha = opacity;
+
+        const radius = 25 + Math.sin(now * 0.01) * 4;
+        const grad = ctx.createRadialGradient(item.x, item.y, 2, item.x, item.y, radius);
+        grad.addColorStop(0, item.glowColor);
+        grad.addColorStop(1, "rgba(0, 0, 0, 0)");
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(item.x, item.y, radius, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.font = "bold 8px 'Outfit', 'Inter', sans-serif";
+        ctx.fillStyle = item.color;
+        ctx.shadowColor = "#000000";
+        ctx.shadowBlur = 4;
+        ctx.fillText(item.rarity.toUpperCase(), item.x, item.y - 12);
+
+        ctx.font = "bold 12px 'Outfit', 'Inter', sans-serif";
+        ctx.fillStyle = "#ffffff";
+        ctx.fillText(`🪵 +${item.prize}`, item.x, item.y + 2);
+        ctx.shadowBlur = 0;
+      });
+      ctx.restore();
+    }
+
     function toggleNearestChest() {
       const chest = nearestChest();
       if (!chest) return false;
@@ -3387,6 +3468,7 @@
         const rarityLabels = ["Common", "Common", "Uncommon", "Rare", "Rare", "Epic", "Epic", "Legendary", "MYTHIC"];
         const tierIdx = GACHA_TIERS.findIndex(t => t.wood === prize);
         const rarity = rarityLabels[tierIdx] || "Common";
+        spawnFloatingItem(chest.x, chest.y, prize, rarity);
         showScaryAnnouncement(
           `GACHA CHEST OPENED!`,
           `Kamu mendapatkan ${prize} wood!`,
@@ -3570,7 +3652,10 @@
           state.announced10 = false;
           state.nightCount = (state.nightCount || 0) + 1;
           spawnNightMonsters(now);
-          spawnGachaChest();
+          const chestCount = 3 + Math.floor(Math.random() * 3);
+          for (let j = 0; j < chestCount; j++) {
+            spawnGachaChest();
+          }
           
           showScaryAnnouncement(
             "LOG // MALAM (NIGHT)",
@@ -6317,6 +6402,7 @@
       
       updateBloodSplats(dt);
       updateAcidSplats(dt);
+      updateFloatingItems(dt);
       updateTreeRespawns(now);
       updateDayNightCycle(now, dt);
       updateMovingTrees(now, dt);
@@ -6406,6 +6492,7 @@
       if (state.scene === "interior") {
         drawInteriorBase();
         drawDepthSortedActors();
+        drawFloatingItems();
         drawBuildGhost();
       } else {
         ctx.scale(state.zoom, state.zoom);
@@ -6417,6 +6504,7 @@
         drawBloodSplats();
         drawAcidSplats();
         drawDepthSortedActors();
+        drawFloatingItems();
         
         // Night shadow overlay & Soft Radial Flashlight (world space)
         if (state.timeOfDay === "night") {
@@ -6840,7 +6928,10 @@
         state.announcedNight10 = false;
         state.nightCount = (state.nightCount || 0) + 1;
         spawnNightMonsters(now);
-        spawnGachaChest();
+        const chestCount = 3 + Math.floor(Math.random() * 3);
+        for (let j = 0; j < chestCount; j++) {
+          spawnGachaChest();
+        }
         
         showScaryAnnouncement(
           "LOG // MALAM (NIGHT)",
