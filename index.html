@@ -3260,7 +3260,12 @@
     }
 
     function updateBuildHover(clientX, clientY) {
-      state.buildHover = { ...snapBuildPoint(screenToWorld(clientX, clientY)), active: true };
+      const item = activeBuildItem();
+      if (item && item.erase) {
+        state.buildHover = { ...screenToWorld(clientX, clientY), active: true };
+      } else {
+        state.buildHover = { ...snapBuildPoint(screenToWorld(clientX, clientY)), active: true };
+      }
     }
 
     function placeBuildItem() {
@@ -3312,7 +3317,22 @@
       for (let i = placedSprites.length - 1; i >= 0; i--) {
         const item = placedSprites[i];
         if (item.scene !== state.scene) continue;
-        if (Math.abs(item.x - x) <= Math.max(20, item.w / 2) && Math.abs(item.y - y) <= Math.max(18, item.h / 2)) {
+        const w = item.w || 16;
+        const h = item.h || 16;
+        const left = item.x - w / 2;
+        const right = item.x + w / 2;
+        let top, bottom;
+        if (item.flatBuild || item.rotateSteps) {
+          top = item.y - h / 2;
+          bottom = item.y + h / 2;
+        } else {
+          top = item.y - h;
+          bottom = item.y;
+        }
+        const pad = 4;
+        const insideBox = (x >= left - pad && x <= right + pad && y >= top - pad && y <= bottom + pad);
+        const nearCenter = (Math.abs(item.x - x) <= Math.max(20, w / 2) && Math.abs(item.y - y) <= Math.max(18, h / 2));
+        if (insideBox || nearCenter) {
           placedSprites.splice(i, 1);
           refreshWallConnections();
           return;
