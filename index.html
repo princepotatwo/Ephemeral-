@@ -5634,6 +5634,24 @@
         
         addChatMessage("subject0", reply);
         
+        // 50% chance to follow up with a question or statement to keep conversation going
+        if (Math.random() < 0.50 && !state.chatOpen && !sub0.personality.lastQuestion) {
+          setTimeout(() => {
+            if (sub0.dead || state.chatOpen || sub0.personality.lastQuestion) return;
+            const rand = Math.random();
+            if (rand < 0.50 && sub0.personality.learnedRules.length > 0) {
+              const rule = sub0.personality.learnedRules[Math.floor(Math.random() * sub0.personality.learnedRules.length)];
+              addChatMessage("subject0", `are you still ${rule.action}?`);
+            } else {
+              const vocabArray = Array.from(sub0.personality.vocabulary);
+              const word = vocabArray[Math.floor(Math.random() * vocabArray.length)];
+              sub0.personality.lastQuestion = "what is " + word;
+              addChatMessage("subject0", `what does ${word} mean to you?`);
+            }
+            sub0.mode = "idle2";
+          }, 3500);
+        }
+        
         // Face the player
         const dx = state.x - sub0.x;
         if (Math.abs(dx) > 10) {
