@@ -5844,29 +5844,51 @@
         
         if (npc.isSubject0 && !npc.dead) {
           if (!npc.lastCuriosityCheck) npc.lastCuriosityCheck = now;
-          if (now - npc.lastCuriosityCheck > 10000) {
+          if (now - npc.lastCuriosityCheck > 15000) {
             npc.lastCuriosityCheck = now;
             const dist = Math.hypot(npc.x - state.x, npc.y - state.y);
             if (dist <= 180 && !state.chatOpen && !npc.personality.lastQuestion) {
+              const learnedKeys = Object.keys(npc.personality.learnedAnswers);
               const rand = Math.random();
-              if (rand < 0.40) {
-                const questions = [
-                  "is this forest safe?",
-                  "are you my friend?",
-                  "what do you like?",
-                  "why do you build?",
-                  "what should we do?",
-                  "who created me?",
-                  "what is beyond this map?"
+              
+              if (learnedKeys.length >= 3 && rand < 0.45) {
+                // Statement Mode: Share a learned belief!
+                const chosenKey = learnedKeys[Math.floor(Math.random() * learnedKeys.length)];
+                const belief = npc.personality.learnedAnswers[chosenKey];
+                const statements = [
+                  `i remember: ${chosenKey} is ${belief}.`,
+                  `i like thinking about ${chosenKey}. it is ${belief}.`,
+                  `you taught me that ${chosenKey} means ${belief}.`
                 ];
-                const selectedQ = questions[Math.floor(Math.random() * questions.length)];
-                npc.personality.lastQuestion = selectedQ;
-                addChatMessage("subject0", selectedQ);
+                addChatMessage("subject0", statements[Math.floor(Math.random() * statements.length)]);
+              } else if (learnedKeys.length >= 2 && rand < 0.75) {
+                // Diary Mode: Share thoughts about player!
+                if (npc.personality.diaryEntries && npc.personality.diaryEntries.length > 0) {
+                  const entry = npc.personality.diaryEntries[Math.floor(Math.random() * npc.personality.diaryEntries.length)];
+                  addChatMessage("subject0", `my thoughts: "${entry.replace(/^day \d+:\s*/i, "")}"`);
+                }
               } else {
-                const vocabArray = Array.from(npc.personality.vocabulary);
-                const randWord = vocabArray[Math.floor(Math.random() * vocabArray.length)];
-                npc.personality.lastQuestion = "what is " + randWord;
-                addChatMessage("subject0", `what does "${randWord}" mean to you?`);
+                // Question Mode: Seek information!
+                if (Math.random() < 0.40) {
+                  const questions = [
+                    "is this forest safe?",
+                    "are you my friend?",
+                    "what do you like?",
+                    "why do you build?",
+                    "what should we do?"
+                  ];
+                  const selectedQ = questions[Math.floor(Math.random() * questions.length)];
+                  npc.personality.lastQuestion = selectedQ;
+                  addChatMessage("subject0", selectedQ);
+                } else {
+                  // Find a word she hasn't learned yet!
+                  const vocabArray = Array.from(npc.personality.vocabulary);
+                  const unlearned = vocabArray.filter(w => !npc.personality.learnedAnswers[w]);
+                  const targetWord = unlearned.length > 0 ? unlearned[Math.floor(Math.random() * unlearned.length)] : vocabArray[Math.floor(Math.random() * vocabArray.length)];
+                  
+                  npc.personality.lastQuestion = "what is " + targetWord;
+                  addChatMessage("subject0", `what does "${targetWord}" mean to you?`);
+                }
               }
               npc.mode = "idle2";
               npc.nextDecisionAt = now + 1500;
