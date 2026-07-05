@@ -1958,7 +1958,7 @@
       for (const mode of modes) {
         for (const dir of DIRECTIONS) {
           const count = counts?.[mode] ?? (base === "frog" && mode === "idle" ? 2 : 4);
-          out[`${mode}-${dir}`] = Array.from({ length: count }, (_, i) => `assets/${base}/${mode}_${dir}_frame_${i}.png`);
+          out[`${mode}-${dir}`] = Array.from({ length: count }, (_, i) => `assets/${base}/${mode}_${dir}_frame_${i}.png?v=3`);
         }
       }
       return out;
