@@ -5566,6 +5566,26 @@
           const rulesSize = sub0.personality.learnedRules.length;
           const answersSize = Object.keys(sub0.personality.learnedAnswers).length;
           reply = `i am growing aware. my brain has ${vocabSize} words, ${rulesSize} rules, and ${answersSize} learned answers.`;
+        } else if (cleanText.startsWith("where") || cleanText.includes("where should") || cleanText.includes("where am i") || cleanText.includes("where are we")) {
+          reply = `we are standing on the grass near ${nearestEntity}.`;
+        } else if (cleanText.startsWith("should i attack") || cleanText.includes("should i hit") || cleanText.includes("should i fight")) {
+          if (state.playerActionCounts["fighting monsters"] > state.playerActionCounts["watering crops"]) {
+            reply = `yes, attack the ${nearestEntity}! fight it.`;
+          } else {
+            reply = `be careful, is attacking the ${nearestEntity} right?`;
+          }
+        } else if (cleanText.startsWith("should i") || cleanText.startsWith("should we")) {
+          const act = words.slice(2).join(" ");
+          reply = `i saw you doing that before. you should ${act || "do it"}.`;
+        } else if (cleanText.includes("is") && (cleanText.includes("good") || cleanText.includes("bad"))) {
+          const target = words.find(w => w !== "is" && w !== "good" && w !== "bad" && w !== "a");
+          if (target === "slime" || target === "monster") {
+            reply = `no, ${target} is bad. you must fight it.`;
+          } else if (target === "plant" || target === "crop" || target === "water") {
+            reply = `yes, ${target} is good. it helps us grow.`;
+          } else {
+            reply = `i think ${target || "it"} is ${cleanText.includes("good") ? "good" : "bad"}.`;
+          }
         } else {
           // Attempt statistical sentence synthesis!
           // Try to seed the generation using one of the words the player typed
