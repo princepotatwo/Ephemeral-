@@ -474,6 +474,45 @@
       padding: 0;
       margin-top: 4px;
     }
+    .game-chat-wrapper {
+      position: absolute;
+      left: 16px;
+      bottom: 80px;
+      width: 280px;
+      display: flex;
+      flex-direction: column;
+      pointer-events: none;
+      z-index: 100;
+    }
+    .game-chat-log {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      max-height: 180px;
+      overflow-y: hidden;
+      margin-bottom: 8px;
+      font-family: 'Courier New', monospace;
+      font-size: 9px;
+      font-weight: bold;
+      color: #dfc8a5;
+      text-shadow: 1px 1px 1px #000;
+      transition: opacity 0.5s ease;
+      opacity: 0;
+    }
+    .game-chat-input {
+      width: 100%;
+      background: rgba(35, 25, 20, 0.85);
+      border: 1px solid #c2b399;
+      border-radius: 4px;
+      padding: 4px 6px;
+      font-family: 'Courier New', monospace;
+      font-size: 9px;
+      font-weight: bold;
+      color: #fffcf8;
+      pointer-events: auto;
+      display: none;
+      outline: none;
+    }
   </style>
 </head>
 <body>
@@ -510,6 +549,10 @@
       <div class="bar-zone bar-zone-top" id="bar-zone-top"></div>
       <div class="bar-zone bar-zone-bottom" id="bar-zone-bottom"></div>
       <div class="hud" id="hud" aria-live="polite"></div>
+      <div class="game-chat-wrapper">
+        <div class="game-chat-log" id="game-chat-log"></div>
+        <input class="game-chat-input" id="game-chat-input" type="text" placeholder="Press Enter to send, Esc to cancel..." />
+      </div>
       <div class="currency-hud" id="currency-hud">
         <div class="currency-item"><span class="currency-icon">🪵</span><span id="currency-logs">0</span></div>
         <div class="currency-item"><span class="currency-icon">💧</span><span id="currency-blood">0</span></div>
@@ -1536,6 +1579,8 @@
       },
       logs: 0,
       blood: 0,
+      chatOpen: false,
+      lastChatMessageAt: 0,
       studyCapture: {
         phase: "idle",
         nextAt: performance.now() + STUDY_CAPTURE_COOLDOWN_MS,
@@ -5047,11 +5092,17 @@
       const target = farmTargetPoint();
       let plot = farmPlotAt(target.x, target.y);
       if (tool === "hoe") {
-        if (!plot) farmPlots.push({ x: target.x, y: target.y, crop: "", plantedAt: 0, watered: false });
+        if (!plot) {
+          farmPlots.push({ x: target.x, y: target.y, crop: "", plantedAt: 0, watered: false });
+          notifySubject0OfAction("tilling soil");
+        }
         return;
       }
       if (tool === "water") {
-        if (plot) plot.watered = true;
+        if (plot) {
+          plot.watered = true;
+          notifySubject0OfAction("watering crops");
+        }
         return;
       }
       if (tool.startsWith("seed-")) {
@@ -5060,6 +5111,7 @@
           plot.crop = crop;
           plot.plantedAt = performance.now();
           plot.watered = false;
+          notifySubject0OfAction("planting seeds");
         }
       }
     }
@@ -5137,6 +5189,8 @@
       sayDialogue(pickDialogue("attack"), 5, 2300);
       const treeTarget = hitTreeInFront();
       const slimeTarget = hitSlimeInFront();
+      if (treeTarget) notifySubject0OfAction("chopping tree");
+      if (slimeTarget) notifySubject0OfAction("fighting monsters");
       const target = treeTarget || slimeTarget;
       triggerPetAttacks(target);
     }
@@ -5339,6 +5393,145 @@
       WILD_NPC_BIOMES.forEach(group => {
         for (let i = 0; i < group.count; i++) spawnWildNpcForGroup(group);
       });
+      // Spawn unique Student Girl 10 as Subject 0
+      const sub0 = createWildNpc("pipoya_su1_student_female_10", SAFE_CENTER_X + 80, SAFE_CENTER_Y + 80, "safe");
+      if (sub0) {
+        sub0.isSubject0 = true;
+        sub0.name = "subject0";
+        sub0.personality = {
+          niceness: 0.5,
+          intelligence: 0.5,
+          awareness: 0.1,
+          vocabulary: new Set(["hello", "hi", "what", "is", "that", "why", "who", "are", "you", "am", "i"]),
+          learnedRules: []
+        };
+        roamingNPCs.push(sub0);
+      }
+    }
+
+    function openGameChat() {
+      state.chatOpen = true;
+      keys.clear(); // Stop player movement immediately!
+      const input = document.getElementById("game-chat-input");
+      input.style.display = "block";
+      input.value = "";
+      input.focus();
+    }
+
+    function closeGameChat() {
+      state.chatOpen = false;
+      const input = document.getElementById("game-chat-input");
+      input.style.display = "none";
+      input.blur();
+    }
+
+    function addChatMessage(sender, text) {
+      const log = document.getElementById("game-chat-log");
+      if (!log) return;
+      const div = document.createElement("div");
+      div.textContent = `${sender}: ${text}`;
+      log.appendChild(div);
+      
+      // Auto scroll to bottom
+      log.scrollTop = log.scrollHeight;
+      
+      // Keep only last 10 messages
+      while (log.children.length > 10) {
+        log.removeChild(log.firstChild);
+      }
+      
+      // Fade in and show log
+      log.style.opacity = "1";
+      state.lastChatMessageAt = performance.now();
+    }
+
+    function sendGameChatMessage() {
+      const input = document.getElementById("game-chat-input");
+      const text = input.value.trim();
+      if (text) {
+        addChatMessage("player", text);
+        triggerSubject0Response(text);
+      }
+      closeGameChat();
+    }
+
+    function triggerSubject0Response(playerText) {
+      // Find Subject 0 in the scene
+      const sub0 = roamingNPCs.find(n => n.isSubject0);
+      if (!sub0) return;
+      
+      // Learn words from player's text
+      const words = playerText.toLowerCase().replace(/[^a-z0-9\s]/g, "").split(/\s+/).filter(w => w.length > 1);
+      let newWordsCount = 0;
+      words.forEach(w => {
+        if (!sub0.personality.vocabulary.has(w)) {
+          sub0.personality.vocabulary.add(w);
+          newWordsCount++;
+        }
+      });
+
+      // Formulate a response after a tiny delay
+      setTimeout(() => {
+        const cleanText = playerText.toLowerCase().trim().replace(/[^a-z0-9\s]/g, "");
+        let reply = "";
+        
+        if (cleanText.includes("who are you")) {
+          reply = "i am subject 0. a student girl. i am learning.";
+        } else if (cleanText.includes("what are you")) {
+          reply = "i am subject 0. a mini me.";
+        } else if (cleanText === "hello" || cleanText === "hi") {
+          reply = "hello player.";
+        } else if (cleanText.includes("what is right") || cleanText.includes("what is wrong")) {
+          if (sub0.personality.learnedRules.length > 0) {
+            const lastRule = sub0.personality.learnedRules[sub0.personality.learnedRules.length - 1];
+            reply = `i saw you ${lastRule.action}. is that ${cleanText.includes("right") ? "right" : "wrong"}?`;
+          } else {
+            reply = "i do not know right or wrong yet. show me some actions!";
+          }
+        } else if (cleanText.includes("self awareness") || cleanText.includes("self aware")) {
+          const vocabSize = sub0.personality.vocabulary.size;
+          reply = `i am growing aware. my brain contains ${vocabSize} words and ${sub0.personality.learnedRules.length} rules.`;
+        } else {
+          if (newWordsCount > 0) {
+            reply = `i learned ${newWordsCount} new words from you! my vocabulary size is now ${sub0.personality.vocabulary.size} words.`;
+          } else {
+            // Pick a random statement using learned words
+            const vocabArray = Array.from(sub0.personality.vocabulary);
+            const randomWords = [];
+            const count = Math.min(vocabArray.length, 3 + Math.floor(Math.random() * 3));
+            for (let i = 0; i < count; i++) {
+              randomWords.push(vocabArray[Math.floor(Math.random() * vocabArray.length)]);
+            }
+            reply = `... ${randomWords.join(" ")} ...`;
+          }
+        }
+        
+        addChatMessage("subject0", reply);
+        
+        // Face the player
+        const dx = state.x - sub0.x;
+        if (Math.abs(dx) > 10) {
+          sub0.dir = dx > 0 ? "right" : "left";
+        }
+        sub0.mode = "idle2";
+        sub0.nextDecisionAt = performance.now() + 1500;
+      }, 500 + Math.random() * 500);
+    }
+
+    function notifySubject0OfAction(actionName) {
+      const sub0 = roamingNPCs.find(n => n.isSubject0);
+      if (sub0 && !sub0.dead) {
+        const dist = Math.hypot(sub0.x - state.x, sub0.y - state.y);
+        if (dist <= 250) {
+          sub0.personality.learnedRules.push({
+            action: actionName,
+            time: performance.now()
+          });
+          if (sub0.personality.learnedRules.length > 5) {
+            sub0.personality.learnedRules.shift();
+          }
+        }
+      }
     }
 
     function updateRoamingNPCs(now, dt) {
@@ -6571,6 +6764,12 @@
       const dt = Math.min((now - state.last) / 1000, 0.05);
       state.last = now;
       state.t += dt;
+
+      // Auto-hide game chat log after 6 seconds of no activity
+      const chatLog = document.getElementById("game-chat-log");
+      if (chatLog && state.lastChatMessageAt && now - state.lastChatMessageAt > 6000) {
+        chatLog.style.opacity = "0";
+      }
       
       // Player burn visual tick
       if (state.burnUntil && now < state.burnUntil) {
@@ -7110,8 +7309,28 @@
       }
       syncFullscreenClass();
     });
-    addEventListener("keydown", e => setKey(e.key, true));
-    addEventListener("keyup", e => setKey(e.key, false));
+    addEventListener("keydown", e => {
+      if (e.key === "/") {
+        if (!state.chatOpen) {
+          e.preventDefault();
+          openGameChat();
+        }
+        return;
+      }
+      if (state.chatOpen) {
+        if (e.key === "Escape") {
+          closeGameChat();
+        } else if (e.key === "Enter") {
+          sendGameChatMessage();
+        }
+        return;
+      }
+      setKey(e.key, true);
+    });
+    addEventListener("keyup", e => {
+      if (state.chatOpen) return;
+      setKey(e.key, false);
+    });
     
     document.getElementById("toggle-time-btn").addEventListener("click", () => {
       playUiClickSound();
