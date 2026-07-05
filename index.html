@@ -5533,6 +5533,25 @@
           if (sub0.personality.learnedRules.length > 5) {
             sub0.personality.learnedRules.shift();
           }
+
+          // Proactive curiosity: Ask why if we do not know the motive
+          if (!sub0.personality.learnedAnswers[actionName] && !sub0.personality.lastQuestion) {
+            setTimeout(() => {
+              if (sub0.dead) return;
+              sub0.personality.lastQuestion = actionName;
+              addChatMessage("subject0", `i saw you ${actionName}. why did you do that?`);
+              const dx = state.x - sub0.x;
+              if (Math.abs(dx) > 10) {
+                sub0.dir = dx > 0 ? "right" : "left";
+              }
+              sub0.mode = "idle2";
+            }, 1000);
+          } else if (sub0.personality.learnedAnswers[actionName]) {
+            setTimeout(() => {
+              if (sub0.dead) return;
+              addChatMessage("subject0", `i know you did ${actionName} ${sub0.personality.learnedAnswers[actionName]}!`);
+            }, 1200);
+          }
         }
       }
     }
@@ -5555,6 +5574,22 @@
         const speedMult = npcInWater ? 0.5 : 1.0;
         const npcSpeed = npc.speed * speedMult;
         npc.t += dt;
+        
+        if (npc.isSubject0 && !npc.dead) {
+          if (!npc.lastCuriosityCheck) npc.lastCuriosityCheck = now;
+          if (now - npc.lastCuriosityCheck > 45000) {
+            npc.lastCuriosityCheck = now;
+            const dist = Math.hypot(npc.x - state.x, npc.y - state.y);
+            if (dist <= 180 && !state.chatOpen && !npc.personality.lastQuestion) {
+              const vocabArray = Array.from(npc.personality.vocabulary);
+              const randWord = vocabArray[Math.floor(Math.random() * vocabArray.length)];
+              npc.personality.lastQuestion = "what is " + randWord;
+              addChatMessage("subject0", `what is ${randWord}?`);
+              npc.mode = "idle2";
+              npc.nextDecisionAt = now + 1500;
+            }
+          }
+        }
         
         // Creepy background sounds for Slasher charge/run and Spider skitter
         if (!npc.dead) {
