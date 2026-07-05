@@ -734,8 +734,8 @@
       sheep: { label: "Sheep", kind: "forest", base: "sheep", scale: 1.08 },
       pig: { label: "Pig", kind: "forest", base: "pig", scale: 1.22 },
       sprout_cat: { label: "Sprout Cat", kind: "forest", base: "sprout_cat", scale: 1.28, attackMs: 420 },
-      sprout_chicken: { label: "Sprout Chicken", kind: "forest", base: "sprout_chicken", scale: 1.14, attackMs: 360 },
-      sprout_cow: { label: "Sprout Cow", kind: "forest", base: "sprout_cow", scale: 1.12, attackMs: 380 },
+      sprout_chicken: { label: "Sprout Chicken", kind: "forest", base: "sprout_chicken", scale: 1.14, attackMs: 360, sideView: true },
+      sprout_cow: { label: "Sprout Cow", kind: "forest", base: "sprout_cow", scale: 1.12, attackMs: 380, sideView: true },
       green_slime: { label: "Green Slime", rarity: "Common", kind: "forest", base: "green_slime", scale: 1.18, attackMs: 480 },
       blue_slime: { label: "Blue Slime", rarity: "Uncommon", kind: "forest", base: "blue_slime", scale: 1.18, attackMs: 480 },
       pink_slime: { label: "Ribbon Slime", rarity: "Rare", kind: "forest", base: "pink_slime", scale: 1.18, attackMs: 480 },
@@ -2143,7 +2143,11 @@
       const mode = npc.mode;
       const frames = forestFrames[npc.base][`${mode}-${dir}`] || forestFrames[npc.base][`idle-${dir}`];
       if (!frames) return null;
-      const multiplier = (mode === "run" ? (npc.animSpeedOverride || 1.0) : 1.0);
+      const npcInWater = state.scene === "outside" && waterTileAt(npc.x, npc.y);
+      const speedMult = npcInWater ? 0.5 : 1.0;
+      const currentSpeed = npc.speed * speedMult;
+      const animSpeed = npc.mode === "run" ? (currentSpeed / 55) : 1.0;
+      const multiplier = (mode === "run" ? (npc.animSpeedOverride || animSpeed) : 1.0);
       const fps = (mode === "attack" ? (cfg.attackFps || 9) : mode === "run" ? (cfg.runFps || 9) : (cfg.idleFps || 5)) * multiplier;
       const started = mode === "attack" ? (npc.attackStarted || npc.t) : 0;
       const playOnce = mode === "attack";
@@ -5736,10 +5740,15 @@
           }
           npc.x = Math.max(60, Math.min(WORLD_W - 60, npc.x + npc.moveDir.x * npcSpeed * dt));
           npc.y = Math.max(60, Math.min(WORLD_H - 60, npc.y + npc.moveDir.y * npcSpeed * dt));
-          if (Math.abs(npc.moveDir.x) > Math.abs(npc.moveDir.y)) {
-            npc.dir = npc.moveDir.x > 0 ? "right" : "left";
+          if (cfg.sideView) {
+            if (npc.moveDir.x < 0) npc.dir = "left";
+            else if (npc.moveDir.x > 0) npc.dir = "right";
           } else {
-            npc.dir = npc.moveDir.y > 0 ? "front" : "back";
+            if (Math.abs(npc.moveDir.x) > Math.abs(npc.moveDir.y)) {
+              npc.dir = npc.moveDir.x > 0 ? "right" : "left";
+            } else {
+              npc.dir = npc.moveDir.y > 0 ? "front" : "back";
+            }
           }
         }
       }
