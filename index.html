@@ -715,6 +715,7 @@
       "fox", "frog", "owl", "doe", "squirle", "bunny", "chicken", "turtle", "cow", "sheep", "pig",
       "sprout_cat", "sprout_chicken", "sprout_cow",
       "green_slime", "blue_slime", "pink_slime", "split_slime", "gold_slime", "shadow_slime", "galaxy_slime", "huge_split_slime",
+      "cutie_sheep",
       ...pipoyaCharacters.map(([name]) => name),
       ...extraItchCharacters.map(([name]) => name),
       ...kenneyCharacters.map(([name]) => name)
@@ -738,6 +739,7 @@
       green_slime: { label: "Green Slime", rarity: "Common", kind: "forest", base: "green_slime", scale: 1.18, attackMs: 480 },
       blue_slime: { label: "Blue Slime", rarity: "Uncommon", kind: "forest", base: "blue_slime", scale: 1.18, attackMs: 480 },
       pink_slime: { label: "Ribbon Slime", rarity: "Rare", kind: "forest", base: "pink_slime", scale: 1.18, attackMs: 480 },
+      cutie_sheep: { label: "Cloud Sheep", rarity: "Legendary", kind: "forest", base: "cutie_sheep", scale: 1.35, attackMs: 480, sideView: true },
       split_slime: { label: "Split Slime", rarity: "Epic", kind: "forest", base: "split_slime", scale: 1.18, attackMs: 480 },
       gold_slime: { label: "Crown Slime", rarity: "Legendary", kind: "forest", base: "gold_slime", scale: 1.18, attackMs: 480 },
       shadow_slime: { label: "Invert Slime", rarity: "Mythic", kind: "forest", base: "shadow_slime", scale: 1.18, attackMs: 480 },
@@ -780,7 +782,8 @@
       silksong_pilgrim_hiker: { idle: 5, run: 10, stop: 5, attack: 8 },
       silksong_ladybug: { idle: 7, run: 22, stop: 7, attack: 2 },
       silksong_lifeblood_worm: { idle: 4, run: 14, stop: 4, attack: 8 },
-      silksong_shakra_rest: { idle: 25, run: 25, stop: 25, attack: 10 }
+      silksong_shakra_rest: { idle: 25, run: 25, stop: 25, attack: 10 },
+      cutie_sheep: { idle: 3, run: 8, attack: 8 }
     };
     const farmCrops = {
       wheat: { label: "Wheat", name: "farm_crop_wheat", stages: 4 },
@@ -5233,7 +5236,7 @@
     const PET_TAME_HEART_COUNT = 6;
 
     const WILD_NPC_BIOMES = [
-      { biomeId: "safe", center: { x: SAFE_CENTER_X, y: SAFE_CENTER_Y }, bases: ["green_slime", "blue_slime", "pink_slime"], count: 6, spread: 600 },
+      { biomeId: "safe", center: { x: SAFE_CENTER_X, y: SAFE_CENTER_Y }, bases: ["green_slime", "blue_slime", "pink_slime", "cutie_sheep"], count: 6, spread: 600 },
       { biomeId: "darkwood", center: startPositions.dark, bases: ["doe"], count: 4, spread: 760 },
       { biomeId: "goldwood", center: startPositions.gold, bases: ["squirle"], count: 4, spread: 760 },
       { biomeId: "bluewater", center: startPositions.blue, bases: ["frog"], count: 4, spread: 760 },
@@ -5243,6 +5246,7 @@
       green_slime: { npcHp: 50, npcDamage: 2, speed: 56 },
       blue_slime: { npcHp: 50, npcDamage: 2, speed: 56 },
       pink_slime: { npcHp: 50, npcDamage: 2, speed: 56 },
+      cutie_sheep: { npcHp: 65, npcDamage: 2, speed: 52 },
       doe: { npcHp: 100, npcDamage: 4, speed: 58 },
       squirle: { npcHp: 70, npcDamage: 3, speed: 70 },
       frog: { npcHp: 80, npcDamage: 3, speed: 62 },
