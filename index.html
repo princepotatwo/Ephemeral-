@@ -902,6 +902,17 @@
       return biomeLayers.find(layer => distance < layer.radius) || biomeLayers[biomeLayers.length - 1];
     }
 
+    function approxBiomeIdAt(x, y) {
+      const dx = x - SAFE_CENTER_X;
+      const dy = (y - SAFE_CENTER_Y) * 1.12;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < 900) return "safe";
+      if (dist < 2300) return "shadow";
+      if (dist < 3650) return "goldwood";
+      if (dist < 5050) return "bluewater";
+      return "deepteal";
+    }
+
     function biomeDisplayName(id) {
       return biomeLayers.find(l => l.id === id)?.displayName || id;
     }
@@ -5272,7 +5283,7 @@
         const x = Math.max(80, Math.min(WORLD_W - 80, group.center.x + Math.cos(angle) * dist));
         const y = Math.max(80, Math.min(WORLD_H - 80, group.center.y + Math.sin(angle) * dist));
         if (isWaterAtWorldPoint(x, y)) continue;
-        if (biomeAt(x, y).id !== group.biomeId) continue;
+        if (approxBiomeIdAt(x, y) !== group.biomeId) continue;
         return { x, y };
       }
       return { x: group.center.x, y: group.center.y };
@@ -5713,7 +5724,7 @@
           }
           // Biome containment check to keep NPCs inside their spawning biomes
           if (!bounced && npc.biomeId) {
-            const nextBiome = biomeAt(nextX, nextY).id;
+            const nextBiome = approxBiomeIdAt(nextX, nextY);
             if (nextBiome !== npc.biomeId) {
               npc.moveDir.x *= -1;
               npc.moveDir.y *= -1;
