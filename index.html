@@ -3139,15 +3139,47 @@
       ctx.save();
       ctx.globalAlpha = 0.62;
       if (item.erase) {
-        ctx.strokeStyle = "#b65b5b";
-        ctx.lineWidth = 2;
-        ctx.strokeRect(Math.round(x - 12), Math.round(y - 12), 24, 24);
-        ctx.beginPath();
-        ctx.moveTo(x - 8, y - 8);
-        ctx.lineTo(x + 8, y + 8);
-        ctx.moveTo(x + 8, y - 8);
-        ctx.lineTo(x - 8, y + 8);
-        ctx.stroke();
+        let targeted = null;
+        for (let i = placedSprites.length - 1; i >= 0; i--) {
+          const sprite = placedSprites[i];
+          if (sprite.scene !== state.scene) continue;
+          const w = sprite.w || 16;
+          const h = sprite.h || 16;
+          const left = sprite.x - w / 2;
+          const right = sprite.x + w / 2;
+          let top, bottom;
+          if (sprite.flatBuild || sprite.rotateSteps) {
+            top = sprite.y - h / 2;
+            bottom = sprite.y + h / 2;
+          } else {
+            top = sprite.y - h;
+            bottom = sprite.y;
+          }
+          const pad = 4;
+          if (x >= left - pad && x <= right + pad && y >= top - pad && y <= bottom + pad) {
+            targeted = sprite;
+            break;
+          }
+        }
+        if (targeted) {
+          const w = targeted.w || 16;
+          const h = targeted.h || 16;
+          let top;
+          if (targeted.flatBuild || targeted.rotateSteps) {
+            top = targeted.y - h / 2;
+          } else {
+            top = targeted.y - h;
+          }
+          ctx.fillStyle = "rgba(255, 68, 68, 0.4)";
+          ctx.fillRect(Math.round(targeted.x - w / 2), Math.round(top), w, h);
+          ctx.strokeStyle = "#ff4444";
+          ctx.lineWidth = 1.5;
+          ctx.strokeRect(Math.round(targeted.x - w / 2) - 0.5, Math.round(top) - 0.5, w + 1, h + 1);
+        } else {
+          ctx.strokeStyle = "rgba(255, 68, 68, 0.6)";
+          ctx.lineWidth = 1.5;
+          ctx.strokeRect(Math.round(x - 8), Math.round(y - 8), 16, 16);
+        }
       } else if (item.equipTool) {
         ctx.restore();
         return;
