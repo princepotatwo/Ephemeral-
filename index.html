@@ -5641,69 +5641,31 @@
             reply = `i think ${target || "it"} is ${cleanText.includes("good") ? "good" : "bad"}.`;
           }
         } else {
-          // Attempt statistical sentence synthesis!
-          // Try to seed the generation using one of the words the player typed
-          let seedWord = null;
-          if (words.length > 0) {
-            const candidates = words.filter(w => sub0.personality.transitions[w]);
-            if (candidates.length > 0) {
-              seedWord = candidates[Math.floor(Math.random() * candidates.length)];
-            }
-          }
-          if (!seedWord) {
-            const keysWithTransitions = Object.keys(sub0.personality.transitions);
-            seedWord = keysWithTransitions[Math.floor(Math.random() * keysWithTransitions.length)];
-          }
-          
-          // Generate a sentence of up to 6 words
-          const generatedWords = [seedWord];
-          for (let len = 0; len < 5; len++) {
-            const last = generatedWords[generatedWords.length - 1];
-            const nextMap = sub0.personality.transitions[last];
-            if (!nextMap) break;
-            
-            const nextWords = Object.keys(nextMap);
-            const weights = Object.values(nextMap);
-            const totalWeight = weights.reduce((a, b) => a + b, 0);
-            let rnd = Math.random() * totalWeight;
-            let chosen = nextWords[0];
-            for (let j = 0; j < nextWords.length; j++) {
-              rnd -= weights[j];
-              if (rnd <= 0) {
-                chosen = nextWords[j];
-                break;
-              }
-            }
-            generatedWords.push(chosen);
-          }
-          
-          let rawReply = generatedWords.join(" ");
-          
-          let nearestEntity = "the grass";
-          let minDist = 300;
-          roamingNPCs.forEach(n => {
-            if (n.isSubject0 || n.dead) return;
-            const dist = Math.hypot(n.x - sub0.x, n.y - sub0.y);
-            if (dist < minDist) {
-              minDist = dist;
-              nearestEntity = roster[n.base].label.toLowerCase();
-            }
-          });
-          const playerDist = Math.hypot(state.x - sub0.x, state.y - sub0.y);
-          if (playerDist < minDist) {
-            minDist = playerDist;
-            nearestEntity = "you";
-          }
-          
-          reply = rawReply.replace(/\b(tree|slime|crop|grass|player)\b/gi, (match) => {
-            if (match.toLowerCase() === "player") return "you";
-            return nearestEntity;
-          });
-          
-          if (reply.split(/\s+/).length < 2) {
-            sub0.personality.lastQuestion = cleanText;
-            reply = `i do not know how to respond to "${playerText}". teach me: what does it mean?`;
-          }
+          // ELIZA-style Reflection fallback!
+          const pronounMap = {
+            "i": "you",
+            "me": "you",
+            "my": "your",
+            "myself": "yourself",
+            "am": "are",
+            "was": "were",
+            "you": "i",
+            "your": "my",
+            "yours": "mine",
+            "are": "am"
+          };
+          const wordsToSwap = playerText.toLowerCase().replace(/[^a-z0-9\s]/g, "").split(/\s+/).filter(Boolean);
+          const swappedWords = wordsToSwap.map(w => pronounMap[w] || w);
+          const reflectedText = swappedWords.join(" ");
+          const reflectionTemplates = [
+            `why do you say "${reflectedText}"?`,
+            `what makes you think "${reflectedText}"?`,
+            `is it important to you that "${reflectedText}"?`,
+            `does it please you that "${reflectedText}"?`,
+            `what does "${reflectedText}" suggest to you?`,
+            `tell me more about "${reflectedText}".`
+          ];
+          reply = reflectionTemplates[Math.floor(Math.random() * reflectionTemplates.length)];
         }
         
         addChatMessage("subject0", reply);
