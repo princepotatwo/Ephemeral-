@@ -3147,14 +3147,8 @@
           const h = sprite.h || 16;
           const left = sprite.x - w / 2;
           const right = sprite.x + w / 2;
-          let top, bottom;
-          if (sprite.flatBuild || sprite.rotateSteps) {
-            top = sprite.y - h / 2;
-            bottom = sprite.y + h / 2;
-          } else {
-            top = sprite.y - h;
-            bottom = sprite.y;
-          }
+          const top = sprite.y - h;
+          const bottom = sprite.y;
           const pad = 4;
           if (x >= left - pad && x <= right + pad && y >= top - pad && y <= bottom + pad) {
             targeted = sprite;
@@ -3164,15 +3158,16 @@
         if (targeted) {
           const w = targeted.w || 16;
           const h = targeted.h || 16;
-          let top;
-          if (targeted.flatBuild || targeted.rotateSteps) {
-            top = targeted.y - h / 2;
-          } else {
-            top = targeted.y - h;
-          }
-          ctx.fillStyle = "rgba(255, 68, 68, 0.4)";
-          ctx.fillRect(Math.round(targeted.x - w / 2), Math.round(top), w, h);
-          ctx.strokeStyle = "#ff4444";
+          const top = targeted.y - h;
+          
+          ctx.save();
+          ctx.shadowColor = "#ff2222";
+          ctx.shadowBlur = 8;
+          ctx.globalAlpha = 0.95;
+          drawPlant(targeted);
+          ctx.restore();
+          
+          ctx.strokeStyle = "#ff2222";
           ctx.lineWidth = 1.5;
           ctx.strokeRect(Math.round(targeted.x - w / 2) - 0.5, Math.round(top) - 0.5, w + 1, h + 1);
         } else {
@@ -3353,18 +3348,10 @@
         const h = item.h || 16;
         const left = item.x - w / 2;
         const right = item.x + w / 2;
-        let top, bottom;
-        if (item.flatBuild || item.rotateSteps) {
-          top = item.y - h / 2;
-          bottom = item.y + h / 2;
-        } else {
-          top = item.y - h;
-          bottom = item.y;
-        }
+        const top = item.y - h;
+        const bottom = item.y;
         const pad = 4;
-        const insideBox = (x >= left - pad && x <= right + pad && y >= top - pad && y <= bottom + pad);
-        const nearCenter = (Math.abs(item.x - x) <= Math.max(20, w / 2) && Math.abs(item.y - y) <= Math.max(18, h / 2));
-        if (insideBox || nearCenter) {
+        if (x >= left - pad && x <= right + pad && y >= top - pad && y <= bottom + pad) {
           placedSprites.splice(i, 1);
           refreshWallConnections();
           return;
