@@ -5708,19 +5708,23 @@
         
         addChatMessage("subject0", reply);
         
-        // 50% chance to follow up with a question or statement to keep conversation going
-        if (Math.random() < 0.50 && !state.chatOpen && !sub0.personality.lastQuestion) {
+        // 90% chance to follow up with a question or statement to keep conversation going
+        if (Math.random() < 0.90 && !state.chatOpen && !sub0.personality.lastQuestion) {
           setTimeout(() => {
             if (sub0.dead || state.chatOpen || sub0.personality.lastQuestion) return;
             const rand = Math.random();
-            if (rand < 0.50 && sub0.personality.learnedRules.length > 0) {
+            if (words.length > 0 && Math.random() < 0.60) {
+              const targetWord = words[Math.floor(Math.random() * words.length)];
+              sub0.personality.lastQuestion = "what is " + targetWord;
+              addChatMessage("subject0", `you said "${targetWord}". what does "${targetWord}" mean?`);
+            } else if (rand < 0.40 && sub0.personality.learnedRules.length > 0) {
               const rule = sub0.personality.learnedRules[Math.floor(Math.random() * sub0.personality.learnedRules.length)];
               addChatMessage("subject0", `are you still ${rule.action}?`);
             } else {
               const vocabArray = Array.from(sub0.personality.vocabulary);
               const word = vocabArray[Math.floor(Math.random() * vocabArray.length)];
               sub0.personality.lastQuestion = "what is " + word;
-              addChatMessage("subject0", `what does ${word} mean to you?`);
+              addChatMessage("subject0", `what does "${word}" mean to you?`);
             }
             sub0.mode = "idle2";
           }, 3500);
@@ -5840,14 +5844,30 @@
         
         if (npc.isSubject0 && !npc.dead) {
           if (!npc.lastCuriosityCheck) npc.lastCuriosityCheck = now;
-          if (now - npc.lastCuriosityCheck > 45000) {
+          if (now - npc.lastCuriosityCheck > 10000) {
             npc.lastCuriosityCheck = now;
             const dist = Math.hypot(npc.x - state.x, npc.y - state.y);
             if (dist <= 180 && !state.chatOpen && !npc.personality.lastQuestion) {
-              const vocabArray = Array.from(npc.personality.vocabulary);
-              const randWord = vocabArray[Math.floor(Math.random() * vocabArray.length)];
-              npc.personality.lastQuestion = "what is " + randWord;
-              addChatMessage("subject0", `what is ${randWord}?`);
+              const rand = Math.random();
+              if (rand < 0.40) {
+                const questions = [
+                  "is this forest safe?",
+                  "are you my friend?",
+                  "what do you like?",
+                  "why do you build?",
+                  "what should we do?",
+                  "who created me?",
+                  "what is beyond this map?"
+                ];
+                const selectedQ = questions[Math.floor(Math.random() * questions.length)];
+                npc.personality.lastQuestion = selectedQ;
+                addChatMessage("subject0", selectedQ);
+              } else {
+                const vocabArray = Array.from(npc.personality.vocabulary);
+                const randWord = vocabArray[Math.floor(Math.random() * vocabArray.length)];
+                npc.personality.lastQuestion = "what is " + randWord;
+                addChatMessage("subject0", `what does "${randWord}" mean to you?`);
+              }
               npc.mode = "idle2";
               npc.nextDecisionAt = now + 1500;
             }
