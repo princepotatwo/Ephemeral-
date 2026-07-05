@@ -5484,7 +5484,30 @@
           sub0.personality.lastQuestion = null;
           reply = `i understand now. "${q}" means "${playerText}". thank you!`;
         } else if (sub0.personality.learnedAnswers[cleanText]) {
-          reply = sub0.personality.learnedAnswers[cleanText];
+          // Dynamic Context Grafting: Swap nouns based on nearest actual entity
+          let rawReply = sub0.personality.learnedAnswers[cleanText];
+          let nearestEntity = "the grass";
+          let minDist = 300;
+          
+          roamingNPCs.forEach(n => {
+            if (n.isSubject0 || n.dead) return;
+            const dist = Math.hypot(n.x - sub0.x, n.y - sub0.y);
+            if (dist < minDist) {
+              minDist = dist;
+              nearestEntity = roster[n.base].label.toLowerCase();
+            }
+          });
+          
+          const playerDist = Math.hypot(state.x - sub0.x, state.y - sub0.y);
+          if (playerDist < minDist) {
+            minDist = playerDist;
+            nearestEntity = "you";
+          }
+          
+          reply = rawReply.replace(/\b(tree|slime|crop|grass|player)\b/gi, (match) => {
+            if (match.toLowerCase() === "player") return "you";
+            return nearestEntity;
+          });
         } else if (cleanText.includes("who are you")) {
           reply = "i am subject 0. a student girl. i am learning.";
         } else if (cleanText.includes("what are you")) {
