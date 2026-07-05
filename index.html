@@ -5403,7 +5403,9 @@
           intelligence: 0.5,
           awareness: 0.1,
           vocabulary: new Set(["hello", "hi", "what", "is", "that", "why", "who", "are", "you", "am", "i"]),
-          learnedRules: []
+          learnedRules: [],
+          learnedAnswers: {},
+          lastQuestion: null
         };
         roamingNPCs.push(sub0);
       }
@@ -5475,7 +5477,15 @@
         const cleanText = playerText.toLowerCase().trim().replace(/[^a-z0-9\s]/g, "");
         let reply = "";
         
-        if (cleanText.includes("who are you")) {
+        // SimiSimi learning loop
+        if (sub0.personality.lastQuestion) {
+          const q = sub0.personality.lastQuestion;
+          sub0.personality.learnedAnswers[q] = playerText;
+          sub0.personality.lastQuestion = null;
+          reply = `i understand now. "${q}" means "${playerText}". thank you!`;
+        } else if (sub0.personality.learnedAnswers[cleanText]) {
+          reply = sub0.personality.learnedAnswers[cleanText];
+        } else if (cleanText.includes("who are you")) {
           reply = "i am subject 0. a student girl. i am learning.";
         } else if (cleanText.includes("what are you")) {
           reply = "i am subject 0. a mini me.";
@@ -5490,20 +5500,13 @@
           }
         } else if (cleanText.includes("self awareness") || cleanText.includes("self aware")) {
           const vocabSize = sub0.personality.vocabulary.size;
-          reply = `i am growing aware. my brain contains ${vocabSize} words and ${sub0.personality.learnedRules.length} rules.`;
+          const rulesSize = sub0.personality.learnedRules.length;
+          const answersSize = Object.keys(sub0.personality.learnedAnswers).length;
+          reply = `i am growing aware. my brain has ${vocabSize} words, ${rulesSize} rules, and ${answersSize} learned answers.`;
         } else {
-          if (newWordsCount > 0) {
-            reply = `i learned ${newWordsCount} new words from you! my vocabulary size is now ${sub0.personality.vocabulary.size} words.`;
-          } else {
-            // Pick a random statement using learned words
-            const vocabArray = Array.from(sub0.personality.vocabulary);
-            const randomWords = [];
-            const count = Math.min(vocabArray.length, 3 + Math.floor(Math.random() * 3));
-            for (let i = 0; i < count; i++) {
-              randomWords.push(vocabArray[Math.floor(Math.random() * vocabArray.length)]);
-            }
-            reply = `... ${randomWords.join(" ")} ...`;
-          }
+          // If we don't know the answer, trigger learning state
+          sub0.personality.lastQuestion = cleanText;
+          reply = `i do not know how to respond to "${playerText}". teach me: what does it mean?`;
         }
         
         addChatMessage("subject0", reply);
