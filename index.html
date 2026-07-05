@@ -1340,6 +1340,8 @@
       }
     }
     const keys = new Set();
+    const ASSET_REV = "one-tree-biomes-water-v61";
+    const APP_VERSION = "1.1.32";
     const images = {};
     const imagePromises = {};
     const forestFrames = {};
@@ -1348,8 +1350,7 @@
     const farmPlots = [];
     const roamingNPCs = [];
     const petSlimes = [];
-    const ASSET_REV = "one-tree-biomes-water-v60";
-    const APP_VERSION = "1.1.31";
+
 
     // ── Auto-refresh on new version ───────────────────────
     // Stores the version in localStorage. If it changed, clears caches and reloads.
@@ -1978,8 +1979,7 @@
       const doorFrames = [
         "assets/plants/build_house_door_0_0/frame_0.png",
         "assets/plants/build_house_door_0_1/frame_0.png",
-        "assets/plants/build_house_door_0_2/frame_0.png",
-        "assets/plants/build_house_door_0_3/frame_0.png"
+        "assets/plants/build_house_door_0_2/frame_0.png"
       ];
       await Promise.all([...allPlants.flatMap(plant => plantFramePaths(plant)), ...cropFrames, ...doorFrames].map(loadImageCached));
     }
@@ -2415,11 +2415,11 @@
     }
 
     function doorFrameIndex(door) {
-      const frames = [1, 3, 2, 0];
+      const frames = [1, 2, 0];
       if (!door.doorAnimStarted) return door.open ? 0 : 1;
       const elapsed = Math.max(0, performance.now() - door.doorAnimStarted);
-      const step = Math.min(3, Math.floor(elapsed / 80)); // 4 frames: 0, 1, 2, 3
-      return door.open ? frames[step] : frames[3 - step];
+      const step = Math.min(2, Math.floor(elapsed / 100)); // 3 frames: 0, 1, 2
+      return door.open ? frames[step] : frames[2 - step];
     }
 
     function activeSprites() {
@@ -6926,6 +6926,12 @@
             out.add(`assets/plants/${crop.name}/frame_${i}.png`)
           )
         );
+        const doorFrames = [
+          "assets/plants/build_house_door_0_0/frame_0.png",
+          "assets/plants/build_house_door_0_1/frame_0.png",
+          "assets/plants/build_house_door_0_2/frame_0.png"
+        ];
+        doorFrames.forEach(f => out.add(f));
         return [...out];
       })();
 
