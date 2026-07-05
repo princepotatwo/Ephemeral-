@@ -5238,8 +5238,8 @@
 
     const WILD_NPC_BIOMES = [
       { biomeId: "safe", center: { x: SAFE_CENTER_X, y: SAFE_CENTER_Y }, bases: ["green_slime", "blue_slime", "pink_slime", "cutie_sheep"], count: 6, spread: 600 },
-      { biomeId: "darkwood", center: startPositions.dark, bases: ["doe"], count: 4, spread: 760 },
-      { biomeId: "goldwood", center: startPositions.gold, bases: ["squirle"], count: 4, spread: 760 },
+      { biomeId: "shadow", center: startPositions.dark, bases: ["doe", "sprout_chicken"], count: 4, spread: 760 },
+      { biomeId: "goldwood", center: startPositions.gold, bases: ["squirle", "sprout_cow"], count: 4, spread: 760 },
       { biomeId: "bluewater", center: startPositions.blue, bases: ["frog"], count: 4, spread: 760 },
       { biomeId: "deepteal", center: startPositions.deep, bases: ["fox"], count: 4, spread: 760 }
     ];
@@ -5251,7 +5251,9 @@
       doe: { npcHp: 100, npcDamage: 4, speed: 58 },
       squirle: { npcHp: 70, npcDamage: 3, speed: 70 },
       frog: { npcHp: 80, npcDamage: 3, speed: 62 },
-      fox: { npcHp: 90, npcDamage: 4, speed: 76 }
+      fox: { npcHp: 90, npcDamage: 4, speed: 76 },
+      sprout_chicken: { npcHp: 40, npcDamage: 2, speed: 60 },
+      sprout_cow: { npcHp: 80, npcDamage: 3, speed: 50 }
     };
 
     function wildNpcStats(base) {
@@ -5708,6 +5710,15 @@
           if (nextY < 60 || nextY > WORLD_H - 60) {
             npc.moveDir.y *= -1;
             bounced = true;
+          }
+          // Biome containment check to keep NPCs inside their spawning biomes
+          if (!bounced && npc.biomeId) {
+            const nextBiome = biomeAt(nextX, nextY).id;
+            if (nextBiome !== npc.biomeId) {
+              npc.moveDir.x *= -1;
+              npc.moveDir.y *= -1;
+              bounced = true;
+            }
           }
           if (bounced) {
             npc.nextDecisionAt = now + 200 + Math.random() * 600;
