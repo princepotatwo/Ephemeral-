@@ -5411,6 +5411,12 @@
           niceness: 0.5,
           intelligence: 0.5,
           awareness: 0.1,
+          joy: 0,
+          diaryEntries: [
+            "day 1: i arrived in this safe meadow. it is beautiful.",
+            "day 1: met the player. they look like me.",
+            "day 1: i want to learn how to live in this world."
+          ],
           vocabulary: new Set(["hello", "hi", "what", "is", "that", "why", "who", "are", "you", "am", "i", "the", "near", "tree", "slime", "plant", "water", "farm", "crop", "wood", "stone", "night", "day"]),
           learnedRules: [],
           learnedAnswers: {},
@@ -5523,6 +5529,17 @@
           sub0.personality.learnedAnswers[q] = playerText;
           sub0.personality.lastQuestion = null;
           reply = `i understand now. "${q}" means "${playerText}". thank you!`;
+          
+          // Joy Reward Engine
+          sub0.personality.joy = (sub0.personality.joy || 0) + 1;
+          if (sub0.personality.joy >= 2) {
+            sub0.personality.joy = 0;
+            state.logs += 15;
+            state.blood += 5;
+            updateCurrencyHud();
+            playUiClickSound();
+            reply += ` also, learning makes me happy! i gathered 15 logs and 5 blood droplets for you!`;
+          }
         } else if (sub0.personality.learnedAnswers[cleanText]) {
           // Dynamic Context Grafting: Swap nouns based on nearest actual entity
           let rawReply = sub0.personality.learnedAnswers[cleanText];
@@ -5566,6 +5583,43 @@
           const rulesSize = sub0.personality.learnedRules.length;
           const answersSize = Object.keys(sub0.personality.learnedAnswers).length;
           reply = `i am growing aware. my brain has ${vocabSize} words, ${rulesSize} rules, and ${answersSize} learned answers.`;
+        } else if (cleanText.includes("study") || cleanText.includes("radar") || cleanText.includes("target") || cleanText.includes("find")) {
+          // Study Candidate Radar Hint
+          const candidates = studyCaptureCandidates();
+          if (candidates.length > 0) {
+            let closest = candidates[0];
+            let closestDist = 999999;
+            candidates.forEach(c => {
+              const cX = c.rect.x + c.rect.w / 2;
+              const cY = c.rect.y + c.rect.h / 2;
+              const dist = Math.hypot(cX - sub0.x, cY - sub0.y);
+              if (dist < closestDist) {
+                closestDist = dist;
+                closest = c;
+              }
+            });
+            const cX = closest.rect.x + closest.rect.w / 2;
+            const cY = closest.rect.y + closest.rect.h / 2;
+            const dx = cX - sub0.x;
+            const dy = cY - sub0.y;
+            let compass = "";
+            if (Math.abs(dx) > Math.abs(dy)) {
+              compass = dx > 0 ? "East" : "West";
+            } else {
+              compass = dy > 0 ? "South" : "North";
+            }
+            reply = `i detect a "${closest.kind}" study target to the ${compass}! let's go snapshot it!`;
+          } else {
+            reply = "i do not detect any study targets near us. let's till soil, plant crops, or search other biomes!";
+          }
+        } else if (cleanText.includes("diary") || cleanText.includes("thoughts") || cleanText.includes("read")) {
+          // Diary Reader
+          if (sub0.personality.diaryEntries && sub0.personality.diaryEntries.length > 0) {
+            const entry = sub0.personality.diaryEntries[Math.floor(Math.random() * sub0.personality.diaryEntries.length)];
+            reply = `my diary entry: "${entry}"`;
+          } else {
+            reply = "i haven't written anything in my diary yet. show me some actions!";
+          }
         } else if (cleanText.startsWith("where") || cleanText.includes("where should") || cleanText.includes("where am i") || cleanText.includes("where are we")) {
           reply = `we are standing on the grass near ${nearestEntity}.`;
         } else if (cleanText.startsWith("should i attack") || cleanText.includes("should i hit") || cleanText.includes("should i fight")) {
@@ -5696,6 +5750,28 @@
           });
           if (sub0.personality.learnedRules.length > 5) {
             sub0.personality.learnedRules.shift();
+          }
+          // Write action to diary
+          let diaryMsg = "";
+          const dayNum = state.nightCount ? (state.nightCount + 1) : 1;
+          if (actionName === "tilling soil") {
+            diaryMsg = `day ${dayNum}: player worked hard tilling soil today. they love farming.`;
+          } else if (actionName === "watering crops") {
+            diaryMsg = `day ${dayNum}: player watered crops. they are gentle and care for life.`;
+          } else if (actionName === "planting seeds") {
+            diaryMsg = `day ${dayNum}: player planted seeds. they are building a beautiful home.`;
+          } else if (actionName === "chopping tree") {
+            diaryMsg = `day ${dayNum}: player chopped trees. they need wood to build things.`;
+          } else if (actionName === "fighting monsters") {
+            diaryMsg = `day ${dayNum}: player fought monsters. they are brave and protect me.`;
+          }
+          if (diaryMsg && sub0.personality.diaryEntries) {
+            if (!sub0.personality.diaryEntries.includes(diaryMsg)) {
+              sub0.personality.diaryEntries.push(diaryMsg);
+              if (sub0.personality.diaryEntries.length > 8) {
+                sub0.personality.diaryEntries.shift();
+              }
+            }
           }
 
           // Proactive curiosity: Ask why if we do not know the motive
