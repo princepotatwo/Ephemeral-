@@ -1581,6 +1581,13 @@
       blood: 0,
       chatOpen: false,
       lastChatMessageAt: 0,
+      playerActionCounts: {
+        "chopping tree": 0,
+        "fighting monsters": 0,
+        "tilling soil": 0,
+        "watering crops": 0,
+        "planting seeds": 0
+      },
       studyCapture: {
         phase: "idle",
         nextAt: performance.now() + STUDY_CAPTURE_COOLDOWN_MS,
@@ -5638,6 +5645,9 @@
     }
 
     function notifySubject0OfAction(actionName) {
+      if (state.playerActionCounts[actionName] !== undefined) {
+        state.playerActionCounts[actionName]++;
+      }
       const sub0 = roamingNPCs.find(n => n.isSubject0);
       if (sub0 && !sub0.dead) {
         const dist = Math.hypot(sub0.x - state.x, sub0.y - state.y);
@@ -6081,7 +6091,37 @@
             npc.nextDecisionAt = now + 600 + Math.random() * 2400;
           } else {
             const rand = Math.random();
-            if (npc.base === "cutie_sheep" && rand < 0.20) {
+            if (npc.isSubject0) {
+              const totalActions = Object.values(state.playerActionCounts).reduce((a, b) => a + b, 0);
+              if (totalActions > 5 && Math.random() < 0.60) {
+                const roll = Math.random() * totalActions;
+                let current = 0;
+                let chosenAction = "chopping tree";
+                for (const [act, count] of Object.entries(state.playerActionCounts)) {
+                  current += count;
+                  if (roll <= current) {
+                    chosenAction = act;
+                    break;
+                  }
+                }
+                if (chosenAction === "chopping tree" || chosenAction === "fighting monsters") {
+                  npc.mode = "attack";
+                  npc.nextDecisionAt = now + 600;
+                } else {
+                  npc.mode = "idle2";
+                  npc.nextDecisionAt = now + 1200;
+                }
+              } else {
+                const roll = Math.random();
+                if (roll < 0.30) {
+                  npc.mode = "idle2";
+                  npc.nextDecisionAt = now + 400 + Math.random() * 1400;
+                } else {
+                  npc.mode = "idle";
+                  npc.nextDecisionAt = now + 400 + Math.random() * 1400;
+                }
+              }
+            } else if (npc.base === "cutie_sheep" && rand < 0.20) {
               npc.mode = "attack";
               npc.nextDecisionAt = now + 800;
             } else if (npc.base === "cutie_sheep" && rand < 0.60) {
