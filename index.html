@@ -5252,11 +5252,11 @@
     const PET_TAME_HEART_COUNT = 6;
 
     const WILD_NPC_BIOMES = [
-      { biomeId: "safe", center: { x: SAFE_CENTER_X, y: SAFE_CENTER_Y }, bases: ["green_slime", "blue_slime", "pink_slime", "cutie_sheep"], count: 6, spread: 600 },
-      { biomeId: "shadow", center: startPositions.dark, bases: ["doe", "sprout_chicken"], count: 4, spread: 760 },
-      { biomeId: "goldwood", center: startPositions.gold, bases: ["squirle", "sprout_cow"], count: 4, spread: 760 },
-      { biomeId: "bluewater", center: startPositions.blue, bases: ["frog"], count: 4, spread: 760 },
-      { biomeId: "deepteal", center: startPositions.deep, bases: ["fox"], count: 4, spread: 760 }
+      { biomeId: "safe", center: { x: SAFE_CENTER_X, y: SAFE_CENTER_Y }, bases: ["green_slime", "blue_slime", "pink_slime", "cutie_sheep"], count: 18, spread: 800 },
+      { biomeId: "shadow", center: startPositions.dark, bases: ["doe", "sprout_chicken"], count: 15, spread: 1200 },
+      { biomeId: "goldwood", center: startPositions.gold, bases: ["squirle", "sprout_cow"], count: 15, spread: 1200 },
+      { biomeId: "bluewater", center: startPositions.blue, bases: ["frog"], count: 15, spread: 1200 },
+      { biomeId: "deepteal", center: startPositions.deep, bases: ["fox"], count: 15, spread: 1200 }
     ];
     const WILD_NPC_STATS = {
       green_slime: { npcHp: 50, npcDamage: 2, speed: 56 },
@@ -5344,6 +5344,16 @@
     function updateRoamingNPCs(now, dt) {
       for (let i = roamingNPCs.length - 1; i >= 0; i--) {
         const npc = roamingNPCs[i];
+        
+        // Culling optimization: Skip AI and movement updates for active NPCs far from player
+        if (!npc.dead) {
+          const dx = npc.x - state.x;
+          const dy = npc.y - state.y;
+          if (dx * dx + dy * dy > 1440000) { // 1200^2 (no Math.sqrt)
+            continue;
+          }
+        }
+
         const cfg = roster[npc.base];
         const npcInWater = state.scene === "outside" && waterTileAt(npc.x, npc.y);
         const speedMult = npcInWater ? 0.5 : 1.0;
