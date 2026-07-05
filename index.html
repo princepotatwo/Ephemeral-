@@ -1093,7 +1093,7 @@
     function tileBuildItems(prefix, label, coords) {
       return coords.map(([col, row], index) => ({
         id: `${prefix}-${col}-${row}`,
-        label: `${label} ${index + 1}`,
+        label: coords.length > 1 ? `${label} ${index + 1}` : label,
         name: `${prefix}_${col}_${row}`,
         count: 1,
         fps: 1,
@@ -1155,7 +1155,7 @@
         [0, 1], [1, 1], [2, 1], [3, 1], [4, 1],
         [0, 2], [1, 2], [2, 2], [3, 2]
       ]),
-      ...tileBuildItems("build_house_door", "Door", [[0, 0], [0, 1], [0, 2], [0, 3]]),
+      ...tileBuildItems("build_house_door", "Door", [[0, 0]]),
       ...tileBuildItems("build_path_piece", "Path", [
         [0, 0], [0, 1], [1, 1], [2, 1], [0, 2], [1, 2], [2, 2], [1, 3], [2, 3], [3, 3]
       ])
@@ -1975,7 +1975,13 @@
       const cropFrames = Object.values(farmCrops).flatMap(crop =>
         Array.from({ length: crop.stages }, (_, i) => `assets/plants/${crop.name}/frame_${i}.png`)
       );
-      await Promise.all([...allPlants.flatMap(plant => plantFramePaths(plant)), ...cropFrames].map(loadImageCached));
+      const doorFrames = [
+        "assets/plants/build_house_door_0_0/frame_0.png",
+        "assets/plants/build_house_door_0_1/frame_0.png",
+        "assets/plants/build_house_door_0_2/frame_0.png",
+        "assets/plants/build_house_door_0_3/frame_0.png"
+      ];
+      await Promise.all([...allPlants.flatMap(plant => plantFramePaths(plant)), ...cropFrames, ...doorFrames].map(loadImageCached));
     }
 
     function sideFacingDir(dir) {
@@ -2311,16 +2317,22 @@
     }
 
     function drawPlant(plant) {
-      let index;
-      if (plant.chest) {
-        index = chestFrameIndex(plant);
-      } else if (plant.tree && Math.hypot(plant.x - state.x, plant.y - state.y) > 550) {
-        // Far tree: freeze at a static frame to save animation calc
-        index = Math.floor(plant.x * 0.003 * plant.fps) % plant.count;
+      let img;
+      if (plant.door) {
+        const idx = doorFrameIndex(plant);
+        img = images[`assets/plants/build_house_door_0_${idx}/frame_0.png`];
       } else {
-        index = Math.floor((state.t + plant.x * 0.003) * plant.fps) % plant.count;
+        let index;
+        if (plant.chest) {
+          index = chestFrameIndex(plant);
+        } else if (plant.tree && Math.hypot(plant.x - state.x, plant.y - state.y) > 550) {
+          // Far tree: freeze at a static frame to save animation calc
+          index = Math.floor(plant.x * 0.003 * plant.fps) % plant.count;
+        } else {
+          index = Math.floor((state.t + plant.x * 0.003) * plant.fps) % plant.count;
+        }
+        img = images[`assets/plants/${plant.name}/frame_${index}.png`];
       }
-      const img = images[`assets/plants/${plant.name}/frame_${index}.png`];
       if (!img) return;
       let shake = 0;
       if (plant.tree && plant.hitStarted) {
@@ -2386,7 +2398,7 @@
     }
 
     function isAlwaysUnderPlayerSprite(plant) {
-      if (plant.built && plant.buildId !== "wall" && !plant.chest) return true;
+      if (plant.built && plant.buildId !== "wall" && !plant.chest && !plant.door) return true;
       return /(_bridge|_path|_rug|_beds|_tables|_furniture_top|_chair|_stool|_bed_)/.test(plant.name);
     }
 
@@ -2399,6 +2411,12 @@
       const elapsed = Math.max(0, performance.now() - (chest.chestAnimStarted || 0));
       const step = Math.min(4, Math.floor(elapsed / 70));
       return chest.open ? step : 4 - step;
+    }
+
+    function doorFrameIndex(door) {
+      const elapsed = Math.max(0, performance.now() - (door.doorAnimStarted || 0));
+      const step = Math.min(2, Math.floor(elapsed / 100)); // 3 frames: 0, 1, 2
+      return door.open ? step : 2 - step;
     }
 
     function activeSprites() {
@@ -3156,6 +3174,7 @@
 
     function solidRectFor(plant) {
       if (!plant.solid) return null;
+      if (plant.door && plant.open) return null;
       return {
         x: plant.x + plant.solid.x,
         y: plant.y + plant.solid.y,
@@ -3259,6 +3278,12 @@
         maxHp: item.maxHp || 5,
         hp: item.maxHp || 5
       };
+      if (placed.name && placed.name.startsWith("build_house_door")) {
+        placed.door = true;
+        placed.open = false;
+        placed.doorAnimStarted = 0;
+        placed.solid = { x: -8, y: -8, w: 16, h: 16 };
+      }
       if (placed.tree || isTreeName(placed.name)) {
         placed.tree = true;
         placed.treeType = placed.treeType || "sprout";
@@ -3300,6 +3325,24 @@
       if (!chest) return false;
       chest.open = !chest.open;
       chest.chestAnimStarted = performance.now();
+      state.demo = false;
+      return true;
+    }
+
+    function nearestInteractiveDoor() {
+      return activeSprites()
+        .filter(item => item.door)
+        .map(item => ({ item, dist: Math.hypot(item.x - state.x, item.y - state.y) }))
+        .filter(entry => entry.dist < 54)
+        .sort((a, b) => a.dist - b.dist)[0]?.item;
+    }
+
+    function toggleNearestDoor() {
+      const door = nearestInteractiveDoor();
+      if (!door) return false;
+      door.open = !door.open;
+      door.doorAnimStarted = performance.now();
+      playSfx("click", 0.5); // Play click sound
       state.demo = false;
       return true;
     }
@@ -4755,16 +4798,21 @@
 
     function exitHouse() {
       state.scene = "outside";
-      state.x = 1180;
-      state.y = 738;
+      state.x = state.lastDoorX !== undefined ? state.lastDoorX : 1180;
+      state.y = state.lastDoorY !== undefined ? state.lastDoorY + 20 : 738;
       state.demo = false;
       startTransition("Outside");
     }
 
     function maybeTeleport() {
       if (performance.now() - state.transitionStarted < 650) return;
-      if (state.scene === "outside" && aabb(state.x - 8, state.y - 8, 16, 12, 1148, 692, 64, 46)) {
-        enterHouse();
+      if (state.scene === "outside") {
+        const openDoor = placedSprites.find(item => item.scene === "outside" && item.door && item.open && Math.hypot(state.x - item.x, state.y - item.y) < 18);
+        if (openDoor) {
+          state.lastDoorX = openDoor.x;
+          state.lastDoorY = openDoor.y;
+          enterHouse();
+        }
       } else if (state.scene === "interior" && aabb(state.x - 8, state.y - 8, 16, 12, 286, 312, 68, 34)) {
         exitHouse();
       }
@@ -4772,6 +4820,7 @@
 
     function triggerAttack() {
       if (toggleNearestChest()) return;
+      if (toggleNearestDoor()) return;
       const now = performance.now();
       if (now < state.attackUntil) return;
       playSwingSound();
