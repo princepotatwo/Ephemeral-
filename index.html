@@ -5344,6 +5344,7 @@
     function updateRoamingNPCs(now, dt) {
       for (let i = roamingNPCs.length - 1; i >= 0; i--) {
         const npc = roamingNPCs[i];
+        const cfg = roster[npc.base];
         const npcInWater = state.scene === "outside" && waterTileAt(npc.x, npc.y);
         const speedMult = npcInWater ? 0.5 : 1.0;
         const npcSpeed = npc.speed * speedMult;
@@ -5563,7 +5564,6 @@
           const dx = targetX - npc.x;
           const dy = targetY - npc.y;
           const dist = Math.hypot(dx, dy);
-          const cfg = roster[npc.base];
           
           if (npc.base === "creature_slasher" && npc.slasherAttacking) {
             npc.mode = "attack";
