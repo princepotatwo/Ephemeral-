@@ -170,7 +170,7 @@
 <body>
 
   <h1>Cutie Assets Extraction Gallery</h1>
-  <p class="subtitle">Extracting background-free, jitter-free 8-frame animations for all 15 characters</p>
+  <p class="subtitle">Extracting background-free, shadow-free, jitter-free animations for all 15 characters</p>
 
   <div class="char-grid" id="charGrid"></div>
 
@@ -180,6 +180,7 @@
   </div>
 
   <script>
+    const animMetadata = {"1": {"idle": 2, "attack": 8, "idle2": 8, "walking": 8}, "2": {"idle": 5, "attack": 8, "idle2": 8, "walking": 8}, "3": {"idle": 8, "attack": 8, "idle2": 8, "walking": 8}, "4": {"idle": 8, "attack": 8, "idle2": 8, "walking": 8}, "5": {"idle": 8, "attack": 8, "idle2": 8, "walking": 8}, "6": {"idle": 8, "attack": 8, "idle2": 8, "walking": 8}, "7": {"idle": 5, "attack": 8, "idle2": 8, "walking": 8}, "8": {"idle": 8, "attack": 8, "idle2": 8, "walking": 8}, "9": {"idle": 8, "attack": 8, "idle2": 8, "walking": 8}, "10": {"idle": 8, "attack": 8, "idle2": 8, "walking": 8}, "11": {"idle": 8, "attack": 8, "idle2": 8, "walking": 8}, "12": {"idle": 8, "attack": 8, "idle2": 8, "walking": 8}, "13": {"idle": 8, "attack": 8, "idle2": 8, "walking": 8}, "14": {"idle": 8, "attack": 8, "idle2": 8, "walking": 8}, "15": {"idle": 8, "attack": 8, "idle2": 8, "walking": 8}};
     const totalChars = 15;
     const anims = ['idle', 'attack', 'idle2', 'walking'];
     let selectedChar = 1;
@@ -220,12 +221,15 @@
       container.innerHTML = '';
 
       anims.forEach(anim => {
+        const frameCount = animMetadata[id][anim];
+        if (frameCount === 0) return;
+
         const card = document.createElement('div');
         card.className = 'anim-card';
 
         // Set up live preview and frame strip
         let frameStripHtml = '';
-        for (let f = 0; f < 8; f++) {
+        for (let f = 0; f < frameCount; f++) {
           frameStripHtml += `
             <div class="frame-item">
               <img src="assets/cutie_raw/char_${id}/${anim}_frame_${f}.png" alt="F${f}">
@@ -253,7 +257,7 @@
         let currentFrame = 0;
         const liveImg = card.querySelector(`#live_${anim}`);
         animTimers[anim] = setInterval(() => {
-          currentFrame = (currentFrame + 1) % 8;
+          currentFrame = (currentFrame + 1) % frameCount;
           liveImg.src = `assets/cutie_raw/char_${id}/${anim}_frame_${currentFrame}.png`;
         }, 120); // 8 FPS loops
       });
