@@ -739,7 +739,7 @@
       green_slime: { label: "Green Slime", rarity: "Common", kind: "forest", base: "green_slime", scale: 1.18, attackMs: 480 },
       blue_slime: { label: "Blue Slime", rarity: "Uncommon", kind: "forest", base: "blue_slime", scale: 1.18, attackMs: 480 },
       pink_slime: { label: "Ribbon Slime", rarity: "Rare", kind: "forest", base: "pink_slime", scale: 1.18, attackMs: 480 },
-      cutie_sheep: { label: "Cloud Sheep", rarity: "Legendary", kind: "forest", base: "cutie_sheep", scale: 1.35, attackMs: 480, sideView: true },
+      cutie_sheep: { label: "Cloud Sheep", rarity: "Legendary", kind: "forest", base: "cutie_sheep", scale: 0.65, attackMs: 480, sideView: true },
       split_slime: { label: "Split Slime", rarity: "Epic", kind: "forest", base: "split_slime", scale: 1.18, attackMs: 480 },
       gold_slime: { label: "Crown Slime", rarity: "Legendary", kind: "forest", base: "gold_slime", scale: 1.18, attackMs: 480 },
       shadow_slime: { label: "Invert Slime", rarity: "Mythic", kind: "forest", base: "shadow_slime", scale: 1.18, attackMs: 480 },
@@ -783,7 +783,7 @@
       silksong_ladybug: { idle: 7, run: 22, stop: 7, attack: 2 },
       silksong_lifeblood_worm: { idle: 4, run: 14, stop: 4, attack: 8 },
       silksong_shakra_rest: { idle: 25, run: 25, stop: 25, attack: 10 },
-      cutie_sheep: { idle: 3, run: 8, attack: 8 }
+      cutie_sheep: { idle: 3, idle2: 8, run: 8, attack: 8 }
     };
     const farmCrops = {
       wheat: { label: "Wheat", name: "farm_crop_wheat", stages: 4 },
@@ -1942,6 +1942,7 @@
       if (counts?.stop) modes.push("stop");
       if (counts?.skid) modes.push("skid");
       if (counts?.die) modes.push("die");
+      if (counts?.idle2) modes.push("idle2");
       modes.push("attack");
       for (const mode of modes) {
         for (const dir of DIRECTIONS) {
@@ -5682,9 +5683,18 @@
             npc.moveDir = { x: Math.cos(moveAngle), y: Math.sin(moveAngle) };
             npc.nextDecisionAt = now + 600 + Math.random() * 2400;
           } else {
-            npc.mode = "idle";
+            const rand = Math.random();
+            if (npc.base === "cutie_sheep" && rand < 0.20) {
+              npc.mode = "attack";
+              npc.nextDecisionAt = now + 800;
+            } else if (npc.base === "cutie_sheep" && rand < 0.60) {
+              npc.mode = "idle2";
+              npc.nextDecisionAt = now + 400 + Math.random() * 1800;
+            } else {
+              npc.mode = "idle";
+              npc.nextDecisionAt = now + 400 + Math.random() * 1800;
+            }
             npc.moveDir = { x: 0, y: 0 };
-            npc.nextDecisionAt = now + 400 + Math.random() * 1800;
           }
         }
         if (npc.mode === "run") {
