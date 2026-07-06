@@ -5817,7 +5817,7 @@
         
         if (npc.isSubject0 && !npc.dead) {
           const dist = Math.hypot(npc.x - state.x, npc.y - state.y);
-          if (dist <= 180 && !state.chatOpen && !npc.personality.lastQuestion) {
+          if (dist <= 350 && !state.chatOpen && !npc.personality.lastQuestion) {
             const lastChatTime = state.lastChatMessageAt || 0;
             if (now - lastChatTime > 5000) {
               state.lastChatMessageAt = now; // Prevent duplicate triggers immediately
