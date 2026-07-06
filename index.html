@@ -607,6 +607,83 @@
     <div class="caption">Online sprite credits: inkBubi, PIPOYA, AxulArt, RGS_Dev, karsiori, Cup Nooble, Kettoman, Shaade, Tayziulei, Daniel Eddeland, Stephen Challener / PixelFarm, patvanmackelberg, Bouste, and Kenney.</div>
   </div>
   <script>
+    const COMMON_ENGLISH_WORDS = ["the", "be", "to", "of", "and", "a", "in", "that", "have", "i", "it", "for", "not", "on", "with", "he", "as", "you", "do", "at", "this", "but", "his", "by", "from", "they", "we", "say", "her", "she", "or", "an", "will", "my", "one", "all", "would", "there", "their", "what", "so", "up", "out", "if", "about", "who", "get", "which", "go", "me", "when", "make", "can", "like", "time", "no", "just", "him", "know", "take", "people", "into", "year", "your", "good", "some", "could", "them", "see", "other", "than", "then", "now", "look", "only", "come", "its", "over", "think", "also", "back", "after", "use", "two", "how", "our", "work", "first", "well", "way", "even", "new", "want", "because", "any", "these", "give", "day", "most", "us", "hello", "hi", "hey", "hoi", "snowman", "build", "nothing", "yes", "ok", "okay", "slime", "forest", "wood", "stone", "water", "crops", "planting", "watering", "tilling", "protect", "friend"];
+    const ABBREVIATIONS = {
+      "u": "you",
+      "idc": "i do not care",
+      "idk": "i do not know",
+      "im": "i am",
+      "tbh": "to be honest",
+      "ur": "your",
+      "r": "are",
+      "cant": "can not",
+      "dont": "do not"
+    };
+
+    function collapseRepeatedLetters(word) {
+      return word.replace(/(.)\1+/g, "$1");
+    }
+
+    function levenshteinDistance(s1, s2) {
+      if (s1.length < s2.length) return levenshteinDistance(s2, s1);
+      if (s2.length === 0) return s1.length;
+      let prevRow = Array.from({ length: s2.length + 1 }, (_, i) => i);
+      for (let i = 0; i < s1.length; i++) {
+        let currRow = [i + 1];
+        for (let j = 0; j < s2.length; j++) {
+          let insertions = prevRow[j + 1] + 1;
+          let deletions = currRow[j] + 1;
+          let subs = prevRow[j] + (s1[i] !== s2[j] ? 1 : 0);
+          currRow.push(Math.min(insertions, deletions, subs));
+        }
+        prevRow = currRow;
+      }
+      return prevRow[prevRow.length - 1];
+    }
+
+    function isGibberishWord(word) {
+      if (word.length <= 3) return false;
+      const collapsed = collapseRepeatedLetters(word);
+      const vowels = (collapsed.match(/[aeiouy]/g) || []).length;
+      if (vowels / collapsed.length < 0.15) return true;
+      if (/[bcdfghjklmnpqrstvwxz]{5,}/.test(collapsed)) return true;
+      const uniqueChars = new Set(collapsed).size;
+      if (collapsed.length >= 6 && uniqueChars <= 2) return true;
+      return false;
+    }
+
+    function normalizeTextToken(word) {
+      const clean = word.toLowerCase().replace(/[^a-z]/g, "");
+      if (!clean) return "";
+      const collapsed = collapseRepeatedLetters(clean);
+      if (ABBREVIATIONS[collapsed]) return ABBREVIATIONS[collapsed];
+      
+      // Spellcheck against common words
+      let bestMatch = collapsed;
+      let minDist = 999;
+      for (const ref of COMMON_ENGLISH_WORDS) {
+        const refCollapsed = collapseRepeatedLetters(ref);
+        const dist = levenshteinDistance(collapsed, refCollapsed);
+        if (dist < minDist) {
+          minDist = dist;
+          bestMatch = ref;
+        }
+      }
+      const maxLen = Math.max(collapsed.length, collapseRepeatedLetters(bestMatch).length);
+      const similarity = maxLen > 0 ? (1.0 - minDist / maxLen) : 0;
+      if (similarity >= 0.60) {
+        return bestMatch;
+      }
+      return clean;
+    }
+
+    function normalizePhrase(phrase) {
+      return phrase.split(/\s+/)
+        .map(normalizeTextToken)
+        .filter(Boolean)
+        .join(" ");
+    }
+
     const VIEW_W = 640;
     const VIEW_H = 360;
     const WORLD_W = 9000;
@@ -5408,37 +5485,24 @@
         sub0.isSubject0 = true;
         sub0.name = "subject0";
         sub0.personality = {
-          niceness: 0.5,
-          intelligence: 0.5,
-          awareness: 0.1,
-          joy: 0,
-          diaryEntries: [
-            "day 1: i arrived in this safe meadow. it is beautiful.",
-            "day 1: met the player. they look like me.",
-            "day 1: i want to learn how to live in this world."
-          ],
-          vocabulary: new Set(["hello", "hi", "what", "is", "that", "why", "who", "are", "you", "am", "i", "the", "near", "tree", "slime", "plant", "water", "farm", "crop", "wood", "stone", "night", "day"]),
-          learnedRules: [],
-          learnedAnswers: {},
+          subject0Memory: {},
+          playerStarters: {},
           lastQuestion: null,
-          transitions: {
-            "hello": { "player": 1 },
-            "i": { "am": 3, "saw": 2 },
-            "am": { "near": 2, "learning": 2 },
-            "near": { "the": 3 },
-            "what": { "is": 3 },
-            "who": { "are": 2 },
-            "are": { "you": 2 }
-          },
-          dialogueTemplates: [
-            "i am near the tree",
-            "i saw you chop tree",
-            "what is tree",
-            "hello player",
-            "who are you",
-            "i am learning words"
-          ]
+          listeningKey: null,
+          vocabulary: new Set(["hello", "hi", "what", "is", "that", "why", "who", "are", "you", "am", "i", "the", "near", "tree", "slime", "plant", "water", "farm", "crop", "wood", "stone", "night", "day"])
         };
+        try {
+          const storedMem = localStorage.getItem("subject0Memory");
+          if (storedMem) {
+            sub0.personality.subject0Memory = JSON.parse(storedMem);
+          }
+          const storedStarters = localStorage.getItem("playerStarters");
+          if (storedStarters) {
+            sub0.personality.playerStarters = JSON.parse(storedStarters);
+          }
+        } catch (e) {
+          console.error("Failed to load memory", e);
+        }
         roamingNPCs.push(sub0);
       }
     }
@@ -5490,108 +5554,128 @@
     }
 
     async function triggerSubject0Response(playerText) {
-      // Find Subject 0 in the scene
       const sub0 = roamingNPCs.find(n => n.isSubject0);
       if (!sub0) return;
       
-      // Update face direction to player
       const dx = state.x - sub0.x;
       if (Math.abs(dx) > 10) {
         sub0.dir = dx > 0 ? "right" : "left";
       }
       sub0.mode = "idle2";
 
-      let reply = "";
-      
-      // Determine nearest game entity for context
-      let nearestEntity = "the grass";
-      let minDist = 300;
-      roamingNPCs.forEach(n => {
-        if (n.isSubject0 || n.dead) return;
-        const dist = Math.hypot(n.x - sub0.x, n.y - sub0.y);
-        if (dist < minDist) {
-          minDist = dist;
-          nearestEntity = roster[n.base].label.toLowerCase();
-        }
-      });
-      const playerDist = Math.hypot(state.x - sub0.x, state.y - sub0.y);
-      if (playerDist < minDist) {
-        minDist = playerDist;
-        nearestEntity = "you";
-      }
+      const normalizedPhrase = normalizePhrase(playerText);
+      const words = playerText.split(/\s+/).filter(Boolean);
+      const gibberishWords = words.filter(w => isGibberishWord(w));
+      const isInputGibberish = gibberishWords.length > 0 && (gibberishWords.length / words.length >= 0.5);
 
-      // 1. Attempt local Ollama endpoint (Free, unlimited, local PC execution)
-      try {
-        const ollamaRes = await fetch("http://127.0.0.1:11434/api/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            model: "gemma:2b",
-            messages: [
-              {
-                role: "system",
-                content: `you are subject 0, a student girl clone of player jasmin. the nearest entity to you is ${nearestEntity}. speak always in lowercase, short sentences, and mirror jasmin's style.`
-              },
-              { role: "user", content: playerText }
-            ],
-            stream: false
-          })
-        });
-        if (ollamaRes.ok) {
-          const data = await ollamaRes.json();
-          reply = data.message.content.toLowerCase().trim();
-          addChatMessage("subject0", reply);
+      // Clarification/Question expectation state
+      if (sub0.personality.lastQuestion) {
+        const q = sub0.personality.lastQuestion;
+        sub0.personality.lastQuestion = null;
+        if (isInputGibberish) {
+          addChatMessage("subject0", "...?");
           return;
         }
-      } catch (e) {
-        // Local server not running
+        if (!sub0.personality.subject0Memory[q]) {
+          sub0.personality.subject0Memory[q] = {};
+        }
+        sub0.personality.subject0Memory[q][playerText] = (sub0.personality.subject0Memory[q][playerText] || 0) + 1;
+        try {
+          localStorage.setItem("subject0Memory", JSON.stringify(sub0.personality.subject0Memory));
+        } catch (e) {}
+
+        addChatMessage("subject0", `i understand now. "${q}" means "${playerText}".`);
+        return;
       }
 
-      // 2. Attempt Hugging Face Serverless Cloud model (Free, unlimited, 0MB download)
-      try {
-        const hfRes = await fetch("https://api-inference.huggingface.co/models/Qwen/Qwen1.5-0.5B-Chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            inputs: `<|system|>\nyou are subject 0, a student girl. you are standing near ${nearestEntity}. speak always in lowercase and short sentences.\n<|user|>\n${playerText}\n<|assistant|>\n`,
-            parameters: { max_new_tokens: 60 }
-          })
-        });
-        if (hfRes.ok) {
-          const data = await hfRes.json();
-          let rawReply = data[0].generated_text.split("<|assistant|>")[1]?.trim() || data[0].generated_text;
-          reply = rawReply.toLowerCase().replace(/[^a-z0-9\s]/g, "").trim();
-          addChatMessage("subject0", reply);
+      // Listening state for a mirrored key
+      if (sub0.personality.listeningKey) {
+        const lKey = sub0.personality.listeningKey;
+        sub0.personality.listeningKey = null;
+        if (!isInputGibberish) {
+          if (!sub0.personality.subject0Memory[lKey]) {
+            sub0.personality.subject0Memory[lKey] = {};
+          }
+          sub0.personality.subject0Memory[lKey][playerText] = (sub0.personality.subject0Memory[lKey][playerText] || 0) + 1;
+          try {
+            localStorage.setItem("subject0Memory", JSON.stringify(sub0.personality.subject0Memory));
+          } catch (e) {}
+        }
+      }
+
+      // Track Conversation Starters
+      const now = performance.now();
+      const isConversationStarter = (!state.lastChatMessageAt || (now - state.lastChatMessageAt > 15000));
+      if (isConversationStarter && !isInputGibberish && normalizedPhrase) {
+        sub0.personality.playerStarters[normalizedPhrase] = (sub0.personality.playerStarters[normalizedPhrase] || 0) + 1;
+        try {
+          localStorage.setItem("playerStarters", JSON.stringify(sub0.personality.playerStarters));
+        } catch (e) {}
+      }
+
+      // Gibberish Filter -> Proactive Clarification Request
+      if (isInputGibberish) {
+        const targetGib = gibberishWords[0];
+        sub0.personality.lastQuestion = targetGib;
+        addChatMessage("subject0", `what do u mean by "${targetGib}"?`);
+        return;
+      }
+
+      if (!normalizedPhrase) {
+        addChatMessage("subject0", "...?");
+        return;
+      }
+
+      // Check direct memory match
+      const pool = sub0.personality.subject0Memory[normalizedPhrase];
+      if (pool && Object.keys(pool).length > 0) {
+        const options = Object.keys(pool);
+        const weights = Object.values(pool);
+        const totalWeight = weights.reduce((a, b) => a + b, 0);
+        let rand = Math.random() * totalWeight;
+        let chosen = options[0];
+        for (let i = 0; i < options.length; i++) {
+          rand -= weights[i];
+          if (rand <= 0) {
+            chosen = options[i];
+            break;
+          }
+        }
+        addChatMessage("subject0", chosen);
+        return;
+      }
+
+      // Attempt temporary phrase concatenation
+      const phraseTokens = normalizedPhrase.split(" ");
+      if (phraseTokens.length > 1) {
+        const segments = [];
+        let segmentIndex = 0;
+        while (segmentIndex < phraseTokens.length) {
+          let foundMatch = false;
+          for (let len = phraseTokens.length - segmentIndex; len >= 1; len--) {
+            const part = phraseTokens.slice(segmentIndex, segmentIndex + len).join(" ");
+            const partPool = sub0.personality.subject0Memory[part];
+            if (partPool && Object.keys(partPool).length > 0) {
+              const bestOption = Object.keys(partPool).reduce((a, b) => partPool[a] > partPool[b] ? a : b);
+              segments.push(bestOption);
+              segmentIndex += len;
+              foundMatch = true;
+              break;
+            }
+          }
+          if (!foundMatch) segmentIndex++;
+        }
+        if (segments.length > 0) {
+          const combinedReply = segments.join(". ");
+          addChatMessage("subject0", combinedReply);
+          sub0.personality.listeningKey = normalizedPhrase;
           return;
         }
-      } catch (e) {
-        // Cloud API offline or rate-limited
       }
 
-      // 3. Clean, zero-download offline fallback (ELIZA pronoun reflector)
-      const pronounMap = {
-        "i": "you",
-        "me": "you",
-        "my": "your",
-        "myself": "yourself",
-        "am": "are",
-        "was": "were",
-        "you": "i",
-        "your": "my",
-        "yours": "mine",
-        "are": "am"
-      };
-      const wordsToSwap = playerText.toLowerCase().replace(/[^a-z0-9\s]/g, "").split(/\s+/).filter(Boolean);
-      const swappedWords = wordsToSwap.map(w => pronounMap[w] || w);
-      const reflectedText = swappedWords.join(" ");
-      const reflectionTemplates = [
-        `why do you say "${reflectedText}"?`,
-        `what makes you think "${reflectedText}"?`,
-        `is it important to you that "${reflectedText}"?`,
-        `tell me more about "${reflectedText}".`
-      ];
-      reply = reflectionTemplates[Math.floor(Math.random() * reflectionTemplates.length)];
-      addChatMessage("subject0", reply);
+      // Mirror fallback
+      addChatMessage("subject0", playerText);
+      sub0.personality.listeningKey = normalizedPhrase;
     }
 
     function notifySubject0OfAction(actionName) {
@@ -5697,53 +5781,37 @@
         npc.t += dt;
         
         if (npc.isSubject0 && !npc.dead) {
-          if (!npc.lastCuriosityCheck) npc.lastCuriosityCheck = now;
-          if (now - npc.lastCuriosityCheck > 15000) {
-            npc.lastCuriosityCheck = now;
-            const dist = Math.hypot(npc.x - state.x, npc.y - state.y);
-            if (dist <= 180 && !state.chatOpen && !npc.personality.lastQuestion) {
-              const learnedKeys = Object.keys(npc.personality.learnedAnswers);
-              const rand = Math.random();
+          const dist = Math.hypot(npc.x - state.x, npc.y - state.y);
+          if (dist <= 180 && !state.chatOpen && !npc.personality.lastQuestion) {
+            const lastChatTime = state.lastChatMessageAt || 0;
+            if (now - lastChatTime > 5000) {
+              state.lastChatMessageAt = now; // Prevent duplicate triggers immediately
               
-              if (learnedKeys.length >= 3 && rand < 0.45) {
-                // Statement Mode: Share a learned belief!
-                const chosenKey = learnedKeys[Math.floor(Math.random() * learnedKeys.length)];
-                const belief = npc.personality.learnedAnswers[chosenKey];
-                const statements = [
-                  `i remember: ${chosenKey} is ${belief}.`,
-                  `i like thinking about ${chosenKey}. it is ${belief}.`,
-                  `you taught me that ${chosenKey} means ${belief}.`
-                ];
-                addChatMessage("subject0", statements[Math.floor(Math.random() * statements.length)]);
-              } else if (learnedKeys.length >= 2 && rand < 0.75) {
-                // Diary Mode: Share thoughts about player!
-                if (npc.personality.diaryEntries && npc.personality.diaryEntries.length > 0) {
-                  const entry = npc.personality.diaryEntries[Math.floor(Math.random() * npc.personality.diaryEntries.length)];
-                  addChatMessage("subject0", `my thoughts: "${entry.replace(/^day \d+:\s*/i, "")}"`);
+              let starter = "hi";
+              const starters = Object.keys(npc.personality.playerStarters);
+              if (starters.length > 0) {
+                const weights = Object.values(npc.personality.playerStarters);
+                const totalWeight = weights.reduce((a, b) => a + b, 0);
+                let rand = Math.random() * totalWeight;
+                for (let i = 0; i < starters.length; i++) {
+                  rand -= weights[i];
+                  if (rand <= 0) {
+                    starter = starters[i];
+                    break;
+                  }
                 }
               } else {
-                // Question Mode: Seek information!
-                if (Math.random() < 0.40) {
-                  const questions = [
-                    "is this forest safe?",
-                    "are you my friend?",
-                    "what do you like?",
-                    "why do you build?",
-                    "what should we do?"
-                  ];
-                  const selectedQ = questions[Math.floor(Math.random() * questions.length)];
-                  npc.personality.lastQuestion = selectedQ;
-                  addChatMessage("subject0", selectedQ);
-                } else {
-                  // Find a word she hasn't learned yet!
-                  const vocabArray = Array.from(npc.personality.vocabulary);
-                  const unlearned = vocabArray.filter(w => !npc.personality.learnedAnswers[w]);
-                  const targetWord = unlearned.length > 0 ? unlearned[Math.floor(Math.random() * unlearned.length)] : vocabArray[Math.floor(Math.random() * vocabArray.length)];
-                  
-                  npc.personality.lastQuestion = "what is " + targetWord;
-                  addChatMessage("subject0", `what does "${targetWord}" mean to you?`);
-                }
+                const vocabArray = Array.from(npc.personality.vocabulary);
+                starter = vocabArray[Math.floor(Math.random() * vocabArray.length)];
               }
+
+              const dx = state.x - npc.x;
+              if (Math.abs(dx) > 10) {
+                npc.dir = dx > 0 ? "right" : "left";
+              }
+              
+              addChatMessage("subject0", starter);
+              npc.personality.listeningKey = normalizePhrase(starter);
               npc.mode = "idle2";
               npc.nextDecisionAt = now + 1500;
             }
