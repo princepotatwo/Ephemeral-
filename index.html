@@ -2295,7 +2295,8 @@
       if (!frames) return null;
       const npcInWater = state.scene === "outside" && waterTileAt(npc.x, npc.y);
       const speedMult = npcInWater ? 0.5 : 1.0;
-      const currentSpeed = npc.speed * speedMult;
+      const baseSpeed = npc.speed || (roster[npc.base] ? wildNpcStats(npc.base).speed : 55);
+      const currentSpeed = baseSpeed * speedMult;
       const animSpeed = npc.mode === "run" ? (currentSpeed / 55) : 1.0;
       const multiplier = (mode === "run" ? (npc.animSpeedOverride || animSpeed) : 1.0);
       const fps = (mode === "attack" ? (cfg.attackFps || 9) : mode === "run" ? (cfg.runFps || 9) : (cfg.idleFps || 5)) * multiplier;
@@ -5814,6 +5815,21 @@
         const speedMult = npcInWater ? 0.5 : 1.0;
         const npcSpeed = npc.speed * speedMult;
         npc.t += dt;
+
+        // Dormant night monster trigger and update logic
+        if (npc.isDormant && !npc.dead) {
+          const distToPlayer = Math.hypot(npc.x - state.x, npc.y - state.y);
+          if (distToPlayer <= (npc.triggerRadius || 450)) {
+            npc.isDormant = false;
+            npc.aggroTarget = "player";
+            npc.aggroUntil = now + 999999;
+            npc.mode = "run";
+          } else {
+            npc.mode = "idle";
+            npc.moveDir = { x: 0, y: 0 };
+            continue; // Skip normal wandering/movement behavior
+          }
+        }
         
         if (npc.isSubject0 && !npc.dead) {
           const dist = Math.hypot(npc.x - state.x, npc.y - state.y);
@@ -6327,7 +6343,8 @@
         loveBurst: now, // tame heart burst timer
         level: 1,
         xp: 0,
-        scale: 1.0
+        scale: 1.0,
+        speed: slime.speed || wildNpcStats(slime.base).speed
       };
       // spawn heart burst
       for (let i = 0; i < PET_TAME_HEART_COUNT; i++) {
@@ -6718,6 +6735,11 @@
 
     function damageSlime(slime, attacker = null) {
       if (slime.dead || slime.hp <= 0) return;
+      if (slime.isDormant) {
+        slime.isDormant = false;
+        slime.aggroTarget = "player";
+        slime.aggroUntil = performance.now() + 999999;
+      }
       const now = performance.now();
       
       // Spawn blood splats if hitting one of the three new night monsters
