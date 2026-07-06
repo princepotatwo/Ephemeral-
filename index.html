@@ -5823,15 +5823,18 @@
               state.lastChatMessageAt = now; // Prevent duplicate triggers immediately
               
               let starter = "hi";
-              const starters = Object.keys(npc.personality.playerStarters);
-              if (starters.length > 0) {
-                const weights = Object.values(npc.personality.playerStarters);
+              const memoryKeys = Object.keys(npc.personality.subject0Memory);
+              if (memoryKeys.length > 0) {
+                const weights = memoryKeys.map(key => {
+                  const starterCount = npc.personality.playerStarters[key] || 0;
+                  return starterCount > 0 ? starterCount : 0.2;
+                });
                 const totalWeight = weights.reduce((a, b) => a + b, 0);
                 let rand = Math.random() * totalWeight;
-                for (let i = 0; i < starters.length; i++) {
+                for (let i = 0; i < memoryKeys.length; i++) {
                   rand -= weights[i];
                   if (rand <= 0) {
-                    starter = starters[i];
+                    starter = memoryKeys[i];
                     break;
                   }
                 }
