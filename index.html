@@ -5768,18 +5768,6 @@
       words.forEach(w => {
         sub0.personality.vocabulary.add(w);
       });
-      
-      for (let i = 0; i < words.length - 1; i++) {
-        const w1 = words[i];
-        const w2 = words[i+1];
-        if (!sub0.personality.transitions[w1]) sub0.personality.transitions[w1] = {};
-        sub0.personality.transitions[w1][w2] = (sub0.personality.transitions[w1][w2] || 0) + 1;
-      }
-      
-      sub0.personality.dialogueTemplates.push(text);
-      if (sub0.personality.dialogueTemplates.length > 15) {
-        sub0.personality.dialogueTemplates.shift();
-      }
     }
 
     function updateRoamingNPCs(now, dt) {
