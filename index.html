@@ -5564,6 +5564,23 @@
       state.lastChatMessageAt = performance.now();
     }
 
+    function addTypingIndicator(sender) {
+      const log = document.getElementById("game-chat-log");
+      if (!log) return null;
+      const div = document.createElement("div");
+      div.textContent = `${sender} is typing...`;
+      div.style.fontStyle = "italic";
+      div.style.color = "#8a8a8a";
+      log.appendChild(div);
+      log.scrollTop = log.scrollHeight;
+      
+      while (log.children.length > 10) {
+        log.removeChild(log.firstChild);
+      }
+      log.style.opacity = "1";
+      return div;
+    }
+
     function sendGameChatMessage() {
       const input = document.getElementById("game-chat-input");
       const text = input.value.trim();
@@ -5584,6 +5601,15 @@
       }
       sub0.mode = "idle2";
 
+      function queueSubject0Reply(replyText) {
+        const indicator = addTypingIndicator("subject0");
+        const delay = Math.min(2500, Math.max(800, replyText.length * 40));
+        setTimeout(() => {
+          if (indicator) indicator.remove();
+          addChatMessage("subject0", replyText);
+        }, delay);
+      }
+
       const normalizedPhrase = normalizePhrase(playerText);
       const words = playerText.split(/\s+/).filter(Boolean);
       const gibberishWords = words.filter(w => isGibberishWord(w));
@@ -5594,7 +5620,7 @@
         const q = sub0.personality.lastQuestion;
         sub0.personality.lastQuestion = null;
         if (isInputGibberish) {
-          addChatMessage("subject0", "...?");
+          queueSubject0Reply("...?");
           return;
         }
         if (!sub0.personality.subject0Memory[q]) {
@@ -5605,7 +5631,7 @@
           localStorage.setItem("subject0Memory", JSON.stringify(sub0.personality.subject0Memory));
         } catch (e) {}
 
-        addChatMessage("subject0", `i understand now. "${q}" means "${playerText}".`);
+        queueSubject0Reply(`i understand now. "${q}" means "${playerText}".`);
         return;
       }
 
@@ -5624,9 +5650,9 @@
         }
       }
 
-      // Track Conversation Starters
+      // Track Conversation Starters (if no player/npc message for 5 seconds)
       const now = performance.now();
-      const isConversationStarter = (!state.lastChatMessageAt || (now - state.lastChatMessageAt > 15000));
+      const isConversationStarter = (!state.lastChatMessageAt || (now - state.lastChatMessageAt > 5000));
       if (isConversationStarter && !isInputGibberish && normalizedPhrase) {
         sub0.personality.playerStarters[normalizedPhrase] = (sub0.personality.playerStarters[normalizedPhrase] || 0) + 1;
         try {
@@ -5638,12 +5664,12 @@
       if (isInputGibberish) {
         const targetGib = gibberishWords[0];
         sub0.personality.lastQuestion = targetGib;
-        addChatMessage("subject0", `what do u mean by "${targetGib}"?`);
+        queueSubject0Reply(`what do u mean by "${targetGib}"?`);
         return;
       }
 
       if (!normalizedPhrase) {
-        addChatMessage("subject0", "...?");
+        queueSubject0Reply("...?");
         return;
       }
 
@@ -5662,7 +5688,7 @@
             break;
           }
         }
-        addChatMessage("subject0", chosen);
+        queueSubject0Reply(chosen);
         return;
       }
 
@@ -5688,14 +5714,14 @@
         }
         if (segments.length > 0) {
           const combinedReply = segments.join(". ");
-          addChatMessage("subject0", combinedReply);
+          queueSubject0Reply(combinedReply);
           sub0.personality.listeningKey = normalizedPhrase;
           return;
         }
       }
 
       // Mirror fallback
-      addChatMessage("subject0", playerText);
+      queueSubject0Reply(playerText);
       sub0.personality.listeningKey = normalizedPhrase;
     }
 
@@ -5818,11 +5844,17 @@
               if (Math.abs(dx) > 10) {
                 npc.dir = dx > 0 ? "right" : "left";
               }
-              
-              addChatMessage("subject0", starter);
-              npc.personality.listeningKey = normalizePhrase(starter);
               npc.mode = "idle2";
               npc.nextDecisionAt = now + 1500;
+
+              // Proactive typing delay simulation
+              const indicator = addTypingIndicator("subject0");
+              const delay = Math.min(2000, Math.max(700, starter.length * 45));
+              setTimeout(() => {
+                if (indicator) indicator.remove();
+                addChatMessage("subject0", starter);
+                npc.personality.listeningKey = normalizePhrase(starter);
+              }, delay);
             }
           }
         }
