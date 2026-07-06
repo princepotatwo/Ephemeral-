@@ -4333,7 +4333,7 @@
           }
         }
       } else {
-        // Night 3: Only 1 Slasher at a remote location (starts invisible to teleport onto the player)
+        // Night 3: Only 1 Slasher at a remote location (runs towards the player)
         const npc = createWildNpc("creature_slasher", 3200, 1900, "forest");
         if (npc) {
           npc.isNightMonster = true;
@@ -4344,18 +4344,12 @@
           npc.maxHp = 100;
           npc.attackDamage = 10; // 5x slime damage (5 * 2)
           
-          // Teleport/stalk initialization
-          npc.slasherState = "invisible";
-          npc.slasherInvisibleUntil = now + 1200; // wait 1.2s to teleport onto player
-          npc.tpX = state.x;
-          npc.tpY = state.y;
-          npc.x = -1000;
-          npc.y = -1000;
-          
+          npc.slasherState = "charge";
           npc.isDormant = false;
           npc.triggerRadius = 450;
           npc.aggroTarget = "player";
-          npc.aggroUntil = now + 999999;
+          npc.aggroUntil = now + 99999999;
+          npc.mode = "run";
           roamingNPCs.push(npc);
         }
       }
