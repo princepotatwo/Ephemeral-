@@ -4333,11 +4333,8 @@
           }
         }
       } else {
-        // Night 3: Only 1 Slasher that spawns just off-screen near the player
-        const angle = Math.random() * Math.PI * 2;
-        const spawnX = Math.max(80, Math.min(WORLD_W - 80, state.x + Math.cos(angle) * 380));
-        const spawnY = Math.max(80, Math.min(WORLD_H - 80, state.y + Math.sin(angle) * 380));
-        const npc = createWildNpc("creature_slasher", spawnX, spawnY, "forest");
+        // Night 3: Only 1 Slasher at a remote location
+        const npc = createWildNpc("creature_slasher", 3200, 1900, "forest");
         if (npc) {
           npc.isNightMonster = true;
           npc.scaleOverride = 1.15 * 0.65; // 35% smaller
@@ -5808,7 +5805,7 @@
         const npc = roamingNPCs[i];
         
         // Culling optimization: Skip AI and movement updates for active NPCs far from player
-        if (!npc.dead) {
+        if (!npc.dead && !npc.isNightMonster) {
           const dx = npc.x - state.x;
           const dy = npc.y - state.y;
           if (dx * dx + dy * dy > 1440000) { // 1200^2 (no Math.sqrt)
