@@ -5854,6 +5854,7 @@
                 if (indicator) indicator.remove();
                 addChatMessage("subject0", starter);
                 npc.personality.listeningKey = normalizePhrase(starter);
+                openGameChat(); // Auto-open input overlay so the player can type back!
               }, delay);
             }
           }
