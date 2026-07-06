@@ -620,6 +620,27 @@
       "dont": "do not"
     };
 
+    fetch("dictionary.json")
+      .then(res => res.json())
+      .then(data => {
+        if (data.words) {
+          COMMON_ENGLISH_WORDS.length = 0;
+          COMMON_ENGLISH_WORDS.push(...data.words);
+        }
+        if (data.abbreviations) {
+          for (const key in ABBREVIATIONS) {
+            delete ABBREVIATIONS[key];
+          }
+          for (const key in data.abbreviations) {
+            ABBREVIATIONS[key] = data.abbreviations[key];
+          }
+        }
+        console.log("Dictionary data synced.");
+      })
+      .catch(err => {
+        console.warn("Using fallback vocabulary lists.");
+      });
+
     function collapseRepeatedLetters(word) {
       return word.replace(/(.)\1+/g, "$1");
     }
