@@ -17,8 +17,8 @@
       margin: 0;
       padding: 0;
       width: 100%;
-      height: 100%;
-      overflow: hidden;
+      min-height: 100%;
+      overflow-y: auto;
       /* Extend into safe areas (iPhone notch, Android cutouts) */
       padding-top: env(safe-area-inset-top);
       padding-bottom: env(safe-area-inset-bottom);
@@ -54,7 +54,7 @@
     body.is-game-fullscreen {
       padding: 0;
       background: #000;
-      overflow: hidden;
+      overflow-y: auto;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -143,6 +143,7 @@
       border-radius: 12px;
       background: rgba(255, 250, 241, .9);
       box-shadow: 0 6px 18px rgba(83, 107, 101, .12);
+      box-sizing: border-box;
     }
     body.is-game-fullscreen .picker,
     body.is-game-fullscreen .test-controls {
@@ -290,7 +291,7 @@
     @media (max-width: 720px) {
       .picker {
         max-height: 86px;
-        overflow: auto;
+        overflow-y: auto;
       }
       .buildbar-line {
         left: 8px;
@@ -602,6 +603,49 @@
         </div>
         <span id="test-time-label" style="font-size: 11px; color: #7c6c56; font-family: monospace; margin-left: auto;">Current Phase: DAY (T-Minus 60s)</span>
       </div>
+      <div style="display: flex; flex-wrap: wrap; gap: 14px; align-items: center; border-top: 1px solid #e8dec9; padding-top: 6px; margin-top: 2px;">
+        <span style="font-family: monospace; font-size: 11px; font-weight: bold; color: #5c4b37; text-transform: uppercase; letter-spacing: 0.5px;">⚔️ Enemy Stats</span>
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <label for="knight-size-slider" style="font-size: 11px; color: #7c6c56; font-family: monospace; font-weight: bold; user-select: none;">Knight Size:</label>
+          <input id="knight-size-slider" type="range" min="0.2" max="2.0" step="0.05" value="1.0" style="width: 80px; cursor: pointer; accent-color: #c47c00; outline: none; margin: 0;">
+          <span id="knight-size-value" style="font-size: 11px; color: #7c6c56; font-family: monospace; width: 36px; font-weight: bold;">1.0x</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <label for="knight-hp-slider" style="font-size: 11px; color: #7c6c56; font-family: monospace; font-weight: bold; user-select: none;">Knight HP:</label>
+          <input id="knight-hp-slider" type="range" min="20" max="500" step="5" value="80" style="width: 80px; cursor: pointer; accent-color: #c47c00; outline: none; margin: 0;">
+          <span id="knight-hp-value" style="font-size: 11px; color: #7c6c56; font-family: monospace; width: 36px; font-weight: bold;">80</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <label for="knight-dmg-slider" style="font-size: 11px; color: #7c6c56; font-family: monospace; font-weight: bold; user-select: none;">Knight Dmg:</label>
+          <input id="knight-dmg-slider" type="range" min="1" max="50" step="1" value="2" style="width: 80px; cursor: pointer; accent-color: #c47c00; outline: none; margin: 0;">
+          <span id="knight-dmg-value" style="font-size: 11px; color: #7c6c56; font-family: monospace; width: 36px; font-weight: bold;">2</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <label for="bear-hp-slider" style="font-size: 11px; color: #7c6c56; font-family: monospace; font-weight: bold; user-select: none;">Bear HP:</label>
+          <input id="bear-hp-slider" type="range" min="20" max="800" step="10" value="160" style="width: 80px; cursor: pointer; accent-color: #8B4513; outline: none; margin: 0;">
+          <span id="bear-hp-value" style="font-size: 11px; color: #7c6c56; font-family: monospace; width: 36px; font-weight: bold;">160</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <label for="bear-dmg-slider" style="font-size: 11px; color: #7c6c56; font-family: monospace; font-weight: bold; user-select: none;">Bear Dmg:</label>
+          <input id="bear-dmg-slider" type="range" min="1" max="50" step="1" value="2" style="width: 80px; cursor: pointer; accent-color: #8B4513; outline: none; margin: 0;">
+          <span id="bear-dmg-value" style="font-size: 11px; color: #7c6c56; font-family: monospace; width: 36px; font-weight: bold;">2</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <label for="slasher-hp-slider" style="font-size: 11px; color: #7c6c56; font-family: monospace; font-weight: bold; user-select: none;">Slasher HP:</label>
+          <input id="slasher-hp-slider" type="range" min="20" max="1000" step="10" value="100" style="width: 80px; cursor: pointer; accent-color: #8B0000; outline: none; margin: 0;">
+          <span id="slasher-hp-value" style="font-size: 11px; color: #7c6c56; font-family: monospace; width: 36px; font-weight: bold;">100</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <label for="slasher-dmg-slider" style="font-size: 11px; color: #7c6c56; font-family: monospace; font-weight: bold; user-select: none;">Slasher Dmg:</label>
+          <input id="slasher-dmg-slider" type="range" min="1" max="100" step="1" value="10" style="width: 80px; cursor: pointer; accent-color: #8B0000; outline: none; margin: 0;">
+          <span id="slasher-dmg-value" style="font-size: 11px; color: #7c6c56; font-family: monospace; width: 36px; font-weight: bold;">10</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <label for="spider-dmg-slider" style="font-size: 11px; color: #7c6c56; font-family: monospace; font-weight: bold; user-select: none;">Spider Dmg:</label>
+          <input id="spider-dmg-slider" type="range" min="1" max="50" step="1" value="2" style="width: 80px; cursor: pointer; accent-color: #1a5c1a; outline: none; margin: 0;">
+          <span id="spider-dmg-value" style="font-size: 11px; color: #7c6c56; font-family: monospace; width: 36px; font-weight: bold;">2</span>
+        </div>
+      </div>
     </div>
     <div class="picker" id="picker" aria-label="Character switcher"></div>
     <div class="caption">Online sprite credits: inkBubi, PIPOYA, AxulArt, RGS_Dev, karsiori, Cup Nooble, Kettoman, Shaade, Tayziulei, Daniel Eddeland, Stephen Challener / PixelFarm, patvanmackelberg, Bouste, and Kenney.</div>
@@ -857,6 +901,7 @@
       "sprout_cat", "sprout_chicken", "sprout_cow",
       "green_slime", "blue_slime", "pink_slime", "split_slime", "gold_slime", "shadow_slime", "galaxy_slime", "huge_split_slime",
       "cutie_sheep",
+      "knight_orange", "knight_green", "knight_blue",
       ...pipoyaCharacters.map(([name]) => name),
       ...extraItchCharacters.map(([name]) => name),
       ...kenneyCharacters.map(([name]) => name)
@@ -893,7 +938,10 @@
       scary_zombie: { label: "Scary Zombie", kind: "forest", base: "scary_zombie", scale: 1.15, attackMs: 420, sideView: true, smooth: true },
       creature_bear: { label: "Flesh Bear", kind: "forest", base: "creature_bear", scale: 1.25, attackMs: 420, sideView: true, smooth: true },
       creature_crawler: { label: "Gore Crawler", kind: "forest", base: "creature_crawler", scale: 1.15, attackMs: 480, sideView: true, smooth: true },
-      creature_slasher: { label: "Flesh Slasher", kind: "forest", base: "creature_slasher", scale: 1.15, attackMs: 730, sideView: true, smooth: true }
+      creature_slasher: { label: "Flesh Slasher", kind: "forest", base: "creature_slasher", scale: 1.15, attackMs: 730, sideView: true, smooth: true },
+      knight_orange: { label: "Orange Knight", kind: "forest", base: "knight_orange", scale: 0.46, attackMs: 500, sideView: true, smooth: true },
+      knight_green: { label: "Green Knight", kind: "forest", base: "knight_green", scale: 0.46, attackMs: 500, sideView: true, smooth: true },
+      knight_blue: { label: "Blue Knight", kind: "forest", base: "knight_blue", scale: 0.46, attackMs: 500, sideView: true, smooth: true }
     };
     silksongStudyCharacters.forEach(([name]) => {
       roster[name].sideView = true;
@@ -917,6 +965,9 @@
       creature_bear: { idle: 6, run: 6, attack: 6, die: 8 },
       creature_crawler: { idle: 7, run: 7, attack: 7, die: 7 },
       creature_slasher: { idle: 8, run: 8, attack: 11, die: 8 },
+      knight_orange: { idle: 7, run: 8, attack: 8, defense: 5, hit: 5 },
+      knight_green:  { idle: 7, run: 8, attack: 8, defense: 5, hit: 5 },
+      knight_blue:   { idle: 7, run: 8, attack: 8, defense: 4, hit: 8 },
       silksong_bone_worm: { idle: 4, run: 4, stop: 4, attack: 7 },
       silksong_moss_crawler: { idle: 3, run: 23, stop: 3, attack: 3 },
       silksong_staff_pilgrim: { idle: 6, run: 10, stop: 6, attack: 13 },
@@ -1496,7 +1547,7 @@
     }
     const keys = new Set();
     const ASSET_REV = "one-tree-biomes-water-v61";
-    const APP_VERSION = "1.1.32";
+    const APP_VERSION = "1.2.0";
     const images = {};
     const imagePromises = {};
     const forestFrames = {};
@@ -2104,10 +2155,30 @@
       if (counts?.skid) modes.push("skid");
       if (counts?.die) modes.push("die");
       if (counts?.idle2) modes.push("idle2");
+      if (counts?.defense) modes.push("defense");
+      if (counts?.hit) modes.push("hit");
+      if (counts?.special_attack) modes.push("special_attack");
       modes.push("attack");
       for (const mode of modes) {
         for (const dir of DIRECTIONS) {
-          const count = counts?.[mode] ?? (base === "frog" && mode === "idle" ? 2 : 4);
+          let count = counts?.[mode] ?? (base === "frog" && mode === "idle" ? 2 : 4);
+          
+          // Knights direction-specific frame overrides:
+          if (["knight_orange", "knight_green", "knight_blue"].includes(base)) {
+            if (mode === "defense" && dir === "back") {
+              count = 4;
+            } else if (mode === "hit") {
+              if (base === "knight_blue") {
+                count = 8;
+              } else { // orange and green knights
+                if (dir === "back" || dir === "front") {
+                  count = 6;
+                } else { // left or right
+                  count = 8;
+                }
+              }
+            }
+          }
           out[`${mode}-${dir}`] = Array.from({ length: count }, (_, i) => `assets/${base}/${mode}_${dir}_frame_${i}.png?v=3`);
         }
       }
@@ -2119,7 +2190,10 @@
       if (forestFrames[base].loaded) return;
       await Promise.all(
         Object.values(forestFrames[base]).flat().map(src =>
-          loadImageCached(src).catch(() => null)
+          loadImageCached(src).catch(err => {
+            console.error(`[loadForestAnimal] Failed to load frame image for base "${base}": ${src}`);
+            return null;
+          })
         )
       );
       forestFrames[base].loaded = true;
@@ -2268,15 +2342,30 @@
     function currentFrame() {
       const cfg = roster[state.current];
       if (cfg.kind === "forest") {
+        const isKnight = ["knight_orange", "knight_green", "knight_blue"].includes(cfg.base);
         const activeDir = state.mode === "attack" ? state.attackDir : state.dir;
         const dir = cfg.sideView ? sideFacingDir(activeDir) : state.mode === "idle" && cfg.idleDir ? cfg.idleDir : activeDir;
         const isStopMode = state.mode === "stop" || state.mode === "skid";
         const mode = isStopMode && !forestFrames[cfg.base][`${state.mode}-${dir}`] ? "idle" : state.mode;
-        const frames = forestFrames[cfg.base][`${mode}-${dir}`] || forestFrames[cfg.base][`idle-${dir}`];
-        const fps = mode === "attack" ? (cfg.attackFps || 9) : mode === "die" ? (cfg.dieFps || 6) : mode === "skid" ? (cfg.skidFps || cfg.stopFps || 12) : mode === "stop" ? (cfg.stopFps || 12) : mode === "run" ? (cfg.runFps || 9) : (cfg.idleFps || 5);
-        const started = mode === "attack" ? state.attackStarted : mode === "die" ? state.dieStarted : mode === "stop" || mode === "skid" ? state.stopStarted : 0;
-        const playOnce = mode === "attack" || mode === "stop" || mode === "skid" || mode === "die";
-        const t = playOnce ? Math.max(0, performance.now() - started) / 1000 : state.t;
+        
+        let frames = forestFrames[cfg.base][`${mode}-${dir}`];
+        // Fallback checks for optional modes like hit/defense in case direction isn't fully loaded
+        if (!frames) {
+          frames = forestFrames[cfg.base][`idle-${dir}`];
+        }
+        
+        let fps = cfg.idleFps || 5;
+        if (mode === "attack") fps = cfg.attackFps || 9;
+        else if (mode === "die") fps = cfg.dieFps || 6;
+        else if (mode === "skid") fps = cfg.skidFps || cfg.stopFps || 12;
+        else if (mode === "stop") fps = cfg.stopFps || 12;
+        else if (mode === "run") fps = cfg.runFps || 9;
+        else if (mode === "hit") fps = 8;
+        else if (mode === "defense") fps = 8;
+
+        const started = mode === "attack" ? state.attackStarted : mode === "die" ? state.dieStarted : mode === "stop" || mode === "skid" ? state.stopStarted : mode === "hit" ? state.hitStarted : mode === "defense" ? state.defenseStarted : 0;
+        const playOnce = mode === "attack" || mode === "stop" || mode === "skid" || mode === "die" || mode === "hit";
+        const t = playOnce ? Math.max(0, performance.now() - started) / 1000 : (mode === "defense" ? (performance.now() - started) / 1000 : state.t);
         const index = playOnce ? Math.min(frames.length - 1, Math.floor(t * fps)) : Math.floor(t * fps) % frames.length;
         const image = images[frames[index]];
         return { image, sx: 0, sy: 0, sw: image.width, sh: image.height, scale: cfg.scale, smooth: cfg.smooth };
@@ -2289,23 +2378,76 @@
     function npcFrame(npc) {
       const cfg = roster[npc.base];
       if (!cfg || cfg.kind !== "forest") return null;
+      const isKnight = ["knight_orange", "knight_green", "knight_blue"].includes(npc.base);
       const dir = cfg.sideView ? sideFacingDir(npc.dir) : npc.dir;
-      const mode = npc.mode;
-      const frames = forestFrames[npc.base][`${mode}-${dir}`] || forestFrames[npc.base][`idle-${dir}`];
-      if (!frames) return null;
+      
+      // Determine mode for enemy knights
+      let mode = npc.mode;
+      if (isKnight) {
+        if (npc.hitStarted && (performance.now() - npc.hitStarted) < 600) {
+          mode = "hit";
+        } else if (mode === "attack" && npc.specialAttackUntil && performance.now() < npc.specialAttackUntil) {
+          mode = "special_attack";
+        }
+      }
+
+      if (!forestFrames[npc.base]) {
+        console.error(`[npcFrame] forestFrames["${npc.base}"] is completely undefined! Making loadForestAnimal call...`);
+        loadForestAnimal(npc.base);
+        return null;
+      }
+      const dirFrames = forestFrames[npc.base][`${mode}-${dir}`] || forestFrames[npc.base][`idle-${dir}`];
+      if (!dirFrames) {
+        console.error(`[npcFrame] No frame paths found in forestFrames for base "${npc.base}" in mode "${mode}" facing "${dir}".`);
+        return null;
+      }
       const npcInWater = state.scene === "outside" && waterTileAt(npc.x, npc.y);
       const speedMult = npcInWater ? 0.5 : 1.0;
       const baseSpeed = npc.speed || (roster[npc.base] ? wildNpcStats(npc.base).speed : 55);
       const currentSpeed = baseSpeed * speedMult;
       const animSpeed = npc.mode === "run" ? (currentSpeed / 55) : 1.0;
       const multiplier = (mode === "run" ? (npc.animSpeedOverride || animSpeed) : 1.0);
-      const fps = (mode === "attack" ? (cfg.attackFps || 9) : mode === "run" ? (cfg.runFps || 9) : (cfg.idleFps || 5)) * multiplier;
-      const started = mode === "attack" ? (npc.attackStarted || npc.t) : 0;
-      const playOnce = mode === "attack";
+      
+      let fps = (mode === "attack" ? (cfg.attackFps || 9) : mode === "run" ? (cfg.runFps || 9) : (cfg.idleFps || 5)) * multiplier;
+      if (mode === "hit" || mode === "defense") fps = 8;
+      else if (mode === "special_attack") fps = cfg.attackFps || 9;
+
+      const started = (mode === "attack" || mode === "special_attack") ? (npc.attackStarted || npc.t) : (mode === "hit" ? npc.hitStarted : 0);
+      const playOnce = mode === "attack" || mode === "special_attack" || mode === "hit";
       const t = playOnce ? Math.max(0, performance.now() - started) / 1000 : npc.t;
-      const index = playOnce ? Math.min(frames.length - 1, Math.floor(t * fps)) : Math.floor(t * fps) % frames.length;
-      const image = images[frames[index]];
-      if (!image) return null;
+      const index = playOnce ? Math.min(dirFrames.length - 1, Math.floor(t * fps)) : Math.floor(t * fps) % dirFrames.length;
+      const image = images[dirFrames[index]];
+      
+      // DIAGNOSTIC LOGGING FOR ENEMY KNIGHTS:
+      if (isKnight) {
+        console.log(`[KNIGHT DIAGNOSTIC] Base: "${npc.base}", ID: ${npc.id || "N/A"}, Pos: (${Math.round(npc.x)}, ${Math.round(npc.y)}), Mode: "${mode}", Dir: "${dir}", FrameSrc: "${dirFrames[index]}", Loaded: ${!!image}, Dead: ${npc.dead}, Dormant: ${npc.isDormant}`);
+      }
+
+      if (!image) {
+        // Fallback 1: Look for any loaded frame of this specific knight in ANY mode/direction
+        for (const key of Object.keys(forestFrames[npc.base])) {
+          if (key === "loaded") continue;
+          const frameList = forestFrames[npc.base][key] || [];
+          for (const framePath of frameList) {
+            if (images[framePath]) {
+              const fallbackImage = images[framePath];
+              return { image: fallbackImage, sx: 0, sy: 0, sw: fallbackImage.width, sh: fallbackImage.height, scale: npc.scaleOverride || cfg.scale, smooth: cfg.smooth };
+            }
+          }
+        }
+        // Fallback 2: If no frames at all are loaded for this knight, draw a tiny colored dot or skip to prevent canvas break,
+        // but try to grab a loaded green/blue/orange slime or sheep to draw so it's not invisible.
+        for (const fallbackBase of ["green_slime", "cutie_sheep"]) {
+          const list = (forestFrames[fallbackBase] && forestFrames[fallbackBase]["idle-front"]) || [];
+          for (const path of list) {
+            if (images[path]) {
+              const fallbackImage = images[path];
+              return { image: fallbackImage, sx: 0, sy: 0, sw: fallbackImage.width, sh: fallbackImage.height, scale: npc.scaleOverride || cfg.scale, smooth: cfg.smooth };
+            }
+          }
+        }
+        return null;
+      }
       return { image, sx: 0, sy: 0, sw: image.width, sh: image.height, scale: npc.scaleOverride || cfg.scale, smooth: cfg.smooth };
     }
 
@@ -2538,7 +2680,7 @@
             drawH
           );
         } else {
-          ctx.rotate(sway);
+          // No wiggle/shear/transformations for moving trees. They draw static and upright to stay completely unobvious.
           ctx.drawImage(
             img,
             crop.sx,
@@ -2662,8 +2804,8 @@
         for (const npc of roamingNPCs) {
           const npcFrameObj = npcFrame(npc);
           if (!npcFrameObj) continue;
-          const pad = 180;
-          const onScreen = npc.x + 40 > state.cameraX - pad && npc.x - 40 < state.cameraX + viewWorldW() + pad && npc.y + 40 > state.cameraY - pad && npc.y - 40 < state.cameraY + viewWorldH() + pad;
+          const pad = 400;
+          const onScreen = npc.x + 120 > state.cameraX - pad && npc.x - 120 < state.cameraX + viewWorldW() + pad && npc.y + 120 > state.cameraY - pad && npc.y - 120 < state.cameraY + viewWorldH() + pad;
           if (!onScreen) continue;
           let shake = 0;
           if (npc.hitStarted) {
@@ -3990,8 +4132,8 @@
           }
           state.screenShakeUntil = now + 400;
         } else {
-          // Night 2: Spiders constantly spawn if all die
-          if ((state.nightCount || 1) % 3 === 2) {
+          // Night 10: Spiders constantly spawn if all die
+          if (state.nightCount === 10) {
             const aliveSpiders = roamingNPCs.filter(n => n.isNightMonster && n.base === "creature_crawler" && !n.dead);
             if (aliveSpiders.length === 0) {
               spawnNightMonsters(now);
@@ -4147,6 +4289,8 @@
         if (dist < 280) {
           candidates.push({ tree, dist, targetX, targetY, combatTarget: tree.combatTarget });
         } else if (tree.isAttacking) {
+          const dx = targetX - tree.x;
+          const dy = targetY - tree.y;
           candidates.push({ tree, dist, targetX, targetY, combatTarget: tree.combatTarget });
         }
       }
@@ -4161,9 +4305,21 @@
           
           const dx = targetX - tree.x;
           const dy = targetY - tree.y;
-          
+
+          // Gaze detection check: Stop when player is looking at the tree, move when player is looking away
+          let playerLookingAtTree = false;
+          const lookDx = tree.x - state.x;
+          const lookDy = tree.y - state.y;
+          if (state.dir === "right" && lookDx > 0 && Math.abs(lookDy) < Math.abs(lookDx)) playerLookingAtTree = true;
+          else if (state.dir === "left" && lookDx < 0 && Math.abs(lookDy) < Math.abs(lookDx)) playerLookingAtTree = true;
+          else if (state.dir === "front" && lookDy > 0 && Math.abs(lookDx) < Math.abs(lookDy)) playerLookingAtTree = true;
+          else if (state.dir === "back" && lookDy < 0 && Math.abs(lookDx) < Math.abs(lookDy)) playerLookingAtTree = true;
+
           let isMoving = false;
-          if (dist > 18) {
+          if (playerLookingAtTree) {
+            // Player is looking directly towards the tree. Tree freezes!
+            tree.isAttacking = false;
+          } else if (dist > 18) {
             const speed = 12;
             const stepX = (dx / dist) * speed * dt;
             const stepY = (dy / dist) * speed * dt;
@@ -4261,96 +4417,161 @@
     }
 
     function spawnNightMonsters(now) {
-      // Clear previous night monsters if any
+      // Clear previous night monsters
       for (let i = roamingNPCs.length - 1; i >= 0; i--) {
-        if (roamingNPCs[i].isNightMonster) {
-          roamingNPCs.splice(i, 1);
-        }
+        if (roamingNPCs[i].isNightMonster) roamingNPCs.splice(i, 1);
       }
+
+      const nightNum = state.nightCount || 1;
+
+      // Helper to spawn a knight with the specified settings (half speed, sliders)
+      const spawnKnightEnemy = (base, x, y) => {
+        const knightHp       = parseInt(document.getElementById("knight-hp-slider")?.value  ?? 80, 10);
+        const knightDmg      = parseInt(document.getElementById("knight-dmg-slider")?.value ?? 2,  10);
+        const knightSizeMult = parseFloat(document.getElementById("knight-size-slider")?.value ?? 1.0);
+        const npc = createWildNpc(base, x, y, "forest");
+        if (npc) {
+          npc.isNightMonster = true;
+          npc.scaleOverride  = roster[base].scale * knightSizeMult;
+          // Movement speed halved (half of normal knight speed 35 -> 17.5)
+          npc.speed          = (wildNpcStats(base).speed || 35) * 0.5;
+          npc.animSpeedOverride = 1.0;
+          npc.hp             = knightHp;
+          npc.maxHp          = knightHp;
+          npc.attackDamage   = knightDmg;
+          npc.isDormant      = false;
+          npc.aggroTarget    = "player";
+          npc.aggroUntil     = now + 999999;
+          npc.mode           = "run";
+          roamingNPCs.push(npc);
+        }
+      };
+
+      const spawnKnightsBatch = () => {
+        const knightBases = ["knight_orange", "knight_green", "knight_blue"];
+        // Pre-trigger image preload for all knights
+        knightBases.forEach(base => loadForestAnimal(base));
+        
+        // Spawn 16 active knights around the player one-by-one with a delay of 150ms between each
+        for (let i = 0; i < 16; i++) {
+          setTimeout(() => {
+            // Verify morning hasn't arrived before spawning
+            if (state.timeOfDay !== "night") return;
+            const base = knightBases[i % knightBases.length];
+            const angle = (i / 16) * Math.PI * 2 + Math.random() * 0.4;
+            const dist = 260 + Math.random() * 80;
+            const x = Math.max(60, Math.min(WORLD_W - 60, state.x + Math.cos(angle) * dist));
+            const y = Math.max(60, Math.min(WORLD_H - 60, state.y + Math.sin(angle) * dist));
+            spawnKnightEnemy(base, x, y);
+          }, i * 150);
+        }
+      };
+
+      // ── New night spawn schedule ──
+      // Nights 1-4: Knights
+      // Night 5: Bear
+      // Nights 6-9: Knights
+      // Night 10: Spider
+      // Nights 11-14: Knights
+      // Night 15: Slasher
       
-      const cycle = (state.nightCount || 1) % 3;
-      if (cycle === 1) {
-        // Night 1: Spawn 3 dormant Flesh Bears at different locations
-        const locations = [
-          { x: 1200, y: 1200 },
-          { x: 4500, y: 3000 },
-          { x: 7800, y: 1500 }
-        ];
-        locations.forEach(loc => {
-          const npc = createWildNpc("creature_bear", loc.x, loc.y, "forest");
+      if (nightNum >= 1 && nightNum <= 4) {
+        spawnKnightsBatch();
+      } else if (nightNum === 5) {
+        // Bear spawns close around player (3 Bears)
+        const bearHp  = parseInt(document.getElementById("bear-hp-slider")?.value  ?? 160, 10);
+        const bearDmg = parseInt(document.getElementById("bear-dmg-slider")?.value ?? 2,   10);
+        for (let i = 0; i < 3; i++) {
+          const angle = (i / 3) * Math.PI * 2 + Math.random() * 0.4;
+          const dist = 280 + Math.random() * 60;
+          const x = Math.max(60, Math.min(WORLD_W - 60, state.x + Math.cos(angle) * dist));
+          const y = Math.max(60, Math.min(WORLD_H - 60, state.y + Math.sin(angle) * dist));
+          
+          const npc = createWildNpc("creature_bear", x, y, "forest");
           if (npc) {
-            npc.isNightMonster = true;
-            npc.scaleOverride = 1.25 * 0.50; // 50% smaller bear
-            npc.speed = wildNpcStats("creature_bear").speed * 2.0; // 2x speed
-            npc.animSpeedOverride = 2.0; // 2x animation speed
-            npc.hp = 160;
-            npc.maxHp = 160;
-            npc.attackDamage = 2; // same damage as slime
-            npc.isDormant = true;
-            npc.triggerRadius = 450;
-            npc.aggroTarget = null;
-            npc.aggroUntil = 0;
+            npc.isNightMonster  = true;
+            npc.scaleOverride   = 1.25 * 0.50;
+            npc.speed           = wildNpcStats("creature_bear").speed * 2.0;
+            npc.animSpeedOverride = 2.0;
+            npc.hp              = bearHp;
+            npc.maxHp           = bearHp;
+            npc.attackDamage    = bearDmg;
+            npc.isDormant       = false;
+            npc.aggroTarget     = "player";
+            npc.aggroUntil      = now + 999999;
+            npc.mode            = "run";
             roamingNPCs.push(npc);
           }
-        });
-      } else if (cycle === 2) {
-        // Night 2: Spiders (small, explode on contact)
-        // Spiders around player
-        for (let i = 0; i < 8; i++) {
-          const angle = Math.random() * Math.PI * 2;
-          const x = state.x + Math.cos(angle) * (260 + Math.random() * 60);
-          const y = state.y + Math.sin(angle) * (260 + Math.random() * 60);
+        }
+      } else if (nightNum >= 6 && nightNum <= 9) {
+        spawnKnightsBatch();
+      } else if (nightNum === 10) {
+        // Spiders spawn close around player (16 Spiders)
+        const spiderDmg = parseInt(document.getElementById("spider-dmg-slider")?.value ?? 2, 10);
+        for (let i = 0; i < 16; i++) {
+          const angle = (i / 16) * Math.PI * 2 + Math.random() * 0.4;
+          const dist = 260 + Math.random() * 80;
+          const x = Math.max(60, Math.min(WORLD_W - 60, state.x + Math.cos(angle) * dist));
+          const y = Math.max(60, Math.min(WORLD_H - 60, state.y + Math.sin(angle) * dist));
+          
           const npc = createWildNpc("creature_crawler", x, y, "forest");
           if (npc) {
             npc.isNightMonster = true;
-            npc.scaleOverride = 0.22; // even smaller!
-            npc.speed = 85; // fast!
-            npc.hp = 30;
-            npc.maxHp = 30;
-            npc.attackDamage = 2; // same damage as slime
+            npc.scaleOverride  = 0.22;
+            npc.speed          = 85;
+            npc.hp = 30; npc.maxHp = 30;
+            npc.attackDamage   = spiderDmg;
             npc.isSuicideSpider = true;
+            npc.aggroTarget    = "player";
+            npc.aggroUntil     = now + 999999;
+            npc.mode           = "run";
+            roamingNPCs.push(npc);
+          }
+        }
+      } else if (nightNum >= 11 && nightNum <= 14) {
+        spawnKnightsBatch();
+      } else if (nightNum === 15) {
+        // Slasher spawns close to player (1 Slasher)
+        const slasherHp  = parseInt(document.getElementById("slasher-hp-slider")?.value  ?? 100, 10);
+        const slasherDmg = parseInt(document.getElementById("slasher-dmg-slider")?.value ?? 10,  10);
+        const angle = Math.random() * Math.PI * 2;
+        const dist = 280;
+        const x = Math.max(60, Math.min(WORLD_W - 60, state.x + Math.cos(angle) * dist));
+        const y = Math.max(60, Math.min(WORLD_H - 60, state.y + Math.sin(angle) * dist));
+        
+        const npc = createWildNpc("creature_slasher", x, y, "forest");
+        if (npc) {
+          npc.isNightMonster    = true;
+          npc.scaleOverride     = 1.15 * 0.65;
+          npc.speed             = wildNpcStats("creature_slasher").speed * 3.0;
+          npc.animSpeedOverride = 3.0;
+          npc.hp                = slasherHp;
+          npc.maxHp             = slasherHp;
+          npc.attackDamage      = slasherDmg;
+          npc.slasherState      = "charge";
+          npc.isDormant         = false;
+          npc.triggerRadius     = 450;
+          npc.aggroTarget       = "player";
+          npc.aggroUntil        = now + 99999999;
+          npc.mode              = "run";
+          roamingNPCs.push(npc);
+        }
+      } else {
+        // Fallback loop after night 15: alternate Knights and bosses
+        if (nightNum % 2 === 0) {
+          spawnKnightsBatch();
+        } else {
+          // Spawn one of the bosses
+          const bossTypes = ["creature_bear", "creature_crawler", "creature_slasher"];
+          const b = bossTypes[nightNum % bossTypes.length];
+          const npc = createWildNpc(b, 2500, 1800, "forest");
+          if (npc) {
+            npc.isNightMonster = true;
+            npc.isDormant = false;
             npc.aggroTarget = "player";
             npc.aggroUntil = now + 999999;
             roamingNPCs.push(npc);
           }
-        }
-        // Spiders everywhere else
-        for (let i = 0; i < 15; i++) {
-          const x = 200 + Math.random() * (WORLD_W - 400);
-          const y = 200 + Math.random() * (WORLD_H - 400);
-          const npc = createWildNpc("creature_crawler", x, y, "forest");
-          if (npc) {
-            npc.isNightMonster = true;
-            npc.scaleOverride = 0.22;
-            npc.speed = 85;
-            npc.hp = 30;
-            npc.maxHp = 30;
-            npc.attackDamage = 2; // same damage as slime
-            npc.isSuicideSpider = true;
-            npc.aggroTarget = null;
-            npc.aggroUntil = 0;
-            roamingNPCs.push(npc);
-          }
-        }
-      } else {
-        // Night 3: Only 1 Slasher at a remote location (runs towards the player)
-        const npc = createWildNpc("creature_slasher", 3200, 1900, "forest");
-        if (npc) {
-          npc.isNightMonster = true;
-          npc.scaleOverride = 1.15 * 0.65; // 35% smaller
-          npc.speed = wildNpcStats("creature_slasher").speed * 3.0; // 3x speed
-          npc.animSpeedOverride = 3.0; // 3x animation speed
-          npc.hp = 100;
-          npc.maxHp = 100;
-          npc.attackDamage = 10; // 5x slime damage (5 * 2)
-          
-          npc.slasherState = "charge";
-          npc.isDormant = false;
-          npc.triggerRadius = 450;
-          npc.aggroTarget = "player";
-          npc.aggroUntil = now + 99999999;
-          npc.mode = "run";
-          roamingNPCs.push(npc);
         }
       }
     }
@@ -5433,7 +5654,13 @@
       frog: { npcHp: 80, npcDamage: 3, speed: 62 },
       fox: { npcHp: 90, npcDamage: 4, speed: 76 },
       sprout_chicken: { npcHp: 40, npcDamage: 2, speed: 60 },
-      sprout_cow: { npcHp: 80, npcDamage: 3, speed: 50 }
+      sprout_cow: { npcHp: 80, npcDamage: 3, speed: 50 },
+      knight_orange: { npcHp: 80, npcDamage: 2, speed: 35 },
+      knight_green: { npcHp: 80, npcDamage: 2, speed: 35 },
+      knight_blue: { npcHp: 80, npcDamage: 2, speed: 35 },
+      creature_bear: { npcHp: 160, npcDamage: 2, speed: 35 },
+      creature_crawler: { npcHp: 30, npcDamage: 2, speed: 85 },
+      creature_slasher: { npcHp: 100, npcDamage: 10, speed: 45 }
     };
 
     function wildNpcStats(base) {
@@ -5808,10 +6035,11 @@
         const npc = roamingNPCs[i];
         
         // Culling optimization: Skip AI and movement updates for active NPCs far from player
-        if (!npc.dead && !npc.isNightMonster) {
+        if (!npc.dead) {
           const dx = npc.x - state.x;
           const dy = npc.y - state.y;
-          if (dx * dx + dy * dy > 1440000) { // 1200^2 (no Math.sqrt)
+          const maxDistSq = npc.isNightMonster ? 2250000 : 1440000; // 1500px for night mobs, 1200px for normal
+          if (dx * dx + dy * dy > maxDistSq) { 
             continue;
           }
         }
@@ -5942,7 +6170,7 @@
           }
           // Evaporate finished - convert to pet if player's side killed it (with gacha chance)
           // Night mobs (Bear, Slasher, Spider) cannot become pets!
-          const canBePet = !["creature_bear", "creature_crawler", "creature_slasher"].includes(npc.base);
+          const canBePet = !["creature_bear", "creature_crawler", "creature_slasher", "knight_orange", "knight_green", "knight_blue"].includes(npc.base);
           if (npc.playerKilled && canBePet) {
             const roll = Math.random();
             if (roll < state.petChance) {
@@ -6135,9 +6363,34 @@
           
           if (dist > 24) {
             if (npc.isNightMonster) {
+              // Calculate separation steering force from other active night monsters
+              let sepDx = 0;
+              let sepDy = 0;
+              let sepCount = 0;
+              for (const other of roamingNPCs) {
+                if (other !== npc && other.isNightMonster && !other.dead && !other.isDormant) {
+                  const oDist = Math.hypot(other.x - npc.x, other.y - npc.y);
+                  if (oDist > 0 && oDist < 30) {
+                    sepDx += (npc.x - other.x) / oDist;
+                    sepDy += (npc.y - other.y) / oDist;
+                    sepCount++;
+                  }
+                }
+              }
+
+              let steerX = dx / dist;
+              let steerY = dy / dist;
+              if (sepCount > 0) {
+                steerX = steerX * 0.7 + (sepDx / sepCount) * 0.3;
+                steerY = steerY * 0.7 + (sepDy / sepCount) * 0.3;
+                const steerLen = Math.hypot(steerX, steerY) || 1;
+                steerX /= steerLen;
+                steerY /= steerLen;
+              }
+
               const speed = npcSpeed;
-              const stepX = (dx / dist) * speed * dt;
-              const stepY = (dy / dist) * speed * dt;
+              const stepX = steerX * speed * dt;
+              const stepY = steerY * speed * dt;
               
               const nextX = npc.x + stepX;
               const nextY = npc.y + stepY;
@@ -6157,9 +6410,17 @@
                 continue;
               }
               
-              npc.mode = "run";
-              if (!obstacleX) npc.x = Math.max(60, Math.min(WORLD_W - 60, nextX));
-              if (!obstacleY) npc.y = Math.max(60, Math.min(WORLD_H - 60, nextY));
+              const isKnight = ["knight_orange", "knight_green", "knight_blue"].includes(npc.base);
+              // If knight has been hit recently, keep them in shield/defense state
+              const isShieldingFromDamage = isKnight && npc.defenseUntil && now < npc.defenseUntil;
+              
+              if (isShieldingFromDamage) {
+                npc.mode = "defense";
+              } else {
+                npc.mode = "run";
+                if (!obstacleX) npc.x = Math.max(60, Math.min(WORLD_W - 60, nextX));
+                if (!obstacleY) npc.y = Math.max(60, Math.min(WORLD_H - 60, nextY));
+              }
             } else {
               npc.mode = "run";
               npc.x = Math.max(60, Math.min(WORLD_W - 60, npc.x + (dx / dist) * npcSpeed * 1.15 * dt));
@@ -6171,8 +6432,13 @@
               npc.dir = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? "right" : "left") : (dy > 0 ? "front" : "back");
             }
           } else {
-            npc.mode = "attack";
-            if (npc.base === "creature_slasher") {
+            const isKnight = ["knight_orange", "knight_green", "knight_blue"].includes(npc.base);
+            const isShieldingFromDamage = isKnight && npc.defenseUntil && now < npc.defenseUntil;
+
+            if (isShieldingFromDamage) {
+              npc.mode = "defense";
+            } else if (npc.base === "creature_slasher") {
+              npc.mode = "attack";
               if (!npc.slasherAttacking) {
                 npc.mode = "attack";
                 npc.attackStarted = now;
@@ -6206,14 +6472,26 @@
             } else {
               npc.mode = "attack";
               if (now >= npc.nextAttackAt) {
-                npc.attackStarted = now;
-                npc.attackUntil = now + NPC_ATTACK_MS;
-                npc.nextAttackAt = now + NPC_ATTACK_MS;
-                
-                npc.damageDealt = false;
-                npc.damageTarget = target;
-                npc.damageDx = dx;
-                npc.damageDy = dy;
+                // Knights have a 30% chance to defend instead of attacking when close
+                if (isKnight && Math.random() < 0.30) {
+                  npc.mode = "defense";
+                  npc.defenseUntil = now + 1000; // block for 1s
+                  npc.nextAttackAt = now + 1200;
+                } else {
+                  npc.attackStarted = now;
+                  npc.attackUntil = now + NPC_ATTACK_MS;
+                  npc.nextAttackAt = now + NPC_ATTACK_MS;
+                  
+                  // Knights: 25% chance to do a special attack animation
+                  if (isKnight && Math.random() < 0.25) {
+                    npc.specialAttackUntil = now + 1500; // show special_attack anim for 1.5s
+                  }
+                  
+                  npc.damageDealt = false;
+                  npc.damageTarget = target;
+                  npc.damageDx = dx;
+                  npc.damageDy = dy;
+                }
               }
             }
           }
@@ -6749,12 +7027,32 @@
       const now = performance.now();
       
       // Spawn blood splats if hitting one of the three new night monsters
-      if (["creature_bear", "creature_crawler", "creature_slasher"].includes(slime.base)) {
+      if (["creature_bear", "creature_crawler", "creature_slasher", "knight_orange", "knight_green", "knight_blue"].includes(slime.base)) {
         spawnBloodSplats(slime.x, slime.y, 10 + Math.floor(Math.random() * 6));
       }
       
-      slime.hp = Math.max(0, slime.hp - (attacker?.attackDamage || PET_DAMAGE));
-      playHitSound();
+      const isKnight = ["knight_orange", "knight_green", "knight_blue"].includes(slime.base);
+      let dmg = attacker?.attackDamage || PET_DAMAGE;
+      
+      // If enemy knight blocks player attack
+      if (isKnight && slime.mode !== "die") {
+        if (Math.random() < 0.70) {
+          // Blocked! Reduce damage to 0 and force defense animation for 1s
+          dmg = 0;
+          slime.defenseUntil = now + 1000;
+          slime.mode = "defense";
+          // Play special block / hit sound
+          playHitSound(); 
+        } else {
+          // Normal hit: still trigger shield response after getting hit
+          slime.defenseUntil = now + 800;
+        }
+      }
+
+      slime.hp = Math.max(0, slime.hp - dmg);
+      if (dmg > 0) {
+        playHitSound();
+      }
       slime.hitStarted = now;
       slime.hitDir = state.attackDir === "left" ? -1 : 1;
       if (attacker && petSlimes.includes(attacker)) {
@@ -6768,7 +7066,7 @@
       slime.dead = true;
       slime.deadAt = now;
       slime.killer = attacker;
-      if (["creature_bear", "creature_crawler", "creature_slasher"].includes(slime.base)) {
+      if (["creature_bear", "creature_crawler", "creature_slasher", "knight_orange", "knight_green", "knight_blue"].includes(slime.base)) {
         playMonsterDeathSound();
       } else {
         playDeathSound();
@@ -6881,7 +7179,7 @@
         triggerDie();
         return;
       }
-      if (["arrowup", "arrowdown", "arrowleft", "arrowright", "w", "a", "s", "d"].includes(k)) {
+      if (["arrowup", "arrowdown", "arrowleft", "arrowright", "w", "a", "s", "d", "o", "p"].includes(k)) {
         if (on) state.demo = false;
         on ? keys.add(k) : keys.delete(k);
       }
@@ -7218,7 +7516,25 @@
       state.wasMoving = Boolean(moving);
       const dying = now < state.dieUntil;
       const stopping = !dying && !attacking && !moving && now < state.stopUntil;
-      state.mode = dying ? "die" : attacking ? "attack" : moving ? "run" : stopping ? state.stopMode : "idle";
+      
+      const isKnight = ["knight_orange", "knight_green", "knight_blue"].includes(cfg.base);
+      if (dying) {
+        state.mode = "die";
+      } else if (attacking) {
+        state.mode = "attack";
+      } else if (isKnight && pressed("o")) {
+        if (!state.hitStarted || state.mode !== "hit") state.hitStarted = now;
+        state.mode = "hit";
+      } else if (isKnight && pressed("p")) {
+        if (!state.defenseStarted || state.mode !== "defense") state.defenseStarted = now;
+        state.mode = "defense";
+      } else if (moving) {
+        state.mode = "run";
+      } else if (stopping) {
+        state.mode = state.stopMode;
+      } else {
+        state.mode = "idle";
+      }
 
       updateRoamingNPCs(now, dt);
       updatePetSlimes(now, dt);
@@ -7451,7 +7767,8 @@
       }
 
       // Draw real-time HUD threat warning on the right side if a dormant night creature is pursuing the player
-      const activeThreats = roamingNPCs.filter(n => n.isNightMonster && !n.dead && !n.isDormant && n.aggroTarget === "player" && (n.base === "creature_bear" || n.base === "creature_slasher"));
+      const KNIGHT_BASES = ["knight_orange", "knight_green", "knight_blue"];
+      const activeThreats = roamingNPCs.filter(n => n.isNightMonster && !n.dead && !n.isDormant && n.aggroTarget === "player" && (n.base === "creature_bear" || n.base === "creature_slasher" || KNIGHT_BASES.includes(n.base)));
       if (activeThreats.length > 0) {
         ctx.save();
         ctx.textAlign = "right";
@@ -7463,7 +7780,13 @@
         ctx.font = "8px 'Courier New', monospace";
         let yOffset = 50;
         activeThreats.forEach(threat => {
-          const name = threat.base === "creature_bear" ? "FLESH BEAR" : "FLESH SLASHER";
+          let name;
+          if (threat.base === "creature_bear") name = "FLESH BEAR";
+          else if (threat.base === "creature_slasher") name = "FLESH SLASHER";
+          else if (threat.base === "knight_orange") name = "ORANGE KNIGHT";
+          else if (threat.base === "knight_green") name = "GREEN KNIGHT";
+          else if (threat.base === "knight_blue") name = "BLUE KNIGHT";
+          else name = "UNKNOWN";
           const dist = Math.round(Math.hypot(state.x - threat.x, state.y - threat.y));
           ctx.fillText(`» ${name} (DIST: ${dist}m)`, VIEW_W - 16, yOffset);
           yOffset += 10;
@@ -7781,6 +8104,26 @@
         petChanceVal.textContent = `${val}%`;
       });
     }
+
+    // ── Enemy stat sliders ──────────────────────────────────────────
+    [
+      { id: "knight-size-slider", valId: "knight-size-value", fmt: v => `${parseFloat(v).toFixed(2)}x` },
+      { id: "knight-hp-slider",   valId: "knight-hp-value",   fmt: v => v },
+      { id: "knight-dmg-slider",  valId: "knight-dmg-value",  fmt: v => v },
+      { id: "bear-hp-slider",     valId: "bear-hp-value",     fmt: v => v },
+      { id: "bear-dmg-slider",    valId: "bear-dmg-value",    fmt: v => v },
+      { id: "slasher-hp-slider",  valId: "slasher-hp-value",  fmt: v => v },
+      { id: "slasher-dmg-slider", valId: "slasher-dmg-value", fmt: v => v },
+      { id: "spider-dmg-slider",  valId: "spider-dmg-value",  fmt: v => v },
+    ].forEach(({ id, valId, fmt }) => {
+      const slider = document.getElementById(id);
+      const span   = document.getElementById(valId);
+      if (slider && span) {
+        slider.addEventListener("input", e => {
+          span.textContent = fmt(parseInt(e.target.value, 10));
+        });
+      }
+    });
     
     buildbarClose.addEventListener("click", () => {
       playUiClickSound();
