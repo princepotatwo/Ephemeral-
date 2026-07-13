@@ -1,5 +1,5 @@
 // Service Worker — Offline-first cache for Ethereal RPG
-const CACHE_NAME = "ethereal-v4";
+const CACHE_NAME = "ethereal-v1.20";
 
 // Shell files to precache on install
 const PRECACHE = [
