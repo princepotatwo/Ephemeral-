@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Bubu & Dudu Frame Inspector</title>
+  <style>
+    body {
+      background: #121214;
+      color: #fafafa;
+      font-family: sans-serif;
+      margin: 0;
+      padding: 24px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 8px;
+      color: #ffb74d;
+    }
+    p.desc {
+      text-align: center;
+      color: #b0bec5;
+      max-width: 600px;
+      margin: 0 auto 24px auto;
+    }
+    .main-layout {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .panel-container {
+      display: flex;
+      gap: 24px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .controls, .player-panel {
+      background: #1e1e24;
+      padding: 16px;
+      border-radius: 12px;
+      border: 1.5px solid #37474f;
+      min-width: 300px;
+      flex: 1;
+    }
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    label {
+      font-weight: bold;
+      color: #ffcc80;
+      font-size: 0.9rem;
+    }
+    select, input[type="range"] {
+      background: #2b2b36;
+      color: #fff;
+      border: 1px solid #455a64;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 1rem;
+      cursor: pointer;
+      outline: none;
+    }
+    select:focus {
+      border-color: #ffb74d;
+    }
+    .player-preview {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .player-canvas-container {
+      width: 200px;
+      height: 240px;
+      background: #2c2c35;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+      border: 2px solid #ffb74d;
+      overflow: hidden;
+    }
+    .player-canvas-container canvas {
+      image-rendering: pixelated;
+      max-width: 100%;
+      max-height: 100%;
+    }
+    .player-buttons {
+      display: flex;
+      gap: 8px;
+    }
+    button {
+      background: #3e2723;
+      color: #ffe0b2;
+      border: 1.5px solid #d7ccc8;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.2s ease;
+    }
+    button:hover {
+      background: #5d4037;
+      color: #fff;
+    }
+    .frame-strip {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      justify-content: center;
+      margin-top: 24px;
+    }
+    .frame-card {
+      background: #1e1e24;
+      border-radius: 12px;
+      border: 1.5px solid #37474f;
+      padding: 12px;
+      width: 130px;
+      text-align: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+    .frame-number {
+      font-size: 1.05rem;
+      font-weight: bold;
+      color: #ffb74d;
+      margin-bottom: 8px;
+    }
+    .canvas-container {
+      width: 110px;
+      height: 130px;
+      background: #2c2c35;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+      overflow: hidden;
+    }
+    .canvas-container canvas {
+      image-rendering: pixelated;
+      max-width: 100%;
+      max-height: 100%;
+    }
+    .frame-meta {
+      font-size: 0.75rem;
+      color: #90a4ae;
+      margin-top: 8px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Bubu & Dudu Frame Inspector</h1>
+  <p class="desc">
+    Inspect each frame of the walk, idle, and attack animations individually. Choose a character, mode, and direction. Define a start and end frame to loop a specific sequence and see how it animates!
+  </p>
+
+  <div class="main-layout">
+    <div class="panel-container">
+      <!-- Left Panel: Configuration -->
+      <div class="controls">
+        <div class="control-group">
+          <label for="char-select">Character</label>
+          <select id="char-select" onchange="onConfigChange()">
+            <option value="bubu">Bubu the Panda</option>
+            <option value="dudu">Dudu the Bear</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label for="mode-select">Animation Mode</label>
+          <select id="mode-select" onchange="onConfigChange()">
+            <option value="idle">Idle Loop</option>
+            <option value="run">Walk Loop</option>
+            <option value="attack">Attack Action</option>
+            <option value="hit">Hurt Action</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label for="dir-select">Direction</label>
+          <select id="dir-select" onchange="onConfigChange()">
+            <option value="left">Left Facing</option>
+            <option value="right">Right Facing</option>
+            <option value="front">Front Facing</option>
+            <option value="back">Back Facing</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Right Panel: Custom Playback Range -->
+      <div class="player-panel">
+        <h3 style="margin-top: 0; color: #ffb74d; text-align: center;">Loop Range Tester</h3>
+        <div style="display: flex; gap: 16px; justify-content: center; margin-bottom: 12px;">
+          <div class="control-group" style="margin: 0;">
+            <label for="start-frame">Start Frame</label>
+            <select id="start-frame" onchange="updatePlaybackRange()"></select>
+          </div>
+          <div class="control-group" style="margin: 0;">
+            <label for="end-frame">End Frame</label>
+            <select id="end-frame" onchange="updatePlaybackRange()"></select>
+          </div>
+        </div>
+
+        <div class="control-group" style="align-items: center;">
+          <label for="fps-range">Speed (FPS: <span id="fps-val">12</span>)</label>
+          <input type="range" id="fps-range" min="1" max="60" value="12" style="width: 80%;" oninput="updateFps(this.value)">
+        </div>
+
+        <div class="player-preview">
+          <div class="player-canvas-container">
+            <canvas id="player-canvas" width="250" height="300"></canvas>
+          </div>
+          <div class="player-buttons">
+            <button id="play-btn" onclick="togglePlay()">Pause</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Strip: Individual Frame Grid -->
+    <div class="frame-strip">
+      <!-- Loaded dynamically -->
+    </div>
+  </div>
+
+  <script>
+    const counts = {
+      bubu: { idle: 13, idle2: 25, run: 16, attack: 6, hit: 16 },
+      dudu: { idle: 12, run: 12, attack: 6, hit: 24 }
+    };
+
+    let playFrames = [];
+    let startFrameIdx = 0;
+    let endFrameIdx = 0;
+    let currentPlayIdx = 0;
+    let isPlaying = true;
+    let playbackTimeout = null;
+    let fps = 12;
+
+    function onConfigChange() {
+      const char = document.getElementById('char-select').value;
+      const mode = document.getElementById('mode-select').value;
+      const count = counts[char][mode];
+
+      // Update start and end frame dropdown selects
+      const startSelect = document.getElementById('start-frame');
+      const endSelect = document.getElementById('end-frame');
+      startSelect.innerHTML = '';
+      endSelect.innerHTML = '';
+
+      for (let i = 0; i < count; i++) {
+        startSelect.add(new Option(`Frame ${i}`, i));
+        endSelect.add(new Option(`Frame ${i}`, i));
+      }
+
+      // Default range: full loop
+      startSelect.value = 0;
+      endSelect.value = count - 1;
+
+      renderFrames();
+    }
+
+    function updatePlaybackRange() {
+      startFrameIdx = parseInt(document.getElementById('start-frame').value);
+      endFrameIdx = parseInt(document.getElementById('end-frame').value);
+      
+      // Keep indices ordered
+      if (startFrameIdx > endFrameIdx) {
+        const temp = startFrameIdx;
+        startFrameIdx = endFrameIdx;
+        endFrameIdx = temp;
+        document.getElementById('start-frame').value = startFrameIdx;
+        document.getElementById('end-frame').value = endFrameIdx;
+      }
+
+      currentPlayIdx = startFrameIdx;
+    }
+
+    function updateFps(val) {
+      fps = parseInt(val);
+      document.getElementById('fps-val').textContent = fps;
+      if (isPlaying) {
+        restartTimer();
+      }
+    }
+
+    function togglePlay() {
+      isPlaying = !isPlaying;
+      document.getElementById('play-btn').textContent = isPlaying ? "Pause" : "Play";
+      if (isPlaying) {
+        tickPlayback();
+      } else {
+        clearTimeout(playbackTimeout);
+      }
+    }
+
+    function restartTimer() {
+      clearTimeout(playbackTimeout);
+      tickPlayback();
+    }
+
+    function renderFrames() {
+      const char = document.getElementById('char-select').value;
+      const mode = document.getElementById('mode-select').value;
+      const dir = document.getElementById('dir-select').value;
+      const count = counts[char][mode];
+
+      const strip = document.querySelector('.frame-strip');
+      strip.innerHTML = ''; // Clear previous
+
+      playFrames = [];
+
+      for (let i = 0; i < count; i++) {
+        const card = document.createElement('div');
+        card.className = 'frame-card';
+        card.innerHTML = `
+          <div class="frame-number">Frame ${i}</div>
+          <div class="canvas-container">
+            <canvas id="canvas-${i}" width="250" height="300"></canvas>
+          </div>
+          <div class="frame-meta">${char}_highres</div>
+        `;
+        strip.appendChild(card);
+
+        const canvas = document.getElementById(`canvas-${i}`);
+        const ctx = canvas.getContext('2d');
+        const img = new Image();
+        img.src = `assets/${char}_highres/${mode}_${dir}_frame_${i}.png`;
+        img.onload = () => {
+          ctx.drawImage(img, 0, 0);
+        };
+        playFrames.push(img);
+      }
+
+      updatePlaybackRange();
+      restartTimer();
+    }
+
+    function tickPlayback() {
+      const canvas = document.getElementById('player-canvas');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, 250, 300);
+
+      // Play the current frame
+      const frameImg = playFrames[currentPlayIdx];
+      if (frameImg && frameImg.complete) {
+        ctx.drawImage(frameImg, 0, 0);
+      }
+
+      // Advance
+      currentPlayIdx++;
+      if (currentPlayIdx > endFrameIdx || currentPlayIdx < startFrameIdx) {
+        currentPlayIdx = startFrameIdx;
+      }
+
+      if (isPlaying) {
+        playbackTimeout = setTimeout(tickPlayback, 1000 / fps);
+      }
+    }
+
+    // Initial render setup
+    onConfigChange();
+  </script>
+</body>
+</html>

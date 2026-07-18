@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Bubu Rendering Quality Comparison</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0f0c09;
+      color: #e8ddd0;
+      font-family: 'Inter', system-ui, sans-serif;
+      padding: 32px 24px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 24px;
+      max-width: 800px;
+    }
+    header h1 {
+      font-size: 26px;
+      font-weight: 700;
+      color: #f5e6cb;
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+    header p {
+      font-size: 14px;
+      color: #b09a84;
+      line-height: 1.5;
+    }
+    
+    .toolbar {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 32px;
+      background: #1c1510;
+      padding: 12px 20px;
+      border: 1px solid #3c2e20;
+      border-radius: 12px;
+      align-items: center;
+    }
+    .toolbar-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .toolbar-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #c8a96e;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .btn {
+      background: #2f231a;
+      border: 1px solid #4a3829;
+      color: #e0d2bf;
+      padding: 6px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      transition: all 0.15s;
+    }
+    .btn:hover {
+      background: #413125;
+      border-color: #c8a96e;
+    }
+    .btn.active {
+      background: #c8a96e;
+      border-color: #c8a96e;
+      color: #0f0c09;
+    }
+    
+    .comparison-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+      width: 100%;
+      max-width: 1000px;
+    }
+    .option-card {
+      background: #16120e;
+      border: 1px solid #2d2319;
+      border-radius: 14px;
+      padding: 20px;
+      width: 280px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .option-card:hover {
+      border-color: #c8a96e;
+      transform: translateY(-2px);
+    }
+    .option-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #f5e6cb;
+      margin-bottom: 6px;
+      text-align: center;
+    }
+    .option-tag {
+      font-size: 10px;
+      font-weight: 700;
+      color: #c8a96e;
+      background: #2b1f15;
+      padding: 2px 8px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+      letter-spacing: 0.5px;
+    }
+    
+    .preview-box {
+      width: 100%;
+      height: 200px;
+      background: #729a6f; /* Green grass-like background */
+      border: 2px solid #2d2319;
+      border-radius: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.2);
+    }
+    .preview-box::before {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle, transparent 20%, #729a6f 120%);
+      pointer-events: none;
+    }
+    canvas {
+      image-rendering: auto;
+    }
+    canvas.pixelated {
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+    
+    .option-desc {
+      font-size: 12px;
+      color: #a89785;
+      text-align: center;
+      margin-top: 16px;
+      line-height: 1.5;
+      min-height: 54px;
+    }
+    .zoom-indicator {
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      background: rgba(0,0,0,0.6);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-family: monospace;
+      color: #e0d2bf;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>🐼 Bubu Rendering Quality Comparison</h1>
+    <p>Compare how Bubu looks under different rendering modes, zoom levels, and styles to select the best visual quality.</p>
+  </header>
+
+  <div class="toolbar">
+    <div class="toolbar-group">
+      <span class="toolbar-label">Animation:</span>
+      <button class="btn active" id="anim-walk">Walk / Run</button>
+      <button class="btn" id="anim-idle">Idle</button>
+    </div>
+    <div class="toolbar-group">
+      <span class="toolbar-label">Zoom Level:</span>
+      <button class="btn" id="zoom-far">Far (0.5x)</button>
+      <button class="btn active" id="zoom-normal">Normal (1.0x)</button>
+      <button class="btn" id="zoom-close">Close (3.0x)</button>
+    </div>
+  </div>
+
+  <div class="comparison-grid">
+    <!-- Option A -->
+    <div class="option-card">
+      <div class="option-title">Option A: High-Res Smooth (Small)</div>
+      <div class="option-tag">Bilinear Smoothing</div>
+      <div class="preview-box">
+        <canvas id="canvas-a"></canvas>
+        <div class="zoom-indicator" id="zi-a">1.0x</div>
+      </div>
+      <div class="option-desc">
+        Uses original 108x148 frames with smoothing (0.25x scale). Blurry at normal zoom.
+      </div>
+    </div>
+
+    <!-- Option C -->
+    <div class="option-card">
+      <div class="option-title">Option C: Retro Pixel-Art (Small)</div>
+      <div class="option-tag">Solid 1px Outline</div>
+      <div class="preview-box">
+        <canvas id="canvas-c" class="pixelated"></canvas>
+        <div class="zoom-indicator" id="zi-c">1.0x</div>
+      </div>
+      <div class="option-desc">
+        Renders downscaled frames with solid retro pixel colors and bold outlines. Sharp at any zoom level.
+      </div>
+    </div>
+
+    <!-- Option D -->
+    <div class="option-card">
+      <div class="option-title">Option D: Dynamic Mipmapped</div>
+      <div class="option-tag">Smart Hybrid</div>
+      <div class="preview-box">
+        <canvas id="canvas-d"></canvas>
+        <div class="zoom-indicator" id="zi-d">1.0x</div>
+      </div>
+      <div class="option-desc">
+        Switches: High-Res (Option A) at Close (3.0x) zoom, and Outlined Pixel Art (Option C) at Normal and Far.
+      </div>
+    </div>
+
+    <!-- Option E -->
+    <div class="option-card">
+      <div class="option-title">Option E: Larger Cartoon (1.5x)</div>
+      <div class="option-tag">Upscaled Vector</div>
+      <div class="preview-box">
+        <canvas id="canvas-e"></canvas>
+        <div class="zoom-indicator" id="zi-e">1.0x</div>
+      </div>
+      <div class="option-desc">
+        Renders Bubu 1.5x larger on screen. Keeps original vector lines sharp and smooth even at normal zoom!
+      </div>
+    </div>
+
+    <!-- Option F -->
+    <div class="option-card">
+      <div class="option-title">Option F: Thick Outlined (Hornet Style)</div>
+      <div class="option-tag">Thick Outline / Smooth</div>
+      <div class="preview-box">
+        <canvas id="canvas-f"></canvas>
+        <div class="zoom-indicator" id="zi-f">1.0x</div>
+      </div>
+      <div class="option-desc">
+        Applies a thick, high-contrast outline (like Hornet Study). Keeps Bubu smooth and perfectly defined even at normal zoom!
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let currentAnim = "run"; // run or idle
+    let currentZoom = 1.0;
+    let t = 0;
+    const countMap = {
+      run: 16,
+      idle: 13
+    };
+    const fpsMap = {
+      run: 24,
+      idle: 12
+    };
+
+    // Preload all frames for the three modes
+    const frames = {
+      highres: { run: [], idle: [] },
+      lowres: { run: [], idle: [] },
+      pixel: { run: [], idle: [] },
+      outlined: { run: [], idle: [] }
+    };
+
+    const loaders = [];
+    ['run', 'idle'].forEach(mode => {
+      const count = countMap[mode];
+      for(let i=0; i<count; i++) {
+        // High-Res
+        const imgH = new Image();
+        imgH.src = `assets/bubu_highres/${mode}_front_frame_${i}.png`;
+        frames.highres[mode].push(imgH);
+        loaders.push(new Promise(res => imgH.onload = res));
+
+        // Low-Res
+        const imgL = new Image();
+        imgL.src = `assets/bubu/${mode}_front_frame_${i}.png`;
+        frames.lowres[mode].push(imgL);
+        loaders.push(new Promise(res => imgL.onload = res));
+
+        // Pixel-art Outlined
+        const imgP = new Image();
+        imgP.src = `assets/bubu_pixel/${mode}_front_frame_${i}.png`;
+        frames.pixel[mode].push(imgP);
+        loaders.push(new Promise(res => imgP.onload = res));
+
+        // Bold Outlined
+        const imgO = new Image();
+        imgO.src = `assets/bubu_outlined/${mode}_front_frame_${i}.png`;
+        frames.outlined[mode].push(imgO);
+        loaders.push(new Promise(res => imgO.onload = res));
+      }
+    });
+
+    // Control buttons
+    const btnWalk = document.getElementById("anim-walk");
+    const btnIdle = document.getElementById("anim-idle");
+    const btnZoomFar = document.getElementById("zoom-far");
+    const btnZoomNormal = document.getElementById("zoom-normal");
+    const btnZoomClose = document.getElementById("zoom-close");
+
+    btnWalk.onclick = () => {
+      currentAnim = "run";
+      btnWalk.classList.add("active");
+      btnIdle.classList.remove("active");
+    };
+    btnIdle.onclick = () => {
+      currentAnim = "idle";
+      btnIdle.classList.add("active");
+      btnWalk.classList.remove("active");
+    };
+    
+    function setZoom(val, btn) {
+      currentZoom = val;
+      [btnZoomFar, btnZoomNormal, btnZoomClose].forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      document.getElementById("zi-a").textContent = val + "x";
+      document.getElementById("zi-c").textContent = val + "x";
+      document.getElementById("zi-d").textContent = val + "x";
+      document.getElementById("zi-e").textContent = val + "x";
+      document.getElementById("zi-f").textContent = val + "x";
+    }
+    
+    btnZoomFar.onclick = () => setZoom(0.5, btnZoomFar);
+    btnZoomNormal.onclick = () => setZoom(1.0, btnZoomNormal);
+    btnZoomClose.onclick = () => setZoom(3.0, btnZoomClose);
+
+    function tick() {
+      t += 1/60;
+      
+      const frameListLength = countMap[currentAnim];
+      const fps = fpsMap[currentAnim];
+      const index = Math.floor(t * fps) % frameListLength;
+      
+      // Draw Option A (High-Res Smooth, Small)
+      drawOption("canvas-a", frames.highres[currentAnim][index], true, 250, 300, 0.25);
+      
+      // Draw Option C (Outlined Retro Pixel Art, Small)
+      drawOption("canvas-c", frames.pixel[currentAnim][index], false, 41, 50, 0.75);
+      
+      // Draw Option D (Dynamic Mipmapped)
+      if (currentZoom === 3.0) {
+        drawOption("canvas-d", frames.highres[currentAnim][index], true, 250, 300, 0.25);
+      } else {
+        drawOption("canvas-d", frames.pixel[currentAnim][index], false, 41, 50, 0.75);
+      }
+
+      // Draw Option E (Small Smooth Cartoon)
+      drawOption("canvas-e", frames.highres[currentAnim][index], true, 250, 300, 0.1875);
+      
+      // Draw Option F (Thick Outlined, Hornet Style)
+      drawOption("canvas-f", frames.outlined[currentAnim][index], true, 250, 300, 0.25);
+      
+      requestAnimationFrame(tick);
+    }
+
+    function drawOption(canvasId, img, smooth, baseW, baseH, ratio) {
+      const canvas = document.getElementById(canvasId);
+      const ctx = canvas.getContext("2d");
+      
+      if (!img || !img.complete || img.naturalWidth === 0) return;
+      
+      const drawW = Math.round(baseW * ratio * currentZoom);
+      const drawH = Math.round(baseH * ratio * currentZoom);
+      
+      canvas.width = drawW + 20;
+      canvas.height = drawH + 20;
+      
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.imageSmoothingEnabled = smooth;
+      if (!smooth) {
+        canvas.classList.add("pixelated");
+      } else {
+        canvas.classList.remove("pixelated");
+      }
+      
+      const x = Math.round((canvas.width - drawW) / 2);
+      const y = Math.round((canvas.height - drawH) / 2);
+      
+      ctx.drawImage(img, x, y, drawW, drawH);
+    }
+
+    Promise.all(loaders).then(() => {
+      tick();
+    });
+  </script>
+</body>
+</html>
