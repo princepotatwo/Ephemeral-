@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Bubu & Dudu Direction Previewer</title>
+  <style>
+    body {
+      background: #1e1e24;
+      color: #fafafa;
+      font-family: sans-serif;
+      margin: 0;
+      padding: 24px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 8px;
+      color: #ffb74d;
+    }
+    p.desc {
+      text-align: center;
+      color: #b0bec5;
+      max-width: 600px;
+      margin: 0 auto 24px auto;
+    }
+    .grid {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .row {
+      background: #2d2d34;
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border: 1.5px solid #42424a;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .row-info {
+      flex: 1;
+    }
+    .row-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #ffcc80;
+      text-transform: capitalize;
+    }
+    .row-meta {
+      font-size: 0.9rem;
+      color: #90a4ae;
+      margin-top: 4px;
+    }
+    .anims {
+      display: flex;
+      gap: 24px;
+    }
+    .anim-box {
+      text-align: center;
+      background: #1a1a1f;
+      border-radius: 8px;
+      padding: 8px;
+      width: 140px;
+      border: 1px dashed #5c5c66;
+    }
+    .anim-box.flipped-view {
+      border-color: #ff7043;
+    }
+    .canvas-container {
+      width: 120px;
+      height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 8px auto;
+      background: #25252b;
+      border-radius: 6px;
+      position: relative;
+      overflow: hidden;
+    }
+    canvas {
+      image-rendering: pixelated;
+      max-width: 100%;
+      max-height: 100%;
+    }
+    .box-label {
+      font-size: 0.85rem;
+      color: #cfd8dc;
+      font-weight: bold;
+    }
+    .btn-group {
+      margin-top: 8px;
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+    }
+    button {
+      background: #3e2723;
+      color: #ffe0b2;
+      border: 1.5px solid #d7ccc8;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.2s ease;
+    }
+    button:hover {
+      background: #5d4037;
+      color: #fff;
+    }
+    button.swap-btn {
+      background: #ff7043;
+      color: #fff;
+      border-color: #ffab91;
+    }
+    button.swap-btn:hover {
+      background: #f4511e;
+    }
+    .action-panel {
+      max-width: 900px;
+      margin: 24px auto 0 auto;
+      background: #263238;
+      border-radius: 12px;
+      padding: 16px;
+      border: 1.5px solid #37474f;
+    }
+    .action-panel h3 {
+      margin-top: 0;
+      color: #ffb74d;
+    }
+    #cmd-box {
+      background: #1e1e1e;
+      color: #a5d6a7;
+      padding: 12px;
+      border-radius: 6px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      word-break: break-all;
+      border: 1px solid #43a047;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Bubu & Dudu Direction Previewer</h1>
+  <p class="desc">
+    Review the walk, idle, and attack animations below. The left column shows the asset loaded when moving left (should look left), and the right column shows the asset loaded when moving right (should look right). Use the **Swap Directions** button to interactively flip any row and generate the correct python command to apply it!
+  </p>
+
+  <div class="grid">
+    <!-- Rows will be dynamically loaded -->
+  </div>
+
+  <div class="action-panel">
+    <h3>Generated Swap Command</h3>
+    <p>If you're happy with the preview states below, copy this command and paste it to apply the swaps permanently:</p>
+    <div id="cmd-box">No swaps pending.</div>
+  </div>
+
+  <script>
+    const config = [
+      { character: 'bubu', mode: 'idle', count: 13, swapped: false },
+      { character: 'bubu', mode: 'idle2', count: 25, swapped: false },
+      { character: 'bubu', mode: 'run', count: 16, swapped: false },
+      { character: 'bubu', mode: 'attack', count: 6, swapped: false },
+      { character: 'bubu', mode: 'hit', count: 16, swapped: false },
+      { character: 'dudu', mode: 'idle', count: 12, swapped: false },
+      { character: 'dudu', mode: 'run', count: 12, swapped: false },
+      { character: 'dudu', mode: 'attack', count: 6, swapped: false },
+      { character: 'dudu', mode: 'hit', count: 24, swapped: false }
+    ];
+
+    const grid = document.querySelector('.grid');
+
+    function updateCommand() {
+      const activeSwaps = config.filter(c => c.swapped);
+      const cmdBox = document.getElementById('cmd-box');
+      if (activeSwaps.length === 0) {
+        cmdBox.textContent = '# No swaps pending. Click "Swap Directions" to flip any row!';
+        return;
+      }
+      
+      let pyLines = [
+        "python3 - << 'EOF'",
+        "import os, shutil",
+        "def swap_files(folder, prefix, num_frames):",
+        "    for i in range(num_frames):",
+        "        left_path = f\"{folder}/{prefix}_left_frame_{i}.png\"",
+        "        right_path = f\"{folder}/{prefix}_right_frame_{i}.png\"",
+        "        if os.path.exists(left_path) and os.path.exists(right_path):",
+        "            temp_path = f\"{folder}/{prefix}_temp_frame_{i}.png\"",
+        "            shutil.move(left_path, temp_path)",
+        "            shutil.move(right_path, left_path)",
+        "            shutil.move(temp_path, right_path)"
+      ];
+
+      activeSwaps.forEach(s => {
+        pyLines.push(`\n# Swap ${s.character} ${s.mode}`);
+        pyLines.push(`for folder in ["assets/${s.character}_highres", "assets/${s.character}_outlined", "assets/${s.character}", "assets/${s.character}_pixel"]:`);
+        pyLines.push(`    swap_files(folder, "${s.mode}", ${s.count})`);
+      });
+
+      pyLines.push("print('Swaps completed successfully!')");
+      pyLines.push("EOF");
+      cmdBox.textContent = pyLines.join('\n');
+    }
+
+    config.forEach((row, index) => {
+      const rowDiv = document.createElement('div');
+      rowDiv.className = 'row';
+      rowDiv.id = `row-${index}`;
+      
+      rowDiv.innerHTML = `
+        <div class="row-info">
+          <div class="row-title">${row.character} - ${row.mode}</div>
+          <div class="row-meta">Frames: ${row.count}</div>
+          <div class="btn-group">
+            <button class="swap-btn" onclick="toggleRowSwap(${index})">🔄 Swap Directions</button>
+          </div>
+        </div>
+        <div class="anims">
+          <div class="anim-box" id="box-${index}-left">
+            <div class="canvas-container">
+              <canvas id="canvas-${index}-left" width="250" height="300"></canvas>
+            </div>
+            <div class="box-label">Loads on Move LEFT</div>
+          </div>
+          <div class="anim-box" id="box-${index}-right">
+            <div class="canvas-container">
+              <canvas id="canvas-${index}-right" width="250" height="300"></canvas>
+            </div>
+            <div class="box-label">Loads on Move RIGHT</div>
+          </div>
+        </div>
+      `;
+      grid.appendChild(rowDiv);
+
+      startAnimation(row, index);
+    });
+
+    function toggleRowSwap(index) {
+      config[index].swapped = !config[index].swapped;
+      
+      const leftBox = document.getElementById(`box-${index}-left`);
+      const rightBox = document.getElementById(`box-${index}-right`);
+      leftBox.classList.toggle('flipped-view', config[index].swapped);
+      rightBox.classList.toggle('flipped-view', config[index].swapped);
+      
+      updateCommand();
+    }
+
+    function startAnimation(row, rowIndex) {
+      const leftCanvas = document.getElementById(`canvas-${rowIndex}-left`);
+      const rightCanvas = document.getElementById(`canvas-${rowIndex}-right`);
+      const leftCtx = leftCanvas.getContext('2d');
+      const rightCtx = rightCanvas.getContext('2d');
+
+      const leftFrames = [];
+      const rightFrames = [];
+
+      for (let i = 0; i < row.count; i++) {
+        const imgL = new Image();
+        imgL.src = `assets/${row.character}_highres/${row.mode}_left_frame_${i}.png`;
+        leftFrames.push(imgL);
+
+        const imgR = new Image();
+        imgR.src = `assets/${row.character}_highres/${row.mode}_right_frame_${i}.png`;
+        rightFrames.push(imgR);
+      }
+
+      let frameIndex = 0;
+      function tick() {
+        leftCtx.clearRect(0, 0, 250, 300);
+        rightCtx.clearRect(0, 0, 250, 300);
+
+        const drawLeftFrame = config[rowIndex].swapped ? rightFrames[frameIndex] : leftFrames[frameIndex];
+        const drawRightFrame = config[rowIndex].swapped ? leftFrames[frameIndex] : rightFrames[frameIndex];
+
+        if (drawLeftFrame && drawLeftFrame.complete) {
+          leftCtx.drawImage(drawLeftFrame, 0, 0);
+        }
+        if (drawRightFrame && drawRightFrame.complete) {
+          rightCtx.drawImage(drawRightFrame, 0, 0);
+        }
+
+        frameIndex = (frameIndex + 1) % row.count;
+        setTimeout(tick, row.mode === 'attack' ? 70 : 100);
+      }
+      tick();
+    }
+
+    updateCommand();
+  </script>
+</body>
+</html>

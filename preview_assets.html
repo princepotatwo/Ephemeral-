@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Game Asset Frame Inspector</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0f0c09;
+      color: #e8ddd0;
+      font-family: 'Inter', system-ui, sans-serif;
+      padding: 28px 24px;
+      min-height: 100vh;
+    }
+    header { display: flex; align-items: baseline; gap: 16px; margin-bottom: 8px; }
+    header h1 { font-size: 22px; font-weight: 700; color: #f5e6cb; letter-spacing: -0.3px; }
+    header p { font-size: 13px; color: #7a6a58; }
+    .section-label {
+      font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+      color: #c8a96e; margin: 32px 0 12px; padding-bottom: 6px; border-bottom: 1px solid #2e2519;
+    }
+    .variant-group-label {
+      font-size: 12px; font-weight: 600; color: #b09070; margin: 16px 0 6px;
+      padding: 2px 8px; background: #1e1610; border-left: 3px solid #c8a96e; border-radius: 0 4px 4px 0;
+    }
+    .grid { display: flex; flex-wrap: wrap; gap: 14px; }
+    .card {
+      background: #1c160f; border: 1px solid #2d2519; border-radius: 10px;
+      padding: 14px; width: 200px; flex-shrink: 0; transition: border-color 0.15s;
+    }
+    .card:hover { border-color: #5c4b37; }
+    .card-title {
+      font-size: 11px; font-weight: 600; color: #e8c98a; margin-bottom: 10px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .preview-wrap {
+      display: flex; justify-content: center; align-items: center;
+      background: #0a0705; border: 1px dashed #2d2519; border-radius: 6px;
+      padding: 8px; margin-bottom: 10px; min-height: 80px;
+    }
+    canvas.preview { image-rendering: pixelated; }
+    .frames-strip {
+      display: flex; gap: 3px; overflow-x: auto; padding-bottom: 2px; margin-bottom: 8px;
+      scrollbar-width: thin; scrollbar-color: #3d3127 transparent;
+    }
+    .frames-strip canvas {
+      image-rendering: pixelated; border: 1px solid #2a1f15; border-radius: 3px;
+      cursor: pointer; flex-shrink: 0; transition: border-color 0.1s;
+    }
+    .frames-strip canvas:hover { border-color: #c8a96e; }
+    .frames-strip canvas.active { border-color: #e8a830; }
+    .controls { display: flex; align-items: center; gap: 8px; }
+    .btn {
+      background: #3a2e22; border: 1px solid #4e3d2e; color: #f0e0c8;
+      padding: 4px 10px; border-radius: 5px; cursor: pointer; font-size: 11px;
+      font-weight: 600; transition: background 0.15s; font-family: inherit;
+    }
+    .btn:hover { background: #4e3d2e; }
+    .meta { font-size: 10px; color: #6a5a48; flex: 1; text-align: right; }
+    .error-label { font-size: 10px; color: #a05050; text-align: center; padding: 8px; }
+    .var-row-label {
+      font-size: 10px; color: #6a5a48; margin: 8px 0 4px; font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>🎮 Asset Frame Inspector</h1>
+    <p>All barricade sheets · 36×64 px per frame · 4× preview</p>
+  </header>
+  <div id="root"></div>
+
+  <script>
+    const BARRICADE_VARIANTS = [
+      { num: 1, label: "Brick" },
+      { num: 2, label: "Spiked" },
+      { num: 3, label: "Wooden" },
+      { num: 4, label: "Iron" },
+    ];
+    const BARRICADE_DIRS = [
+      { prefix: "D", label: "Down (post facing player)" },
+      { prefix: "S", label: "Side (horizontal wall)" },
+      { prefix: "U", label: "Up (post back)" },
+    ];
+    const BARRICADE_STATES = [
+      { suffix: "_Build",   label: "Build" },
+      { suffix: "",         label: "Idle" },
+      { suffix: "_Destroy", label: "Destroy" },
+    ];
+
+    const OTHER_ASSETS = [
+      { section: "Predator Plants", items: [
+        { label: "Green Predator Idle",   path: "assets/predator_plants/PNG/Plant1/Idle/Plant1_Idle_full.png",     fw: 64, fh: 64 },
+        { label: "Green Predator Attack", path: "assets/predator_plants/PNG/Plant1/Attack/Plant1_Attack_full.png", fw: 64, fh: 64 },
+        { label: "Green Predator Death",  path: "assets/predator_plants/PNG/Plant1/Death/Plant1_Death_full.png",   fw: 64, fh: 64 },
+        { label: "Red Predator Idle",     path: "assets/predator_plants/PNG/Plant2/Idle/Plant2_Idle_full.png",     fw: 64, fh: 64 },
+        { label: "Red Predator Attack",   path: "assets/predator_plants/PNG/Plant2/Attack/Plant2_Attack_full.png", fw: 64, fh: 64 },
+        { label: "Blue Predator Idle",    path: "assets/predator_plants/PNG/Plant3/Idle/Plant3_Idle_full.png",     fw: 64, fh: 64 },
+        { label: "Blue Predator Attack",  path: "assets/predator_plants/PNG/Plant3/Attack/Plant3_Attack_full.png", fw: 64, fh: 64 },
+      ]},
+      { section: "Spikes", items: [
+        { label: "Spike Trap 1", path: "assets/magic_traps/1 Spikes/1.png", fw: 32, fh: 32 },
+        { label: "Spike Trap 2", path: "assets/magic_traps/1 Spikes/2.png", fw: 32, fh: 32 },
+        { label: "Spike Trap 3", path: "assets/magic_traps/1 Spikes/3.png", fw: 32, fh: 32 },
+        { label: "Spike Trap 4", path: "assets/magic_traps/1 Spikes/4.png", fw: 32, fh: 32 },
+      ]},
+      { section: "Lightning", items: [
+        { label: "Lightning 1", path: "assets/magic_traps/3 Lightning/1.png", fw: 160, fh: 160 },
+        { label: "Lightning 2", path: "assets/magic_traps/3 Lightning/2.png", fw: 160, fh: 160 },
+        { label: "Lightning 3", path: "assets/magic_traps/3 Lightning/3.png", fw: 160, fh: 160 },
+        { label: "Lightning 4", path: "assets/magic_traps/3 Lightning/4.png", fw: 160, fh: 160 },
+      ]},
+      { section: "Barrel", items: [
+        { label: "Barrel Idle",    path: "assets/magic_traps/4 Barrel/1.png",     fw: 48, fh: 48 },
+        { label: "Barrel Build",   path: "assets/magic_traps/4 Barrel/2.png",     fw: 48, fh: 48 },
+        { label: "Barrel Destroy", path: "assets/magic_traps/4 Barrel/3.png",     fw: 48, fh: 48 },
+        { label: "Barrel Boom 1",  path: "assets/magic_traps/4 Barrel/Boom1.png", fw: 48, fh: 48 },
+        { label: "Barrel Boom 2",  path: "assets/magic_traps/4 Barrel/Boom2.png", fw: 48, fh: 48 },
+        { label: "Barrel Boom 3",  path: "assets/magic_traps/4 Barrel/Boom3.png", fw: 48, fh: 48 },
+      ]},
+      { section: "Animated Traps", items: [
+        { label: "Pit Trap Spikes", path: "assets/animated_traps/Pit_Trap_Spikes.png", fw: 32, fh: 32 },
+        { label: "Push Trap Front", path: "assets/animated_traps/Push_Trap_Front.png", fw: 32, fh: 32 },
+        { label: "Push Trap Right", path: "assets/animated_traps/Push_Trap_Right.png", fw: 32, fh: 32 },
+        { label: "Spike Trap",      path: "assets/animated_traps/Spike Trap.png",      fw: 32, fh: 32 },
+        { label: "Bear Trap",       path: "assets/animated_traps/Bear_Trap.png",        fw: 32, fh: 32 },
+        { label: "Fire Trap",       path: "assets/animated_traps/Fire_Trap.png",        fw: 32, fh: 32 },
+      ]},
+    ];
+
+    let cardId = 0;
+
+    // Regular card (no transform)
+    function makeCard(label, path, fw, fh) {
+      return makeCardTransform(label, path, fw, fh, { rotate: 0, flipX: false });
+    }
+
+    // Card with canvas transform: rotate (radians) + optional flipX
+    function makeCardTransform(label, path, fw, fh, { rotate = 0, flipX = false } = {}) {
+      const id = cardId++;
+      // For rotated cards (90°), swap dw/dh so canvas fits
+      const rotated = Math.abs(rotate) > 0.1;
+      const scale = Math.max(1, Math.min(4, Math.floor(144 / fw), Math.floor(128 / fh)));
+      const dw = rotated ? fh * scale : fw * scale;
+      const dh = rotated ? fw * scale : fh * scale;
+
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `
+        <div class="card-title" title="${label}">${label}</div>
+        <div class="preview-wrap">
+          <canvas class="preview" id="pc-${id}" width="${dw}" height="${dh}"></canvas>
+        </div>
+        <div class="frames-strip" id="strip-${id}"></div>
+        <div class="controls">
+          <button class="btn" id="btn-${id}">⏸</button>
+          <span class="meta" id="meta-${id}">— / —</span>
+        </div>
+      `;
+
+      const img = new Image();
+      img.onload = () => {
+        const totalFrames = Math.max(1, Math.floor(img.width / fw));
+        const canvas = document.getElementById("pc-" + id);
+        const ctx = canvas.getContext("2d");
+        const strip = document.getElementById("strip-" + id);
+        const btn = document.getElementById("btn-" + id);
+        const meta = document.getElementById("meta-" + id);
+
+        let fi = 0, playing = true, activeThumb = null;
+        const THUMB = 28;
+
+        const drawTransformed = (tCtx, tW, tH, frameIdx, sw, sh) => {
+          tCtx.clearRect(0, 0, tW, tH);
+          tCtx.imageSmoothingEnabled = false;
+          tCtx.save();
+          tCtx.translate(tW / 2, tH / 2);
+          if (flipX) tCtx.scale(-1, 1);
+          if (rotate) tCtx.rotate(rotate);
+          // After rotation, the logical draw origin shifts
+          tCtx.drawImage(img, frameIdx * fw, 0, fw, fh,
+            -sw / 2, -sh / 2, sw, sh);
+          tCtx.restore();
+        };
+
+        const sw = rotated ? fh * scale : fw * scale;
+        const sh = rotated ? fw * scale : fh * scale;
+
+        const draw = () => {
+          drawTransformed(ctx, dw, dh, fi, sw, sh);
+          meta.textContent = "f " + (fi + 1) + "/" + totalFrames + " · " + fw + "×" + fh;
+        };
+
+        for (let i = 0; i < totalFrames; i++) {
+          const t = document.createElement("canvas");
+          t.width = THUMB; t.height = THUMB;
+          const tc = t.getContext("2d");
+          drawTransformed(tc, THUMB, THUMB, i, THUMB, THUMB);
+          t.title = "Frame " + (i + 1);
+          t.onclick = (function(idx, el) { return function() {
+            fi = idx; playing = false; btn.textContent = "▶"; draw();
+            if (activeThumb) activeThumb.classList.remove("active");
+            el.classList.add("active"); activeThumb = el;
+          }; })(i, t);
+          if (i === 0) { t.classList.add("active"); activeThumb = t; }
+          strip.appendChild(t);
+        }
+
+        draw();
+        setInterval(() => {
+          if (!playing) return;
+          fi = (fi + 1) % totalFrames;
+          if (activeThumb) activeThumb.classList.remove("active");
+          activeThumb = strip.children[fi];
+          if (activeThumb) activeThumb.classList.add("active");
+          draw();
+        }, 160);
+
+        btn.onclick = () => { playing = !playing; btn.textContent = playing ? "⏸" : "▶"; };
+      };
+      img.onerror = () => {
+        const wrap = card.querySelector(".preview-wrap");
+        wrap.innerHTML = '<div class="error-label">⚠ Not found<br><small>' + path + '</small></div>';
+      };
+      img.src = path;
+      return card;
+    }
+
+    const root = document.getElementById("root");
+
+    // ── Barricades ──
+    const bSection = document.createElement("div");
+    bSection.className = "section-label";
+    bSection.textContent = "Barricades — 36×64 px per frame · Build: 6 frames (construct) · Idle: 12 damage states · Destroy: 6 frames (collapse)";
+    root.appendChild(bSection);
+
+    for (const dir of BARRICADE_DIRS) {
+      const dirLabel = document.createElement("div");
+      dirLabel.className = "variant-group-label";
+      dirLabel.textContent = dir.label;
+      root.appendChild(dirLabel);
+
+      for (const v of BARRICADE_VARIANTS) {
+        const varLabel = document.createElement("div");
+        varLabel.className = "var-row-label";
+        varLabel.textContent = "Variant " + v.num + " · " + v.label;
+        root.appendChild(varLabel);
+
+        const row = document.createElement("div");
+        row.className = "grid";
+        for (const st of BARRICADE_STATES) {
+          const path = "assets/magic_traps/2 Barricades/" + dir.prefix + "_" + v.num + st.suffix + ".png";
+          // Idle sheet has 12 damage-state frames (frame 0=full HP … frame 11=rubble)
+          // Build/Destroy sheets have 6 animation frames each
+          const label = st.suffix === "" ? st.label + " (12 damage frames, f0=full HP)" : st.label + " (6 anim frames)";
+          row.appendChild(makeCard(label, path, 36, 64));
+        }
+        root.appendChild(row);
+      }
+    }
+
+    // ── Side Barricade Transforms ──
+    const sideSection = document.createElement("div");
+    sideSection.className = "section-label";
+    sideSection.textContent = "Side Barricade · 4 Transform Modes (identify correct Left & Right)";
+    root.appendChild(sideSection);
+
+    const SIDE_VARIANTS = [
+      { num: 1, label: "Brick" },
+      { num: 2, label: "Spiked" },
+      { num: 3, label: "Wooden" },
+      { num: 4, label: "Iron" },
+    ];
+    const TRANSFORMS = [
+      { label: "① Raw (no transform)",         rotate: 0,            flipX: false },
+      { label: "② FlipX only (mirror raw)",    rotate: 0,            flipX: true  },
+      { label: "③ Rotate90 CCW (Left-facing)", rotate: -Math.PI / 2, flipX: false },
+      { label: "④ Rotate90 CW  (Right-facing)",rotate:  Math.PI / 2, flipX: false },
+      { label: "⑤ Rotate90+FlipX (mirror)",    rotate: -Math.PI / 2, flipX: true  },
+    ];
+
+    for (const sv of SIDE_VARIANTS) {
+      const svLabel = document.createElement("div");
+      svLabel.className = "var-row-label";
+      svLabel.textContent = "S_" + sv.num + " · " + sv.label + " · using Destroy f0 (idle frame)";
+      root.appendChild(svLabel);
+
+      const row = document.createElement("div");
+      row.className = "grid";
+      const path = "assets/magic_traps/2 Barricades/S_" + sv.num + "_Destroy.png";
+      for (const t of TRANSFORMS) {
+        row.appendChild(makeCardTransform(t.label, path, 36, 64, { rotate: t.rotate, flipX: t.flipX }));
+      }
+      root.appendChild(row);
+    }
+
+    // ── Other sections ──
+    for (const section of OTHER_ASSETS) {
+      const sl = document.createElement("div");
+      sl.className = "section-label";
+      sl.textContent = section.section;
+      root.appendChild(sl);
+
+      const grid = document.createElement("div");
+      grid.className = "grid";
+      for (const a of section.items) {
+        grid.appendChild(makeCard(a.label, a.path, a.fw, a.fh));
+      }
+      root.appendChild(grid);
+    }
+  </script>
+</body>
+</html>
