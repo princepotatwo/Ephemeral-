@@ -586,6 +586,12 @@
         <button id="toggle-time-btn" class="time-toggle-btn" type="button" style="padding: 6px 12px; font-weight: 600; border-radius: 8px; border: 1px solid #c2b399; background: #fffcf8; color: #5c4b37; cursor: pointer; transition: all 0.2s ease; font-family: monospace; font-size: 11px;">
           ☀️ Switch to Night
         </button>
+        <button id="toggle-hitbox-btn" class="time-toggle-btn" type="button" style="padding: 6px 12px; font-weight: 600; border-radius: 8px; border: 1px solid #c2b399; background: #fffcf8; color: #5c4b37; cursor: pointer; transition: all 0.2s ease; font-family: monospace; font-size: 11px;">
+          🟩 Show Hitboxes
+        </button>
+        <button id="toggle-sound-btn" class="time-toggle-btn" type="button" style="padding: 6px 12px; font-weight: 600; border-radius: 8px; border: 1px solid #c2b399; background: #fffcf8; color: #5c4b37; cursor: pointer; transition: all 0.2s ease; font-family: monospace; font-size: 11px;">
+          🔊 Sound: ON
+        </button>
         <div style="display: flex; align-items: center; gap: 6px;">
           <label for="night-darkness-slider" style="font-size: 11px; color: #7c6c56; font-family: monospace; font-weight: bold; user-select: none;">Night Darkness:</label>
           <input id="night-darkness-slider" type="range" min="0.0" max="1.0" step="0.02" value="0.82" style="width: 90px; cursor: pointer; accent-color: #5c4b37; outline: none; margin: 0;">
@@ -901,6 +907,7 @@
       "sprout_cat", "sprout_chicken", "sprout_cow",
       "green_slime", "blue_slime", "pink_slime", "split_slime", "gold_slime", "shadow_slime", "galaxy_slime", "huge_split_slime",
       "cutie_sheep",
+      "bubu", "dudu",
       "knight_orange", "knight_green", "knight_blue",
       ...pipoyaCharacters.map(([name]) => name),
       ...extraItchCharacters.map(([name]) => name),
@@ -926,6 +933,8 @@
       blue_slime: { label: "Blue Slime", rarity: "Uncommon", kind: "forest", base: "blue_slime", scale: 1.18, attackMs: 480 },
       pink_slime: { label: "Ribbon Slime", rarity: "Rare", kind: "forest", base: "pink_slime", scale: 1.18, attackMs: 480 },
       cutie_sheep: { label: "Cloud Sheep", rarity: "Legendary", kind: "forest", base: "cutie_sheep", scale: 0.65, attackMs: 480, sideView: true },
+      bubu: { label: "Bubu the Panda", rarity: "Legendary", kind: "forest", base: "bubu_highres", scale: 0.1875, attackMs: 375, sideView: true, smooth: true, idleFps: 12, runFps: 24, attackFps: 16 },
+      dudu: { label: "Dudu the Bear", rarity: "Legendary", kind: "forest", base: "dudu_highres", scale: 0.1875, attackMs: 375, sideView: true, smooth: true, idleFps: 12, runFps: 24, attackFps: 16 },
       split_slime: { label: "Split Slime", rarity: "Epic", kind: "forest", base: "split_slime", scale: 1.18, attackMs: 480 },
       gold_slime: { label: "Crown Slime", rarity: "Legendary", kind: "forest", base: "gold_slime", scale: 1.18, attackMs: 480 },
       shadow_slime: { label: "Invert Slime", rarity: "Mythic", kind: "forest", base: "shadow_slime", scale: 1.18, attackMs: 480 },
@@ -939,9 +948,9 @@
       creature_bear: { label: "Flesh Bear", kind: "forest", base: "creature_bear", scale: 1.25, attackMs: 420, sideView: true, smooth: true },
       creature_crawler: { label: "Gore Crawler", kind: "forest", base: "creature_crawler", scale: 1.15, attackMs: 480, sideView: true, smooth: true },
       creature_slasher: { label: "Flesh Slasher", kind: "forest", base: "creature_slasher", scale: 1.15, attackMs: 730, sideView: true, smooth: true },
-      knight_orange: { label: "Orange Knight", kind: "forest", base: "knight_orange", scale: 0.46, attackMs: 500, sideView: true, smooth: true },
-      knight_green: { label: "Green Knight", kind: "forest", base: "knight_green", scale: 0.46, attackMs: 500, sideView: true, smooth: true },
-      knight_blue: { label: "Blue Knight", kind: "forest", base: "knight_blue", scale: 0.46, attackMs: 500, sideView: true, smooth: true }
+      knight_orange: { label: "Orange Knight", kind: "forest", base: "knight_orange", scale: 0.46, attackMs: 500, sideView: false, smooth: true },
+      knight_green: { label: "Green Knight", kind: "forest", base: "knight_green", scale: 0.46, attackMs: 500, sideView: false, smooth: true },
+      knight_blue: { label: "Blue Knight", kind: "forest", base: "knight_blue", scale: 0.46, attackMs: 500, sideView: false, smooth: true }
     };
     silksongStudyCharacters.forEach(([name]) => {
       roster[name].sideView = true;
@@ -975,7 +984,11 @@
       silksong_ladybug: { idle: 7, run: 22, stop: 7, attack: 2 },
       silksong_lifeblood_worm: { idle: 4, run: 14, stop: 4, attack: 8 },
       silksong_shakra_rest: { idle: 25, run: 25, stop: 25, attack: 10 },
-      cutie_sheep: { idle: 3, idle2: 8, run: 8, attack: 8 }
+      cutie_sheep: { idle: 3, idle2: 8, run: 8, attack: 8 },
+      bubu: { idle: 13, idle2: 25, run: 16, attack: 6, hit: 16 },
+      bubu_highres: { idle: 13, idle2: 25, run: 16, attack: 6, hit: 16 },
+      dudu: { idle: 12, idle2: 13, idle_build: 10, run: 12, run2: 4, run_build: 16, attack: 6, hit: 24 },
+      dudu_highres: { idle: 12, idle2: 13, idle_build: 10, run: 12, run2: 4, run_build: 16, attack: 6, hit: 24 }
     };
     const farmCrops = {
       wheat: { label: "Wheat", name: "farm_crop_wheat", stages: 4 },
@@ -1245,7 +1258,6 @@
         hitStarted,
         hitDir,
         hp,
-        maxHp,
         respawnAt,
         destroyed,
         biomeTree,
@@ -1258,6 +1270,7 @@
         id: buildItemId(sprite.name),
         label: buildLabelFromName(sprite.name),
         group: isUsableBuildAsset(sprite.name) ? "tools" : "buildings",
+        maxHp: sprite.maxHp, // Preserve maxHp from raw sprite config
         ...overrides
       };
       if (isTreeName(item.name)) {
@@ -1312,7 +1325,7 @@
     }
 
     const coreBuildPaletteBase = [
-      { id: "wall", label: "Wall", name: "build_sprout_fence_post", count: 1, fps: 1, w: 32, h: 32, solid: { x: -12, y: -16, w: 24, h: 18 } },
+      { id: "wall", label: "Wall", name: "build_sprout_fence_post", count: 1, fps: 1, w: 32, h: 32, maxHp: 100, solid: { x: -12, y: -16, w: 24, h: 18 } },
       { id: "bed-green", label: "Green bed", name: "build_sprout_bed_green", count: 1, fps: 1, w: 40, h: 70, solid: { x: -16, y: -46, w: 32, h: 44 } },
       { id: "bed-blue", label: "Blue bed", name: "build_sprout_bed_blue", count: 1, fps: 1, w: 40, h: 70, solid: { x: -16, y: -46, w: 32, h: 44 } },
       { id: "bed-pink", label: "Pink bed", name: "build_sprout_bed_pink", count: 1, fps: 1, w: 40, h: 70, solid: { x: -16, y: -46, w: 32, h: 44 } },
@@ -1368,6 +1381,124 @@
     ];
 
     const extraBuildAssetBase = [
+      // 4 Barricade Variants (each has 3 directions: Down, Side, Up as rotatable variants)
+      {
+        id: "magic_barricade_1",
+        label: "Brick Barricade",
+        name: "magic_barricade_1_down",
+        count: 1, fps: 1, w: 36, h: 64,
+        group: "buildings",
+        maxHp: 100,
+        solid: { x: -18, y: -30, w: 36, h: 30 },
+        variants: [
+          { name: "magic_barricade_1_down", label: "Down", count: 1, w: 36, h: 64, solid: { x: -18, y: -30, w: 36, h: 30 } },
+          { name: "magic_barricade_1_side", label: "Side", count: 1, w: 36, h: 64, rotate90: true, solid: { x: -32, y: -18, w: 64, h: 36 } },
+          { name: "magic_barricade_1_up",   label: "Up",   count: 1, w: 36, h: 64, solid: { x: -18, y: -30, w: 36, h: 30 } }
+        ]
+      },
+      {
+        id: "magic_barricade_2",
+        label: "Spiked Barricade",
+        name: "magic_barricade_2_up",
+        count: 1, fps: 1, w: 36, h: 64,
+        group: "buildings",
+        maxHp: 100,
+        solid: { x: -18, y: -30, w: 36, h: 30 },
+        variants: [
+          { name: "magic_barricade_2_up",   label: "Down", count: 1, w: 36, h: 64, solid: { x: -18, y: -30, w: 36, h: 30 } },
+          { name: "magic_barricade_2_side", label: "Side", count: 1, w: 36, h: 64, rotate90: true, solid: { x: -32, y: -18, w: 64, h: 36 } },
+          { name: "magic_barricade_2_down", label: "Up",   count: 1, w: 36, h: 64, solid: { x: -18, y: -30, w: 36, h: 30 } }
+        ]
+      },
+      {
+        id: "magic_barricade_3",
+        label: "Wooden Barricade",
+        name: "magic_barricade_3_down",
+        count: 1, fps: 1, w: 36, h: 64,
+        group: "buildings",
+        maxHp: 100,
+        solid: { x: -18, y: -30, w: 36, h: 30 },
+        variants: [
+          { name: "magic_barricade_3_down", label: "Down", count: 1, w: 36, h: 64, solid: { x: -18, y: -30, w: 36, h: 30 } },
+          { name: "magic_barricade_3_side", label: "Side", count: 1, w: 36, h: 64, rotate90: true, solid: { x: -32, y: -18, w: 64, h: 36 } },
+          { name: "magic_barricade_3_up",   label: "Up",   count: 1, w: 36, h: 64, solid: { x: -18, y: -30, w: 36, h: 30 } }
+        ]
+      },
+      {
+        id: "magic_barricade_4",
+        label: "Iron Barricade",
+        name: "magic_barricade_4_down",
+        count: 1, fps: 1, w: 36, h: 64,
+        group: "buildings",
+        maxHp: 100,
+        solid: { x: -18, y: -30, w: 36, h: 30 },
+        variants: [
+          { name: "magic_barricade_4_down", label: "Down", count: 1, w: 36, h: 64, solid: { x: -18, y: -30, w: 36, h: 30 } },
+          { name: "magic_barricade_4_side", label: "Side", count: 1, w: 36, h: 64, rotate90: true, solid: { x: -32, y: -18, w: 64, h: 36 } },
+          { name: "magic_barricade_4_up",   label: "Up",   count: 1, w: 36, h: 64, solid: { x: -18, y: -30, w: 36, h: 30 } }
+        ]
+      },
+      // Single Magic Barrel
+      { id: "magic_barrel", label: "Magic Barrel", name: "magic_barrel", count: 4, fps: 4, w: 48, h: 48, group: "buildings", solid: { x: -16, y: -16, w: 32, h: 32 } },
+      // Archer Turret (Down, Side, Up as variants)
+      {
+        id: "trap_archer",
+        label: "Archer Turret",
+        name: "trap_archer_down_idle",
+        count: 4, fps: 4, w: 48, h: 48,
+        group: "buildings",
+        solid: { x: -16, y: -16, w: 32, h: 32 },
+        variants: [
+          { name: "trap_archer_down", label: "Down", count: 4 },
+          { name: "trap_archer_side", label: "Side", count: 4 },
+          { name: "trap_archer_up", label: "Up", count: 4 }
+        ]
+      },
+      // Predator plant trap (starts with growth, then goes to idle)
+      {
+        id: "trap_predator",
+        label: "Predator Trap",
+        name: "trap_predator_1_down",
+        count: 4, fps: 5, w: 64, h: 64,
+        group: "buildings",
+        maxHp: 50,
+        solid: { x: -16, y: 3, w: 32, h: 32 },
+        variants: [
+          { name: "trap_predator_1_down", label: "Green Down", count: 4 },
+          { name: "trap_predator_1_up", label: "Green Up", count: 4 },
+          { name: "trap_predator_1_left", label: "Green Left", count: 4 },
+          { name: "trap_predator_1_right", label: "Green Right", count: 4 },
+          { name: "trap_predator_2_down", label: "Red Down", count: 4 },
+          { name: "trap_predator_2_up", label: "Red Up", count: 4 },
+          { name: "trap_predator_2_left", label: "Red Left", count: 4 },
+          { name: "trap_predator_2_right", label: "Red Right", count: 4 },
+          { name: "trap_predator_3_down", label: "Blue Down", count: 4 },
+          { name: "trap_predator_3_up", label: "Blue Up", count: 4 },
+          { name: "trap_predator_3_left", label: "Blue Left", count: 4 },
+          { name: "trap_predator_3_right", label: "Blue Right", count: 4 }
+        ],
+        erase: false
+      },
+      // Other traps and plants
+      { name: "trap_spike", count: 14, fps: 10, w: 32, h: 32, group: "buildings", erase: false },
+      { name: "trap_bear", count: 4, fps: 5, w: 32, h: 32, group: "buildings", erase: false },
+      { name: "trap_fire", count: 14, fps: 10, w: 32, h: 41, group: "buildings", erase: false },
+      { name: "trap_pit_spikes", count: 1, fps: 1, w: 32, h: 32, group: "buildings", erase: false },
+      { name: "trap_push_front", count: 11, fps: 10, w: 32, h: 32, group: "buildings", erase: false },
+      { name: "trap_push_right", count: 12, fps: 10, w: 32, h: 32, group: "buildings", erase: false },
+      { name: "magic_spike_1", count: 6, fps: 6, w: 32, h: 32, group: "buildings", erase: false },
+      { name: "magic_spike_2", count: 6, fps: 6, w: 32, h: 32, group: "buildings", erase: false },
+      { name: "magic_spike_3", count: 6, fps: 6, w: 32, h: 32, group: "buildings", erase: false },
+      { name: "magic_spike_4", count: 6, fps: 6, w: 32, h: 32, group: "buildings", erase: false },
+      { name: "magic_lightning_1", count: 4, fps: 5, w: 64, h: 64, group: "buildings", erase: false },
+      { name: "magic_lightning_2", count: 4, fps: 5, w: 64, h: 64, group: "buildings", erase: false },
+      { name: "magic_lightning_3", count: 4, fps: 5, w: 64, h: 64, group: "buildings", erase: false },
+      { name: "magic_lightning_4", count: 4, fps: 5, w: 64, h: 64, group: "buildings", erase: false },
+      { name: "ponk_plant_1", count: 1, fps: 1, w: 32, h: 32, group: "buildings" },
+      { name: "ponk_plant_2", count: 1, fps: 1, w: 32, h: 32, group: "buildings" },
+      { name: "ponk_plant_3", count: 1, fps: 1, w: 32, h: 32, group: "buildings" },
+      { name: "ponk_plant_4", count: 1, fps: 1, w: 32, h: 32, group: "buildings" },
+      { name: "ponk_plant_5", count: 1, fps: 1, w: 32, h: 32, group: "buildings" },
       { name: "farm_crop_wheat", count: 4, fps: 1, w: 32, h: 32 },
       { name: "farm_crop_radish", count: 4, fps: 1, w: 32, h: 32 },
       { name: "plant_blue_sprout", count: 1, fps: 1, w: 42, h: 42 },
@@ -1686,6 +1817,8 @@
       announcedNight10: false,
       screenShakeUntil: 0,
       screenFlashRedUntil: 0,
+      audioMuted: false,
+      lastPlayerHitShakeTime: 0,
       treeHits: 0,
       treesDestroyed: 0,
       lastTreeHit: "",
@@ -2155,6 +2288,9 @@
       if (counts?.skid) modes.push("skid");
       if (counts?.die) modes.push("die");
       if (counts?.idle2) modes.push("idle2");
+      if (counts?.idle_build) modes.push("idle_build");
+      if (counts?.run2) modes.push("run2");
+      if (counts?.run_build) modes.push("run_build");
       if (counts?.defense) modes.push("defense");
       if (counts?.hit) modes.push("hit");
       if (counts?.special_attack) modes.push("special_attack");
@@ -2179,7 +2315,7 @@
               }
             }
           }
-          out[`${mode}-${dir}`] = Array.from({ length: count }, (_, i) => `assets/${base}/${mode}_${dir}_frame_${i}.png?v=3`);
+          out[`${mode}-${dir}`] = Array.from({ length: count }, (_, i) => `assets/${base}/${mode}_${dir}_frame_${i}.png?v=23`);
         }
       }
       return out;
@@ -2344,14 +2480,20 @@
       if (cfg.kind === "forest") {
         const isKnight = ["knight_orange", "knight_green", "knight_blue"].includes(cfg.base);
         const activeDir = state.mode === "attack" ? state.attackDir : state.dir;
-        const dir = cfg.sideView ? sideFacingDir(activeDir) : state.mode === "idle" && cfg.idleDir ? cfg.idleDir : activeDir;
+        const isIdleMode = state.mode === "idle" || state.mode === "idle2" || state.mode === "idle_build";
+        const dir = cfg.sideView ? sideFacingDir(activeDir) : isIdleMode && cfg.idleDir ? cfg.idleDir : activeDir;
         const isStopMode = state.mode === "stop" || state.mode === "skid";
-        const mode = isStopMode && !forestFrames[cfg.base][`${state.mode}-${dir}`] ? "idle" : state.mode;
         
-        let frames = forestFrames[cfg.base][`${mode}-${dir}`];
+        const base = cfg.base;
+        const smooth = cfg.smooth;
+        const scale = cfg.scale;
+        
+        const mode = isStopMode && !forestFrames[base][`${state.mode}-${dir}`] ? "idle" : state.mode;
+        
+        let frames = forestFrames[base][`${mode}-${dir}`];
         // Fallback checks for optional modes like hit/defense in case direction isn't fully loaded
         if (!frames) {
-          frames = forestFrames[cfg.base][`idle-${dir}`];
+          frames = forestFrames[base][`idle-${dir}`];
         }
         
         let fps = cfg.idleFps || 5;
@@ -2359,7 +2501,8 @@
         else if (mode === "die") fps = cfg.dieFps || 6;
         else if (mode === "skid") fps = cfg.skidFps || cfg.stopFps || 12;
         else if (mode === "stop") fps = cfg.stopFps || 12;
-        else if (mode === "run") fps = cfg.runFps || 9;
+        else if (mode === "run" || mode === "run2" || mode === "run_build") fps = cfg.runFps || 9;
+        else if (mode === "idle_build") fps = cfg.idleFps || 12;
         else if (mode === "hit") fps = 8;
         else if (mode === "defense") fps = 8;
 
@@ -2368,7 +2511,7 @@
         const t = playOnce ? Math.max(0, performance.now() - started) / 1000 : (mode === "defense" ? (performance.now() - started) / 1000 : state.t);
         const index = playOnce ? Math.min(frames.length - 1, Math.floor(t * fps)) : Math.floor(t * fps) % frames.length;
         const image = images[frames[index]];
-        return { image, sx: 0, sy: 0, sw: image.width, sh: image.height, scale: cfg.scale, smooth: cfg.smooth };
+        return { image, sx: 0, sy: 0, sw: image.width, sh: image.height, scale: scale, smooth: smooth };
       }
       const index = Math.floor(state.t * (cfg.fps || 6)) % cfg.frames.length;
       const [sx, sy] = cfg.frames[index];
@@ -2379,26 +2522,33 @@
       const cfg = roster[npc.base];
       if (!cfg || cfg.kind !== "forest") return null;
       const isKnight = ["knight_orange", "knight_green", "knight_blue"].includes(npc.base);
+      const isBubuDudu = ["bubu_highres", "dudu_highres", "bubu_outlined", "dudu_outlined", "bubu", "dudu", "bubu_pixel", "dudu_pixel"].includes(npc.base);
       const dir = cfg.sideView ? sideFacingDir(npc.dir) : npc.dir;
+      const base = npc.base;
+      const smooth = cfg.smooth;
+      const scale = npc.scaleOverride || cfg.scale;
       
-      // Determine mode for enemy knights
+      // Determine mode for enemy knights and Bubu/Dudu
       let mode = npc.mode;
-      if (isKnight) {
-        if (npc.hitStarted && (performance.now() - npc.hitStarted) < 600) {
+      if (isKnight || isBubuDudu) {
+        const hitDuration = base.includes("bubu") ? 667 : (base.includes("dudu") ? 1000 : 600);
+        if (npc.hitStarted && (performance.now() - npc.hitStarted) < hitDuration) {
           mode = "hit";
-        } else if (mode === "attack" && npc.specialAttackUntil && performance.now() < npc.specialAttackUntil) {
+        } else if (isKnight && npc.defenseUntil && performance.now() < npc.defenseUntil) {
+          mode = "defense";
+        } else if (isKnight && mode === "attack" && npc.specialAttackUntil && performance.now() < npc.specialAttackUntil) {
           mode = "special_attack";
         }
       }
 
-      if (!forestFrames[npc.base]) {
-        console.error(`[npcFrame] forestFrames["${npc.base}"] is completely undefined! Making loadForestAnimal call...`);
-        loadForestAnimal(npc.base);
+      if (!forestFrames[base]) {
+        console.error(`[npcFrame] forestFrames["${base}"] is completely undefined! Making loadForestAnimal call...`);
+        loadForestAnimal(base);
         return null;
       }
-      const dirFrames = forestFrames[npc.base][`${mode}-${dir}`] || forestFrames[npc.base][`idle-${dir}`];
+      const dirFrames = forestFrames[base][`${mode}-${dir}`] || forestFrames[base][`idle-${dir}`];
       if (!dirFrames) {
-        console.error(`[npcFrame] No frame paths found in forestFrames for base "${npc.base}" in mode "${mode}" facing "${dir}".`);
+        console.error(`[npcFrame] No frame paths found in forestFrames for base "${base}" in mode "${mode}" facing "${dir}".`);
         return null;
       }
       const npcInWater = state.scene === "outside" && waterTileAt(npc.x, npc.y);
@@ -2406,7 +2556,10 @@
       const baseSpeed = npc.speed || (roster[npc.base] ? wildNpcStats(npc.base).speed : 55);
       const currentSpeed = baseSpeed * speedMult;
       const animSpeed = npc.mode === "run" ? (currentSpeed / 55) : 1.0;
-      const multiplier = (mode === "run" ? (npc.animSpeedOverride || animSpeed) : 1.0);
+      let multiplier = (mode === "run" ? (npc.animSpeedOverride || animSpeed) : 1.0);
+      if (npc.base === "cutie_sheep" && mode === "run") {
+        multiplier *= 1.2;
+      }
       
       let fps = (mode === "attack" ? (cfg.attackFps || 9) : mode === "run" ? (cfg.runFps || 9) : (cfg.idleFps || 5)) * multiplier;
       if (mode === "hit" || mode === "defense") fps = 8;
@@ -2417,21 +2570,15 @@
       const t = playOnce ? Math.max(0, performance.now() - started) / 1000 : npc.t;
       const index = playOnce ? Math.min(dirFrames.length - 1, Math.floor(t * fps)) : Math.floor(t * fps) % dirFrames.length;
       const image = images[dirFrames[index]];
-      
-      // DIAGNOSTIC LOGGING FOR ENEMY KNIGHTS:
-      if (isKnight) {
-        console.log(`[KNIGHT DIAGNOSTIC] Base: "${npc.base}", ID: ${npc.id || "N/A"}, Pos: (${Math.round(npc.x)}, ${Math.round(npc.y)}), Mode: "${mode}", Dir: "${dir}", FrameSrc: "${dirFrames[index]}", Loaded: ${!!image}, Dead: ${npc.dead}, Dormant: ${npc.isDormant}`);
-      }
-
       if (!image) {
         // Fallback 1: Look for any loaded frame of this specific knight in ANY mode/direction
-        for (const key of Object.keys(forestFrames[npc.base])) {
+        for (const key of Object.keys(forestFrames[base])) {
           if (key === "loaded") continue;
-          const frameList = forestFrames[npc.base][key] || [];
+          const frameList = forestFrames[base][key] || [];
           for (const framePath of frameList) {
             if (images[framePath]) {
               const fallbackImage = images[framePath];
-              return { image: fallbackImage, sx: 0, sy: 0, sw: fallbackImage.width, sh: fallbackImage.height, scale: npc.scaleOverride || cfg.scale, smooth: cfg.smooth };
+              return { image: fallbackImage, sx: 0, sy: 0, sw: fallbackImage.width, sh: fallbackImage.height, scale: scale, smooth: smooth };
             }
           }
         }
@@ -2442,13 +2589,13 @@
           for (const path of list) {
             if (images[path]) {
               const fallbackImage = images[path];
-              return { image: fallbackImage, sx: 0, sy: 0, sw: fallbackImage.width, sh: fallbackImage.height, scale: npc.scaleOverride || cfg.scale, smooth: cfg.smooth };
+              return { image: fallbackImage, sx: 0, sy: 0, sw: fallbackImage.width, sh: fallbackImage.height, scale: scale, smooth: smooth };
             }
           }
         }
         return null;
       }
-      return { image, sx: 0, sy: 0, sw: image.width, sh: image.height, scale: npc.scaleOverride || cfg.scale, smooth: cfg.smooth };
+      return { image, sx: 0, sy: 0, sw: image.width, sh: image.height, scale: scale, smooth: smooth };
     }
 
     function playerDrawSize(frame) {
@@ -2457,13 +2604,22 @@
       return { w, h };
     }
 
-    function drawPlayerAt(frame, x, y, shake = 0, scaleFactor = 1) {
+    function drawPlayerAt(frame, x, y, shake = 0, scaleFactor = 1, yOff = 0) {
       const { w, h } = playerDrawSize(frame);
       const drawW = Math.round(w * scaleFactor);
       const drawH = Math.round(h * scaleFactor);
       ctx.imageSmoothingEnabled = Boolean(frame.smooth);
-      ctx.drawImage(frame.image, frame.sx, frame.sy, frame.sw, frame.sh, Math.round(x - drawW / 2 + shake), Math.round(y - drawH + 10), drawW, drawH);
+      ctx.drawImage(frame.image, frame.sx, frame.sy, frame.sw, frame.sh, Math.round(x - drawW / 2 + shake), Math.round(y - drawH + 10 + yOff), drawW, drawH);
       ctx.imageSmoothingEnabled = false;
+
+      if (state.showHitboxes) {
+        const feet = playerFeetAt(x, y);
+        ctx.save();
+        ctx.strokeStyle = "rgba(255, 0, 0, 0.9)";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(feet.x, feet.y, feet.w, feet.h);
+        ctx.restore();
+      }
     }
 
     function drawEvaporatingNPC(frame, x, y, elapsed, shake = 0, npc = null) {
@@ -2634,16 +2790,108 @@
         const idx = doorFrameIndex(plant);
         img = images[`assets/plants/build_house_door_0_${idx}/frame_0.png`];
       } else {
+        let name = plant.name;
         let index;
+        const now = performance.now();
+        const age = now - (plant.placedAt || 0);
+
         if (plant.chest) {
           index = chestFrameIndex(plant);
+        } else if (plant.name.startsWith("magic_barricade_")) {
+          const parts = plant.name.split("_");
+          const variant = parts[2];
+          const dir = parts[3] || "down";
+          const prefix = dir === "down" ? "D" : dir === "side" ? "S" : "U";
+          let sheetUrl;
+          if (age < 600) {
+            // Build animation: play f0→f5 (first to last = construction fills in)
+            sheetUrl = `assets/magic_traps/2 Barricades/${prefix}_${variant}_Build.png`;
+            index = Math.min(5, Math.floor(age / 100));
+          } else if (plant.destroyedAt) {
+            // Destroy animation: f0→f5 (collapse plays out)
+            const destAge = now - plant.destroyedAt;
+            sheetUrl = `assets/magic_traps/2 Barricades/${prefix}_${variant}_Destroy.png`;
+            index = Math.min(5, Math.floor(destAge / 100));
+          } else {
+            // Idle: single static frame — Destroy sheet f0 is the clean complete barricade
+            sheetUrl = `assets/magic_traps/2 Barricades/${prefix}_${variant}_Destroy.png`;
+            index = 0;
+          }
+          img = images[sheetUrl];
+          if (img) {
+            plant.crop = { sx: index * 36, sy: 0, sw: 36, sh: 64 };
+          }
+        } else if (plant.name.startsWith("trap_predator_")) {
+          const parts = plant.name.split("_"); // ["trap", "predator", "1", "down"]
+          const variant = parts[2];
+          const dir = parts[3] || "down";
+          if (age < 1500) {
+            // Growing animation
+            name = `trap_predator_grow_${variant}_${dir}`;
+            index = Math.min(9, Math.floor(age / 150));
+          } else if (plant.triggeredAt && now - plant.triggeredAt < 700) {
+            // Attack animation (plays once)
+            name = `trap_predator_attack_${variant}_${dir}`;
+            index = Math.min(6, Math.floor((now - plant.triggeredAt) / 100));
+          } else {
+            // Idle: loop through all 4 frames continuously
+            name = `trap_predator_idle_${variant}_${dir}`;
+            index = Math.floor((now / 200)) % 4;
+          }
+        } else if (plant.name === "magic_barrel") {
+          if (age < 400) {
+            name = "magic_barrel_build";
+            index = Math.min(3, Math.floor(age / 100));
+          } else if (plant.explodedAt) {
+            const explAge = now - plant.explodedAt;
+            const boomVariant = (Math.floor(plant.x) % 3) + 1;
+            if (explAge < 400) {
+              name = "magic_barrel_destroy";
+              index = Math.min(3, Math.floor(explAge / 100));
+            } else {
+              name = `magic_barrel_boom_${boomVariant}`;
+              index = Math.min(7, Math.floor((explAge - 400) / 100));
+            }
+          } else {
+            name = "magic_barrel_idle";
+            index = 0; // Freeze frame 0 when idle
+          }
+        } else if (plant.name.startsWith("trap_archer_")) {
+          const parts = plant.name.split("_");
+          const dir = parts[2];
+          if (plant.attackStarted && now - plant.attackStarted < 900) {
+            name = `trap_archer_${dir}_attack`;
+            index = Math.min(5, Math.floor((now - plant.attackStarted) / 150));
+          } else {
+            name = `trap_archer_${dir}_idle`;
+            index = 0; // Freeze frame 0 when idle
+          }
+        } else if (plant.name.startsWith("trap_") || plant.name.startsWith("magic_spike_") || plant.name.startsWith("magic_lightning_")) {
+          // Trigger-based traps: play once and return to frame 0 (dormant)
+          if (plant.triggeredAt) {
+            const elapsed = now - plant.triggeredAt;
+            const animDuration = (plant.count || 1) * 100;
+            if (elapsed < animDuration) {
+              index = Math.min((plant.count || 1) - 1, Math.floor(elapsed / 100));
+            } else if (elapsed < animDuration + 1500) {
+              index = (plant.count || 1) - 1; // Hold triggered/active state
+            } else {
+              plant.triggeredAt = null; // Reset to dormant
+              index = 0;
+            }
+          } else {
+            if (plant.name.startsWith("magic_lightning_")) {
+              return; // Invisible when idle/dormant!
+            }
+            index = 0; // Dormant/freeze frame 0
+          }
         } else if (plant.tree && Math.hypot(plant.x - state.x, plant.y - state.y) > 550) {
           // Far tree: freeze at a static frame to save animation calc
           index = Math.floor(plant.x * 0.003 * plant.fps) % plant.count;
         } else {
-          index = Math.floor((state.t + plant.x * 0.003) * plant.fps) % plant.count;
+          index = Math.floor((state.t + plant.x * 0.003) * (plant.fps || 6)) % (plant.count || 1);
         }
-        img = images[`assets/plants/${plant.name}/frame_${index}.png`];
+        if (!img) img = images[`assets/plants/${name}/frame_${index}.png`];
       }
       if (!img) return;
       let shake = 0;
@@ -2696,17 +2944,49 @@
         ctx.restore();
         return;
       }
-      ctx.drawImage(
-        img,
-        crop.sx,
-        crop.sy,
-        crop.sw,
-        crop.sh,
-        Math.round(plant.x - plant.w / 2 + shake),
-        Math.round(plant.y - plant.h),
-        plant.w,
-        plant.h
-      );
+      // Per-plant sprite Y offset: predator plant h=64, solid.y=-20 -> hitbox center=y-5, sprite center=y-32, need +27
+      const plantYOff = plant.name && plant.name.startsWith("trap_predator_") ? 27 : 0;
+      
+      if (plant.flipX) {
+        ctx.save();
+        ctx.translate(plant.x + shake, plant.y - plant.h / 2);
+        ctx.scale(-1, 1);
+        ctx.drawImage(
+          img,
+          crop.sx,
+          crop.sy,
+          crop.sw,
+          crop.sh,
+          Math.round(-plant.w / 2),
+          Math.round(-plant.h / 2 + plantYOff),
+          plant.w,
+          plant.h
+        );
+        ctx.restore();
+      } else {
+        ctx.drawImage(
+          img,
+          crop.sx,
+          crop.sy,
+          crop.sw,
+          crop.sh,
+          Math.round(plant.x - plant.w / 2 + shake),
+          Math.round(plant.y - plant.h + plantYOff),
+          plant.w,
+          plant.h
+        );
+      }
+
+      if (state.showHitboxes) {
+        const solid = solidRectFor(plant);
+        if (solid) {
+          ctx.save();
+          ctx.strokeStyle = "rgba(0, 255, 0, 0.9)";
+          ctx.lineWidth = 1;
+          ctx.strokeRect(solid.x, solid.y, solid.w, solid.h);
+          ctx.restore();
+        }
+      }
     }
 
     function isAlwaysUnderPlayerSprite(plant) {
@@ -2825,9 +3105,13 @@
             }
             continue;
           }
+          // Per-NPC vertical sprite offset: shift sprite DOWN so hitbox centers on sprite
+          // Knight drawH=49, sprite center at y-14.5, hitbox center at y-2, need yOff=12.5≈13
+          const isKnight = ["knight_orange", "knight_green", "knight_blue"].includes(npc.base);
+          const npcYOff = isKnight ? 13 : 0;
           actors.push({
             y: npc.y,
-            draw: () => drawPlayerAt(npcFrameObj, npc.x, npc.y, shake)
+            draw: () => drawPlayerAt(npcFrameObj, npc.x, npc.y, shake, 1, npcYOff)
           });
         }
         // Add pet slimes to the depth-sorted draw list
@@ -3361,22 +3645,33 @@
     }
 
     function activeBuildItem(item = currentBuildItem()) {
+      if (!item) return null;
       const rotation = buildRotationIndex(item);
-      const variant = item.variants?.[rotation % item.variants.length];
-      if (!variant) {
-        const steps = item.rotatable === false ? 0 : rotation % 4;
-        const turnsSideways = steps % 2 === 1;
-        return {
-          ...item,
-          rotation,
-          rotateSteps: steps,
-          baseW: item.baseW || item.w,
-          baseH: item.baseH || item.h,
-          w: turnsSideways ? (item.baseH || item.h) : item.w,
-          h: turnsSideways ? (item.baseW || item.w) : item.h
-        };
+      const isBarricade = item.id && /magic[-_]barricade/.test(item.id);
+      
+      let variant = null;
+      let flipX = false;
+      
+      if (isBarricade && item.variants) {
+        const rotIndex = rotation % 4;
+        if (rotIndex === 0) variant = item.variants[0]; // Down
+        else if (rotIndex === 1) variant = item.variants[1]; // Side (Left)
+        else if (rotIndex === 2) variant = item.variants[2]; // Up
+        else if (rotIndex === 3) {
+          variant = item.variants[1]; // Side (Right)
+          flipX = true;
+        }
+      } else {
+        const stepsCount = item.variants?.length || 4;
+        const rotIndex = rotation % stepsCount;
+        variant = item.variants?.[rotIndex] || item.variants?.[0] || item;
       }
-      return {
+
+      const finalW = variant.w || item.w;
+      const finalH = variant.h || item.h;
+      const finalSolid = variant.solid || item.solid;
+      
+      const res = {
         ...item,
         ...variant,
         id: item.id,
@@ -3385,12 +3680,16 @@
         variants: item.variants,
         rotation,
         rotateSteps: 0,
-        baseW: variant.baseW || item.baseW || item.w,
-        baseH: variant.baseH || item.baseH || item.h,
-        w: variant.w || item.w,
-        h: variant.h || item.h,
-        solid: variant.solid || item.solid
+        baseW: finalW,
+        baseH: finalH,
+        w: finalW,
+        h: finalH,
+        solid: finalSolid,
+        maxHp: variant.maxHp || item.maxHp,
+        flipX: flipX
       };
+      
+      return res;
     }
 
     function buildButtonItem(item) {
@@ -3401,9 +3700,12 @@
       if (!state.buildUiOpen) return;
       const item = currentBuildItem();
       if (item.equipTool || item.erase) return;
-      const steps = item.variants?.length || 4;
-      state.buildRotations[item.id] = (buildRotationIndex(item) + 1) % steps;
+      const isBarricade = item.id && /magic[-_]barricade/.test(item.id);
+      const steps = isBarricade ? 4 : (item.variants?.length || 4);
+      const prevRot = buildRotationIndex(item);
+      state.buildRotations[item.id] = (prevRot + 1) % steps;
       state.demo = false;
+      
       renderBuildbar();
     }
 
@@ -3591,11 +3893,143 @@
 
     function snapBuildPoint(point) {
       const item = activeBuildItem();
-      const grid = item.grid || (item.id === "wall" ? BUILD_WALL_STEP : BUILD_GRID);
-      return {
-        x: Math.round(point.x / grid) * grid,
-        y: Math.round(point.y / grid) * grid
-      };
+      const isBarricade = item.id && /magic[-_]barricade/.test(item.id);
+      
+      let targetX, targetY;
+      if (isBarricade) {
+        // No grid snapping for barricades, they follow the mouse smoothly
+        targetX = point.x;
+        targetY = point.y;
+      } else {
+        const grid = item.grid || (item.id === "wall" ? BUILD_WALL_STEP : BUILD_GRID);
+        targetX = Math.round(point.x / grid) * grid;
+        targetY = Math.round(point.y / grid) * grid;
+      }
+
+      // Smart avoidance: if there is an existing solid object at this grid coordinate, shift adjacent to avoid overlapping!
+      if (item.solid) {
+        // Build the candidate rectangle for the item we are trying to place
+        const candidateRect = {
+          x: targetX + item.solid.x,
+          y: targetY + item.solid.y,
+          w: item.solid.w,
+          h: item.solid.h
+        };
+
+        // Determine active item snapping orientation
+        const itemSnapsHorizontally = item.name && (
+          item.name.endsWith("_up") || 
+          item.name.endsWith("_down") || 
+          item.name.includes("_fence_h") || 
+          item.name.includes("_fence_mid")
+        );
+        const itemSnapsVertically = item.name && (
+          item.name.endsWith("_side") || 
+          item.name.includes("_fence_v")
+        );
+
+        // Find the closest parallel building inside the magnet snapping range (16px)
+        const magnetRange = 16;
+        let closestSprite = null;
+        let minDist = Infinity;
+        
+        for (const sprite of placedSprites) {
+          if (sprite.scene !== state.scene || !sprite.solid || sprite.destroyed) continue;
+          
+          const spriteSnapsHorizontally = sprite.name && (
+            sprite.name.endsWith("_up") || 
+            sprite.name.endsWith("_down") || 
+            sprite.name.includes("_fence_h") || 
+            sprite.name.includes("_fence_mid")
+          );
+          const spriteSnapsVertically = sprite.name && (
+            sprite.name.endsWith("_side") || 
+            sprite.name.includes("_fence_v")
+          );
+          
+          const isParallel = (itemSnapsHorizontally && spriteSnapsHorizontally) || 
+                             (itemSnapsVertically && spriteSnapsVertically);
+                             
+          if (!isParallel) continue; // Skip orthogonal items (let them place freely at corners)
+
+          const spriteX = sprite.x + sprite.solid.x;
+          const spriteY = sprite.y + sprite.solid.y;
+          const spriteW = sprite.solid.w;
+          const spriteH = sprite.solid.h;
+          
+          // Check if candidate is near the sprite's solid bounds (inflated by magnetRange)
+          if (aabb(
+            candidateRect.x - magnetRange, candidateRect.y - magnetRange,
+            candidateRect.w + 2 * magnetRange, candidateRect.h + 2 * magnetRange,
+            spriteX, spriteY, spriteW, spriteH
+          )) {
+            const dist = Math.hypot(point.x - sprite.x, point.y - sprite.y);
+            if (dist < minDist) {
+              minDist = dist;
+              closestSprite = sprite;
+            }
+          }
+        }
+
+        const hasOverlay = closestSprite;
+
+        if (hasOverlay) {
+          // Calculate displacement from the mouse point to the center of the overlapped building
+          const dx = point.x - hasOverlay.x;
+          const dy = point.y - hasOverlay.y;
+          
+          // Determine snapping behavior based on adjacent building orientation
+          const snapsHorizontally = hasOverlay.name && (
+            hasOverlay.name.endsWith("_up") || 
+            hasOverlay.name.endsWith("_down") || 
+            hasOverlay.name.includes("_fence_h") || 
+            hasOverlay.name.includes("_fence_mid")
+          );
+          const snapsVertically = hasOverlay.name && (
+            hasOverlay.name.endsWith("_side") || 
+            hasOverlay.name.includes("_fence_v")
+          );
+          
+          let useHorizontalShift = Math.abs(dx) > Math.abs(dy);
+          if (snapsHorizontally && !snapsVertically) {
+            useHorizontalShift = true;  // Snap horizontally (left/right)
+          } else if (snapsVertically && !snapsHorizontally) {
+            useHorizontalShift = false; // Snap vertically (top/bottom)
+          }
+          
+          const gap = 0.01;
+          
+          if (useHorizontalShift) {
+            // Precise horizontal boundary touch alignment
+            const hasOverlayLeft = hasOverlay.solid ? hasOverlay.solid.x : -hasOverlay.w / 2;
+            const hasOverlayRight = hasOverlay.solid ? (hasOverlay.solid.x + hasOverlay.solid.w) : hasOverlay.w / 2;
+            const itemLeft = item.solid ? item.solid.x : -item.w / 2;
+            const rightEdge = item.solid ? (item.solid.x + item.solid.w) : item.w / 2;
+            
+            targetX = dx > 0 
+              ? (hasOverlay.x + hasOverlayRight - itemLeft + gap)
+              : (hasOverlay.x + hasOverlayLeft - rightEdge - gap);
+              
+            // Magnetic Snapping: Lock Y coordinate exactly to the adjacent building's Y
+            targetY = hasOverlay.y;
+          } else {
+            // Precise vertical boundary touch alignment
+            const hasOverlayTop = hasOverlay.solid ? hasOverlay.solid.y : -hasOverlay.h;
+            const hasOverlayBottom = hasOverlay.solid ? (hasOverlay.solid.y + hasOverlay.solid.h) : 0;
+            const itemTop = item.solid ? item.solid.y : -item.h;
+            const itemBottom = item.solid ? (item.solid.y + item.solid.h) : 0;
+            
+            targetY = dy > 0
+              ? (hasOverlay.y + hasOverlayBottom - itemTop + gap)
+              : (hasOverlay.y + hasOverlayTop - itemBottom - gap);
+              
+            // Magnetic Snapping: Lock X coordinate exactly to the adjacent building's X
+            targetX = hasOverlay.x;
+          }
+        }
+      }
+
+      return { x: targetX, y: targetY };
     }
 
     function updateBuildHover(clientX, clientY) {
@@ -3611,6 +4045,7 @@
       const item = activeBuildItem();
       const { x, y } = state.buildHover;
       if (!state.buildUiOpen || !state.buildHover.active) return;
+      state.lastBuildTime = performance.now();
       if (item.equipTool) {
         state.equippedTool = item.equipTool;
         return;
@@ -3621,7 +4056,44 @@
         return;
       }
       if (wouldBlockPlayer(item, x, y)) return;
-      const existing = placedSprites.findIndex(sprite => sprite.scene === state.scene && sprite.x === x && sprite.y === y && sprite.buildId === item.id);
+
+      // Prevent overlapping other placed buildings/barricades when placing
+      if (item.solid) {
+        const candidateRect = {
+          x: x + item.solid.x,
+          y: y + item.solid.y,
+          w: item.solid.w,
+          h: item.solid.h
+        };
+        
+        const isBarricadeItem = item.id && /magic[-_]barricade/.test(item.id);
+        const itemSnapsHorizontally = item.name && (item.name.endsWith("_up") || item.name.endsWith("_down"));
+        const itemSnapsVertically = item.name && item.name.endsWith("_side");
+
+        // Use a tiny 0.02px inset to allow buildings to be placed perfectly flush (separated by gap of 0.01px) without float overlap issues
+        const hasOverlay = placedSprites.find(sprite => {
+          if (sprite.scene !== state.scene || !sprite.solid || sprite.destroyed) return false;
+          
+          // Orthogonal barricade corner bypass:
+          // If both are barricades and they have different orientations, allow them to overlap to form corners/boxes!
+          if (isBarricadeItem && sprite.buildId && /magic[-_]barricade/.test(sprite.buildId)) {
+            const spriteSnapsHorizontally = sprite.name && (sprite.name.endsWith("_up") || sprite.name.endsWith("_down"));
+            const spriteSnapsVertically = sprite.name && sprite.name.endsWith("_side");
+            
+            if ((itemSnapsHorizontally && spriteSnapsVertically) || (itemSnapsVertically && spriteSnapsHorizontally)) {
+              return false; // Bypass overlap check!
+            }
+          }
+
+          return aabb(
+            candidateRect.x + 0.02, candidateRect.y + 0.02, candidateRect.w - 0.04, candidateRect.h - 0.04,
+            sprite.x + sprite.solid.x, sprite.y + sprite.solid.y, sprite.solid.w, sprite.solid.h
+          );
+        });
+        if (hasOverlay) return; // Overlap detected, block placement!
+      }
+
+      const existing = placedSprites.findIndex(sprite => sprite.scene === state.scene && Math.abs(sprite.x - x) < 0.1 && Math.abs(sprite.y - y) < 0.1 && sprite.buildId === item.id);
       if (existing >= 0) placedSprites.splice(existing, 1);
       const placed = {
         ...item,
@@ -3630,9 +4102,11 @@
         x,
         y,
         built: true,
+        placedAt: performance.now(),
         chestAnimStarted: 0,
-        maxHp: item.maxHp || 5,
-        hp: item.maxHp || 5
+        maxHp: item.maxHp || 10,
+        hp: item.maxHp || 10,
+        manualRotationIndex: state.buildRotations[item.id] !== undefined ? state.buildRotations[item.id] : undefined
       };
       if (placed.name && placed.name.startsWith("build_house_door")) {
         placed.door = true;
@@ -4159,9 +4633,26 @@
 
     function triggerScaryHit(dx, dy, source = null) {
       const now = performance.now();
-      state.screenShakeUntil = now + 450;
+      // Shaking only happens on the first hit after not getting hit for 5 seconds (5000ms).
+      // Each hit (even if on cooldown) pushes/resets the cooldown so the player must wait 5 seconds without hits to shake again.
+      if (now - state.lastPlayerHitShakeTime >= 5000) {
+        state.screenShakeUntil = now + 450;
+      }
+      state.lastPlayerHitShakeTime = now;
       state.screenFlashRedUntil = now + 180;
       playSfx("sfx-hurt", 0.28);
+      
+      const pBase = roster[state.current]?.base;
+      const isKnight = ["knight_orange", "knight_green", "knight_blue"].includes(pBase);
+      const isBubuDudu = ["bubu_highres", "dudu_highres", "bubu_outlined", "dudu_outlined", "bubu", "dudu", "bubu_pixel", "dudu_pixel"].includes(pBase);
+      if (isKnight || isBubuDudu) {
+        const hitDuration = pBase.includes("bubu") ? 667 : (pBase.includes("dudu") ? 1000 : 600);
+        state.hitUntil = now + hitDuration;
+        state.hitStarted = now;
+        if (pBase.includes("dudu")) {
+          state.duduGotHitRun = true;
+        }
+      }
       
       // If hit by a Flesh Bear, apply burn to player!
       if (source && source.base === "creature_bear") {
@@ -4217,25 +4708,39 @@
       });
     }
 
-    function damageBuilding(building, amount = 1) {
+    function damageBuilding(building, amount = 5, attacker = null) {
+      if (building.destroyed) return;
       if (building.hp === undefined) {
-        building.maxHp = building.maxHp || 5;
+        building.maxHp = building.maxHp || 10; // Default maxHp 10 (2 hits of 5 damage)
         building.hp = building.maxHp;
       }
+      
+      // retaliate/reflect logic
+      if (attacker && building.name && building.name.startsWith("magic_barricade_2")) {
+        if (attacker.hp !== undefined) {
+          attacker.hp = Math.max(0, attacker.hp - 15); // Reflect 15 damage
+          console.log(`[SPIKED BARRICADE REFLECT] Dealt 15 reflection damage to ${attacker.base || attacker.name || "attacker"}. Attacker HP: ${attacker.hp}`);
+          if (attacker.hp <= 0 && attacker.die) {
+            attacker.die();
+          }
+        }
+      }
+
+      const oldHp = building.hp;
       building.hp = Math.max(0, building.hp - amount);
       building.hitStarted = performance.now();
       building.hitDir = Math.random() < 0.5 ? 1 : -1;
+
+      // Track all building hits in console
+      console.log(`[BUILDING DAMAGE] Structure: "${building.name || "N/A"}" (ID: ${building.id || "N/A"}), Hit by: "${attacker?.base || attacker?.name || "Unknown"}", Damage: ${amount}, HP: ${oldHp} -> ${building.hp}`);
       
       if (building.hp <= 0) {
-        const placedIdx = placedSprites.indexOf(building);
-        if (placedIdx >= 0) {
-          placedSprites.splice(placedIdx, 1);
-          refreshWallConnections();
-        }
-        const plantIdx = plantSprites.indexOf(building);
-        if (plantIdx >= 0) {
-          plantSprites.splice(plantIdx, 1);
-        }
+        building.destroyed = true;
+        building.destroyedAt = performance.now();
+        building.solid = null; // Clear hitbox immediately so enemies stop targeting it
+
+        // Remove from connections list immediately
+        refreshWallConnections();
         
         const shout = `A tree broke my ${building.name || "structure"}!`;
         state.dialogueCooldownUntil = 0;
@@ -4297,105 +4802,110 @@
       
       candidates.sort((a, b) => a.dist - b.dist);
       
-      for (let i = 0; i < candidates.length; i++) {
-        const { tree, dist, targetX, targetY, combatTarget } = candidates[i];
-        if (i === 0) {
-          tree.isAttacking = true;
-          if (tree.pauseUntil && now < tree.pauseUntil) continue;
+      // Enforce ONLY 1 moving/attacking tree at a time
+      const activeTree = candidates[0]?.tree || null;
+      for (const t of allTreeSprites()) {
+        if (t !== activeTree) {
+          t.isAttacking = false;
+          t.stuckTicks = 0;
+        }
+      }
+      
+      if (activeTree) {
+        const { tree, dist, targetX, targetY, combatTarget } = candidates[0];
+        tree.isAttacking = true;
+        if (tree.pauseUntil && now < tree.pauseUntil) return;
+        
+        const dx = targetX - tree.x;
+        const dy = targetY - tree.y;
+
+        // Gaze detection check: Stop when player is looking at the tree, move when player is looking away
+        let playerLookingAtTree = false;
+        const lookDx = tree.x - state.x;
+        const lookDy = tree.y - state.y;
+        if (state.dir === "right" && lookDx > 0 && Math.abs(lookDy) < Math.abs(lookDx)) playerLookingAtTree = true;
+        else if (state.dir === "left" && lookDx < 0 && Math.abs(lookDy) < Math.abs(lookDx)) playerLookingAtTree = true;
+        else if (state.dir === "front" && lookDy > 0 && Math.abs(lookDx) < Math.abs(lookDy)) playerLookingAtTree = true;
+        else if (state.dir === "back" && lookDy < 0 && Math.abs(lookDx) < Math.abs(lookDy)) playerLookingAtTree = true;
+
+        let isMoving = false;
+        if (playerLookingAtTree) {
+          // Player is looking directly towards the tree. Tree freezes!
+          tree.isAttacking = false;
+        } else if (dist > 18) {
+          const speed = 12;
+          const stepX = (dx / dist) * speed * dt;
+          const stepY = (dy / dist) * speed * dt;
           
-          const dx = targetX - tree.x;
-          const dy = targetY - tree.y;
-
-          // Gaze detection check: Stop when player is looking at the tree, move when player is looking away
-          let playerLookingAtTree = false;
-          const lookDx = tree.x - state.x;
-          const lookDy = tree.y - state.y;
-          if (state.dir === "right" && lookDx > 0 && Math.abs(lookDy) < Math.abs(lookDx)) playerLookingAtTree = true;
-          else if (state.dir === "left" && lookDx < 0 && Math.abs(lookDy) < Math.abs(lookDx)) playerLookingAtTree = true;
-          else if (state.dir === "front" && lookDy > 0 && Math.abs(lookDx) < Math.abs(lookDy)) playerLookingAtTree = true;
-          else if (state.dir === "back" && lookDy < 0 && Math.abs(lookDx) < Math.abs(lookDy)) playerLookingAtTree = true;
-
-          let isMoving = false;
-          if (playerLookingAtTree) {
-            // Player is looking directly towards the tree. Tree freezes!
-            tree.isAttacking = false;
-          } else if (dist > 18) {
-            const speed = 12;
-            const stepX = (dx / dist) * speed * dt;
-            const stepY = (dy / dist) * speed * dt;
-            
-            const nextX = tree.x + stepX;
-            const nextY = tree.y + stepY;
-            
-            const obstacleX = findTreeObstacle(nextX, tree.y, tree);
-            const obstacleY = findTreeObstacle(tree.x, nextY, tree);
-            const obstacleBoth = findTreeObstacle(nextX, nextY, tree);
-            
-            const mainObstacle = obstacleBoth || obstacleX || obstacleY;
-            if (mainObstacle) {
-              tree.isAttacking = true;
-              tree.pauseUntil = now + 1400;
-              damageBuilding(mainObstacle, 1);
-              const screenDist = Math.hypot(tree.x - state.x, tree.y - state.y);
-              if (screenDist < 250) {
-                state.screenShakeUntil = now + 250;
-              }
-            }
-            
-            let moved = false;
-            if (!obstacleX) {
-              tree.x = nextX;
-              moved = true;
-            }
-            if (!obstacleY) {
-              tree.y = nextY;
-              moved = true;
-            }
-            if (moved) {
-              isMoving = true;
+          const nextX = tree.x + stepX;
+          const nextY = tree.y + stepY;
+          
+          const obstacleX = findTreeObstacle(nextX, tree.y, tree);
+          const obstacleY = findTreeObstacle(tree.x, nextY, tree);
+          const obstacleBoth = findTreeObstacle(nextX, nextY, tree);
+          
+          const mainObstacle = obstacleBoth || obstacleX || obstacleY;
+          if (mainObstacle) {
+            tree.isAttacking = true;
+            tree.pauseUntil = now + 1400;
+            damageBuilding(mainObstacle, 5, tree);
+            const screenDist = Math.hypot(tree.x - state.x, tree.y - state.y);
+            if (screenDist < 250) {
+              state.screenShakeUntil = now + 250;
             }
           }
           
-          // Stuck detection fallback
-          if (isMoving) {
-            const movedDist = Math.hypot(tree.x - (tree.lastX ?? tree.x), tree.y - (tree.lastY ?? tree.y));
-            if (movedDist < 0.05) {
-              tree.stuckTicks = (tree.stuckTicks || 0) + 1;
-            } else {
-              tree.stuckTicks = 0;
-            }
-            
-            if ((tree.stuckTicks || 0) > 24) {
-              const escapeTarget = findTreeObstacle(tree.x, tree.y, tree) || 
-                                   activeSprites().find(sprite => {
-                                     if (sprite === tree || sprite.tree || !sprite.solid) return false;
-                                     if (sprite.destroyed || sprite.dead) return false;
-                                     return Math.hypot(tree.x - sprite.x, tree.y - sprite.y) < 36;
-                                   });
-              if (escapeTarget) {
-                tree.isAttacking = true;
-                tree.pauseUntil = now + 1400;
-                damageBuilding(escapeTarget, 1);
-              }
-              tree.stuckTicks = 0;
-            }
+          let moved = false;
+          if (!obstacleX) {
+            tree.x = nextX;
+            moved = true;
+          }
+          if (!obstacleY) {
+            tree.y = nextY;
+            moved = true;
+          }
+          if (moved) {
+            isMoving = true;
+          }
+        }
+        
+        // Stuck detection fallback
+        if (isMoving) {
+          const movedDist = Math.hypot(tree.x - (tree.lastX ?? tree.x), tree.y - (tree.lastY ?? tree.y));
+          if (movedDist < 0.05) {
+            tree.stuckTicks = (tree.stuckTicks || 0) + 1;
           } else {
             tree.stuckTicks = 0;
           }
           
-          tree.lastX = tree.x;
-          tree.lastY = tree.y;
-          
-          if (dist < 38) {
-            tree.pauseUntil = now + 1600;
-            if (combatTarget === "player") {
-              triggerScaryHit(dx, dy, tree);
-            } else {
-              damagePetSlime(combatTarget, tree);
+          if ((tree.stuckTicks || 0) > 24) {
+            const escapeTarget = findTreeObstacle(tree.x, tree.y, tree) || 
+                                 activeSprites().find(sprite => {
+                                   if (sprite === tree || sprite.tree || !sprite.solid) return false;
+                                   if (sprite.destroyed || sprite.dead) return false;
+                                   return Math.hypot(tree.x - sprite.x, tree.y - sprite.y) < 36;
+                                 });
+            if (escapeTarget) {
+              tree.isAttacking = true;
+              tree.pauseUntil = now + 1400;
+              damageBuilding(escapeTarget, 5, tree);
             }
+            tree.stuckTicks = 0;
           }
         } else {
-          tree.isAttacking = false;
+          tree.stuckTicks = 0;
+        }
+        
+        tree.lastX = tree.x;
+        tree.lastY = tree.y;
+        
+        if (dist < 38) {
+          tree.pauseUntil = now + 1600;
+          if (combatTarget === "player") {
+            triggerScaryHit(dx, dy, tree);
+          } else {
+            damagePetSlime(combatTarget, tree);
+          }
         }
       }
     }
@@ -4585,6 +5095,7 @@
     let nightWindGain = null;
 
     function initAudio() {
+      if (state && state.audioMuted) return;
       if (audioCtx) return;
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       if (state.timeOfDay === "day") {
@@ -4777,6 +5288,7 @@
     }
 
     function playSfx(id, volume = 0.22) {
+      if (state && state.audioMuted) return;
       const original = document.getElementById(id);
       if (!original) return;
       const clone = original.cloneNode(true);
@@ -5449,6 +5961,7 @@
     }
 
     function refreshWallConnections() {
+      // 1. Process regular walls/fences
       for (const item of placedSprites) {
         if (item.buildId !== "wall") continue;
         const left = wallAt(item.scene, item.x - BUILD_WALL_STEP, item.y);
@@ -5648,7 +6161,7 @@
       green_slime: { npcHp: 50, npcDamage: 2, speed: 56 },
       blue_slime: { npcHp: 50, npcDamage: 2, speed: 56 },
       pink_slime: { npcHp: 50, npcDamage: 2, speed: 56 },
-      cutie_sheep: { npcHp: 65, npcDamage: 2, speed: 52 },
+      cutie_sheep: { npcHp: 65, npcDamage: 2, speed: 36 },
       doe: { npcHp: 100, npcDamage: 4, speed: 58 },
       squirle: { npcHp: 70, npcDamage: 3, speed: 70 },
       frog: { npcHp: 80, npcDamage: 3, speed: 62 },
@@ -5724,7 +6237,10 @@
 
     function spawnNewWildSlime(biomeId = "safe") {
       const group = WILD_NPC_BIOMES.find(entry => entry.biomeId === biomeId) || WILD_NPC_BIOMES[0];
-      spawnWildNpcForGroup(group);
+      const currentCount = roamingNPCs.filter(npc => npc.biomeId === biomeId && !npc.dead).length;
+      if (currentCount < group.count) {
+        spawnWildNpcForGroup(group);
+      }
     }
 
     function initRoamingNPCs() {
@@ -6031,14 +6547,216 @@
     }
 
     function updateRoamingNPCs(now, dt) {
+      // 1. Update arrow projectiles
+      if (state.projectiles) {
+        for (let idx = state.projectiles.length - 1; idx >= 0; idx--) {
+          const proj = state.projectiles[idx];
+          if (proj.target.dead) {
+            state.projectiles.splice(idx, 1);
+            continue;
+          }
+          const dx = proj.target.x - proj.x;
+          const dy = proj.target.y - 6 - proj.y;
+          const dist = Math.hypot(dx, dy);
+          if (dist < 12) {
+            proj.target.hp -= proj.damage;
+            
+            // Knight shielding/getting-hit reaction
+            const isKnight = ["knight_orange", "knight_green", "knight_blue"].includes(proj.target.base);
+            if (isKnight && !proj.target.dead) {
+              if (Math.random() < 0.3) {
+                proj.target.mode = "defense";
+                proj.target.defenseUntil = now + 800; // shield for 800ms
+              } else {
+                proj.target.mode = "hit";
+                proj.target.hitStarted = now;
+              }
+            }
+
+            spawnBloodSplats(proj.target.x, proj.target.y, 4);
+            playHitSound();
+            if (proj.target.hp <= 0) {
+              proj.target.dead = true;
+              proj.target.deadAt = now;
+              proj.target.mode = "die";
+              proj.target.playerKilled = true;
+            }
+            state.projectiles.splice(idx, 1);
+          } else {
+            proj.x += (dx / dist) * proj.speed * dt;
+            proj.y += (dy / dist) * proj.speed * dt;
+          }
+        }
+      }
+
+      // 2. Update Archer Turrets
+      const archers = placedSprites.filter(plant => plant && plant.name && plant.name.startsWith("trap_archer_") && !plant.destroyed);
+      for (const archer of archers) {
+        if (!archer.lastShotAt) archer.lastShotAt = 0;
+        if (now - archer.lastShotAt > 1500) {
+          let nearestMob = null;
+          let minDist = 180;
+          for (const mob of roamingNPCs) {
+            if (mob.isNightMonster && !mob.dead) {
+              const d = Math.hypot(mob.x - archer.x, mob.y - archer.y);
+              if (d < minDist) {
+                minDist = d;
+                nearestMob = mob;
+              }
+            }
+          }
+          if (nearestMob) {
+            archer.lastShotAt = now;
+            archer.attackStarted = now;
+            if (!state.projectiles) state.projectiles = [];
+            state.projectiles.push({
+              x: archer.x,
+              y: archer.y - 12,
+              target: nearestMob,
+              speed: 280,
+              damage: 28
+            });
+            playHitSound();
+          }
+        }
+      }
+
+      // 3. Clean up exploded barrels & destroyed barricades after their animations finish
+      for (let idx = placedSprites.length - 1; idx >= 0; idx--) {
+        const plant = placedSprites[idx];
+        if (plant.name && plant.name === "magic_barrel" && plant.explodedAt && now - plant.explodedAt > 1200) {
+          placedSprites.splice(idx, 1);
+        } else if (plant.name && plant.name.startsWith("magic_barricade_") && plant.destroyedAt && now - plant.destroyedAt > 600) {
+          placedSprites.splice(idx, 1);
+        }
+      }
+
+      // 4. Predator plant proximity bite — triggers when enemy/NPC is within range
+      const activeTraps = placedSprites.filter(plant => plant && plant.name && (
+        plant.name.startsWith("trap_") || 
+        plant.name.startsWith("magic_spike") || 
+        plant.name.startsWith("magic_lightning") ||
+        plant.name === "magic_barrel"
+      ));
+
+      for (const trap of activeTraps) {
+        if (!trap.name.startsWith("trap_predator_")) continue;
+        const trapAge = now - (trap.placedAt || 0);
+        if (trapAge < 1500) continue; // Still growing
+
+        const biteRange = 48; // Bite range in pixels
+        let nearestDist = Infinity;
+        let nearestTarget = null;
+
+        // Check all night monsters and roaming NPCs in range
+        for (const npc of roamingNPCs) {
+          if (npc.dead) continue;
+          const dist = Math.hypot(npc.x - trap.x, npc.y - trap.y);
+          if (dist < biteRange && dist < nearestDist) {
+            nearestDist = dist;
+            nearestTarget = npc;
+          }
+        }
+
+        if (nearestTarget) {
+          // Trigger attack animation if not already attacking
+          if (!trap.triggeredAt || now - trap.triggeredAt > 1200) {
+            trap.triggeredAt = now;
+            nearestTarget.hp -= 25;
+            
+            // Knight shielding/getting-hit reaction
+            const isKnight = ["knight_orange", "knight_green", "knight_blue"].includes(nearestTarget.base);
+            if (isKnight && !nearestTarget.dead) {
+              if (Math.random() < 0.3) {
+                nearestTarget.mode = "defense";
+                nearestTarget.defenseUntil = now + 800; // shield for 800ms
+              } else {
+                nearestTarget.mode = "hit";
+                nearestTarget.hitStarted = now;
+              }
+            }
+
+            spawnBloodSplats(nearestTarget.x, nearestTarget.y, 3);
+            playHitSound();
+            if (nearestTarget.hp <= 0) {
+              nearestTarget.dead = true;
+              nearestTarget.deadAt = now;
+              nearestTarget.mode = "die";
+              if (nearestTarget.isNightMonster) {
+                nearestTarget.playerKilled = true;
+              }
+            }
+          }
+        } else {
+          // Nothing nearby — reset trigger so idle resumes
+          if (trap.triggeredAt && now - trap.triggeredAt > 700) {
+            trap.triggeredAt = null;
+          }
+        }
+      }
+
+      // 5. Update other trap trigger animations for player, pets, and NPCs (footstep-based)
+      const stompTraps = activeTraps.filter(t => !t.name.startsWith("trap_predator_"));
+      
+      for (const trap of stompTraps) {
+        if (trap.name === "magic_barrel" && trap.explodedAt) continue;
+        
+        // Assemble colliders
+        const colliders = [];
+        colliders.push(playerFeetAt(state.x, state.y));
+        for (const npc of roamingNPCs) {
+          if (!npc.dead) {
+            colliders.push({ x: npc.x - 7, y: npc.y - 6, w: 14, h: 8 });
+          }
+        }
+        if (state.petSlimes) {
+          for (const pet of state.petSlimes) {
+            colliders.push({ x: pet.x - 6, y: pet.y - 5, w: 12, h: 7 });
+          }
+        }
+
+        const tx = trap.x;
+        const ty = trap.y;
+        const tw = trap.w;
+        const th = trap.h;
+        for (const feet of colliders) {
+          if (aabb(feet.x, feet.y, feet.w, feet.h, tx - tw/2, ty - th, tw, th)) {
+            if (trap.name === "magic_barrel") {
+              // Detonate barrel!
+              trap.explodedAt = now;
+              trap.solid = null;
+              playMonsterDeathSound();
+              for (const mob of roamingNPCs) {
+                if (mob.isNightMonster && !mob.dead) {
+                  if (Math.hypot(mob.x - trap.x, mob.y - trap.y) <= 120) {
+                    mob.hp -= 60;
+                    spawnBloodSplats(mob.x, mob.y, 6);
+                    if (mob.hp <= 0) {
+                      mob.dead = true;
+                      mob.deadAt = now;
+                      mob.mode = "die";
+                      mob.playerKilled = true;
+                    }
+                  }
+                }
+              }
+            } else {
+              if (!trap.triggeredAt) {
+                trap.triggeredAt = now;
+              }
+            }
+            break;
+          }
+        }
+      }
+
       for (let i = roamingNPCs.length - 1; i >= 0; i--) {
         const npc = roamingNPCs[i];
         
-        // Culling optimization: Skip AI and movement updates for active NPCs far from player
         if (!npc.dead) {
           const dx = npc.x - state.x;
           const dy = npc.y - state.y;
-          const maxDistSq = npc.isNightMonster ? 2250000 : 1440000; // 1500px for night mobs, 1200px for normal
+          const maxDistSq = npc.isNightMonster ? 2250000 : 1440000;
           if (dx * dx + dy * dy > maxDistSq) { 
             continue;
           }
@@ -6046,9 +6764,146 @@
 
         const cfg = roster[npc.base];
         const npcInWater = state.scene === "outside" && waterTileAt(npc.x, npc.y);
-        const speedMult = npcInWater ? 0.5 : 1.0;
+        let speedMult = npcInWater ? 0.5 : 1.0;
+        
+        // Status effect multipliers:
+        if (npc.stunUntil && now < npc.stunUntil) {
+          speedMult = 0.0; // Anchored/stunned in place
+        } else if (npc.slowUntil && now < npc.slowUntil) {
+          speedMult *= 0.5; // Slowed by 50%
+        }
+
         const npcSpeed = npc.speed * speedMult;
         npc.t += dt;
+
+        // Trap damage logic for enemies walking over placed traps
+        if (!npc.dead && npc.isNightMonster) {
+          const feet = { x: npc.x - 7, y: npc.y - 6, w: 14, h: 8 };
+          for (const trap of activeTraps) {
+            if (trap.name === "magic_barrel") continue;
+            if (trap.name.startsWith("trap_predator_")) {
+              const trapAge = now - (trap.placedAt || 0);
+              if (trapAge < 1500) continue;
+            }
+
+            const tx = trap.x;
+            const ty = trap.y;
+            const tw = trap.w;
+            const th = trap.h;
+            if (aabb(feet.x, feet.y, feet.w, feet.h, tx - tw/2, ty - th, tw, th)) {
+              // Ensure traps only damage the NPC once every 800ms
+              if (!npc.lastTrapHit || now - npc.lastTrapHit > 800) {
+                npc.lastTrapHit = now;
+                
+                let damage = 20;
+                let pushbackDistance = 0;
+                let pushbackAngle = 0;
+
+                if (trap.name.startsWith("trap_spike")) {
+                  damage = 15; // Balanced, not a 1-hit kill
+                } else if (trap.name.startsWith("trap_bear")) {
+                  damage = 25;
+                  // Stun/Root monster for 1.5 seconds!
+                  npc.stunUntil = now + 1500;
+                  npc.mode = "idle";
+                } else if (trap.name.startsWith("trap_fire")) {
+                  damage = 10;
+                  npc.burnUntil = now + 3000; // Ignite! Burn for 3 seconds
+                  npc.lastBurnTick = now;
+                } else if (trap.name.startsWith("magic_lightning_")) {
+                  damage = 30;
+                  // Chain Lightning: hits other nearby monsters for 15 damage
+                  for (const other of roamingNPCs) {
+                    if (other !== npc && other.isNightMonster && !other.dead) {
+                      const otherDist = Math.hypot(other.x - npc.x, other.y - npc.y);
+                      if (otherDist < 96) {
+                        other.hp -= 15;
+                        spawnBloodSplats(other.x, other.y, 3);
+                        if (other.hp <= 0) {
+                          other.dead = true;
+                          other.deadAt = now;
+                          other.mode = "die";
+                          other.playerKilled = true;
+                        }
+                      }
+                    }
+                  }
+                } else if (trap.name.startsWith("trap_pit_spikes")) {
+                  damage = 15;
+                  // Slow enemy down by 50% for 2.5 seconds (via status)
+                  npc.slowUntil = now + 2500;
+                } else if (trap.name.startsWith("trap_push_")) {
+                  damage = 12;
+                  pushbackDistance = 45;
+                  
+                  // Compute push direction dynamically using trap's rotationSteps (0=down/front, 1=left, 2=up, 3=right)
+                  const rotation = trap.rotateSteps || 0;
+                  if (rotation === 0) {
+                    pushbackAngle = Math.PI / 2; // Down
+                  } else if (rotation === 1) {
+                    pushbackAngle = Math.PI; // Left
+                  } else if (rotation === 2) {
+                    pushbackAngle = -Math.PI / 2; // Up
+                  } else if (rotation === 3) {
+                    pushbackAngle = 0; // Right
+                  }
+                }
+                
+                npc.hp -= damage;
+                
+                // Knight and Bubu/Dudu shielding/getting-hit reaction
+                const isKnight = ["knight_orange", "knight_green", "knight_blue"].includes(npc.base);
+                const isBubuDudu = ["bubu_highres", "dudu_highres", "bubu_outlined", "dudu_outlined", "bubu", "dudu", "bubu_pixel", "dudu_pixel"].includes(npc.base);
+                if ((isKnight || isBubuDudu) && !npc.dead) {
+                  if (isKnight && Math.random() < 0.3) {
+                    npc.mode = "defense";
+                    npc.defenseUntil = now + 800; // shield for 800ms
+                  } else {
+                    npc.mode = "hit";
+                    npc.hitStarted = now;
+                  }
+                }
+                
+                // Handle pushback translation safely checking walls/collision boundaries
+                if (pushbackDistance > 0) {
+                  const newX = Math.max(60, Math.min(WORLD_W - 60, npc.x + Math.cos(pushbackAngle) * pushbackDistance));
+                  const newY = Math.max(60, Math.min(WORLD_H - 60, npc.y + Math.sin(pushbackAngle) * pushbackDistance));
+                  if (!findNpcObstacle(newX, newY, npc)) {
+                    npc.x = newX;
+                    npc.y = newY;
+                  }
+                }
+
+                spawnBloodSplats(npc.x, npc.y, 4);
+                playHitSound();
+                if (npc.hp <= 0) {
+                  npc.dead = true;
+                  npc.deadAt = now;
+                  npc.mode = "die";
+                  npc.playerKilled = true;
+                }
+              }
+            }
+          }
+        }
+
+        // Active fire/burn status tick for NPCs
+        if (!npc.dead && npc.burnUntil && now < npc.burnUntil) {
+          if (!npc.lastBurnTick) npc.lastBurnTick = now;
+          if (now - npc.lastBurnTick >= 500) {
+            npc.hp = Math.max(0, npc.hp - 3); // 3 damage per tick (18 total over 3s)
+            npc.lastBurnTick = now;
+            spawnBloodSplats(npc.x, npc.y, 2);
+            if (npc.hp <= 0) {
+              npc.dead = true;
+              npc.deadAt = now;
+              npc.mode = "die";
+              if (npc.isNightMonster) {
+                npc.playerKilled = true;
+              }
+            }
+          }
+        }
 
         // Dormant night monster trigger and update logic
         if (npc.isDormant && !npc.dead) {
@@ -6220,11 +7075,16 @@
             const frames = (forestFrames[npc.base] && forestFrames[npc.base]["attack-" + npc.dir]) || [];
             const fps = (cfg.attackFps || 9) * (npc.animSpeedOverride || 1.0);
             const index = Math.floor(((now - npc.attackStarted) / 1000) * fps);
-            if (frames.length === 0 || index >= frames.length - 1 || now >= npc.attackUntil) {
+            const isKnight = ["knight_orange", "knight_green", "knight_blue"].includes(npc.base);
+            const shouldTrigger = isKnight ? (index >= 1) : (frames.length === 0 || index >= frames.length - 1 || now >= npc.attackUntil);
+            if (shouldTrigger) {
               npc.damageDealt = true;
               const tTarget = npc.damageTarget;
               if (tTarget === "player") {
                 triggerScaryHit(npc.damageDx, npc.damageDy, npc);
+              } else if (tTarget.built) {
+                // It is a placed building / wall! Deal damage upon animation completion
+                damageBuilding(tTarget, 5, npc); // Deal exactly 5 structure damage per full attack anim
               } else {
                 if (!tTarget.dead && !tTarget.destroyed) {
                   damagePetSlime(tTarget, npc);
@@ -6401,12 +7261,20 @@
               const mainObstacle = obstacleBoth || obstacleX || obstacleY;
               
               if (mainObstacle) {
-                npc.mode = "attack";
-                npc.attackStarted = now;
-                npc.attackUntil = now + 1200;
-                npc.nextAttackAt = now + 1200;
-                damageBuilding(mainObstacle, 1);
-                npc.nextDecisionAt = now + 1200;
+                // Trigger standard animation-based building attacks (not instant hit)
+                if (now >= (npc.nextAttackAt || 0)) {
+                  npc.mode = "attack";
+                  npc.attackStarted = now;
+                  const attackDur = cfg.attackMs || 1000;
+                  npc.attackUntil = now + attackDur;
+                  npc.nextAttackAt = now + attackDur + 200; // Attack cooldown
+                  
+                  npc.damageDealt = false;
+                  npc.damageTarget = mainObstacle; // Target the wall building structure!
+                  npc.damageDx = steerX;
+                  npc.damageDy = steerY;
+                  npc.nextDecisionAt = now + attackDur;
+                }
                 continue;
               }
               
@@ -6744,19 +7612,35 @@
           decidePetBrain(pet, now);
         }
         
-        // Match player pacing at night (or catch up fast)
-        let speed = PET_MOVE_SPEED_BASE;
-        if (isNight) {
-          const playerDist = Math.hypot(state.x - pet.x, state.y - pet.y);
-          if (playerDist > 55) {
-            speed = MOVE_SPEED * 1.55;
-          } else {
-            speed = MOVE_SPEED;
+        // Match movement speed of corresponding wild NPC base (stored in pet.speed), regardless of night/day
+        let speed = pet.speed || PET_MOVE_SPEED_BASE;
+        
+        let dx = pet.targetX - pet.x;
+        let dy = pet.targetY - pet.y;
+        
+        // Overlap avoidance: Push away from other pets to prevent stacking/overlapping in the same place
+        let avoidX = 0;
+        let avoidY = 0;
+        for (const other of petSlimes) {
+          if (other === pet) continue;
+          const odist = Math.hypot(other.x - pet.x, other.y - pet.y);
+          if (odist < 16) {
+            const push = 16 - odist;
+            // Vector pointing away from other pet
+            const angle = odist > 0 ? Math.atan2(pet.y - other.y, pet.x - other.x) : Math.random() * Math.PI * 2;
+            avoidX += Math.cos(angle) * push * 0.45;
+            avoidY += Math.sin(angle) * push * 0.45;
           }
         }
         
-        const dx = pet.targetX - pet.x;
-        const dy = pet.targetY - pet.y;
+        // Apply separation offset directly to position if it pushes them away
+        if (Math.hypot(avoidX, avoidY) > 0.1) {
+          movePetSlime(pet, avoidX, avoidY);
+          // Re-evaluate distance to target after push
+          dx = pet.targetX - pet.x;
+          dy = pet.targetY - pet.y;
+        }
+
         const dist = Math.hypot(dx, dy);
         
         if (pet.brainState === "attack" && pet.petTarget) {
@@ -7500,8 +8384,10 @@
       }
       if (attacking) {
         state.stopUntil = 0;
+        state.hitUntil = 0;
       } else if (moving) {
         state.stopUntil = 0;
+        state.hitUntil = 0;
       } else if (wasMoving) {
         const cfg = roster[state.current];
         const counts = cfg?.kind === "forest" && cfg.sideView ? forestFrameCounts[cfg.base] : null;
@@ -7518,22 +8404,48 @@
       const stopping = !dying && !attacking && !moving && now < state.stopUntil;
       
       const isKnight = ["knight_orange", "knight_green", "knight_blue"].includes(cfg.base);
+      const isBubuDudu = ["bubu_highres", "dudu_highres", "bubu_outlined", "dudu_outlined", "bubu", "dudu", "bubu_pixel", "dudu_pixel"].includes(cfg.base);
+      if (state.buildUiOpen) {
+        state.lastBuildTime = now;
+      }
+      const isBuildingMode = (now - (state.lastBuildTime || 0)) <= 10000;
+
       if (dying) {
         state.mode = "die";
+        state.duduGotHitRun = false;
       } else if (attacking) {
         state.mode = "attack";
-      } else if (isKnight && pressed("o")) {
+        state.duduGotHitRun = false;
+      } else if ((isKnight || isBubuDudu) && (pressed("o") || (state.hitUntil && now < state.hitUntil))) {
         if (!state.hitStarted || state.mode !== "hit") state.hitStarted = now;
         state.mode = "hit";
       } else if (isKnight && pressed("p")) {
         if (!state.defenseStarted || state.mode !== "defense") state.defenseStarted = now;
         state.mode = "defense";
+        state.duduGotHitRun = false;
       } else if (moving) {
-        state.mode = "run";
+        if (cfg.base.includes("dudu") && isBuildingMode) {
+          state.mode = "run_build";
+        } else if (cfg.base.includes("dudu") && state.duduGotHitRun) {
+          state.mode = "run2";
+        } else {
+          state.mode = "run";
+        }
       } else if (stopping) {
         state.mode = state.stopMode;
+        state.duduGotHitRun = false;
       } else {
-        state.mode = "idle";
+        state.duduGotHitRun = false;
+        if (cfg.base.includes("dudu") && isBuildingMode) {
+          state.mode = "idle_build";
+        } else {
+          const counts = forestFrameCounts[cfg.base];
+          const hasIdle2 = counts && counts.idle2;
+          const wasIdle = state.mode === "idle" || state.mode === "idle2";
+          if (!wasIdle) {
+            state.mode = (hasIdle2 && Math.random() < 0.5) ? "idle2" : "idle";
+          }
+        }
       }
 
       updateRoamingNPCs(now, dt);
@@ -7577,6 +8489,21 @@
         drawAcidSplats();
         drawDepthSortedActors();
         drawFloatingItems();
+        
+        // Draw arrow projectiles
+        if (state.projectiles) {
+          for (const proj of state.projectiles) {
+            const dx = proj.target.x - proj.x;
+            const dy = proj.target.y - 6 - proj.y;
+            const angle = Math.atan2(dy, dx);
+            let angleDeg = (angle * 180 / Math.PI + 360) % 360;
+            let frameIndex = Math.round(angleDeg / (360 / 27)) % 27 + 1;
+            const arrowImg = images[`assets/magic_traps/2 Barricades/Archer/Arrow/${frameIndex}.png`];
+            if (arrowImg) {
+              ctx.drawImage(arrowImg, Math.round(proj.x - arrowImg.width / 2), Math.round(proj.y - arrowImg.height / 2));
+            }
+          }
+        }
         
         // Night shadow overlay & Soft Radial Flashlight (world space)
         if (state.timeOfDay === "night") {
@@ -7766,33 +8693,7 @@
         ctx.restore();
       }
 
-      // Draw real-time HUD threat warning on the right side if a dormant night creature is pursuing the player
-      const KNIGHT_BASES = ["knight_orange", "knight_green", "knight_blue"];
-      const activeThreats = roamingNPCs.filter(n => n.isNightMonster && !n.dead && !n.isDormant && n.aggroTarget === "player" && (n.base === "creature_bear" || n.base === "creature_slasher" || KNIGHT_BASES.includes(n.base)));
-      if (activeThreats.length > 0) {
-        ctx.save();
-        ctx.textAlign = "right";
-        ctx.font = "bold 9px 'Courier New', monospace";
-        ctx.fillStyle = (Math.floor(now / 220) % 2 === 0) ? "rgba(255, 30, 30, 0.9)" : "rgba(180, 20, 20, 0.5)";
-        ctx.fillText("⚠️ CRITICAL THREAT DETECTED", VIEW_W - 16, 40);
-        
-        ctx.fillStyle = "rgba(230, 210, 180, 0.85)";
-        ctx.font = "8px 'Courier New', monospace";
-        let yOffset = 50;
-        activeThreats.forEach(threat => {
-          let name;
-          if (threat.base === "creature_bear") name = "FLESH BEAR";
-          else if (threat.base === "creature_slasher") name = "FLESH SLASHER";
-          else if (threat.base === "knight_orange") name = "ORANGE KNIGHT";
-          else if (threat.base === "knight_green") name = "GREEN KNIGHT";
-          else if (threat.base === "knight_blue") name = "BLUE KNIGHT";
-          else name = "UNKNOWN";
-          const dist = Math.round(Math.hypot(state.x - threat.x, state.y - threat.y));
-          ctx.fillText(`» ${name} (DIST: ${dist}m)`, VIEW_W - 16, yOffset);
-          yOffset += 10;
-        });
-        ctx.restore();
-      }
+      // HUD threat warning removed
 
       // drawJoystick(); // hidden but still functional
       captureStudySnapshot(now);
@@ -7899,9 +8800,17 @@
           .forEach(item => uniquePlants.set(`${item.name}:${item.count}`, item));
         [...uniquePlants.values()].forEach(plant => {
           [plant, ...(plant.variants || [])].forEach(item => {
-            Array.from({ length: item.count || plant.count || 1 }, (_, i) =>
-              out.add(`assets/plants/${item.name}/frame_${i}.png`)
-            );
+            if (item.name && item.name.startsWith("magic_barricade_")) {
+              const parts = item.name.split("_");
+              const variant = parts[2];
+              const dir = parts[3];
+              const prefix = dir === "down" ? "D" : dir === "side" ? "S" : "U";
+              out.add(`assets/magic_traps/2 Barricades/${prefix}_${variant}.png`);
+            } else {
+              Array.from({ length: item.count || plant.count || 1 }, (_, i) =>
+                out.add(`assets/plants/${item.name}/frame_${i}.png`)
+              );
+            }
           });
         });
         Object.values(farmCrops).forEach(crop =>
@@ -7915,6 +8824,51 @@
           "assets/plants/build_house_door_0_2/frame_0.png"
         ];
         doorFrames.forEach(f => out.add(f));
+
+        // Preload barricade original sheets (Down = D, Side = S, Up = U)
+        for (let v = 1; v <= 4; v++) {
+          for (const prefix of ["D", "S", "U"]) {
+            out.add(`assets/magic_traps/2 Barricades/${prefix}_${v}.png`);
+            out.add(`assets/magic_traps/2 Barricades/${prefix}_${v}_Build.png`);
+            out.add(`assets/magic_traps/2 Barricades/${prefix}_${v}_Destroy.png`);
+          }
+        }
+        // Preload predator plant grow/idle/attack frames for all 3 variants × 4 directions
+        for (let v = 1; v <= 3; v++) {
+          for (const d of ["down", "up", "left", "right"]) {
+            for (let i = 0; i < 10; i++) {
+              out.add(`assets/plants/trap_predator_grow_${v}_${d}/frame_${i}.png`);
+            }
+            for (let i = 0; i < 4; i++) {
+              out.add(`assets/plants/trap_predator_idle_${v}_${d}/frame_${i}.png`);
+            }
+            for (let i = 0; i < 7; i++) {
+              out.add(`assets/plants/trap_predator_attack_${v}_${d}/frame_${i}.png`);
+            }
+          }
+        }
+        // Preload barrel idle/build/destroy/boom frames
+        for (let i = 0; i < 4; i++) {
+          out.add(`assets/plants/magic_barrel_idle/frame_${i}.png`);
+          out.add(`assets/plants/magic_barrel_build/frame_${i}.png`);
+          out.add(`assets/plants/magic_barrel_destroy/frame_${i}.png`);
+        }
+        for (let v = 1; v <= 3; v++) {
+          for (let i = 0; i < 8; i++) {
+            out.add(`assets/plants/magic_barrel_boom_${v}/frame_${i}.png`);
+          }
+        }
+        // Preload archer attack frames
+        for (const d of ["down", "side", "up"]) {
+          for (let i = 0; i < 6; i++) {
+            out.add(`assets/plants/trap_archer_${d}_attack/frame_${i}.png`);
+          }
+        }
+        // Preload arrow projectile rotation frames
+        for (let i = 1; i <= 27; i++) {
+          out.add(`assets/magic_traps/2 Barricades/Archer/Arrow/${i}.png`);
+        }
+
         return [...out];
       })();
 
@@ -8022,6 +8976,13 @@
       setKey(e.key, false);
     });
     
+    state.showHitboxes = false;
+    document.getElementById("toggle-hitbox-btn").addEventListener("click", () => {
+      playUiClickSound();
+      state.showHitboxes = !state.showHitboxes;
+      document.getElementById("toggle-hitbox-btn").textContent = state.showHitboxes ? "🟥 Hide Hitboxes" : "🟩 Show Hitboxes";
+    });
+    
     document.getElementById("toggle-time-btn").addEventListener("click", () => {
       playUiClickSound();
       const now = performance.now();
@@ -8082,6 +9043,23 @@
         const val = parseFloat(e.target.value);
         state.nightDarkness = val;
         darknessVal.textContent = `${Math.round(val * 100)}%`;
+      });
+    }
+
+    const soundToggleBtn = document.getElementById("toggle-sound-btn");
+    if (soundToggleBtn) {
+      soundToggleBtn.addEventListener("click", () => {
+        state.audioMuted = !state.audioMuted;
+        if (state.audioMuted) {
+          soundToggleBtn.textContent = "🔇 Sound: OFF";
+          soundToggleBtn.style.background = "#ffd6d6";
+          soundToggleBtn.style.color = "#8b0000";
+        } else {
+          soundToggleBtn.textContent = "🔊 Sound: ON";
+          soundToggleBtn.style.background = "#fffcf8";
+          soundToggleBtn.style.color = "#5c4b37";
+        }
+        playUiClickSound();
       });
     }
     

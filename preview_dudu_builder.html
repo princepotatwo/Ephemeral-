@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dudu Builder Interactive Cropper & Scale Tuning Tool</title>
+  <style>
+    :root {
+      --bg: #18181c;
+      --card-bg: #24242a;
+      --accent: #ff9800;
+      --accent-hover: #f57c00;
+      --text: #eceff1;
+      --subtext: #90a4ae;
+      --border: #373740;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 4px;
+      color: var(--accent);
+    }
+    p.subtitle {
+      text-align: center;
+      color: var(--subtext);
+      margin-top: 0;
+      margin-bottom: 24px;
+    }
+    .main-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    @media (max-width: 1000px) {
+      .main-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+    .panel {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    }
+    .panel-title {
+      font-size: 1.25rem;
+      font-weight: bold;
+      color: #ffe0b2;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 10px;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .previews-row {
+      display: flex;
+      gap: 16px;
+      justify-content: center;
+      align-items: flex-end;
+      margin-bottom: 20px;
+      background: #121215;
+      padding: 16px;
+      border-radius: 10px;
+      border: 1px solid #2a2a32;
+    }
+    .preview-box {
+      text-align: center;
+    }
+    .preview-box label {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--subtext);
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+    .canvas-wrapper {
+      position: relative;
+      background: #7ca86b; /* In-game grass color fallback */
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
+      display: inline-block;
+    }
+    .canvas-wrapper.bg-grass { background: #94c47d; }
+    .canvas-wrapper.bg-dark { background: #1e1e24; }
+    .canvas-wrapper.bg-grid {
+      background-color: #2a2a32;
+      background-image: linear-gradient(45deg, #222228 25%, transparent 25%), linear-gradient(-45deg, #222228 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #222228 75%), linear-gradient(-45deg, transparent 75%, #222228 75%);
+      background-size: 20px 20px;
+      background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    }
+    canvas {
+      image-rendering: pixelated;
+      display: block;
+    }
+    .controls-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 16px;
+    }
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .control-group.full-width {
+      grid-column: 1 / -1;
+    }
+    .control-group label {
+      font-size: 0.85rem;
+      color: var(--subtext);
+      display: flex;
+      justify-content: space-between;
+    }
+    .control-group label span.val {
+      color: var(--accent);
+      font-family: monospace;
+      font-weight: bold;
+    }
+    input[type="range"] {
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+    input[type="number"] {
+      background: #18181c;
+      border: 1px solid var(--border);
+      color: #fff;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-family: monospace;
+    }
+    .json-export-panel {
+      grid-column: 1 / -1;
+      background: #1a1a20;
+      border: 1.5px solid var(--accent);
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 10px;
+    }
+    .json-textarea {
+      width: 100%;
+      height: 140px;
+      background: #101014;
+      color: #a5d6a7;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 0.9rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      box-sizing: border-box;
+      resize: vertical;
+    }
+    .btn {
+      background: var(--accent);
+      color: #121212;
+      border: none;
+      padding: 10px 20px;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn:hover {
+      background: var(--accent-hover);
+      transform: translateY(-1px);
+    }
+    .btn-secondary {
+      background: #37474f;
+      color: #eceff1;
+    }
+    .btn-secondary:hover {
+      background: #455a64;
+    }
+    .global-toolbar {
+      max-width: 1400px;
+      margin: 0 auto 20px auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: var(--card-bg);
+      padding: 12px 20px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+    .tool-group {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Dudu Builder Interactive Cropper & Scale Tuning Tool</h1>
+  <p class="subtitle">Adjust cropping, text erasure, scale, and offset in real-time. Copy the resulting data back to Antigravity!</p>
+
+  <div class="global-toolbar">
+    <div class="tool-group">
+      <span><strong>Background:</strong></span>
+      <button class="btn btn-secondary" onclick="setBg('grass')">Grass</button>
+      <button class="btn btn-secondary" onclick="setBg('grid')">Checker Grid</button>
+      <button class="btn btn-secondary" onclick="setBg('dark')">Dark</button>
+    </div>
+    <div class="tool-group">
+      <button class="btn btn-secondary" onclick="togglePlay()"><span id="playIcon">⏸</span> Play/Pause</button>
+      <span><strong>Speed:</strong></span>
+      <input type="range" id="globalFps" min="1" max="24" value="8" style="width: 100px;" oninput="updateFps()">
+      <span id="fpsVal" style="font-family: monospace;">8 FPS</span>
+    </div>
+    <div>
+      <button class="btn" onclick="copyConfigJson()">📋 Copy All Config Data</button>
+    </div>
+  </div>
+
+  <div class="main-layout">
+
+    <!-- 1. DUDU BUILD IDLE PANEL -->
+    <div class="panel" id="panelIdle">
+      <div class="panel-title">
+        <span>🛠️ Dudu Builder Idle (dudubuildidle)</span>
+        <span style="font-size: 0.85rem; color: var(--subtext);">10 Frames</span>
+      </div>
+
+      <div class="previews-row">
+        <div class="preview-box">
+          <label>Standard Dudu Idle (Reference)</label>
+          <div class="canvas-wrapper bg-grass">
+            <canvas id="canvasRefIdle" width="160" height="192"></canvas>
+          </div>
+        </div>
+        <div class="preview-box">
+          <label>Processed Output</label>
+          <div class="canvas-wrapper bg-grass">
+            <canvas id="canvasOutputIdle" width="160" height="192"></canvas>
+          </div>
+        </div>
+        <div class="preview-box">
+          <label>Raw Crop Bounding Box</label>
+          <div class="canvas-wrapper bg-grid">
+            <canvas id="canvasRawIdle" width="160" height="192"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls-grid">
+        <div class="control-group full-width">
+          <label>Frame Index: <span class="val" id="idleFrameVal">0</span></label>
+          <input type="range" id="idleFrame" min="0" max="9" value="0" oninput="renderAll()">
+        </div>
+
+        <div class="control-group">
+          <label>Crop Left (X1): <span class="val" id="idleLeftVal">0</span></label>
+          <input type="range" id="idleLeft" min="0" max="100" value="0" oninput="renderAll()">
+        </div>
+        <div class="control-group">
+          <label>Crop Top (Y1): <span class="val" id="idleTopVal">26</span></label>
+          <input type="range" id="idleTop" min="0" max="100" value="26" oninput="renderAll()">
+        </div>
+        <div class="control-group">
+          <label>Crop Right (X2): <span class="val" id="idleRightVal">209</span></label>
+          <input type="range" id="idleRight" min="100" max="209" value="209" oninput="renderAll()">
+        </div>
+        <div class="control-group">
+          <label>Crop Bottom (Y2): <span class="val" id="idleBottomVal">262</span></label>
+          <input type="range" id="idleBottom" min="150" max="265" value="262" oninput="renderAll()">
+        </div>
+
+        <div class="control-group">
+          <label>Erase Text W (Top-Left): <span class="val" id="idleEraseWVal">41</span></label>
+          <input type="range" id="idleEraseW" min="0" max="100" value="41" oninput="renderAll()">
+        </div>
+        <div class="control-group">
+          <label>Erase Text H (Top-Left): <span class="val" id="idleEraseHVal">155</span></label>
+          <input type="range" id="idleEraseH" min="0" max="200" value="155" oninput="renderAll()">
+        </div>
+
+        <div class="control-group">
+          <label>Scale Factor: <span class="val" id="idleScaleVal">1.237</span></label>
+          <input type="range" id="idleScale" min="0.5" max="2.0" step="0.005" value="1.237" oninput="renderAll()">
+        </div>
+        <div class="control-group">
+          <label>Direction Facing: <span class="val" id="idleFlipVal">Normal (Left)</span></label>
+          <button class="btn btn-secondary" onclick="toggleFlip('idle')" style="padding: 4px 10px; font-size: 0.8rem;">Flip Horizontal</button>
+        </div>
+
+        <div class="control-group">
+          <label>Canvas Offset X: <span class="val" id="idleOffsetXVal">0</span></label>
+          <input type="range" id="idleOffsetX" min="-40" max="40" value="0" oninput="renderAll()">
+        </div>
+        <div class="control-group">
+          <label>Canvas Offset Y: <span class="val" id="idleOffsetYVal">-4</span></label>
+          <input type="range" id="idleOffsetY" min="-40" max="40" value="-4" oninput="renderAll()">
+        </div>
+      </div>
+    </div>
+
+
+    <!-- 2. DUDU BUILD WALK PANEL -->
+    <div class="panel" id="panelWalk">
+      <div class="panel-title">
+        <span>🚜 Dudu Builder Walk (dudubuildwalk)</span>
+        <span style="font-size: 0.85rem; color: var(--subtext);">16 Frames</span>
+      </div>
+
+      <div class="previews-row">
+        <div class="preview-box">
+          <label>Standard Dudu Walk (Reference)</label>
+          <div class="canvas-wrapper bg-grass">
+            <canvas id="canvasRefWalk" width="160" height="192"></canvas>
+          </div>
+        </div>
+        <div class="preview-box">
+          <label>Processed Output</label>
+          <div class="canvas-wrapper bg-grass">
+            <canvas id="canvasOutputWalk" width="160" height="192"></canvas>
+          </div>
+        </div>
+        <div class="preview-box">
+          <label>Raw Crop Bounding Box</label>
+          <div class="canvas-wrapper bg-grid">
+            <canvas id="canvasRawWalk" width="160" height="192"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="controls-grid">
+        <div class="control-group full-width">
+          <label>Frame Index: <span class="val" id="walkFrameVal">0</span></label>
+          <input type="range" id="walkFrame" min="0" max="15" value="0" oninput="renderAll()">
+        </div>
+
+        <div class="control-group">
+          <label>Crop Left (X1): <span class="val" id="walkLeftVal">7</span></label>
+          <input type="range" id="walkLeft" min="0" max="100" value="7" oninput="renderAll()">
+        </div>
+        <div class="control-group">
+          <label>Crop Top (Y1): <span class="val" id="walkTopVal">10</span></label>
+          <input type="range" id="walkTop" min="0" max="100" value="10" oninput="renderAll()">
+        </div>
+        <div class="control-group">
+          <label>Crop Right (X2): <span class="val" id="walkRightVal">209</span></label>
+          <input type="range" id="walkRight" min="100" max="240" value="209" oninput="renderAll()">
+        </div>
+        <div class="control-group">
+          <label>Crop Bottom (Y2): <span class="val" id="walkBottomVal">235</span></label>
+          <input type="range" id="walkBottom" min="150" max="260" value="235" oninput="renderAll()">
+        </div>
+
+        <div class="control-group">
+          <label>Erase Text W (Top-Right): <span class="val" id="walkEraseWVal">50</span></label>
+          <input type="range" id="walkEraseW" min="0" max="100" value="50" oninput="renderAll()">
+        </div>
+        <div class="control-group">
+          <label>Erase Text H (Top-Right): <span class="val" id="walkEraseHVal">110</span></label>
+          <input type="range" id="walkEraseH" min="0" max="200" value="110" oninput="renderAll()">
+        </div>
+
+        <div class="control-group">
+          <label>Scale Factor: <span class="val" id="walkScaleVal">1.346</span></label>
+          <input type="range" id="walkScale" min="0.5" max="2.5" step="0.005" value="1.346" oninput="renderAll()">
+        </div>
+        <div class="control-group">
+          <label>Direction Facing: <span class="val" id="walkFlipVal">Flipped (Left)</span></label>
+          <button class="btn btn-secondary" onclick="toggleFlip('walk')" style="padding: 4px 10px; font-size: 0.8rem;">Flip Horizontal</button>
+        </div>
+
+        <div class="control-group">
+          <label>Canvas Offset X: <span class="val" id="walkOffsetXVal">0</span></label>
+          <input type="range" id="walkOffsetX" min="-40" max="40" value="0" oninput="renderAll()">
+        </div>
+        <div class="control-group">
+          <label>Canvas Offset Y: <span class="val" id="walkOffsetYVal">-4</span></label>
+          <input type="range" id="walkOffsetY" min="-40" max="40" value="-4" oninput="renderAll()">
+        </div>
+      </div>
+    </div>
+
+
+    <!-- 3. CONFIG EXPORT PANEL -->
+    <div class="json-export-panel">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <h3 style="margin: 0; color: var(--accent);">📋 JSON Configuration Data</h3>
+        <button class="btn" onclick="copyConfigJson()">Click to Copy Data to Clipboard</button>
+      </div>
+      <p style="margin-top: 0; margin-bottom: 12px; font-size: 0.85rem; color: var(--subtext);">
+        After tuning the sliders above, click <strong>Copy Data</strong> and paste the contents into the chat!
+      </p>
+      <textarea id="jsonOutput" class="json-textarea" readonly></textarea>
+    </div>
+
+  </div>
+
+  <script>
+    // State & Asset Storage
+    const state = {
+      bg: 'grass',
+      isPlaying: true,
+      fps: 8,
+      idleFlipped: false,
+      walkFlipped: true,
+      idleFrame: 0,
+      walkFrame: 0
+    };
+
+    const rawIdleImages = [];
+    const rawWalkImages = [];
+    let refIdleImg = new Image();
+    let refWalkImg = new Image();
+
+    let animInterval = null;
+
+    // Load assets
+    function loadAssets() {
+      // Reference images
+      refIdleImg.src = 'assets/dudu_highres/idle_left_frame_0.png?v=22';
+      refWalkImg.src = 'assets/dudu_highres/run_left_frame_0.png?v=22';
+      refIdleImg.onload = renderAll;
+      refWalkImg.onload = renderAll;
+
+      // Raw Idle frames (10)
+      for (let i = 0; i < 10; i++) {
+        const img = new Image();
+        img.src = `assets/raw_dudu_build/idle/frame_${String(i).padStart(2, '0')}.png`;
+        img.onload = renderAll;
+        rawIdleImages.push(img);
+      }
+
+      // Raw Walk frames (16)
+      for (let i = 0; i < 16; i++) {
+        const img = new Image();
+        img.src = `assets/raw_dudu_build/walk/frame_${String(i).padStart(2, '0')}.png`;
+        img.onload = renderAll;
+        rawWalkImages.push(img);
+      }
+    }
+
+    function setBg(type) {
+      state.bg = type;
+      document.querySelectorAll('.canvas-wrapper').forEach(el => {
+        el.className = `canvas-wrapper bg-${type}`;
+      });
+    }
+
+    function updateFps() {
+      state.fps = parseInt(document.getElementById('globalFps').value);
+      document.getElementById('fpsVal').innerText = `${state.fps} FPS`;
+      restartAnimTimer();
+    }
+
+    function togglePlay() {
+      state.isPlaying = !state.isPlaying;
+      document.getElementById('playIcon').innerText = state.isPlaying ? '⏸' : '▶';
+      if (state.isPlaying) restartAnimTimer();
+      else clearInterval(animInterval);
+    }
+
+    function toggleFlip(type) {
+      if (type === 'idle') {
+        state.idleFlipped = !state.idleFlipped;
+        document.getElementById('idleFlipVal').innerText = state.idleFlipped ? 'Flipped (Right)' : 'Normal (Left)';
+      } else {
+        state.walkFlipped = !state.walkFlipped;
+        document.getElementById('walkFlipVal').innerText = state.walkFlipped ? 'Flipped (Left)' : 'Normal (Right)';
+      }
+      renderAll();
+    }
+
+    function restartAnimTimer() {
+      clearInterval(animInterval);
+      if (!state.isPlaying) return;
+      animInterval = setInterval(() => {
+        state.idleFrame = (state.idleFrame + 1) % 10;
+        state.walkFrame = (state.walkFrame + 1) % 16;
+
+        document.getElementById('idleFrame').value = state.idleFrame;
+        document.getElementById('walkFrame').value = state.walkFrame;
+        renderAll();
+      }, 1000 / state.fps);
+    }
+
+    function renderAll() {
+      updateValLabels();
+
+      const idleFrameIdx = parseInt(document.getElementById('idleFrame').value);
+      const walkFrameIdx = parseInt(document.getElementById('walkFrame').value);
+
+      state.idleFrame = idleFrameIdx;
+      state.walkFrame = walkFrameIdx;
+
+      // 1. Render References
+      drawReference('canvasRefIdle', refIdleImg);
+      drawReference('canvasRefWalk', refWalkImg);
+
+      // 2. Process Idle
+      processAndDraw('idle', idleFrameIdx);
+
+      // 3. Process Walk
+      processAndDraw('walk', walkFrameIdx);
+
+      // 4. Update JSON Box
+      updateConfigJson();
+    }
+
+    function updateValLabels() {
+      ['idleLeft', 'idleTop', 'idleRight', 'idleBottom', 'idleEraseW', 'idleEraseH', 'idleScale', 'idleOffsetX', 'idleOffsetY', 'idleFrame',
+       'walkLeft', 'walkTop', 'walkRight', 'walkBottom', 'walkEraseW', 'walkEraseH', 'walkScale', 'walkOffsetX', 'walkOffsetY', 'walkFrame'
+      ].forEach(id => {
+        const el = document.getElementById(id);
+        const label = document.getElementById(id + 'Val');
+        if (el && label) label.innerText = el.value;
+      });
+    }
+
+    function drawReference(canvasId, img) {
+      const canvas = document.getElementById(canvasId);
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (img.complete && img.naturalWidth > 0) {
+        // Draw scaled to fit 160x192 canvas
+        const sw = img.naturalWidth;
+        const sh = img.naturalHeight;
+        const targetW = 160;
+        const targetH = 192;
+        const scale = targetW / 250; // Match 250x300 standard to 160x192 preview
+        const dw = sw * scale;
+        const dh = sh * scale;
+        const dx = (targetW - dw) / 2;
+        const dy = targetH - dh;
+        ctx.drawImage(img, dx, dy, dw, dh);
+      }
+    }
+
+    function processAndDraw(type, frameIdx) {
+      const isIdle = type === 'idle';
+      const rawImg = isIdle ? rawIdleImages[frameIdx] : rawWalkImages[frameIdx];
+      const rawCanvas = document.getElementById(isIdle ? 'canvasRawIdle' : 'canvasRawWalk');
+      const outCanvas = document.getElementById(isIdle ? 'canvasOutputIdle' : 'canvasOutputWalk');
+
+      if (!rawImg || !rawImg.complete || rawImg.naturalWidth === 0) return;
+
+      const left = parseInt(document.getElementById(isIdle ? 'idleLeft' : 'walkLeft').value);
+      const top = parseInt(document.getElementById(isIdle ? 'idleTop' : 'walkTop').value);
+      const right = parseInt(document.getElementById(isIdle ? 'idleRight' : 'walkRight').value);
+      const bottom = parseInt(document.getElementById(isIdle ? 'idleBottom' : 'walkBottom').value);
+      const eraseW = parseInt(document.getElementById(isIdle ? 'idleEraseW' : 'walkEraseW').value);
+      const eraseH = parseInt(document.getElementById(isIdle ? 'idleEraseH' : 'walkEraseH').value);
+      const scale = parseFloat(document.getElementById(isIdle ? 'idleScale' : 'walkScale').value);
+      const offX = parseInt(document.getElementById(isIdle ? 'idleOffsetX' : 'walkOffsetX').value);
+      const offY = parseInt(document.getElementById(isIdle ? 'idleOffsetY' : 'walkOffsetY').value);
+      const isFlipped = isIdle ? state.idleFlipped : state.walkFlipped;
+
+      const rw = rawImg.naturalWidth;
+      const rh = rawImg.naturalHeight;
+
+      // 1. Draw Raw Canvas with Bounding Box Overlay
+      const rctx = rawCanvas.getContext('2d');
+      rawCanvas.width = rw;
+      rawCanvas.height = rh;
+      rctx.clearRect(0, 0, rw, rh);
+      rctx.drawImage(rawImg, 0, 0);
+
+      // Draw Erase Box
+      rctx.fillStyle = 'rgba(255, 0, 0, 0.35)';
+      if (isIdle) {
+        rctx.fillRect(0, 0, Math.min(eraseW, rw), Math.min(eraseH, rh));
+      } else {
+        rctx.fillRect(Math.max(0, rw - eraseW), 0, eraseW, Math.min(eraseH, rh));
+      }
+
+      // Draw Crop Box
+      rctx.strokeStyle = '#00e676';
+      rctx.lineWidth = 2;
+      rctx.setLineDash([4, 4]);
+      const cropW = Math.max(1, right - left);
+      const cropH = Math.max(1, bottom - top);
+      rctx.strokeRect(left, top, cropW, cropH);
+
+      // 2. Offscreen Canvas for Processing (Floodfill & Erase)
+      const tempCanvas = document.createElement('canvas');
+      tempCanvas.width = rw;
+      tempCanvas.height = rh;
+      const tctx = tempCanvas.getContext('2d');
+      tctx.drawImage(rawImg, 0, 0);
+
+      const imgData = tctx.getImageData(0, 0, rw, rh);
+      const pixels = imgData.data;
+
+      // Erase text box
+      for (let y = 0; y < rh; y++) {
+        for (let x = 0; x < rw; x++) {
+          const isEraseZone = isIdle ? (x <= eraseW && y <= eraseH) : (x >= (rw - eraseW) && y <= eraseH);
+          if (isEraseZone) {
+            const idx = (y * rw + x) * 4;
+            pixels[idx] = 255;
+            pixels[idx + 1] = 255;
+            pixels[idx + 2] = 255;
+            pixels[idx + 3] = 255;
+          }
+        }
+      }
+
+      // Floodfill background transparency
+      floodFillTransparent(imgData, rw, rh);
+      tctx.putImageData(imgData, 0, 0);
+
+      // 3. Crop & Scale to Output Canvas
+      const outCtx = outCanvas.getContext('2d');
+      const targetW = 160;
+      const targetH = 192;
+      outCanvas.width = targetW;
+      outCanvas.height = targetH;
+      outCtx.clearRect(0, 0, targetW, targetH);
+
+      // Create cropped & scaled version
+      const displayScale = targetW / 250; // Map 250x300 standard to 160x192 preview canvas
+      const scaledW = cropW * scale * displayScale;
+      const scaledH = cropH * scale * displayScale;
+
+      const px = (targetW - scaledW) / 2 + (offX * displayScale);
+      const py = targetH - scaledH + (offY * displayScale);
+
+      outCtx.save();
+      if (isFlipped) {
+        outCtx.translate(targetW, 0);
+        outCtx.scale(-1, 1);
+        const flipPx = targetW - px - scaledW;
+        outCtx.drawImage(tempCanvas, left, top, cropW, cropH, flipPx, py, scaledW, scaledH);
+      } else {
+        outCtx.drawImage(tempCanvas, left, top, cropW, cropH, px, py, scaledW, scaledH);
+      }
+      outCtx.restore();
+    }
+
+    function floodFillTransparent(imgData, w, h) {
+      const pixels = imgData.data;
+      const visited = new Uint8Array(w * h);
+      const queue = [];
+
+      for (let x = 0; x < w; x++) {
+        queue.push(x, 0);
+        queue.push(x, h - 1);
+      }
+      for (let y = 1; y < h - 1; y++) {
+        queue.push(0, y);
+        queue.push(w - 1, y);
+      }
+
+      for (let i = 0; i < queue.length; i += 2) {
+        const x = queue[i];
+        const y = queue[i + 1];
+        visited[y * w + x] = 1;
+      }
+
+      let qIdx = 0;
+      while (qIdx < queue.length) {
+        const cx = queue[qIdx++];
+        const cy = queue[qIdx++];
+        const idx = (cy * w + cx) * 4;
+
+        const r = pixels[idx];
+        const g = pixels[idx + 1];
+        const b = pixels[idx + 2];
+        const a = pixels[idx + 3];
+
+        const isBg = (r > 200 && g > 185 && b > 180 && a > 0) || a < 100;
+
+        if (isBg) {
+          pixels[idx + 3] = 0; // Make transparent
+
+          const neighbors = [[cx - 1, cy], [cx + 1, cy], [cx, cy - 1], [cx, cy + 1]];
+          for (let i = 0; i < 4; i++) {
+            const [nx, ny] = neighbors[i];
+            if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
+              const nPos = ny * w + nx;
+              if (!visited[nPos]) {
+                visited[nPos] = 1;
+                queue.push(nx, ny);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    function updateConfigJson() {
+      const config = {
+        idle: {
+          cropLeft: parseInt(document.getElementById('idleLeft').value),
+          cropTop: parseInt(document.getElementById('idleTop').value),
+          cropRight: parseInt(document.getElementById('idleRight').value),
+          cropBottom: parseInt(document.getElementById('idleBottom').value),
+          eraseTextW: parseInt(document.getElementById('idleEraseW').value),
+          eraseTextH: parseInt(document.getElementById('idleEraseH').value),
+          scaleFactor: parseFloat(document.getElementById('idleScale').value),
+          offsetX: parseInt(document.getElementById('idleOffsetX').value),
+          offsetY: parseInt(document.getElementById('idleOffsetY').value),
+          flipped: state.idleFlipped
+        },
+        walk: {
+          cropLeft: parseInt(document.getElementById('walkLeft').value),
+          cropTop: parseInt(document.getElementById('walkTop').value),
+          cropRight: parseInt(document.getElementById('walkRight').value),
+          cropBottom: parseInt(document.getElementById('walkBottom').value),
+          eraseTextW: parseInt(document.getElementById('walkEraseW').value),
+          eraseTextH: parseInt(document.getElementById('walkEraseH').value),
+          scaleFactor: parseFloat(document.getElementById('walkScale').value),
+          offsetX: parseInt(document.getElementById('walkOffsetX').value),
+          offsetY: parseInt(document.getElementById('walkOffsetY').value),
+          flipped: state.walkFlipped
+        }
+      };
+
+      document.getElementById('jsonOutput').value = JSON.stringify(config, null, 2);
+    }
+
+    function copyConfigJson() {
+      const textarea = document.getElementById('jsonOutput');
+      textarea.select();
+      document.execCommand('copy');
+      alert('Config data copied to clipboard! You can now paste it into the chat.');
+    }
+
+    // Initialize
+    window.onload = () => {
+      loadAssets();
+      restartAnimTimer();
+    };
+  </script>
+</body>
+</html>

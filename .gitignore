@@ -8,3 +8,14 @@ outputs/silksong_*candidates*.jpg
 outputs/hornet_*previews*/
 outputs/hornet_mapping_test/
 outputs/test_dont_starve_fog.html
+
+.DS_Store
+*.DS_Store
+cookies*.txt
+token*.txt
+url*.json
+unused_assets_backup/
+2026-06-11/
+2026-06-18/
+composite.py
+find_unused*.py
