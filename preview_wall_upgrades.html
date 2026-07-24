@@ -566,20 +566,38 @@
     let currentDir = 'down'; // 'down', 'side', 'up'
     let auraEnabled = true;
 
-    // Image Preloader Cache
+    // Image Preloader Cache (NO crossOrigin = "anonymous" so local file:// loading NEVER fails!)
     const imageCache = {};
 
     function loadImage(path) {
       if (imageCache[path]) return Promise.resolve(imageCache[path]);
       return new Promise((resolve) => {
         const img = new Image();
-        img.crossOrigin = "anonymous";
+        // DO NOT set img.crossOrigin for local file:// paths to prevent CORS error on disk
         img.src = path;
         img.onload = () => {
           imageCache[path] = img;
           resolve(img);
         };
-        img.onerror = () => resolve(null);
+        img.onerror = () => {
+          // If frame_0.png fails, try alternative sheet path: assets/magic_traps/2 Barricades/D_1_Destroy.png
+          if (path.includes("magic_barricade_")) {
+            const parts = path.split("magic_barricade_")[1].split("_");
+            const bNum = parts[0];
+            const bDir = parts[1].split("/")[0];
+            const prefix = bDir === "side" ? "S" : bDir === "up" ? "U" : "D";
+            const altImg = new Image();
+            altImg.src = `assets/magic_traps/2 Barricades/${prefix}_${bNum}_Destroy.png`;
+            altImg.onload = () => {
+              altImg.isSheet = true;
+              imageCache[path] = altImg;
+              resolve(altImg);
+            };
+            altImg.onerror = () => resolve(null);
+          } else {
+            resolve(null);
+          }
+        };
       });
     }
 
@@ -610,14 +628,27 @@
       }
 
       if (img) {
-        const dx = Math.round((w - img.width) / 2);
-        const dy = Math.round((h - img.height) / 2);
-        // Render RAW unaltered in-game PNG sprite!
-        ctx.drawImage(img, dx, dy);
+        if (img.isSheet) {
+          // Draw frame 0 (36x64) from sheet
+          const targetW = 36;
+          const targetH = 64;
+          const dx = Math.round((w - targetW) / 2);
+          const dy = Math.round((h - targetH) / 2);
+          ctx.drawImage(img, 0, 0, targetW, targetH, dx, dy, targetW, targetH);
+        } else {
+          // Draw single sliced frame PNG
+          const drawW = img.width;
+          const drawH = img.height;
+          const drawX = Math.round((w - drawW) / 2);
+          const drawY = Math.round((h - drawH) / 2);
+          ctx.drawImage(img, drawX, drawY);
+        }
       } else {
-        // Fallback procedural box if image is still loading
-        ctx.fillStyle = "#78350f";
-        ctx.fillRect(22, 10, 36, 60);
+        // Fallback error indicator if image path was not found
+        ctx.fillStyle = "#ef4444";
+        ctx.font = "10px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText("Asset Missing", w / 2, h / 2);
       }
 
       ctx.restore();
