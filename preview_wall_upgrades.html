@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Wall & Barricade Upgrade System Preview (Levels 1 - 100)</title>
+  <title>In-Game Wall & Barricade Upgrade System Preview (Levels 1 - 100)</title>
   <style>
     :root {
       --bg: #0f1015;
@@ -85,7 +85,7 @@
       max-width: 1400px;
       margin: 0 auto 32px auto;
       display: grid;
-      grid-template-columns: 360px 1fr;
+      grid-template-columns: 380px 1fr;
       gap: 24px;
     }
 
@@ -164,7 +164,7 @@
 
     .btn-option {
       flex: 1;
-      min-width: 70px;
+      min-width: 80px;
       padding: 8px 12px;
       background: #252834;
       border: 1px solid var(--border);
@@ -198,7 +198,7 @@
 
     .stage-view {
       position: relative;
-      height: 340px;
+      height: 360px;
       border-radius: 16px;
       overflow: hidden;
       display: flex;
@@ -208,9 +208,6 @@
       box-shadow: inset 0 0 40px rgba(0,0,0,0.6);
       background-size: cover;
       background-position: center;
-
-      /* Grassland Default */
-      background-image: radial-gradient(circle at center, #2e4c27 0%, #172a13 100%);
     }
 
     .stage-view.bg-grass {
@@ -231,8 +228,8 @@
 
     canvas.wall-canvas {
       image-rendering: pixelated;
-      transform: scale(2.2);
-      filter: drop-shadow(0 12px 18px rgba(0, 0, 0, 0.7));
+      transform: scale(2.6);
+      filter: drop-shadow(0 14px 20px rgba(0, 0, 0, 0.8));
       transition: filter 0.3s ease;
     }
 
@@ -295,7 +292,7 @@
       border-radius: 14px;
       padding: 16px;
       cursor: pointer;
-      transition: all 0.25 ease;
+      transition: all 0.25s ease;
       position: relative;
       overflow: hidden;
     }
@@ -335,7 +332,7 @@
     }
 
     .tier-preview-box {
-      height: 120px;
+      height: 130px;
       background: #14151a;
       border-radius: 8px;
       display: flex;
@@ -347,7 +344,7 @@
     }
 
     .tier-preview-box canvas {
-      transform: scale(1.4);
+      transform: scale(1.6);
       image-rendering: pixelated;
     }
 
@@ -362,7 +359,6 @@
       color: #fff;
     }
 
-    /* Aura Badges */
     .tier-badge {
       display: inline-block;
       font-size: 0.7rem;
@@ -388,8 +384,8 @@
   <!-- Top Navigation Header -->
   <div class="header-nav">
     <div class="header-title">
-      <h1>🧱 Wall & Barricade Upgrade System (Levels 1 - 100)</h1>
-      <p>Visual progression preview every 5 levels, featuring 20 distinct upgrade tiers, armor evolution, particle aura glows, and stat scaling.</p>
+      <h1>🧱 In-Game Wall & Barricade Upgrade System (Levels 1 - 100)</h1>
+      <p>Preview using actual game assets: Wooden, Spiked, Brick, Iron barricades & Sprout fences with 20 visual evolution tiers every 5 levels.</p>
     </div>
     <a href="preview_collection.html" class="btn-nav">
       <span>👈 Return to Preview Collection Hub</span>
@@ -402,7 +398,7 @@
     <!-- Controls Panel -->
     <div class="panel">
       <div class="panel-header">
-        <span>⚙️ Upgrade Controls</span>
+        <span>⚙️ In-Game Asset Controls</span>
       </div>
 
       <!-- Level Slider -->
@@ -416,7 +412,7 @@
 
       <!-- Quick Tier Jump Buttons -->
       <div class="control-group">
-        <label>Quick Jump Tier</label>
+        <label>Quick Jump Level Tier</label>
         <div class="btn-group">
           <button class="btn-option" onclick="setWallLevel(1)">Lvl 1</button>
           <button class="btn-option" onclick="setWallLevel(25)">Lvl 25</button>
@@ -426,14 +422,16 @@
         </div>
       </div>
 
-      <!-- Base Barricade Type -->
+      <!-- Actual Game Barricade Asset Selector -->
       <div class="control-group">
-        <label>Base Wall Variant</label>
-        <div class="btn-group">
-          <button class="btn-option active" id="btnBase1" onclick="setBaseType(1)">Wood (1)</button>
-          <button class="btn-option" id="btnBase2" onclick="setBaseType(2)">Spikes (2)</button>
-          <button class="btn-option" id="btnBase3" onclick="setBaseType(3)">Brick (3)</button>
-          <button class="btn-option" id="btnBase4" onclick="setBaseType(4)">Iron (4)</button>
+        <label>Actual In-Game Asset Base</label>
+        <div class="btn-group" style="flex-direction: column;">
+          <button class="btn-option active" id="btnAsset_barricade_1" onclick="setGameAsset('barricade_1')" style="text-align: left;">🪵 Wooden Barricade (magic_barricade_1)</button>
+          <button class="btn-option" id="btnAsset_barricade_2" onclick="setGameAsset('barricade_2')" style="text-align: left;">⚔️ Spiked Barricade (magic_barricade_2)</button>
+          <button class="btn-option" id="btnAsset_barricade_3" onclick="setGameAsset('barricade_3')" style="text-align: left;">🧱 Brick Barricade (magic_barricade_3)</button>
+          <button class="btn-option" id="btnAsset_barricade_4" onclick="setGameAsset('barricade_4')" style="text-align: left;">🛡️ Iron Barricade (magic_barricade_4)</button>
+          <button class="btn-option" id="btnAsset_sprout_fence" onclick="setGameAsset('sprout_fence')" style="text-align: left;">🌾 Sprout Farm Fence (build_sprout_fence_h)</button>
+          <button class="btn-option" id="btnAsset_house_wall" onclick="setGameAsset('house_wall')" style="text-align: left;">🏰 House Stone Wall (build_house_wall_floor)</button>
         </div>
       </div>
 
@@ -458,9 +456,9 @@
         </div>
       </div>
 
-      <!-- Particle Aura Toggle -->
+      <!-- Runic Aura Toggle -->
       <div class="control-group">
-        <label>Runic Aura Glow</label>
+        <label>Runic Aura & Particles</label>
         <div class="btn-group">
           <button class="btn-option active" id="btnAuraOn" onclick="setAuraToggle(true)">Enabled</button>
           <button class="btn-option" id="btnAuraOff" onclick="setAuraToggle(false)">Disabled</button>
@@ -471,7 +469,7 @@
     <!-- Main Live Stage -->
     <div class="stage-container">
       <div class="stage-view bg-grass" id="stageView">
-        <canvas id="mainWallCanvas" class="wall-canvas" width="64" height="64"></canvas>
+        <canvas id="mainWallCanvas" class="wall-canvas" width="72" height="72"></canvas>
       </div>
 
       <!-- Dynamic Stat Card -->
@@ -518,11 +516,11 @@
   <script>
     // 20 Tier Definitions (Level 1-100)
     const TIERS = [
-      { tier: 1,  lvlMin: 1,  lvlMax: 5,   name: "Primitive Wood",       badgeClass: "badge-wood",     hp: 100,   def: 0,   reflect: 0,   hue: 0,   sat: 1.0,  light: 1.0, glow: null },
-      { tier: 2,  lvlMin: 6,  lvlMax: 10,  name: "Reinforced Timber",    badgeClass: "badge-wood",     hp: 250,   def: 5,   reflect: 2,   hue: 15,  sat: 1.1,  light: 0.9, glow: null },
-      { tier: 3,  lvlMin: 11, lvlMax: 15,  name: "Cobblestone Masonry",  badgeClass: "badge-stone",    hp: 500,   def: 12,  reflect: 5,   hue: 0,   sat: 0.2,  light: 0.85, glow: null },
-      { tier: 4,  lvlMin: 16, lvlMax: 20,  name: "Spiked Palisade",      badgeClass: "badge-stone",    hp: 850,   def: 20,  reflect: 10,  hue: 10,  sat: 0.8,  light: 0.8, glow: "#ef4444" },
-      { tier: 5,  lvlMin: 21, lvlMax: 25,  name: "Iron Clad Bulwark",    badgeClass: "badge-iron",     hp: 1300,  def: 30,  reflect: 15,  hue: 210, sat: 0.3,  light: 0.75, glow: "#94a3b8" },
+      { tier: 1,  lvlMin: 1,  lvlMax: 5,   name: "Base Game Asset",      badgeClass: "badge-wood",     hp: 100,   def: 0,   reflect: 0,   hue: 0,   sat: 1.0,  light: 1.0, glow: null },
+      { tier: 2,  lvlMin: 6,  lvlMax: 10,  name: "Iron Banded",          badgeClass: "badge-wood",     hp: 250,   def: 5,   reflect: 2,   hue: 15,  sat: 1.1,  light: 0.9, glow: null },
+      { tier: 3,  lvlMin: 11, lvlMax: 15,  name: "Stone Foundation",     badgeClass: "badge-stone",    hp: 500,   def: 12,  reflect: 5,   hue: 0,   sat: 0.2,  light: 0.85, glow: null },
+      { tier: 4,  lvlMin: 16, lvlMax: 20,  name: "Spiked Steel Palisade",badgeClass: "badge-stone",    hp: 850,   def: 20,  reflect: 10,  hue: 10,  sat: 0.8,  light: 0.8, glow: "#ef4444" },
+      { tier: 5,  lvlMin: 21, lvlMax: 25,  name: "Iron Clad Armor",      badgeClass: "badge-iron",     hp: 1300,  def: 30,  reflect: 15,  hue: 210, sat: 0.3,  light: 0.75, glow: "#94a3b8" },
       { tier: 6,  lvlMin: 26, lvlMax: 30,  name: "Granite Fortress",     badgeClass: "badge-iron",     hp: 1800,  def: 42,  reflect: 22,  hue: 200, sat: 0.4,  light: 0.7, glow: "#60a5fa" },
       { tier: 7,  lvlMin: 31, lvlMax: 35,  name: "Steel Guard Wall",     badgeClass: "badge-iron",     hp: 2400,  def: 55,  reflect: 30,  hue: 220, sat: 0.5,  light: 0.8, glow: "#38bdf8" },
       { tier: 8,  lvlMin: 36, lvlMax: 40,  name: "Cobalt Armor Wall",    badgeClass: "badge-iron",     hp: 3100,  def: 70,  reflect: 40,  hue: 230, sat: 1.2,  light: 0.8, glow: "#2563eb" },
@@ -540,22 +538,58 @@
       { tier: 20, lvlMin: 96, lvlMax: 100, name: "Divine Apex Aegis",    badgeClass: "badge-divine",   hp: 27000, def: 600, reflect: 470, hue: 45,  sat: 2.5,  light: 1.3, glow: "#fbbf24" }
     ];
 
+    // Actual Game Asset Definitions
+    const GAME_ASSETS = {
+      barricade_1: {
+        label: "Wooden Barricade (magic_barricade_1)",
+        getPath: (dir) => `assets/magic_traps/2 Barricades/${dir}_1_Destroy.png`,
+        isSheet: true,
+        cropW: 36, cropH: 64
+      },
+      barricade_2: {
+        label: "Spiked Barricade (magic_barricade_2)",
+        getPath: (dir) => `assets/magic_traps/2 Barricades/${dir}_2_Destroy.png`,
+        isSheet: true,
+        cropW: 36, cropH: 64
+      },
+      barricade_3: {
+        label: "Brick Barricade (magic_barricade_3)",
+        getPath: (dir) => `assets/magic_traps/2 Barricades/${dir}_3_Destroy.png`,
+        isSheet: true,
+        cropW: 36, cropH: 64
+      },
+      barricade_4: {
+        label: "Iron Barricade (magic_barricade_4)",
+        getPath: (dir) => `assets/magic_traps/2 Barricades/${dir}_4_Destroy.png`,
+        isSheet: true,
+        cropW: 36, cropH: 64
+      },
+      sprout_fence: {
+        label: "Sprout Farm Fence (build_sprout_fence_h)",
+        getPath: (dir) => dir === 'S' ? `assets/plants/build_sprout_fence_h.png` : `assets/plants/build_sprout_fence_v.png`,
+        isSheet: false,
+        cropW: 32, cropH: 32
+      },
+      house_wall: {
+        label: "House Stone Wall (build_house_wall_floor_3_2)",
+        getPath: (dir) => `assets/plants/build_house_wall_floor_3_2.png`,
+        isSheet: false,
+        cropW: 32, cropH: 32
+      }
+    };
+
     // State Variables
     let currentLevel = 1;
-    let currentBase = 1; // 1 to 4
+    let currentAssetKey = 'barricade_1';
     let currentDir = 'D'; // D, S, U
     let auraEnabled = true;
 
-    // Image Preloader Cache
+    // Image Cache
     const imageCache = {};
-
-    function getSheetPath(base, dir) {
-      return `assets/magic_traps/2 Barricades/${dir}_${base}_Destroy.png`;
-    }
 
     function loadImage(path) {
       if (imageCache[path]) return Promise.resolve(imageCache[path]);
-      return new Promise((resolve, reject) => {
+      return new Promise((resolve) => {
         const img = new Image();
         img.crossOrigin = "anonymous";
         img.src = path;
@@ -563,7 +597,7 @@
           imageCache[path] = img;
           resolve(img);
         };
-        img.onerror = () => resolve(null); // graceful fallback
+        img.onerror = () => resolve(null);
       });
     }
 
@@ -573,15 +607,16 @@
       return TIERS[idx];
     }
 
-    // Render Wall onto a Target Canvas with Shaders and Effects
-    async function renderWallOnCanvas(canvas, lvl, base, dir, enableAura) {
+    // Render Wall onto Target Canvas using Actual In-Game Sprite & Procedural Shaders
+    async function renderWallOnCanvas(canvas, lvl, assetKey, dir, enableAura) {
       const ctx = canvas.getContext('2d');
       const w = canvas.width;
       const h = canvas.height;
       ctx.clearRect(0, 0, w, h);
 
       const tier = getTierInfo(lvl);
-      const path = getSheetPath(base, dir);
+      const assetCfg = GAME_ASSETS[assetKey] || GAME_ASSETS.barricade_1;
+      const path = assetCfg.getPath(dir);
       const img = await loadImage(path);
 
       ctx.save();
@@ -593,10 +628,8 @@
       }
 
       if (img) {
-        // Draw frame 0 (uncropped complete barricade at 36x64 step)
-        // Crop sx=0, sy=0, sw=36, sh=64
-        const targetW = 36;
-        const targetH = 64;
+        const targetW = assetCfg.cropW;
+        const targetH = assetCfg.cropH;
         const dx = Math.round((w - targetW) / 2);
         const dy = Math.round((h - targetH) / 2);
 
@@ -605,12 +638,18 @@
           ctx.filter = `hue-rotate(${tier.hue}deg) saturate(${tier.sat}) brightness(${tier.light})`;
         }
 
-        ctx.drawImage(img, 0, 0, 36, 64, dx, dy, targetW, targetH);
+        if (assetCfg.isSheet) {
+          // Crop frame 0 (uncropped complete barricade at 36x64 step)
+          ctx.drawImage(img, 0, 0, targetW, targetH, dx, dy, targetW, targetH);
+        } else {
+          // Single standalone image
+          ctx.drawImage(img, 0, 0, img.width, img.height, dx, dy, targetW, targetH);
+        }
         ctx.filter = "none";
       } else {
-        // Fallback procedural placeholder rect if image is loading
+        // Fallback procedural placeholder
         ctx.fillStyle = "#78350f";
-        ctx.fillRect(14, 8, 36, 48);
+        ctx.fillRect(18, 8, 36, 56);
       }
 
       ctx.restore();
@@ -619,17 +658,17 @@
       if (tier.tier >= 3) {
         // Add Metal Straps / Rivets
         ctx.fillStyle = tier.tier >= 10 ? "#cbd5e1" : "#64748b";
-        ctx.fillRect(16, 20, 32, 3);
-        ctx.fillRect(16, 44, 32, 3);
+        ctx.fillRect(20, 20, 32, 3);
+        ctx.fillRect(20, 44, 32, 3);
       }
 
       if (tier.tier >= 5) {
         // Add Corner Metal Brackets
         ctx.fillStyle = tier.glow || "#fbbf24";
-        ctx.fillRect(16, 12, 5, 5);
-        ctx.fillRect(43, 12, 5, 5);
-        ctx.fillRect(16, 48, 5, 5);
-        ctx.fillRect(43, 48, 5, 5);
+        ctx.fillRect(20, 12, 5, 5);
+        ctx.fillRect(47, 12, 5, 5);
+        ctx.fillRect(20, 48, 5, 5);
+        ctx.fillRect(47, 48, 5, 5);
       }
 
       if (tier.tier >= 8) {
@@ -639,7 +678,7 @@
         ctx.shadowColor = tier.glow || "#60a5fa";
         ctx.shadowBlur = 10;
         ctx.beginPath();
-        ctx.arc(32, 32, Math.min(6, 3 + (tier.tier * 0.2)), 0, Math.PI * 2);
+        ctx.arc(36, 34, Math.min(6, 3 + (tier.tier * 0.2)), 0, Math.PI * 2);
         ctx.fill();
         ctx.restore();
       }
@@ -649,8 +688,8 @@
         const time = Date.now() * 0.003;
         ctx.fillStyle = "#ffffff";
         for (let p = 0; p < 4; p++) {
-          const px = 20 + Math.sin(time + p * 1.5) * 12;
-          const py = 16 + Math.cos(time * 0.8 + p * 2.1) * 20;
+          const px = 24 + Math.sin(time + p * 1.5) * 14;
+          const py = 16 + Math.cos(time * 0.8 + p * 2.1) * 22;
           ctx.fillRect(Math.round(px), Math.round(py), 2, 2);
         }
       }
@@ -687,7 +726,7 @@
 
       // Render Stage Canvas
       const mainCanvas = document.getElementById('mainWallCanvas');
-      renderWallOnCanvas(mainCanvas, currentLevel, currentBase, currentDir, auraEnabled);
+      renderWallOnCanvas(mainCanvas, currentLevel, currentAssetKey, currentDir, auraEnabled);
     }
 
     // Generate the 20 Showcase Tier Cards
@@ -708,13 +747,13 @@
             <div class="tier-lvl-range">Lv.${tier.lvlMin}-${tier.lvlMax}</div>
           </div>
           <div class="tier-preview-box">
-            <canvas id="thumbCanvasT${tier.tier}" width="64" height="64"></canvas>
+            <canvas id="thumbCanvasT${tier.tier}" width="72" height="72"></canvas>
           </div>
           <div class="tier-card-stats">
             <span>HP: <strong>${tier.hp}</strong></span>
             <span>Reflect: <strong>${tier.reflect}</strong></span>
           </div>
-          <div class="tier-badge ${tier.badgeClass}">${tier.name.split(' ')[0]} Tier</div>
+          <div class="tier-badge ${tier.badgeClass}">Tier ${tier.tier}</div>
         `;
 
         grid.appendChild(card);
@@ -723,7 +762,7 @@
         setTimeout(() => {
           const thumbCanvas = document.getElementById(`thumbCanvasT${tier.tier}`);
           if (thumbCanvas) {
-            renderWallOnCanvas(thumbCanvas, tier.lvlMin, currentBase, currentDir, true);
+            renderWallOnCanvas(thumbCanvas, tier.lvlMin, currentAssetKey, currentDir, true);
           }
         }, 50);
       });
@@ -735,10 +774,10 @@
       updateMainDisplay();
     }
 
-    function setBaseType(base) {
-      currentBase = base;
-      document.querySelectorAll('#btnBase1, #btnBase2, #btnBase3, #btnBase4').forEach((btn, idx) => {
-        btn.classList.toggle('active', idx + 1 === base);
+    function setGameAsset(key) {
+      currentAssetKey = key;
+      document.querySelectorAll('[id^="btnAsset_"]').forEach((btn) => {
+        btn.classList.toggle('active', btn.id === `btnAsset_${key}`);
       });
       updateMainDisplay();
       refreshAllThumbnails();
@@ -772,7 +811,7 @@
       TIERS.forEach((tier) => {
         const thumbCanvas = document.getElementById(`thumbCanvasT${tier.tier}`);
         if (thumbCanvas) {
-          renderWallOnCanvas(thumbCanvas, tier.lvlMin, currentBase, currentDir, true);
+          renderWallOnCanvas(thumbCanvas, tier.lvlMin, currentAssetKey, currentDir, true);
         }
       });
     }
@@ -783,11 +822,11 @@
       updateMainDisplay();
     });
 
-    // Pulse animation loop for high tier glowing aurass
+    // Pulse animation loop for high tier glowing auras
     setInterval(() => {
       if (getTierInfo(currentLevel).tier >= 8) {
         const mainCanvas = document.getElementById('mainWallCanvas');
-        renderWallOnCanvas(mainCanvas, currentLevel, currentBase, currentDir, auraEnabled);
+        renderWallOnCanvas(mainCanvas, currentLevel, currentAssetKey, currentDir, auraEnabled);
       }
     }, 150);
 
