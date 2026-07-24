@@ -2315,7 +2315,7 @@
               }
             }
           }
-          out[`${mode}-${dir}`] = Array.from({ length: count }, (_, i) => `assets/${base}/${mode}_${dir}_frame_${i}.png?v=23`);
+          out[`${mode}-${dir}`] = Array.from({ length: count }, (_, i) => `assets/${base}/${mode}_${dir}_frame_${i}.png?v=24`);
         }
       }
       return out;
@@ -3721,7 +3721,9 @@
       if (petHud) petHud.classList.toggle("show", petSlimes.length > 0 && state.buildUiOpen);
       if (!state.buildUiOpen) {
         state.buildHover.active = false;
+        state.lastBuildTime = 0;
       } else {
+        state.lastBuildTime = performance.now();
         state.demo = false;
         renderBuildbar();
         // Force initial scroll position on fresh open
@@ -8408,7 +8410,7 @@
       if (state.buildUiOpen) {
         state.lastBuildTime = now;
       }
-      const isBuildingMode = (now - (state.lastBuildTime || 0)) <= 10000;
+      const isBuildingMode = state.buildUiOpen || (state.lastBuildTime > 0 && (now - state.lastBuildTime) <= 10000);
 
       if (dying) {
         state.mode = "die";
