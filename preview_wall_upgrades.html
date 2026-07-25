@@ -392,7 +392,7 @@
   <div class="header-nav">
     <div class="header-title">
       <h1>🧱 Actual In-Game Barricade & Wall Upgrade System (Levels 1 - 100)</h1>
-      <p>Renders 100% clean unaltered game PNG assets: Wooden, Spiked, Brick, Iron barricades & Sprout fences with 20 evolution tiers every 5 levels.</p>
+      <p>Renders clean in-game PNG assets with material texture filters (Stone, Metallic Steel, Obsidian, Lava, Ice, Gold, Plasma, Dragon Scale).</p>
     </div>
     <a href="preview_collection.html" class="btn-nav">
       <span>👈 Return to Preview Collection Hub</span>
@@ -405,7 +405,7 @@
     <!-- Controls Panel -->
     <div class="panel">
       <div class="panel-header">
-        <span>⚙️ In-Game Asset Controls</span>
+        <span>⚙️ In-Game Asset & Material Controls</span>
       </div>
 
       <!-- Level Slider -->
@@ -426,6 +426,15 @@
           <button class="btn-option" onclick="setWallLevel(50)">Lvl 50</button>
           <button class="btn-option" onclick="setWallLevel(75)">Lvl 75</button>
           <button class="btn-option" onclick="setWallLevel(100)">Lvl 100</button>
+        </div>
+      </div>
+
+      <!-- Material Color Filter Toggle -->
+      <div class="control-group">
+        <label>Material Texture & Color Filter</label>
+        <div class="btn-group">
+          <button class="btn-option active" id="btnMatFilterOn" onclick="setMaterialFilterToggle(true)">Filter Enabled</button>
+          <button class="btn-option" id="btnMatFilterOff" onclick="setMaterialFilterToggle(false)">Raw Original</button>
         </div>
       </div>
 
@@ -466,7 +475,7 @@
 
       <!-- Runic Aura Toggle -->
       <div class="control-group">
-        <label>Runic Aura Glow</label>
+        <label>Runic Aura & Particles</label>
         <div class="btn-group">
           <button class="btn-option active" id="btnAuraOn" onclick="setAuraToggle(true)">Enabled</button>
           <button class="btn-option" id="btnAuraOff" onclick="setAuraToggle(false)">Disabled</button>
@@ -489,15 +498,15 @@
         </div>
 
         <div class="stat-box" style="border-color: #10b981;">
-          <div class="stat-label">Wall Durability (HP)</div>
+          <div class="stat-label">Wall Durability & Material</div>
           <div class="stat-value" id="statHp">100 HP</div>
-          <div style="font-size: 0.75rem; color: #9ca3af; margin-top: 2px;" id="statDefense">+0 Defense Rating</div>
+          <div style="font-size: 0.75rem; color: #34d399; margin-top: 2px;" id="statMaterial">Material: Raw Wood</div>
         </div>
 
         <div class="stat-box" style="border-color: #ef4444;">
           <div class="stat-label">Spike Reflect Damage</div>
           <div class="stat-value" id="statReflect">0 Dmg</div>
-          <div style="font-size: 0.75rem; color: #9ca3af; margin-top: 2px;" id="statPerk">Standard Barrier</div>
+          <div style="font-size: 0.75rem; color: #9ca3af; margin-top: 2px;" id="statDefense">+0 Defense Rating</div>
         </div>
 
         <div class="stat-box" style="border-color: #3b82f6;">
@@ -513,7 +522,7 @@
   <!-- Showcase Grid of All 20 Tiers -->
   <div class="showcase-section">
     <div class="showcase-title">
-      <span>🏛️ 20 Tier In-Game Asset Evolution Grid (Every 5 Levels)</span>
+      <span>🏛️ 20 Tier Material & Color Evolution Grid (Every 5 Levels)</span>
       <span style="font-size: 0.85rem; font-weight: normal; color: var(--subtext);">Click any card to inspect that level tier!</span>
     </div>
     <div class="tier-grid" id="tierGrid">
@@ -522,28 +531,28 @@
   </div>
 
   <script>
-    // 20 Tier Progression Mapping to Exact In-Game Asset Files
+    // 20 Tier Progression Mapping with Material Filters & Color Tints
     const TIERS = [
-      { tier: 1,  lvlMin: 1,  lvlMax: 5,   name: "Sprout Wooden Fence",   badgeClass: "badge-wood",     hp: 100,   def: 0,   reflect: 0,   assetKey: "sprout",  glow: null },
-      { tier: 2,  lvlMin: 6,  lvlMax: 10,  name: "Wooden Barricade 1",   badgeClass: "badge-wood",     hp: 250,   def: 5,   reflect: 2,   assetKey: "b1",      glow: null },
-      { tier: 3,  lvlMin: 11, lvlMax: 15,  name: "Spiked Barricade 2",   badgeClass: "badge-stone",    hp: 500,   def: 12,  reflect: 15,  assetKey: "b2",      glow: null },
-      { tier: 4,  lvlMin: 16, lvlMax: 20,  name: "Brick Barricade 3",    badgeClass: "badge-stone",    hp: 850,   def: 20,  reflect: 18,  assetKey: "b3",      glow: null },
-      { tier: 5,  lvlMin: 21, lvlMax: 25,  name: "Iron Barricade 4",     badgeClass: "badge-iron",     hp: 1300,  def: 30,  reflect: 25,  assetKey: "b4",      glow: "#94a3b8" },
-      { tier: 6,  lvlMin: 26, lvlMax: 30,  name: "Fortified Stone Wall", badgeClass: "badge-stone",    hp: 1800,  def: 42,  reflect: 30,  assetKey: "house",   glow: "#60a5fa" },
-      { tier: 7,  lvlMin: 31, lvlMax: 35,  name: "Reinforced Iron Guard",badgeClass: "badge-iron",     hp: 2400,  def: 55,  reflect: 35,  assetKey: "b4",      glow: "#38bdf8" },
-      { tier: 8,  lvlMin: 36, lvlMax: 40,  name: "Cobalt Spiked Shield", badgeClass: "badge-iron",     hp: 3100,  def: 70,  reflect: 45,  assetKey: "b2",      glow: "#2563eb" },
-      { tier: 9,  lvlMin: 41, lvlMax: 45,  name: "Runic Brick Fortress", badgeClass: "badge-bronze",   hp: 3900,  def: 88,  reflect: 55,  assetKey: "b3",      glow: "#f59e0b" },
-      { tier: 10, lvlMin: 46, lvlMax: 50,  name: "Obsidian Iron Wall",   badgeClass: "badge-obsidian", hp: 4800,  def: 110, reflect: 70,  assetKey: "b4",      glow: "#a855f7" },
-      { tier: 11, lvlMin: 51, lvlMax: 55,  name: "Molten Spiked Guard",  badgeClass: "badge-elemental",hp: 5800,  def: 135, reflect: 90,  assetKey: "b2",      glow: "#f97316" },
-      { tier: 12, lvlMin: 56, lvlMax: 60,  name: "Frost Cyan Brick Wall",badgeClass: "badge-elemental",hp: 7000,  def: 165, reflect: 110, assetKey: "b3",      glow: "#22d3ee" },
-      { tier: 13, lvlMin: 61, lvlMax: 65,  name: "Emerald Sprout Shield",badgeClass: "badge-elemental",hp: 8300,  def: 200, reflect: 130, assetKey: "sprout",  glow: "#10b981" },
-      { tier: 14, lvlMin: 66, lvlMax: 70,  name: "Void Iron Plasma Wall",badgeClass: "badge-cosmic",   hp: 9800,  def: 240, reflect: 160, assetKey: "b4",      glow: "#ec4899" },
-      { tier: 15, lvlMin: 71, lvlMax: 75,  name: "Gilded Brick Citadel", badgeClass: "badge-divine",   hp: 11500, def: 285, reflect: 195, assetKey: "b3",      glow: "#eab308" },
-      { tier: 16, lvlMin: 76, lvlMax: 80,  name: "Radiant Spiked Aegis", badgeClass: "badge-cosmic",   hp: 13500, def: 335, reflect: 235, assetKey: "b2",      glow: "#38bdf8" },
-      { tier: 17, lvlMin: 81, lvlMax: 85,  name: "Ethereal Iron Fortress",badgeClass: "badge-cosmic",  hp: 16000, def: 390, reflect: 280, assetKey: "b4",      glow: "#c084fc" },
-      { tier: 18, lvlMin: 86, lvlMax: 90,  name: "Dragon Stone Bulwark", badgeClass: "badge-divine",   hp: 19000, def: 450, reflect: 340, assetKey: "house",   glow: "#f43f5e" },
-      { tier: 19, lvlMin: 91, lvlMax: 95,  name: "Cosmic Spiked Nebula", badgeClass: "badge-cosmic",   hp: 22500, def: 520, reflect: 410, assetKey: "b2",      glow: "#f472b6" },
-      { tier: 20, lvlMin: 96, lvlMax: 100, name: "Divine Apex Aegis",    badgeClass: "badge-divine",   hp: 27000, def: 600, reflect: 500, assetKey: "b4",      glow: "#fbbf24" }
+      { tier: 1,  lvlMin: 1,  lvlMax: 5,   name: "Sprout Wooden Fence",   badgeClass: "badge-wood",     hp: 100,   def: 0,   reflect: 0,   assetKey: "sprout",  material: "Raw Wood",          filterColor: null,                   glow: null },
+      { tier: 2,  lvlMin: 6,  lvlMax: 10,  name: "Wooden Barricade 1",   badgeClass: "badge-wood",     hp: 250,   def: 5,   reflect: 2,   assetKey: "b1",      material: "Oak Timber",         filterColor: "rgba(120,53,15,0.22)", glow: null },
+      { tier: 3,  lvlMin: 11, lvlMax: 15,  name: "Cobblestone Masonry",  badgeClass: "badge-stone",    hp: 500,   def: 12,  reflect: 15,  assetKey: "b2",      material: "Granite Stone",     filterColor: "rgba(100,116,139,0.55)",glow: null },
+      { tier: 4,  lvlMin: 16, lvlMax: 20,  name: "Brick Masonry Wall",   badgeClass: "badge-stone",    hp: 850,   def: 20,  reflect: 18,  assetKey: "b3",      material: "Reinforced Brick",  filterColor: "rgba(185,28,28,0.35)",  glow: null },
+      { tier: 5,  lvlMin: 21, lvlMax: 25,  name: "Iron Barricade 4",     badgeClass: "badge-iron",     hp: 1300,  def: 30,  reflect: 25,  assetKey: "b4",      material: "Polished Steel",    filterColor: "rgba(148,163,184,0.6)", glow: "#94a3b8" },
+      { tier: 6,  lvlMin: 26, lvlMax: 30,  name: "Fortified Slate Wall", badgeClass: "badge-stone",    hp: 1800,  def: 42,  reflect: 30,  assetKey: "house",   material: "Slate Granite",     filterColor: "rgba(71,85,105,0.65)", glow: "#60a5fa" },
+      { tier: 7,  lvlMin: 31, lvlMax: 35,  name: "Steel Guard Wall",     badgeClass: "badge-iron",     hp: 2400,  def: 55,  reflect: 35,  assetKey: "b4",      material: "Titanium Steel",    filterColor: "rgba(56,189,248,0.5)",  glow: "#38bdf8" },
+      { tier: 8,  lvlMin: 36, lvlMax: 40,  name: "Cobalt Spiked Shield", badgeClass: "badge-iron",     hp: 3100,  def: 70,  reflect: 45,  assetKey: "b2",      material: "Cobalt Blue Steel", filterColor: "rgba(37,99,235,0.65)",   glow: "#2563eb" },
+      { tier: 9,  lvlMin: 41, lvlMax: 45,  name: "Runic Bronze Wall",    badgeClass: "badge-bronze",   hp: 3900,  def: 88,  reflect: 55,  assetKey: "b3",      material: "Ancient Bronze",    filterColor: "rgba(217,119,6,0.65)",  glow: "#f59e0b" },
+      { tier: 10, lvlMin: 46, lvlMax: 50,  name: "Obsidian Void Wall",   badgeClass: "badge-obsidian", hp: 4800,  def: 110, reflect: 70,  assetKey: "b4",      material: "Obsidian Stone",    filterColor: "rgba(126,34,206,0.7)",  glow: "#a855f7" },
+      { tier: 11, lvlMin: 51, lvlMax: 55,  name: "Molten Lava Guard",    badgeClass: "badge-elemental",hp: 5800,  def: 135, reflect: 90,  assetKey: "b2",      material: "Fiery Magma",       filterColor: "rgba(234,88,12,0.75)",  glow: "#f97316" },
+      { tier: 12, lvlMin: 56, lvlMax: 60,  name: "Frost Ice Crystal",    badgeClass: "badge-elemental",hp: 7000,  def: 165, reflect: 110, assetKey: "b3",      material: "Glacial Ice",       filterColor: "rgba(6,182,212,0.65)",  glow: "#22d3ee" },
+      { tier: 13, lvlMin: 61, lvlMax: 65,  name: "Emerald Nature Shield",badgeClass: "badge-elemental",hp: 8300,  def: 200, reflect: 130, assetKey: "sprout",  material: "Emerald Rune",      filterColor: "rgba(16,185,129,0.7)",  glow: "#10b981" },
+      { tier: 14, lvlMin: 66, lvlMax: 70,  name: "Void Plasma Barrier",  badgeClass: "badge-cosmic",   hp: 9800,  def: 240, reflect: 160, assetKey: "b4",      material: "Void Plasma",       filterColor: "rgba(236,72,153,0.75)", glow: "#ec4899" },
+      { tier: 15, lvlMin: 71, lvlMax: 75,  name: "Gilded Diamond Wall",  badgeClass: "badge-divine",   hp: 11500, def: 285, reflect: 195, assetKey: "b3",      material: "Pure Gold",         filterColor: "rgba(234,179,8,0.75)",  glow: "#eab308" },
+      { tier: 16, lvlMin: 76, lvlMax: 80,  name: "Radiant Starlight",    badgeClass: "badge-cosmic",   hp: 13500, def: 335, reflect: 235, assetKey: "b2",      material: "Celestial Light",   filterColor: "rgba(14,165,233,0.7)",  glow: "#38bdf8" },
+      { tier: 17, lvlMin: 81, lvlMax: 85,  name: "Ethereal Dark Matter", badgeClass: "badge-cosmic",   hp: 16000, def: 390, reflect: 280, assetKey: "b4",      material: "Dark Matter",       filterColor: "rgba(88,28,135,0.8)",   glow: "#c084fc" },
+      { tier: 18, lvlMin: 86, lvlMax: 90,  name: "Dragon Crimson Aegis", badgeClass: "badge-divine",   hp: 19000, def: 450, reflect: 340, assetKey: "house",   material: "Dragon Scale",      filterColor: "rgba(225,29,72,0.75)",  glow: "#f43f5e" },
+      { tier: 19, lvlMin: 91, lvlMax: 95,  name: "Cosmic Spiked Nebula", badgeClass: "badge-cosmic",   hp: 22500, def: 520, reflect: 410, assetKey: "b2",      material: "Cosmic Nebula",     filterColor: "rgba(244,114,182,0.8)", glow: "#f472b6" },
+      { tier: 20, lvlMin: 96, lvlMax: 100, name: "Divine Apex Aegis",    badgeClass: "badge-divine",   hp: 27000, def: 600, reflect: 500, assetKey: "b4",      material: "Divine Aegis",      filterColor: "rgba(251,191,36,0.85)", glow: "#fbbf24" }
     ];
 
     // Map Asset Keys to Exact Relative In-Game PNG File Paths
@@ -565,22 +574,21 @@
     let selectedAssetMode = 'auto'; // 'auto' or 'b1','b2','b3','b4','sprout','house'
     let currentDir = 'down'; // 'down', 'side', 'up'
     let auraEnabled = true;
+    let materialFilterEnabled = true;
 
-    // Image Preloader Cache (NO crossOrigin = "anonymous" so local file:// loading NEVER fails!)
+    // Image Preloader Cache
     const imageCache = {};
 
     function loadImage(path) {
       if (imageCache[path]) return Promise.resolve(imageCache[path]);
       return new Promise((resolve) => {
         const img = new Image();
-        // DO NOT set img.crossOrigin for local file:// paths to prevent CORS error on disk
         img.src = path;
         img.onload = () => {
           imageCache[path] = img;
           resolve(img);
         };
         img.onerror = () => {
-          // If frame_0.png fails, try alternative sheet path: assets/magic_traps/2 Barricades/D_1_Destroy.png
           if (path.includes("magic_barricade_")) {
             const parts = path.split("magic_barricade_")[1].split("_");
             const bNum = parts[0];
@@ -607,7 +615,7 @@
       return TIERS[idx];
     }
 
-    // Render Exact In-Game PNG Asset onto Target Canvas cleanly
+    // Render Exact In-Game PNG Asset onto Target Canvas cleanly with Material Filters
     async function renderWallOnCanvas(canvas, lvl, assetMode, dir, enableAura) {
       const ctx = canvas.getContext('2d');
       const w = canvas.width;
@@ -628,21 +636,44 @@
       }
 
       if (img) {
+        const drawW = img.isSheet ? 36 : img.width;
+        const drawH = img.isSheet ? 64 : img.height;
+
+        // Use offscreen canvas to apply source-atop material color filter exclusively onto sprite pixels!
+        const offCanvas = document.createElement('canvas');
+        offCanvas.width = drawW;
+        offCanvas.height = drawH;
+        const offCtx = offCanvas.getContext('2d');
+
         if (img.isSheet) {
-          // Draw frame 0 (36x64) from sheet
-          const targetW = 36;
-          const targetH = 64;
-          const dx = Math.round((w - targetW) / 2);
-          const dy = Math.round((h - targetH) / 2);
-          ctx.drawImage(img, 0, 0, targetW, targetH, dx, dy, targetW, targetH);
+          offCtx.drawImage(img, 0, 0, 36, 64, 0, 0, 36, 64);
         } else {
-          // Draw single sliced frame PNG
-          const drawW = img.width;
-          const drawH = img.height;
-          const drawX = Math.round((w - drawW) / 2);
-          const drawY = Math.round((h - drawH) / 2);
-          ctx.drawImage(img, drawX, drawY);
+          offCtx.drawImage(img, 0, 0);
         }
+
+        // Apply Material Color & Sheen Overlay Filter if enabled & tier has filterColor
+        if (materialFilterEnabled && tier.filterColor) {
+          offCtx.save();
+          offCtx.globalCompositeOperation = 'source-atop';
+          offCtx.fillStyle = tier.filterColor;
+          offCtx.fillRect(0, 0, drawW, drawH);
+
+          // Metallic Sheen Highlight for Steel, Bronze, Iron, Gold, and Celestial Tiers
+          if (tier.material.includes("Steel") || tier.material.includes("Bronze") || tier.material.includes("Gold") || tier.material.includes("Iron") || tier.material.includes("Aegis")) {
+            offCtx.globalCompositeOperation = 'lighter';
+            const grad = offCtx.createLinearGradient(0, 0, drawW, drawH);
+            grad.addColorStop(0, "rgba(255,255,255,0.0)");
+            grad.addColorStop(0.5, "rgba(255,255,255,0.35)");
+            grad.addColorStop(1, "rgba(255,255,255,0.0)");
+            offCtx.fillStyle = grad;
+            offCtx.fillRect(0, 0, drawW, drawH);
+          }
+          offCtx.restore();
+        }
+
+        const dx = Math.round((w - drawW) / 2);
+        const dy = Math.round((h - drawH) / 2);
+        ctx.drawImage(offCanvas, dx, dy);
       } else {
         // Fallback error indicator if image path was not found
         ctx.fillStyle = "#ef4444";
@@ -687,6 +718,7 @@
       const scaledReflect = tier.reflect > 0 ? tier.reflect + (currentLevel - tier.lvlMin) * 3 : 0;
 
       document.getElementById('statHp').textContent = `${scaledHp.toLocaleString()} HP`;
+      document.getElementById('statMaterial').textContent = `Material: ${tier.material}`;
       document.getElementById('statDefense').textContent = `+${scaledDef} Defense Rating`;
       document.getElementById('statReflect').textContent = scaledReflect > 0 ? `${scaledReflect} Reflect Dmg` : `0 Dmg`;
       document.getElementById('statAssetPath').textContent = path;
@@ -725,8 +757,8 @@
             <canvas id="thumbCanvasT${tier.tier}" width="80" height="80"></canvas>
           </div>
           <div class="tier-card-stats">
+            <span>Mat: <strong>${tier.material.split(' ')[0]}</strong></span>
             <span>HP: <strong>${tier.hp}</strong></span>
-            <span>Reflect: <strong>${tier.reflect}</strong></span>
           </div>
           <div class="tier-badge ${tier.badgeClass}">Tier ${tier.tier}</div>
         `;
@@ -780,6 +812,14 @@
       document.getElementById('btnAuraOn').classList.toggle('active', enabled);
       document.getElementById('btnAuraOff').classList.toggle('active', !enabled);
       updateMainDisplay();
+    }
+
+    function setMaterialFilterToggle(enabled) {
+      materialFilterEnabled = enabled;
+      document.getElementById('btnMatFilterOn').classList.toggle('active', enabled);
+      document.getElementById('btnMatFilterOff').classList.toggle('active', !enabled);
+      updateMainDisplay();
+      refreshAllThumbnails();
     }
 
     function refreshAllThumbnails() {
