@@ -2332,7 +2332,7 @@
               }
             }
           }
-          out[`${mode}-${dir}`] = Array.from({ length: count }, (_, i) => `assets/${base}/${mode}_${dir}_frame_${i}.png?v=28`);
+          out[`${mode}-${dir}`] = Array.from({ length: count }, (_, i) => `assets/${base}/${mode}_${dir}_frame_${i}.png?v=29`);
         }
       }
       return out;
@@ -3869,6 +3869,22 @@
       if (petHud) petHud.classList.toggle("show", petSlimes.length > 0 && state.buildUiOpen);
     }
 
+    function getStructureTargetBounds(item) {
+      if (!item) return { left: 0, top: 0, right: 16, bottom: 16, w: 16, h: 16 };
+      if (item.solid) {
+        const left = item.x + item.solid.x;
+        const top = item.y + item.solid.y;
+        const w = item.solid.w;
+        const h = item.solid.h;
+        return { left, top, right: left + w, bottom: top + h, w, h };
+      }
+      const w = item.w || 16;
+      const h = item.h || 16;
+      const left = item.x - w / 2;
+      const top = item.y - h;
+      return { left, top, right: left + w, bottom: item.y, w, h };
+    }
+
     function toggleBuildUi() {
       setBuildUiOpen(!state.buildUiOpen);
       state.demo = false;
@@ -3886,22 +3902,15 @@
         for (let i = placedSprites.length - 1; i >= 0; i--) {
           const sprite = placedSprites[i];
           if (sprite.scene !== state.scene) continue;
-          const w = sprite.w || 16;
-          const h = sprite.h || 16;
-          const left = sprite.x - w / 2;
-          const right = sprite.x + w / 2;
-          const top = sprite.y - h;
-          const bottom = sprite.y;
+          const bounds = getStructureTargetBounds(sprite);
           const pad = 4;
-          if (x >= left - pad && x <= right + pad && y >= top - pad && y <= bottom + pad) {
+          if (x >= bounds.left - pad && x <= bounds.right + pad && y >= bounds.top - pad && y <= bounds.bottom + pad) {
             targeted = sprite;
             break;
           }
         }
         if (targeted) {
-          const w = targeted.w || 16;
-          const h = targeted.h || 16;
-          const top = targeted.y - h;
+          const bounds = getStructureTargetBounds(targeted);
           const highlightColor = item.upgrade ? "#3b82f6" : "#ff2222";
           
           ctx.save();
@@ -3913,7 +3922,7 @@
           
           ctx.strokeStyle = highlightColor;
           ctx.lineWidth = 2;
-          ctx.strokeRect(Math.round(targeted.x - w / 2) - 0.5, Math.round(top) - 0.5, w + 1, h + 1);
+          ctx.strokeRect(Math.round(bounds.left) - 0.5, Math.round(bounds.top) - 0.5, bounds.w + 1, bounds.h + 1);
 
           if (item.upgrade) {
             ctx.save();
@@ -3925,7 +3934,7 @@
             ctx.fillStyle = "#ffffff";
             ctx.shadowColor = "#000000";
             ctx.shadowBlur = 4;
-            ctx.fillText(badgeText, Math.round(targeted.x), Math.round(top) - 10);
+            ctx.fillText(badgeText, Math.round(targeted.x), Math.round(bounds.top) - 10);
             ctx.restore();
           }
         } else {
@@ -4204,14 +4213,9 @@
         for (let i = placedSprites.length - 1; i >= 0; i--) {
           const sprite = placedSprites[i];
           if (sprite.scene !== state.scene) continue;
-          const w = sprite.w || 16;
-          const h = sprite.h || 16;
-          const left = sprite.x - w / 2;
-          const right = sprite.x + w / 2;
-          const top = sprite.y - h;
-          const bottom = sprite.y;
+          const bounds = getStructureTargetBounds(sprite);
           const pad = 4;
-          if (x >= left - pad && x <= right + pad && y >= top - pad && y <= bottom + pad) {
+          if (x >= bounds.left - pad && x <= bounds.right + pad && y >= bounds.top - pad && y <= bounds.bottom + pad) {
             targeted = sprite;
             break;
           }
@@ -4309,14 +4313,9 @@
       for (let i = placedSprites.length - 1; i >= 0; i--) {
         const item = placedSprites[i];
         if (item.scene !== state.scene) continue;
-        const w = item.w || 16;
-        const h = item.h || 16;
-        const left = item.x - w / 2;
-        const right = item.x + w / 2;
-        const top = item.y - h;
-        const bottom = item.y;
+        const bounds = getStructureTargetBounds(item);
         const pad = 4;
-        if (x >= left - pad && x <= right + pad && y >= top - pad && y <= bottom + pad) {
+        if (x >= bounds.left - pad && x <= bounds.right + pad && y >= bounds.top - pad && y <= bounds.bottom + pad) {
           placedSprites.splice(i, 1);
           refreshWallConnections();
           return;
