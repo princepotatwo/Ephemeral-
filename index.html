@@ -2332,7 +2332,7 @@
               }
             }
           }
-          out[`${mode}-${dir}`] = Array.from({ length: count }, (_, i) => `assets/${base}/${mode}_${dir}_frame_${i}.png?v=35`);
+          out[`${mode}-${dir}`] = Array.from({ length: count }, (_, i) => `assets/${base}/${mode}_${dir}_frame_${i}.png?v=36`);
         }
       }
       return out;
@@ -2865,10 +2865,8 @@
       // Step 1: draw original sprite to preserve texture detail
       cx.drawImage(img, crop.sx, crop.sy, crop.sw, crop.sh, 0, 0, crop.sw, crop.sh);
 
-      // Step 2: apply color tint using the specified blend mode
-      // - "multiply": darkens and saturates (great for stone, iron, obsidian, dark tones)
-      // - "screen":   brightens and adds vivid color on top (great for fire, ice, gold, plasma)
-      cx.globalCompositeOperation = mode;
+      // Step 2: apply solid color tint directly over sprite pixels
+      cx.globalCompositeOperation = "source-atop";
       cx.fillStyle = filterColor;
       cx.fillRect(0, 0, crop.sw, crop.sh);
 
@@ -3210,27 +3208,7 @@
     const activeDivineStrikes = [];
 
     function drawBlackHoles() {
-      if (activeBlackHoles.length === 0) return;
-      const now = performance.now();
-      ctx.save();
-      for (let i = activeBlackHoles.length - 1; i >= 0; i--) {
-        const bh = activeBlackHoles[i];
-        const age = now - bh.createdAt;
-        if (age >= bh.duration) {
-          activeBlackHoles.splice(i, 1);
-          continue;
-        }
-        const alpha = Math.min(1, (bh.duration - age) / 400) * Math.min(1, age / 300);
-        ctx.globalAlpha = alpha;
-
-        // Draw a highly pixelated void portal (spinning square block overlay)
-        ctx.fillStyle = "#a855f7"; // purple outer frame
-        ctx.fillRect(Math.round(bh.x - 12), Math.round(bh.y - 12), 24, 24);
-
-        ctx.fillStyle = "#000000"; // dark core
-        ctx.fillRect(Math.round(bh.x - 6), Math.round(bh.y - 6), 12, 12);
-      }
-      ctx.restore();
+      // Void effect now directly tints the target enemy violet
     }
 
     function drawPlasmaLasers() {
@@ -3730,14 +3708,33 @@
               const isFrozen = npc.frozenUntil && pNow < npc.frozenUntil;
               const isPoisoned = npc.poisonUntil && pNow < npc.poisonUntil;
               const isBurning = npc.burnEndTime && pNow < npc.burnEndTime;
+              const isViolet = npc.voidEndTime && pNow < npc.voidEndTime;
 
               ctx.save();
               const finalScale = npc.scaleMultiplier !== undefined ? npc.scaleMultiplier : 1;
               drawPlayerAt(npcFrameObj, npc.x, npc.y, shake, finalScale, npcYOff);
               ctx.restore();
 
+              // Draw overlays directly over the sprite bounds
+              const { w, h } = playerDrawSize(npcFrameObj);
+              if (isViolet) {
+                ctx.save();
+                ctx.fillStyle = "rgba(147, 51, 234, 0.45)"; // Violet overlay
+                const rectW = w * finalScale;
+                const rectH = h * finalScale;
+                ctx.fillRect(Math.round(npc.x - rectW / 2), Math.round(npc.y - rectH + 10), Math.round(rectW), Math.round(rectH));
+                ctx.restore();
+              }
+              if (hasGlow) {
+                ctx.save();
+                ctx.fillStyle = "rgba(255, 255, 255, 0.45)"; // Glowy white/gold overlay
+                const rectW = w * finalScale;
+                const rectH = h * finalScale;
+                ctx.fillRect(Math.round(npc.x - rectW / 2), Math.round(npc.y - rectH + 10), Math.round(rectW), Math.round(rectH));
+                ctx.restore();
+              }
+
               // Draw extra status visuals on top of the sprite
-              const { h } = playerDrawSize(npcFrameObj);
               if (isFrozen) {
                 // Draw a beautiful ice block outline/fill around the sprite
                 ctx.save();
@@ -5509,6 +5506,7 @@
 
         // 🌀 VOID: Create a black hole at point of attack pulling nearby enemies!
         if (effect === "void") {
+          attacker.voidEndTime = performance.now() + 3000;
           activeBlackHoles.push({
             x: ax,
             y: ay,
@@ -5564,7 +5562,7 @@
           });
           // Convert to ally
           attacker.divineAlly = true;
-          attacker.divineAllyUntil = performance.now() + 6000;
+          attacker.divineAllyUntil = performance.now() + 12000; // Increased to 12s
           attacker.isNightMonster = false; // Stop targeting player/buildings
           attacker.aggroTarget = null;
         }
