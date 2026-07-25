@@ -2332,7 +2332,7 @@
               }
             }
           }
-          out[`${mode}-${dir}`] = Array.from({ length: count }, (_, i) => `assets/${base}/${mode}_${dir}_frame_${i}.png?v=37`);
+          out[`${mode}-${dir}`] = Array.from({ length: count }, (_, i) => `assets/${base}/${mode}_${dir}_frame_${i}.png?v=38`);
         }
       }
       return out;
@@ -3665,26 +3665,15 @@
               drawPlayerAt(npcFrameObj, npc.x, npc.y, shake, finalScale, npcYOff);
               ctx.restore();
 
-              // Draw overlays directly over the sprite bounds
+              // Draw extra status visuals on top of the sprite
               const { w, h } = playerDrawSize(npcFrameObj);
               if (isViolet) {
                 ctx.save();
-                ctx.fillStyle = "rgba(147, 51, 234, 0.45)"; // Violet overlay
-                const rectW = w * finalScale;
-                const rectH = h * finalScale;
-                ctx.fillRect(Math.round(npc.x - rectW / 2), Math.round(npc.y - rectH + 10), Math.round(rectW), Math.round(rectH));
+                ctx.fillStyle = "#a855f7";
+                ctx.font = "bold 9px system-ui, sans-serif";
+                ctx.fillText("🌀", npc.x - 5, npc.y - h * finalScale - 2);
                 ctx.restore();
               }
-              if (hasGlow) {
-                ctx.save();
-                ctx.fillStyle = "rgba(255, 255, 255, 0.45)"; // Glowy white/gold overlay
-                const rectW = w * finalScale;
-                const rectH = h * finalScale;
-                ctx.fillRect(Math.round(npc.x - rectW / 2), Math.round(npc.y - rectH + 10), Math.round(rectW), Math.round(rectH));
-                ctx.restore();
-              }
-
-              // Draw extra status visuals on top of the sprite
               if (isFrozen) {
                 // Draw a beautiful ice block outline/fill around the sprite
                 ctx.save();
