@@ -1282,8 +1282,8 @@
       if (isGroupedBuildAsset(sprite.name)) return null;
       const item = {
         ...copy,
-        id: buildItemId(sprite.name),
-        label: buildLabelFromName(sprite.name),
+        id: copy.id || buildItemId(sprite.name),
+        label: copy.label || buildLabelFromName(sprite.name),
         group: isUsableBuildAsset(sprite.name) ? "tools" : "buildings",
         maxHp: sprite.maxHp, // Preserve maxHp from raw sprite config
         ...overrides
@@ -2332,7 +2332,7 @@
               }
             }
           }
-          out[`${mode}-${dir}`] = Array.from({ length: count }, (_, i) => `assets/${base}/${mode}_${dir}_frame_${i}.png?v=31`);
+          out[`${mode}-${dir}`] = Array.from({ length: count }, (_, i) => `assets/${base}/${mode}_${dir}_frame_${i}.png?v=32`);
         }
       }
       return out;
