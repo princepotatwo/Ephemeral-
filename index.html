@@ -2315,7 +2315,7 @@
               }
             }
           }
-          out[`${mode}-${dir}`] = Array.from({ length: count }, (_, i) => `assets/${base}/${mode}_${dir}_frame_${i}.png?v=25`);
+          out[`${mode}-${dir}`] = Array.from({ length: count }, (_, i) => `assets/${base}/${mode}_${dir}_frame_${i}.png?v=26`);
         }
       }
       return out;
@@ -2784,14 +2784,6 @@
       if (state.toolActionTool === "water") drawWaterDrops(x, y, dir, step);
     }
 
-    function drawPlant(plant) {
-      let img;
-      if (plant.door) {
-        const idx = doorFrameIndex(plant);
-        img = images[`assets/plants/build_house_door_0_${idx}/frame_0.png`];
-      } else {
-        let name = plant.name;
-        let index;
     const WALL_TIERS = [
       { tier: 1,  lvlMin: 1,  lvlMax: 5,   name: "Sprout Wooden Fence",   material: "Raw Wood",          filterColor: null,                   glow: null,     hp: 100,  def: 0,   reflect: 0 },
       { tier: 2,  lvlMin: 6,  lvlMax: 10,  name: "Wooden Barricade 1",   material: "Oak Timber",         filterColor: "rgba(120,53,15,0.22)", glow: null,     hp: 250,  def: 5,   reflect: 2 },
@@ -2845,7 +2837,10 @@
       let img = plant.img;
       let name = plant.name;
       let index = 0;
-      if (!img) {
+      if (plant.door) {
+        const idx = doorFrameIndex(plant);
+        img = images[`assets/plants/build_house_door_0_${idx}/frame_0.png`];
+      } else if (!img) {
         const now = performance.now();
         const age = now - (plant.placedAt || 0);
 
