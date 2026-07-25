@@ -2332,7 +2332,7 @@
               }
             }
           }
-          out[`${mode}-${dir}`] = Array.from({ length: count }, (_, i) => `assets/${base}/${mode}_${dir}_frame_${i}.png?v=30`);
+          out[`${mode}-${dir}`] = Array.from({ length: count }, (_, i) => `assets/${base}/${mode}_${dir}_frame_${i}.png?v=31`);
         }
       }
       return out;
@@ -2803,45 +2803,45 @@
 
     const WALL_TIERS = [
       // tier 1: no tint — raw natural wood
-      { tier: 1,  lvlMin: 1,  lvlMax: 5,   name: "Sprout Wooden Fence",   material: "Raw Wood",          filterColor: null,                    blendMode: null,       glow: null,      hp: 100,  def: 0,   reflect: 0 },
+      { tier: 1,  lvlMin: 1,  lvlMax: 5,   name: "Sprout Wooden Fence",   material: "Raw Wood",          filterColor: null,                    blendMode: null,       glow: null,      effect: null,       hp: 100,  def: 0,   reflect: 0 },
       // tier 2: deep brown stain — darker, richer oak
-      { tier: 2,  lvlMin: 6,  lvlMax: 10,  name: "Rugged Oak Barricade",  material: "Charred Oak",       filterColor: "rgba(80,35,5,0.55)",    blendMode: "multiply", glow: null,      hp: 250,  def: 5,   reflect: 2 },
+      { tier: 2,  lvlMin: 6,  lvlMax: 10,  name: "Rugged Oak Barricade",  material: "Charred Oak",       filterColor: "rgba(80,35,5,0.55)",    blendMode: "multiply", glow: null,      effect: null,       hp: 250,  def: 5,   reflect: 2 },
       // tier 3: cold dark stone — heavy granite grey
-      { tier: 3,  lvlMin: 11, lvlMax: 15,  name: "Cobblestone Masonry",   material: "Dark Granite",      filterColor: "rgba(40,40,50,0.62)",   blendMode: "multiply", glow: null,      hp: 500,  def: 12,  reflect: 15 },
+      { tier: 3,  lvlMin: 11, lvlMax: 15,  name: "Cobblestone Masonry",   material: "Dark Granite",      filterColor: "rgba(40,40,50,0.62)",   blendMode: "multiply", glow: null,      effect: null,       hp: 500,  def: 12,  reflect: 15 },
       // tier 4: deep brick crimson — battle-worn red
-      { tier: 4,  lvlMin: 16, lvlMax: 20,  name: "Brick Masonry Wall",    material: "Bloodied Brick",    filterColor: "rgba(160,10,10,0.65)",  blendMode: "multiply", glow: null,      hp: 850,  def: 20,  reflect: 18 },
-      // tier 5: dark steel — gunmetal iron
-      { tier: 5,  lvlMin: 21, lvlMax: 25,  name: "Iron Guard Wall",       material: "Gunmetal Iron",     filterColor: "rgba(30,35,45,0.70)",   blendMode: "multiply", glow: "#64748b", hp: 1300, def: 30,  reflect: 25 },
-      // tier 6: midnight slate — near-black fortified stone
-      { tier: 6,  lvlMin: 26, lvlMax: 30,  name: "Fortified Slate Wall",  material: "Midnight Slate",    filterColor: "rgba(20,25,40,0.72)",   blendMode: "multiply", glow: "#475569", hp: 1800, def: 42,  reflect: 30 },
-      // tier 7: electric blue steel — titanium with vivid blue sheen
-      { tier: 7,  lvlMin: 31, lvlMax: 35,  name: "Titanium Steel Wall",   material: "Titanium Steel",    filterColor: "rgba(0,120,255,0.55)",  blendMode: "screen",   glow: "#3b82f6", hp: 2400, def: 55,  reflect: 35 },
-      // tier 8: deep cobalt — cold heavy blue
-      { tier: 8,  lvlMin: 36, lvlMax: 40,  name: "Cobalt Spiked Shield",  material: "Cobalt Blue Steel", filterColor: "rgba(15,50,180,0.72)",  blendMode: "multiply", glow: "#1d4ed8", hp: 3100, def: 70,  reflect: 45 },
-      // tier 9: dark molten bronze — ancient hot metal
-      { tier: 9,  lvlMin: 41, lvlMax: 45,  name: "Runic Bronze Aegis",    material: "Ancient Bronze",    filterColor: "rgba(180,80,0,0.72)",   blendMode: "multiply", glow: "#d97706", hp: 3900, def: 88,  reflect: 55 },
-      // tier 10: void black obsidian — deep purple-black
-      { tier: 10, lvlMin: 46, lvlMax: 50,  name: "Obsidian Void Wall",    material: "Void Obsidian",     filterColor: "rgba(30,0,60,0.80)",    blendMode: "multiply", glow: "#7c3aed", hp: 4800, def: 110, reflect: 70 },
-      // tier 11: hellfire orange — scorched molten lava
-      { tier: 11, lvlMin: 51, lvlMax: 55,  name: "Hellfire Lava Guard",   material: "Scorched Magma",    filterColor: "rgba(220,60,0,0.68)",   blendMode: "screen",   glow: "#ea580c", hp: 5800, def: 135, reflect: 90 },
-      // tier 12: glacial deep teal — frozen shard
-      { tier: 12, lvlMin: 56, lvlMax: 60,  name: "Glacial Frost Wall",    material: "Deep Glacial Ice",  filterColor: "rgba(0,180,220,0.60)",  blendMode: "screen",   glow: "#06b6d4", hp: 7000, def: 165, reflect: 110 },
-      // tier 13: dark emerald — ancient enchanted stone
-      { tier: 13, lvlMin: 61, lvlMax: 65,  name: "Emerald Rune Shield",   material: "Ancient Emerald",   filterColor: "rgba(0,100,40,0.75)",   blendMode: "multiply", glow: "#059669", hp: 8300, def: 200, reflect: 130 },
-      // tier 14: deep magenta void — pulsing plasma
-      { tier: 14, lvlMin: 66, lvlMax: 70,  name: "Void Plasma Barrier",   material: "Dark Void Plasma",  filterColor: "rgba(180,0,120,0.72)",  blendMode: "screen",   glow: "#db2777", hp: 9800, def: 240, reflect: 160 },
-      // tier 15: molten gold — shining war-gilded
-      { tier: 15, lvlMin: 71, lvlMax: 75,  name: "Gilded War Bastion",    material: "Molten Gold",       filterColor: "rgba(200,140,0,0.70)",  blendMode: "screen",   glow: "#ca8a04", hp: 11500,def: 285, reflect: 195 },
-      // tier 16: deep cosmic blue — starforged
-      { tier: 16, lvlMin: 76, lvlMax: 80,  name: "Starforged Bastion",    material: "Celestial Metal",   filterColor: "rgba(0,60,200,0.75)",   blendMode: "screen",   glow: "#2563eb", hp: 13500,def: 335, reflect: 235 },
-      // tier 17: abyssal dark purple — dark matter
-      { tier: 17, lvlMin: 81, lvlMax: 85,  name: "Abyssal Dark Matter",   material: "Compressed Dark",   filterColor: "rgba(40,0,80,0.88)",    blendMode: "multiply", glow: "#9333ea", hp: 16000,def: 390, reflect: 280 },
-      // tier 18: dragon crimson — blazing dragonscale
-      { tier: 18, lvlMin: 86, lvlMax: 90,  name: "Dragon Crimson Aegis",  material: "Dragonscale",       filterColor: "rgba(180,0,20,0.78)",   blendMode: "screen",   glow: "#be123c", hp: 19000,def: 450, reflect: 340 },
-      // tier 19: supernova — blinding cosmic purple-pink
-      { tier: 19, lvlMin: 91, lvlMax: 95,  name: "Supernova Nebula Wall", material: "Cosmic Nebula",     filterColor: "rgba(160,0,200,0.80)",  blendMode: "screen",   glow: "#c026d3", hp: 22500,def: 520, reflect: 410 },
-      // tier 20: divine white-gold — apex godlike sheen
-      { tier: 20, lvlMin: 96, lvlMax: 100, name: "Divine Apex Aegis",     material: "Divine Aegis",      filterColor: "rgba(255,220,80,0.82)", blendMode: "screen",   glow: "#f59e0b", hp: 27000,def: 600, reflect: 500 }
+      { tier: 4,  lvlMin: 16, lvlMax: 20,  name: "Brick Masonry Wall",    material: "Bloodied Brick",    filterColor: "rgba(160,10,10,0.65)",  blendMode: "multiply", glow: null,      effect: null,       hp: 850,  def: 20,  reflect: 18 },
+      // tier 5: dark steel — gunmetal iron — sparks start
+      { tier: 5,  lvlMin: 21, lvlMax: 25,  name: "Iron Guard Wall",       material: "Gunmetal Iron",     filterColor: "rgba(30,35,45,0.70)",   blendMode: "multiply", glow: "#64748b", effect: "spark",     hp: 1300, def: 30,  reflect: 25 },
+      // tier 6: midnight slate
+      { tier: 6,  lvlMin: 26, lvlMax: 30,  name: "Fortified Slate Wall",  material: "Midnight Slate",    filterColor: "rgba(20,25,40,0.72)",   blendMode: "multiply", glow: "#475569", effect: "spark",     hp: 1800, def: 42,  reflect: 30 },
+      // tier 7: electric blue steel
+      { tier: 7,  lvlMin: 31, lvlMax: 35,  name: "Titanium Steel Wall",   material: "Titanium Steel",    filterColor: "rgba(0,120,255,0.55)",  blendMode: "screen",   glow: "#3b82f6", effect: "electric",  hp: 2400, def: 55,  reflect: 35 },
+      // tier 8: deep cobalt
+      { tier: 8,  lvlMin: 36, lvlMax: 40,  name: "Cobalt Spiked Shield",  material: "Cobalt Blue Steel", filterColor: "rgba(15,50,180,0.72)",  blendMode: "multiply", glow: "#1d4ed8", effect: "electric",  hp: 3100, def: 70,  reflect: 45 },
+      // tier 9: dark molten bronze — fire begins
+      { tier: 9,  lvlMin: 41, lvlMax: 45,  name: "Runic Bronze Aegis",    material: "Ancient Bronze",    filterColor: "rgba(180,80,0,0.72)",   blendMode: "multiply", glow: "#d97706", effect: "fire",      hp: 3900, def: 88,  reflect: 55 },
+      // tier 10: void black obsidian
+      { tier: 10, lvlMin: 46, lvlMax: 50,  name: "Obsidian Void Wall",    material: "Void Obsidian",     filterColor: "rgba(30,0,60,0.80)",    blendMode: "multiply", glow: "#7c3aed", effect: "void",      hp: 4800, def: 110, reflect: 70 },
+      // tier 11: hellfire
+      { tier: 11, lvlMin: 51, lvlMax: 55,  name: "Hellfire Lava Guard",   material: "Scorched Magma",    filterColor: "rgba(220,60,0,0.68)",   blendMode: "screen",   glow: "#ea580c", effect: "fire",      hp: 5800, def: 135, reflect: 90 },
+      // tier 12: glacial ice
+      { tier: 12, lvlMin: 56, lvlMax: 60,  name: "Glacial Frost Wall",    material: "Deep Glacial Ice",  filterColor: "rgba(0,180,220,0.60)",  blendMode: "screen",   glow: "#06b6d4", effect: "ice",       hp: 7000, def: 165, reflect: 110 },
+      // tier 13: poison emerald
+      { tier: 13, lvlMin: 61, lvlMax: 65,  name: "Emerald Rune Shield",   material: "Ancient Emerald",   filterColor: "rgba(0,100,40,0.75)",   blendMode: "multiply", glow: "#059669", effect: "poison",    hp: 8300, def: 200, reflect: 130 },
+      // tier 14: void plasma
+      { tier: 14, lvlMin: 66, lvlMax: 70,  name: "Void Plasma Barrier",   material: "Dark Void Plasma",  filterColor: "rgba(180,0,120,0.72)",  blendMode: "screen",   glow: "#db2777", effect: "plasma",    hp: 9800, def: 240, reflect: 160 },
+      // tier 15: molten gold
+      { tier: 15, lvlMin: 71, lvlMax: 75,  name: "Gilded War Bastion",    material: "Molten Gold",       filterColor: "rgba(200,140,0,0.70)",  blendMode: "screen",   glow: "#ca8a04", effect: "divine",    hp: 11500,def: 285, reflect: 195 },
+      // tier 16: starforged
+      { tier: 16, lvlMin: 76, lvlMax: 80,  name: "Starforged Bastion",    material: "Celestial Metal",   filterColor: "rgba(0,60,200,0.75)",   blendMode: "screen",   glow: "#2563eb", effect: "electric",  hp: 13500,def: 335, reflect: 235 },
+      // tier 17: abyssal dark matter
+      { tier: 17, lvlMin: 81, lvlMax: 85,  name: "Abyssal Dark Matter",   material: "Compressed Dark",   filterColor: "rgba(40,0,80,0.88)",    blendMode: "multiply", glow: "#9333ea", effect: "void",      hp: 16000,def: 390, reflect: 280 },
+      // tier 18: dragon crimson
+      { tier: 18, lvlMin: 86, lvlMax: 90,  name: "Dragon Crimson Aegis",  material: "Dragonscale",       filterColor: "rgba(180,0,20,0.78)",   blendMode: "screen",   glow: "#be123c", effect: "fire",      hp: 19000,def: 450, reflect: 340 },
+      // tier 19: supernova
+      { tier: 19, lvlMin: 91, lvlMax: 95,  name: "Supernova Nebula Wall", material: "Cosmic Nebula",     filterColor: "rgba(160,0,200,0.80)",  blendMode: "screen",   glow: "#c026d3", effect: "plasma",    hp: 22500,def: 520, reflect: 410 },
+      // tier 20: divine apex
+      { tier: 20, lvlMin: 96, lvlMax: 100, name: "Divine Apex Aegis",     material: "Divine Aegis",      filterColor: "rgba(255,220,80,0.82)", blendMode: "screen",   glow: "#f59e0b", effect: "divine",    hp: 27000,def: 600, reflect: 500 }
     ];
 
     function getWallTier(lvl) {
@@ -2879,6 +2879,283 @@
       tintedSpriteCache.set(key, c);
       return c;
     }
+
+    // ─── Barricade Power Effects ───────────────────────────────────────────────
+    // Procedural particle/effect system for upgraded walls. All animation driven
+    // by performance.now() + a seed from plant.x/y so each barricade looks unique
+    // and consistent without storing particle state.
+    function drawBarricadeEffect(plant, wallTier) {
+      if (!wallTier || !wallTier.effect) return;
+      const effect = wallTier.effect;
+      const now = performance.now();
+      const tier = wallTier.tier;
+      // Seed from position so each barricade has unique phase offsets
+      const seed = (Math.abs(plant.x * 7 + plant.y * 13)) % 100;
+      const sx = Math.round(plant.x);
+      // Visual center of the sprite (solid hitbox center)
+      const sy = plant.solid ? Math.round(plant.y + plant.solid.y + plant.solid.h / 2) : Math.round(plant.y - (plant.h || 32) / 2);
+      const hw = plant.solid ? plant.solid.w / 2 : (plant.w || 36) / 2;
+      const hh = plant.solid ? plant.solid.h / 2 : (plant.h || 30) / 2;
+      // Intensity scales slightly with tier
+      const intensity = Math.min(1, 0.4 + (tier - 5) * 0.065);
+
+      ctx.save();
+
+      // ── SPARK (tiers 5-6): tiny white/grey crackling sparks ──────────────────
+      if (effect === "spark") {
+        const count = 3 + Math.floor(tier * 0.8);
+        for (let i = 0; i < count; i++) {
+          const phase = (now * 0.003 + seed * 0.7 + i * 2.4) % (Math.PI * 2);
+          const life = (Math.sin(now * 0.008 + i * 1.9 + seed) * 0.5 + 0.5);
+          if (life < 0.15) continue; // flicker off
+          const px = sx + (((seed * 3 + i * 37) % 100) / 100 - 0.5) * hw * 2.2;
+          const py = sy + hh - (life * hh * 1.6);
+          const size = 1 + life * 1.5;
+          ctx.globalAlpha = life * 0.85 * intensity;
+          ctx.fillStyle = life > 0.6 ? "#ffffff" : "#b0c4d8";
+          ctx.beginPath();
+          ctx.arc(px, py, size, 0, Math.PI * 2);
+          ctx.fill();
+          // tiny cross spark
+          if (life > 0.5) {
+            ctx.strokeStyle = "#ffffff";
+            ctx.lineWidth = 0.7;
+            ctx.globalAlpha = life * 0.5;
+            ctx.beginPath();
+            ctx.moveTo(px - size * 1.6, py); ctx.lineTo(px + size * 1.6, py);
+            ctx.moveTo(px, py - size * 1.6); ctx.lineTo(px, py + size * 1.6);
+            ctx.stroke();
+          }
+        }
+      }
+
+      // ── ELECTRIC (tiers 7-8, 16): blue lightning arcs ────────────────────────
+      if (effect === "electric") {
+        const arcCount = tier >= 16 ? 4 : 3;
+        for (let i = 0; i < arcCount; i++) {
+          const cycleMs = 500 + i * 170;
+          const phase = (now % cycleMs) / cycleMs;
+          if (phase > 0.4) continue; // only show arc for first 40% of cycle (flash on/off)
+          const alpha = phase < 0.2 ? phase / 0.2 : (0.4 - phase) / 0.2;
+          const startX = sx + (((seed + i * 29) % 100) / 100 - 0.5) * hw * 1.8;
+          const startY = sy + hh * 0.4 + ((seed * 2 + i * 11) % 100) / 100 * hh;
+          const endX = sx + (((seed + i * 43) % 100) / 100 - 0.5) * hw * 1.8;
+          const endY = sy - hh * 0.2 - ((seed + i * 17) % 100) / 100 * hh * 0.8;
+          ctx.globalAlpha = alpha * intensity * 0.9;
+          ctx.strokeStyle = i % 2 === 0 ? "#93c5fd" : "#ffffff";
+          ctx.lineWidth = 1 + (i === 0 ? 1 : 0);
+          ctx.shadowColor = "#3b82f6";
+          ctx.shadowBlur = 6;
+          // draw zigzag arc between two points
+          const segs = 5;
+          ctx.beginPath();
+          ctx.moveTo(startX, startY);
+          for (let s = 1; s <= segs; s++) {
+            const t = s / segs;
+            const mx = startX + (endX - startX) * t;
+            const my = startY + (endY - startY) * t;
+            const jitter = Math.sin(now * 0.05 + s * 2.3 + i * 5.1 + seed) * 5;
+            ctx.lineTo(mx + jitter, my + jitter * 0.5);
+          }
+          ctx.stroke();
+          ctx.shadowBlur = 0;
+        }
+      }
+
+      // ── FIRE (tiers 9, 11, 18): rising ember particles ───────────────────────
+      if (effect === "fire") {
+        const count = 5 + Math.floor(tier * 0.5);
+        const fireColors = ["#fbbf24", "#f97316", "#ef4444", "#fde68a"];
+        for (let i = 0; i < count; i++) {
+          const cycleMs = 900 + ((seed * 7 + i * 130) % 400);
+          const phase = ((now + seed * 80 + i * 310) % cycleMs) / cycleMs;
+          const px = sx + (((seed * 5 + i * 31) % 100) / 100 - 0.5) * hw * 2;
+          const py = sy + hh * 0.5 - phase * hh * 2.8;
+          const life = phase < 0.5 ? phase * 2 : (1 - phase) * 2;
+          if (life < 0.05) continue;
+          const size = (1.5 + life * 2.5) * (tier >= 18 ? 1.4 : 1);
+          ctx.globalAlpha = life * 0.8 * intensity;
+          ctx.fillStyle = fireColors[Math.floor((seed + i * 3) % fireColors.length)];
+          ctx.shadowColor = "#f97316";
+          ctx.shadowBlur = 5;
+          ctx.beginPath();
+          ctx.arc(px, py, size, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.shadowBlur = 0;
+        }
+      }
+
+      // ── VOID (tiers 10, 17): dark purple orbs drifting ───────────────────────
+      if (effect === "void") {
+        const count = 4 + Math.floor(tier * 0.3);
+        for (let i = 0; i < count; i++) {
+          const cycleMs = 1400 + ((seed * 9 + i * 200) % 600);
+          const phase = ((now * 0.6 + seed * 100 + i * 450) % cycleMs) / cycleMs;
+          const px = sx + Math.sin(now * 0.002 + i * 2.1 + seed) * hw * 1.3;
+          const py = sy + (phase - 0.5) * hh * 2.2;
+          const pulse = Math.sin(now * 0.006 + i * 1.7) * 0.3 + 0.7;
+          const size = (2 + tier * 0.15) * pulse;
+          ctx.globalAlpha = (1 - Math.abs(phase - 0.5) * 1.8) * 0.7 * intensity;
+          if (ctx.globalAlpha <= 0) continue;
+          ctx.fillStyle = tier >= 17 ? "#a855f7" : "#7c3aed";
+          ctx.shadowColor = tier >= 17 ? "#c084fc" : "#8b5cf6";
+          ctx.shadowBlur = 8;
+          ctx.beginPath();
+          ctx.arc(px, py, size, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.shadowBlur = 0;
+        }
+      }
+
+      // ── ICE (tier 12): drifting frost crystals ───────────────────────────────
+      if (effect === "ice") {
+        const count = 5;
+        for (let i = 0; i < count; i++) {
+          const cycleMs = 1800 + i * 250;
+          const phase = ((now * 0.7 + seed * 90 + i * 360) % cycleMs) / cycleMs;
+          const px = sx + (((seed * 3 + i * 41) % 100) / 100 - 0.5) * hw * 2.4;
+          const py = sy + hh * 0.6 - phase * hh * 2.4;
+          const life = phase < 0.6 ? phase / 0.6 : (1 - phase) / 0.4;
+          if (life < 0.05) continue;
+          const size = 1.5 + life * 1.5;
+          ctx.globalAlpha = life * 0.75 * intensity;
+          ctx.strokeStyle = "#bae6fd";
+          ctx.fillStyle = "rgba(186,230,253,0.4)";
+          ctx.lineWidth = 0.8;
+          ctx.shadowColor = "#38bdf8";
+          ctx.shadowBlur = 5;
+          // Draw 6-pointed snowflake
+          ctx.save();
+          ctx.translate(px, py);
+          ctx.rotate(now * 0.001 + i);
+          for (let arm = 0; arm < 6; arm++) {
+            ctx.beginPath();
+            ctx.moveTo(0, 0);
+            ctx.lineTo(0, -size * 2.5);
+            ctx.stroke();
+            ctx.rotate(Math.PI / 3);
+          }
+          ctx.restore();
+          ctx.shadowBlur = 0;
+        }
+      }
+
+      // ── POISON (tier 13): toxic green drips ──────────────────────────────────
+      if (effect === "poison") {
+        const count = 5;
+        for (let i = 0; i < count; i++) {
+          const cycleMs = 1100 + ((seed * 11 + i * 190) % 500);
+          const phase = ((now * 0.8 + seed * 70 + i * 280) % cycleMs) / cycleMs;
+          const px = sx + (((seed * 7 + i * 23) % 100) / 100 - 0.5) * hw * 1.8;
+          // Drips fall downward from center
+          const py = sy - hh * 0.2 + phase * hh * 2.6;
+          const life = phase < 0.4 ? phase / 0.4 : (1 - phase) / 0.6;
+          if (life < 0.05) continue;
+          const size = 1.2 + life * 2;
+          ctx.globalAlpha = life * 0.85 * intensity;
+          ctx.fillStyle = phase > 0.6 ? "#4ade80" : "#22c55e";
+          ctx.shadowColor = "#16a34a";
+          ctx.shadowBlur = 6;
+          // teardrop shape (circle + tail)
+          ctx.beginPath();
+          ctx.arc(px, py, size, 0, Math.PI * 2);
+          ctx.fill();
+          if (life > 0.3) {
+            ctx.beginPath();
+            ctx.moveTo(px - size * 0.6, py - size * 0.5);
+            ctx.lineTo(px, py - size * 2.2);
+            ctx.lineTo(px + size * 0.6, py - size * 0.5);
+            ctx.fill();
+          }
+          ctx.shadowBlur = 0;
+        }
+        // Wisp swirling
+        const wispAlpha = (Math.sin(now * 0.003 + seed) * 0.3 + 0.5) * 0.35 * intensity;
+        ctx.globalAlpha = wispAlpha;
+        ctx.strokeStyle = "#86efac";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        for (let a = 0; a < Math.PI * 2; a += 0.3) {
+          const r = hw * 0.9 + Math.sin(a * 3 + now * 0.002) * 3;
+          const wx = sx + Math.cos(a) * r;
+          const wy = sy + Math.sin(a) * r * 0.4;
+          a === 0 ? ctx.moveTo(wx, wy) : ctx.lineTo(wx, wy);
+        }
+        ctx.closePath();
+        ctx.stroke();
+      }
+
+      // ── PLASMA (tiers 14, 19): pulsing energy rings ───────────────────────────
+      if (effect === "plasma") {
+        const ringCount = tier >= 19 ? 3 : 2;
+        for (let r = 0; r < ringCount; r++) {
+          const cycleMs = 1200 + r * 400;
+          const phase = ((now + seed * 60 + r * 600) % cycleMs) / cycleMs;
+          const radius = hw * (0.8 + phase * 1.6);
+          const alpha = (1 - phase) * 0.65 * intensity;
+          ctx.globalAlpha = alpha;
+          ctx.strokeStyle = r % 2 === 0 ? "#e879f9" : "#f0abfc";
+          ctx.lineWidth = 1.5 - phase;
+          ctx.shadowColor = "#d946ef";
+          ctx.shadowBlur = 8;
+          ctx.beginPath();
+          ctx.ellipse(sx, sy, radius, radius * 0.45, 0, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.shadowBlur = 0;
+        }
+        // Plasma sparks
+        const count = tier >= 19 ? 5 : 3;
+        for (let i = 0; i < count; i++) {
+          const orbitPhase = (now * 0.0015 + seed * 0.1 + i * (Math.PI * 2 / count)) % (Math.PI * 2);
+          const px = sx + Math.cos(orbitPhase) * hw * 1.1;
+          const py = sy + Math.sin(orbitPhase) * hh * 0.9;
+          ctx.globalAlpha = 0.7 * intensity;
+          ctx.fillStyle = "#f0abfc";
+          ctx.shadowColor = "#d946ef";
+          ctx.shadowBlur = 6;
+          ctx.beginPath();
+          ctx.arc(px, py, 1.8, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.shadowBlur = 0;
+        }
+      }
+
+      // ── DIVINE (tiers 15, 20): golden star sparkles ───────────────────────────
+      if (effect === "divine") {
+        const count = tier >= 20 ? 10 : 7;
+        const colors = ["#fef08a", "#fbbf24", "#ffffff", "#fde68a"];
+        for (let i = 0; i < count; i++) {
+          const orbitSpeed = 0.0012 + (seed % 5) * 0.0002;
+          const angle = (now * orbitSpeed + seed * 0.08 + i * (Math.PI * 2 / count)) % (Math.PI * 2);
+          const dist = hw * (0.8 + Math.sin(now * 0.003 + i * 1.4 + seed) * 0.4);
+          const px = sx + Math.cos(angle) * dist;
+          const py = sy + Math.sin(angle) * dist * 0.45;
+          const pulse = Math.sin(now * 0.008 + i * 2.1) * 0.5 + 0.5;
+          const size = (1.2 + pulse * 2) * (tier >= 20 ? 1.3 : 1);
+          ctx.globalAlpha = (0.5 + pulse * 0.5) * intensity;
+          ctx.fillStyle = colors[i % colors.length];
+          ctx.shadowColor = "#fbbf24";
+          ctx.shadowBlur = 8;
+          // 4-point star
+          ctx.save();
+          ctx.translate(px, py);
+          ctx.rotate(now * 0.002 + i);
+          ctx.beginPath();
+          for (let p = 0; p < 8; p++) {
+            const r = p % 2 === 0 ? size : size * 0.4;
+            const a = (p / 8) * Math.PI * 2;
+            p === 0 ? ctx.moveTo(Math.cos(a) * r, Math.sin(a) * r) : ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r);
+          }
+          ctx.closePath();
+          ctx.fill();
+          ctx.restore();
+          ctx.shadowBlur = 0;
+        }
+      }
+
+      ctx.restore();
+    }
+    // ───────────────────────────────────────────────────────────────────────────
 
     function drawPlant(plant) {
       let img = plant.img;
@@ -3133,6 +3410,11 @@
         );
       }
       if (isSquashing) ctx.restore();
+
+      // Draw barricade power effects on top of the sprite
+      if (isBarricadeOrWall && wallTier && wallTier.effect) {
+        drawBarricadeEffect(plant, wallTier);
+      }
 
       if (state.showHitboxes) {
         const solid = solidRectFor(plant);
