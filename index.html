@@ -2332,7 +2332,7 @@
               }
             }
           }
-          out[`${mode}-${dir}`] = Array.from({ length: count }, (_, i) => `assets/${base}/${mode}_${dir}_frame_${i}.png?v=36`);
+          out[`${mode}-${dir}`] = Array.from({ length: count }, (_, i) => `assets/${base}/${mode}_${dir}_frame_${i}.png?v=37`);
         }
       }
       return out;
@@ -3200,16 +3200,10 @@
       ctx.restore();
     }
 
-    // Global active black holes storage
-    const activeBlackHoles = [];
     // Global active plasma lasers storage
     const activePlasmaLasers = [];
     // Global active divine strikes storage
     const activeDivineStrikes = [];
-
-    function drawBlackHoles() {
-      // Void effect now directly tints the target enemy violet
-    }
 
     function drawPlasmaLasers() {
       if (activePlasmaLasers.length === 0) return;
@@ -3264,50 +3258,6 @@
       ctx.restore();
     }
 
-    function updateBlackHoles(now) {
-      if (activeBlackHoles.length === 0) return;
-      for (let i = activeBlackHoles.length - 1; i >= 0; i--) {
-        const bh = activeBlackHoles[i];
-        const age = now - bh.createdAt;
-        if (age >= bh.duration) {
-          activeBlackHoles.splice(i, 1);
-          continue;
-        }
-
-        const progress = age / bh.duration;
-        // Follow target enemy's position dynamically
-        if (bh.target && !bh.target.dead) {
-          bh.x = bh.target.x;
-          bh.y = bh.target.y;
-        }
-        // Find and pull nearby enemies towards bh.x, bh.y
-        for (const enemy of roamingNPCs) {
-          if (enemy.dead || enemy.hp === undefined) continue;
-          const dist = Math.hypot(enemy.x - bh.x, enemy.y - bh.y);
-          if (dist <= 45) {
-            // Pull vector
-            const pullStrength = 0.05 * (1.0 - progress);
-            enemy.x += (bh.x - enemy.x) * pullStrength;
-            enemy.y += (bh.y - enemy.y) * pullStrength;
-
-            // Slowly eat/shrink scale factor
-            if (enemy === bh.target) {
-              enemy.scaleMultiplier = 1.0 - (progress * 0.65); // Down to 35% scale
-            }
-
-            // Deal slow tick damage
-            if (!bh.lastDamageTick || now - bh.lastDamageTick >= 350) {
-              const tickDmg = Math.round((20 + bh.tier * 4) * 0.35);
-              enemy.hp = Math.max(0, enemy.hp - tickDmg);
-              if (enemy.hp <= 0 && enemy.die) enemy.die();
-            }
-          }
-        }
-        if (!bh.lastDamageTick || now - bh.lastDamageTick >= 350) {
-          bh.lastDamageTick = now;
-        }
-      }
-    }
 
     function drawPlant(plant) {
       let img = plant.img;
@@ -5504,17 +5454,21 @@
           attacker.moveSpeedMultiplier = 0.0;
         }
 
-        // 🌀 VOID: Create a black hole at point of attack pulling nearby enemies!
+        // 🌀 VOID: Banish attacker 160px away and afflict them with decay!
         if (effect === "void") {
-          attacker.voidEndTime = performance.now() + 3000;
-          activeBlackHoles.push({
-            x: ax,
-            y: ay,
-            createdAt: performance.now(),
-            duration: 3000,
-            target: attacker,
-            tier: wallTier.tier
-          });
+          const oldX = attacker.x;
+          const oldY = attacker.y;
+          const banishAngle = Math.random() * Math.PI * 2;
+          const dist = 160;
+          attacker.x = Math.max(60, Math.min(WORLD_W - 60, attacker.x + Math.cos(banishAngle) * dist));
+          attacker.y = Math.max(60, Math.min(WORLD_H - 60, attacker.y + Math.sin(banishAngle) * dist));
+          
+          // Spawn purple poof particles at old and new coordinates
+          spawnBloodSplats(oldX, oldY, 5);
+          spawnBloodSplats(attacker.x, attacker.y, 5);
+          
+          attacker.voidEndTime = performance.now() + 4000; // 4s decay
+          attacker.moveSpeedMultiplier = 0.5; // 50% slow
         }
 
         // 🌸 PLASMA: Plasma lasers firing from the barricade to attacker + nearby enemies!
@@ -7763,12 +7717,26 @@
           }
         }
 
-        // Barricade Freeze Effect: completely frozen/stunned, no movement
+        // Barricade Status Move Speed Multipliers
         if (!npc.dead && npc.frozenUntil && now < npc.frozenUntil) {
           npc.moveSpeedMultiplier = 0.0;
           npc.mode = "idle";
+        } else if (!npc.dead && npc.voidEndTime && now < npc.voidEndTime) {
+          npc.moveSpeedMultiplier = 0.5; // 50% slow
         } else {
           npc.moveSpeedMultiplier = 1.0;
+        }
+
+        // Void Banishment Corruption / Decay Tick
+        if (!npc.dead && npc.voidEndTime && now < npc.voidEndTime) {
+          if (!npc.lastVoidTick) npc.lastVoidTick = now;
+          if (now - npc.lastVoidTick >= 500) {
+            const tickDmg = Math.max(1, Math.round(15 * 0.4)); // Wither damage tick
+            npc.hp = Math.max(0, npc.hp - tickDmg);
+            npc.lastVoidTick = now;
+            spawnBloodSplats(npc.x, npc.y, 2);
+            if (npc.hp <= 0 && npc.die) npc.die();
+          }
         }
 
         // Active fire/burn status tick for NPCs
@@ -9281,7 +9249,6 @@
       updateTreeRespawns(now);
       updateDayNightCycle(now, dt);
       updateMovingTrees(now, dt);
-      updateBlackHoles(now);
 
       let dx = Number(pressed("arrowright", "d")) - Number(pressed("arrowleft", "a"));
       let dy = Number(pressed("arrowdown", "s")) - Number(pressed("arrowup", "w"));
@@ -9437,7 +9404,6 @@
         drawDepthSortedActors();
         drawFloatingItems();
         drawChainLightningBeams();
-        drawBlackHoles();
         drawPlasmaLasers();
         drawDivineStrikes();
         
