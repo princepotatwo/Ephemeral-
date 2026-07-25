@@ -2315,7 +2315,7 @@
               }
             }
           }
-          out[`${mode}-${dir}`] = Array.from({ length: count }, (_, i) => `assets/${base}/${mode}_${dir}_frame_${i}.png?v=24`);
+          out[`${mode}-${dir}`] = Array.from({ length: count }, (_, i) => `assets/${base}/${mode}_${dir}_frame_${i}.png?v=25`);
         }
       }
       return out;
@@ -2792,6 +2792,60 @@
       } else {
         let name = plant.name;
         let index;
+    const WALL_TIERS = [
+      { tier: 1,  lvlMin: 1,  lvlMax: 5,   name: "Sprout Wooden Fence",   material: "Raw Wood",          filterColor: null,                   glow: null,     hp: 100,  def: 0,   reflect: 0 },
+      { tier: 2,  lvlMin: 6,  lvlMax: 10,  name: "Wooden Barricade 1",   material: "Oak Timber",         filterColor: "rgba(120,53,15,0.22)", glow: null,     hp: 250,  def: 5,   reflect: 2 },
+      { tier: 3,  lvlMin: 11, lvlMax: 15,  name: "Cobblestone Masonry",  material: "Granite Stone",     filterColor: "rgba(100,116,139,0.55)",glow: null,     hp: 500,  def: 12,  reflect: 15 },
+      { tier: 4,  lvlMin: 16, lvlMax: 20,  name: "Brick Masonry Wall",   material: "Reinforced Brick",  filterColor: "rgba(185,28,28,0.35)",  glow: null,     hp: 850,  def: 20,  reflect: 18 },
+      { tier: 5,  lvlMin: 21, lvlMax: 25,  name: "Iron Barricade 4",     material: "Polished Steel",    filterColor: "rgba(148,163,184,0.6)", glow: "#94a3b8", hp: 1300, def: 30,  reflect: 25 },
+      { tier: 6,  lvlMin: 26, lvlMax: 30,  name: "Fortified Slate Wall", material: "Slate Granite",     filterColor: "rgba(71,85,105,0.65)", glow: "#60a5fa", hp: 1800, def: 42,  reflect: 30 },
+      { tier: 7,  lvlMin: 31, lvlMax: 35,  name: "Steel Guard Wall",     material: "Titanium Steel",    filterColor: "rgba(56,189,248,0.5)",  glow: "#38bdf8", hp: 2400, def: 55,  reflect: 35 },
+      { tier: 8,  lvlMin: 36, lvlMax: 40,  name: "Cobalt Spiked Shield", material: "Cobalt Blue Steel", filterColor: "rgba(37,99,235,0.65)",   glow: "#2563eb", hp: 3100, def: 70,  reflect: 45 },
+      { tier: 9,  lvlMin: 41, lvlMax: 45,  name: "Runic Bronze Wall",    material: "Ancient Bronze",    filterColor: "rgba(217,119,6,0.65)",  glow: "#f59e0b", hp: 3900, def: 88,  reflect: 55 },
+      { tier: 10, lvlMin: 46, lvlMax: 50,  name: "Obsidian Void Wall",   material: "Obsidian Stone",    filterColor: "rgba(126,34,206,0.7)",  glow: "#a855f7", hp: 4800, def: 110, reflect: 70 },
+      { tier: 11, lvlMin: 51, lvlMax: 55,  name: "Molten Lava Guard",    material: "Fiery Magma",       filterColor: "rgba(234,88,12,0.75)",  glow: "#f97316", hp: 5800, def: 135, reflect: 90 },
+      { tier: 12, lvlMin: 56, lvlMax: 60,  name: "Frost Ice Crystal",    material: "Glacial Ice",       filterColor: "rgba(6,182,212,0.65)",  glow: "#22d3ee", hp: 7000, def: 165, reflect: 110 },
+      { tier: 13, lvlMin: 61, lvlMax: 65,  name: "Emerald Nature Shield",material: "Emerald Rune",      filterColor: "rgba(16,185,129,0.7)",  glow: "#10b981", hp: 8300, def: 200, reflect: 130 },
+      { tier: 14, lvlMin: 66, lvlMax: 70,  name: "Void Plasma Barrier",  material: "Void Plasma",       filterColor: "rgba(236,72,153,0.75)", glow: "#ec4899", hp: 9800, def: 240, reflect: 160 },
+      { tier: 15, lvlMin: 71, lvlMax: 75,  name: "Gilded Diamond Wall",  material: "Pure Gold",         filterColor: "rgba(234,179,8,0.75)",  glow: "#eab308", hp: 11500,def: 285, reflect: 195 },
+      { tier: 16, lvlMin: 76, lvlMax: 80,  name: "Radiant Starlight",    material: "Celestial Light",   filterColor: "rgba(14,165,233,0.7)",  glow: "#38bdf8", hp: 13500,def: 335, reflect: 235 },
+      { tier: 17, lvlMin: 81, lvlMax: 85,  name: "Ethereal Dark Matter", material: "Dark Matter",       filterColor: "rgba(88,28,135,0.8)",   glow: "#c084fc", hp: 16000,def: 390, reflect: 280 },
+      { tier: 18, lvlMin: 86, lvlMax: 90,  name: "Dragon Crimson Aegis", material: "Dragon Scale",      filterColor: "rgba(225,29,72,0.75)",  glow: "#f43f5e", hp: 19000,def: 450, reflect: 340 },
+      { tier: 19, lvlMin: 91, lvlMax: 95,  name: "Cosmic Spiked Nebula", material: "Cosmic Nebula",     filterColor: "rgba(244,114,182,0.8)", glow: "#f472b6", hp: 22500,def: 520, reflect: 410 },
+      { tier: 20, lvlMin: 96, lvlMax: 100, name: "Divine Apex Aegis",    material: "Divine Aegis",      filterColor: "rgba(251,191,36,0.85)", glow: "#fbbf24", hp: 27000,def: 600, reflect: 500 }
+    ];
+
+    function getWallTier(lvl) {
+      const idx = Math.min(19, Math.floor((Math.max(1, lvl || 1) - 1) / 5));
+      return WALL_TIERS[idx];
+    }
+
+    const tintedSpriteCache = new Map();
+
+    function getTintedBarricadeSprite(img, crop, filterColor) {
+      if (!filterColor || !img) return null;
+      const key = `${img.src}:${crop.sx}:${crop.sy}:${crop.sw}:${crop.sh}:${filterColor}`;
+      if (tintedSpriteCache.has(key)) return tintedSpriteCache.get(key);
+
+      const c = document.createElement("canvas");
+      c.width = crop.sw;
+      c.height = crop.sh;
+      const cx = c.getContext("2d");
+      cx.drawImage(img, crop.sx, crop.sy, crop.sw, crop.sh, 0, 0, crop.sw, crop.sh);
+
+      cx.globalCompositeOperation = "source-atop";
+      cx.fillStyle = filterColor;
+      cx.fillRect(0, 0, crop.sw, crop.sh);
+
+      tintedSpriteCache.set(key, c);
+      return c;
+    }
+
+    function drawPlant(plant) {
+      let img = plant.img;
+      let name = plant.name;
+      let index = 0;
+      if (!img) {
         const now = performance.now();
         const age = now - (plant.placedAt || 0);
 
@@ -2908,6 +2962,42 @@
       if (plant.tree && plant.isAttacking) {
         sway = Math.sin(performance.now() * 0.009) * 0.12;
       }
+
+      // Check if this structure is a barricade or wall eligible for Material Tint & Night-Only Aura
+      const isBarricadeOrWall = plant.name && (plant.name.startsWith("magic_barricade_") || plant.name.startsWith("build_sprout_fence_") || plant.name === "build_house_wall_floor_3_2");
+      const isNight = state.timeOfDay === "night";
+      const lvl = plant.level || 1;
+      const wallTier = isBarricadeOrWall ? getWallTier(lvl) : null;
+
+      // 1. Draw smooth circular organic radial aura glow BEHIND barricade ONLY AT NIGHT!
+      if (isBarricadeOrWall && isNight && wallTier && wallTier.glow) {
+        ctx.save();
+        const cx = Math.round(plant.x + shake);
+        const cy = Math.round(plant.y - plant.h / 2);
+        const auraRadius = Math.min(36, 16 + (wallTier.tier * 0.9));
+        const radGrad = ctx.createRadialGradient(cx, cy, 2, cx, cy, auraRadius);
+        const hex = wallTier.glow;
+        radGrad.addColorStop(0, hex + "88"); // 50% opacity center
+        radGrad.addColorStop(0.6, hex + "33"); // 20% opacity mid
+        radGrad.addColorStop(1, hex + "00"); // 0% opacity edge
+        ctx.fillStyle = radGrad;
+        ctx.beginPath();
+        ctx.arc(cx, cy, auraRadius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // Prepare drawing source (tinted canvas or original image)
+      let drawSource = img;
+      let drawCrop = crop;
+      if (isBarricadeOrWall && wallTier && wallTier.filterColor) {
+        const tintedCanvas = getTintedBarricadeSprite(img, crop, wallTier.filterColor);
+        if (tintedCanvas) {
+          drawSource = tintedCanvas;
+          drawCrop = { sx: 0, sy: 0, sw: tintedCanvas.width, sh: tintedCanvas.height };
+        }
+      }
+
       if (rotateSteps || sway) {
         const drawW = plant.baseW || plant.w;
         const drawH = plant.baseH || plant.h;
@@ -2917,24 +3007,23 @@
           ctx.translate(0, -plant.h / 2);
           ctx.rotate(rotateSteps * Math.PI / 2);
           ctx.drawImage(
-            img,
-            crop.sx,
-            crop.sy,
-            crop.sw,
-            crop.sh,
+            drawSource,
+            drawCrop.sx,
+            drawCrop.sy,
+            drawCrop.sw,
+            drawCrop.sh,
             Math.round(-drawW / 2),
             Math.round(-drawH / 2),
             drawW,
             drawH
           );
         } else {
-          // No wiggle/shear/transformations for moving trees. They draw static and upright to stay completely unobvious.
           ctx.drawImage(
-            img,
-            crop.sx,
-            crop.sy,
-            crop.sw,
-            crop.sh,
+            drawSource,
+            drawCrop.sx,
+            drawCrop.sy,
+            drawCrop.sw,
+            drawCrop.sh,
             Math.round(-drawW / 2),
             Math.round(-drawH),
             drawW,
@@ -2952,11 +3041,11 @@
         ctx.translate(plant.x + shake, plant.y - plant.h / 2);
         ctx.scale(-1, 1);
         ctx.drawImage(
-          img,
-          crop.sx,
-          crop.sy,
-          crop.sw,
-          crop.sh,
+          drawSource,
+          drawCrop.sx,
+          drawCrop.sy,
+          drawCrop.sw,
+          drawCrop.sh,
           Math.round(-plant.w / 2),
           Math.round(-plant.h / 2 + plantYOff),
           plant.w,
@@ -2965,11 +3054,11 @@
         ctx.restore();
       } else {
         ctx.drawImage(
-          img,
-          crop.sx,
-          crop.sy,
-          crop.sw,
-          crop.sh,
+          drawSource,
+          drawCrop.sx,
+          drawCrop.sy,
+          drawCrop.sw,
+          drawCrop.sh,
           Math.round(plant.x - plant.w / 2 + shake),
           Math.round(plant.y - plant.h + plantYOff),
           plant.w,
@@ -4712,29 +4801,43 @@
 
     function damageBuilding(building, amount = 5, attacker = null) {
       if (building.destroyed) return;
+
+      const isWallOrBarricade = building.name && (building.name.startsWith("magic_barricade_") || building.name.startsWith("build_sprout_fence_") || building.name === "build_house_wall_floor_3_2");
+      const wallLvl = building.level || 1;
+      const wallTier = isWallOrBarricade ? getWallTier(wallLvl) : null;
+
       if (building.hp === undefined) {
-        building.maxHp = building.maxHp || 10; // Default maxHp 10 (2 hits of 5 damage)
+        if (wallTier) {
+          building.maxHp = wallTier.hp + (wallLvl - wallTier.lvlMin) * Math.round(wallTier.hp * 0.08);
+        } else {
+          building.maxHp = building.maxHp || 10;
+        }
         building.hp = building.maxHp;
       }
+
+      // Defense damage mitigation for upgraded walls
+      let finalDamage = amount;
+      if (wallTier && wallTier.def > 0) {
+        finalDamage = Math.max(1, amount - Math.round(wallTier.def * 0.15));
+      }
       
-      // retaliate/reflect logic
-      if (attacker && building.name && building.name.startsWith("magic_barricade_2")) {
-        if (attacker.hp !== undefined) {
-          attacker.hp = Math.max(0, attacker.hp - 15); // Reflect 15 damage
-          console.log(`[SPIKED BARRICADE REFLECT] Dealt 15 reflection damage to ${attacker.base || attacker.name || "attacker"}. Attacker HP: ${attacker.hp}`);
-          if (attacker.hp <= 0 && attacker.die) {
-            attacker.die();
-          }
+      // Retaliate/reflect logic for spiked barricades & upgraded reflection walls
+      const reflectDmg = wallTier && wallTier.reflect > 0 ? wallTier.reflect : (building.name && building.name.startsWith("magic_barricade_2") ? 15 : 0);
+      if (attacker && reflectDmg > 0 && attacker.hp !== undefined) {
+        attacker.hp = Math.max(0, attacker.hp - reflectDmg);
+        console.log(`[BARRICADE REFLECT] Dealt ${reflectDmg} reflection damage to ${attacker.base || attacker.name || "attacker"}. Attacker HP: ${attacker.hp}`);
+        if (attacker.hp <= 0 && attacker.die) {
+          attacker.die();
         }
       }
 
       const oldHp = building.hp;
-      building.hp = Math.max(0, building.hp - amount);
+      building.hp = Math.max(0, building.hp - finalDamage);
       building.hitStarted = performance.now();
       building.hitDir = Math.random() < 0.5 ? 1 : -1;
 
       // Track all building hits in console
-      console.log(`[BUILDING DAMAGE] Structure: "${building.name || "N/A"}" (ID: ${building.id || "N/A"}), Hit by: "${attacker?.base || attacker?.name || "Unknown"}", Damage: ${amount}, HP: ${oldHp} -> ${building.hp}`);
+      console.log(`[BUILDING DAMAGE] Structure: "${building.name || "N/A"}" (ID: ${building.id || "N/A"}), Hit by: "${attacker?.base || attacker?.name || "Unknown"}", Damage: ${finalDamage}, HP: ${oldHp} -> ${building.hp}`);
       
       if (building.hp <= 0) {
         building.destroyed = true;
