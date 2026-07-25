@@ -277,16 +277,19 @@
       outline: 2px solid #90d39f;
       background: #eaf8df;
     }
-    .build-tool[data-build="upgrade"] {
-      background: rgba(37, 99, 235, 0.9);
-      border: 1px solid #60a5fa;
+    .build-tool[data-build="upgrade"], #buildbar-upgrade-btn {
+      background: rgba(37, 99, 235, 0.95);
+      border: 1.5px solid #60a5fa;
       color: #ffffff;
+      font-weight: 900;
+      font-size: 16px;
       box-shadow: inset 0 -2px rgba(0,0,0,.2), 0 0 10px rgba(59, 130, 246, 0.6);
     }
-    .build-tool[data-build="upgrade"].active {
+    .build-tool[data-build="upgrade"].active, #buildbar-upgrade-btn.active, #buildbar-upgrade-btn:hover {
       background: #1d4ed8;
       outline: 2px solid #93c5fd;
       box-shadow: 0 0 14px rgba(59, 130, 246, 0.9);
+      transform: scale(1.06);
     }
     .build-tool img {
       max-width: 23px;
@@ -584,6 +587,7 @@
         <button class="buildbar-action" id="buildbar-rotate" type="button">Rotate</button>
         <div class="buildbar-right-container">
           <div class="buildbar buildbar-right" id="buildbar-tools"></div>
+          <button class="build-tool" id="buildbar-upgrade-btn" type="button" title="Upgrade Structure (Blue)" aria-label="Upgrade Structure">▲</button>
           <button class="build-tool" id="buildbar-fullscreen" type="button"></button>
         </div>
       </div>
@@ -1606,6 +1610,7 @@
     const buildbarTools = document.getElementById("buildbar-tools");
     const buildbarClose = document.getElementById("buildbar-close");
     const buildbarFullscreen = document.getElementById("buildbar-fullscreen");
+    const buildbarUpgradeBtn = document.getElementById("buildbar-upgrade-btn");
     const buildbarRotate = document.getElementById("buildbar-rotate");
     const barZoneTop = document.getElementById("bar-zone-top");
     const barZoneBottom = document.getElementById("bar-zone-bottom");
@@ -2327,7 +2332,7 @@
               }
             }
           }
-          out[`${mode}-${dir}`] = Array.from({ length: count }, (_, i) => `assets/${base}/${mode}_${dir}_frame_${i}.png?v=27`);
+          out[`${mode}-${dir}`] = Array.from({ length: count }, (_, i) => `assets/${base}/${mode}_${dir}_frame_${i}.png?v=28`);
         }
       }
       return out;
@@ -8355,6 +8360,9 @@
       buildrowTools.classList.toggle("open", state.buildUiOpen);
       const item = currentBuildItem();
       buildbarRotate.disabled = Boolean(item.equipTool || item.erase || item.upgrade);
+      if (buildbarUpgradeBtn) {
+        buildbarUpgradeBtn.classList.toggle("active", state.buildTool === "upgrade");
+      }
     }
 
     function resetJoystick() {
@@ -9300,6 +9308,13 @@
       setBuildUiOpen(false);
       state.demo = false;
     });
+    if (buildbarUpgradeBtn) {
+      buildbarUpgradeBtn.addEventListener("click", () => {
+        playUiClickSound();
+        state.buildTool = "upgrade";
+        renderBuildbar();
+      });
+    }
     buildbarFullscreen.addEventListener("click", () => {
       playUiClickSound();
       toggleFullscreenManual();
