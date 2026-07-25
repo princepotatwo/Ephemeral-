@@ -392,7 +392,7 @@
   <div class="header-nav">
     <div class="header-title">
       <h1>🧱 Actual In-Game Barricade & Wall Upgrade System (Levels 1 - 100)</h1>
-      <p>Renders clean in-game PNG assets with material texture filters (Stone, Metallic Steel, Obsidian, Lava, Ice, Gold, Plasma, Dragon Scale).</p>
+      <p>Renders clean in-game PNG assets with soft circular aura glows and material color filters (Stone, Steel, Obsidian, Lava, Ice, Gold, Plasma, Dragon Scale).</p>
     </div>
     <a href="preview_collection.html" class="btn-nav">
       <span>👈 Return to Preview Collection Hub</span>
@@ -615,7 +615,7 @@
       return TIERS[idx];
     }
 
-    // Render Exact In-Game PNG Asset onto Target Canvas cleanly with Material Filters
+    // Render Exact In-Game PNG Asset onto Target Canvas cleanly with Organic Circular Aura (NO Box Shadows!)
     async function renderWallOnCanvas(canvas, lvl, assetMode, dir, enableAura) {
       const ctx = canvas.getContext('2d');
       const w = canvas.width;
@@ -627,73 +627,71 @@
       const path = getAssetPath(activeKey, dir);
       const img = await loadImage(path);
 
-      ctx.save();
-
-      // 1. Draw Runic Glow Aura BEHIND the sprite if enabled
-      if (enableAura && tier.glow) {
-        ctx.shadowColor = tier.glow;
-        ctx.shadowBlur = Math.min(22, 4 + (tier.tier * 0.8));
-      }
-
-      if (img) {
-        const drawW = img.isSheet ? 36 : img.width;
-        const drawH = img.isSheet ? 64 : img.height;
-
-        // Use offscreen canvas to apply source-atop material color filter exclusively onto sprite pixels!
-        const offCanvas = document.createElement('canvas');
-        offCanvas.width = drawW;
-        offCanvas.height = drawH;
-        const offCtx = offCanvas.getContext('2d');
-
-        if (img.isSheet) {
-          offCtx.drawImage(img, 0, 0, 36, 64, 0, 0, 36, 64);
-        } else {
-          offCtx.drawImage(img, 0, 0);
-        }
-
-        // Apply Material Color & Sheen Overlay Filter if enabled & tier has filterColor
-        if (materialFilterEnabled && tier.filterColor) {
-          offCtx.save();
-          offCtx.globalCompositeOperation = 'source-atop';
-          offCtx.fillStyle = tier.filterColor;
-          offCtx.fillRect(0, 0, drawW, drawH);
-
-          // Metallic Sheen Highlight for Steel, Bronze, Iron, Gold, and Celestial Tiers
-          if (tier.material.includes("Steel") || tier.material.includes("Bronze") || tier.material.includes("Gold") || tier.material.includes("Iron") || tier.material.includes("Aegis")) {
-            offCtx.globalCompositeOperation = 'lighter';
-            const grad = offCtx.createLinearGradient(0, 0, drawW, drawH);
-            grad.addColorStop(0, "rgba(255,255,255,0.0)");
-            grad.addColorStop(0.5, "rgba(255,255,255,0.35)");
-            grad.addColorStop(1, "rgba(255,255,255,0.0)");
-            offCtx.fillStyle = grad;
-            offCtx.fillRect(0, 0, drawW, drawH);
-          }
-          offCtx.restore();
-        }
-
-        const dx = Math.round((w - drawW) / 2);
-        const dy = Math.round((h - drawH) / 2);
-        ctx.drawImage(offCanvas, dx, dy);
-      } else {
-        // Fallback error indicator if image path was not found
+      if (!img) {
         ctx.fillStyle = "#ef4444";
         ctx.font = "10px sans-serif";
         ctx.textAlign = "center";
         ctx.fillText("Asset Missing", w / 2, h / 2);
+        return;
       }
 
-      ctx.restore();
+      const drawW = img.isSheet ? 36 : img.width;
+      const drawH = img.isSheet ? 64 : img.height;
+      const dx = Math.round((w - drawW) / 2);
+      const dy = Math.round((h - drawH) / 2);
+      const cx = w / 2;
+      const cy = h / 2;
 
-      // 2. Subtle Runic Particles for High Tiers (drawn around sprite)
+      // 1. Draw smooth circular organic Runic Glow Aura BEHIND the sprite (NO box shadow!)
+      if (enableAura && tier.glow) {
+        ctx.save();
+        const auraRadius = Math.min(36, 16 + (tier.tier * 0.9));
+        const radGrad = ctx.createRadialGradient(cx, cy, 2, cx, cy, auraRadius);
+        const hex = tier.glow;
+        radGrad.addColorStop(0, hex + "99"); // 60% opacity center
+        radGrad.addColorStop(0.6, hex + "44"); // 26% opacity mid
+        radGrad.addColorStop(1, hex + "00"); // 0% opacity edge
+        ctx.fillStyle = radGrad;
+        ctx.beginPath();
+        ctx.arc(cx, cy, auraRadius, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+
+      // 2. Prepare offscreen canvas for sprite material tinting
+      const offCanvas = document.createElement('canvas');
+      offCanvas.width = drawW;
+      offCanvas.height = drawH;
+      const offCtx = offCanvas.getContext('2d');
+
+      if (img.isSheet) {
+        offCtx.drawImage(img, 0, 0, 36, 64, 0, 0, 36, 64);
+      } else {
+        offCtx.drawImage(img, 0, 0);
+      }
+
+      // 3. Apply Material Tint strictly to non-transparent sprite pixels using source-atop
+      if (materialFilterEnabled && tier.filterColor) {
+        offCtx.save();
+        offCtx.globalCompositeOperation = 'source-atop';
+        offCtx.fillStyle = tier.filterColor;
+        offCtx.fillRect(0, 0, drawW, drawH);
+        offCtx.restore();
+      }
+
+      // Render clean sprite onto main canvas
+      ctx.drawImage(offCanvas, dx, dy);
+
+      // 4. Subtle Runic Sparkles for High Tiers (drawn around sprite)
       if (enableAura && tier.tier >= 8) {
         ctx.save();
         const time = Date.now() * 0.003;
         ctx.fillStyle = tier.glow || "#fbbf24";
         ctx.shadowColor = tier.glow || "#fbbf24";
-        ctx.shadowBlur = 8;
+        ctx.shadowBlur = 6;
         for (let p = 0; p < Math.min(6, Math.floor(tier.tier / 3)); p++) {
-          const px = 18 + Math.sin(time + p * 1.3) * 22;
-          const py = 12 + Math.cos(time * 0.9 + p * 1.7) * 26;
+          const px = cx + Math.sin(time + p * 1.3) * 22;
+          const py = cy + Math.cos(time * 0.9 + p * 1.7) * 24;
           ctx.fillRect(Math.round(px), Math.round(py), 2, 2);
         }
         ctx.restore();
