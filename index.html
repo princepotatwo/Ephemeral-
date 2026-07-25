@@ -2332,7 +2332,7 @@
               }
             }
           }
-          out[`${mode}-${dir}`] = Array.from({ length: count }, (_, i) => `assets/${base}/${mode}_${dir}_frame_${i}.png?v=29`);
+          out[`${mode}-${dir}`] = Array.from({ length: count }, (_, i) => `assets/${base}/${mode}_${dir}_frame_${i}.png?v=30`);
         }
       }
       return out;
@@ -2802,26 +2802,26 @@
     }
 
     const WALL_TIERS = [
-      { tier: 1,  lvlMin: 1,  lvlMax: 5,   name: "Sprout Wooden Fence",   material: "Raw Wood",          filterColor: null,                   glow: null,     hp: 100,  def: 0,   reflect: 0 },
-      { tier: 2,  lvlMin: 6,  lvlMax: 10,  name: "Wooden Barricade 1",   material: "Oak Timber",         filterColor: "rgba(120,53,15,0.22)", glow: null,     hp: 250,  def: 5,   reflect: 2 },
-      { tier: 3,  lvlMin: 11, lvlMax: 15,  name: "Cobblestone Masonry",  material: "Granite Stone",     filterColor: "rgba(100,116,139,0.55)",glow: null,     hp: 500,  def: 12,  reflect: 15 },
-      { tier: 4,  lvlMin: 16, lvlMax: 20,  name: "Brick Masonry Wall",   material: "Reinforced Brick",  filterColor: "rgba(185,28,28,0.35)",  glow: null,     hp: 850,  def: 20,  reflect: 18 },
-      { tier: 5,  lvlMin: 21, lvlMax: 25,  name: "Iron Barricade 4",     material: "Polished Steel",    filterColor: "rgba(148,163,184,0.6)", glow: "#94a3b8", hp: 1300, def: 30,  reflect: 25 },
-      { tier: 6,  lvlMin: 26, lvlMax: 30,  name: "Fortified Slate Wall", material: "Slate Granite",     filterColor: "rgba(71,85,105,0.65)", glow: "#60a5fa", hp: 1800, def: 42,  reflect: 30 },
-      { tier: 7,  lvlMin: 31, lvlMax: 35,  name: "Steel Guard Wall",     material: "Titanium Steel",    filterColor: "rgba(56,189,248,0.5)",  glow: "#38bdf8", hp: 2400, def: 55,  reflect: 35 },
-      { tier: 8,  lvlMin: 36, lvlMax: 40,  name: "Cobalt Spiked Shield", material: "Cobalt Blue Steel", filterColor: "rgba(37,99,235,0.65)",   glow: "#2563eb", hp: 3100, def: 70,  reflect: 45 },
-      { tier: 9,  lvlMin: 41, lvlMax: 45,  name: "Runic Bronze Wall",    material: "Ancient Bronze",    filterColor: "rgba(217,119,6,0.65)",  glow: "#f59e0b", hp: 3900, def: 88,  reflect: 55 },
-      { tier: 10, lvlMin: 46, lvlMax: 50,  name: "Obsidian Void Wall",   material: "Obsidian Stone",    filterColor: "rgba(126,34,206,0.7)",  glow: "#a855f7", hp: 4800, def: 110, reflect: 70 },
-      { tier: 11, lvlMin: 51, lvlMax: 55,  name: "Molten Lava Guard",    material: "Fiery Magma",       filterColor: "rgba(234,88,12,0.75)",  glow: "#f97316", hp: 5800, def: 135, reflect: 90 },
-      { tier: 12, lvlMin: 56, lvlMax: 60,  name: "Frost Ice Crystal",    material: "Glacial Ice",       filterColor: "rgba(6,182,212,0.65)",  glow: "#22d3ee", hp: 7000, def: 165, reflect: 110 },
-      { tier: 13, lvlMin: 61, lvlMax: 65,  name: "Emerald Nature Shield",material: "Emerald Rune",      filterColor: "rgba(16,185,129,0.7)",  glow: "#10b981", hp: 8300, def: 200, reflect: 130 },
-      { tier: 14, lvlMin: 66, lvlMax: 70,  name: "Void Plasma Barrier",  material: "Void Plasma",       filterColor: "rgba(236,72,153,0.75)", glow: "#ec4899", hp: 9800, def: 240, reflect: 160 },
-      { tier: 15, lvlMin: 71, lvlMax: 75,  name: "Gilded Diamond Wall",  material: "Pure Gold",         filterColor: "rgba(234,179,8,0.75)",  glow: "#eab308", hp: 11500,def: 285, reflect: 195 },
-      { tier: 16, lvlMin: 76, lvlMax: 80,  name: "Radiant Starlight",    material: "Celestial Light",   filterColor: "rgba(14,165,233,0.7)",  glow: "#38bdf8", hp: 13500,def: 335, reflect: 235 },
-      { tier: 17, lvlMin: 81, lvlMax: 85,  name: "Ethereal Dark Matter", material: "Dark Matter",       filterColor: "rgba(88,28,135,0.8)",   glow: "#c084fc", hp: 16000,def: 390, reflect: 280 },
-      { tier: 18, lvlMin: 86, lvlMax: 90,  name: "Dragon Crimson Aegis", material: "Dragon Scale",      filterColor: "rgba(225,29,72,0.75)",  glow: "#f43f5e", hp: 19000,def: 450, reflect: 340 },
-      { tier: 19, lvlMin: 91, lvlMax: 95,  name: "Cosmic Spiked Nebula", material: "Cosmic Nebula",     filterColor: "rgba(244,114,182,0.8)", glow: "#f472b6", hp: 22500,def: 520, reflect: 410 },
-      { tier: 20, lvlMin: 96, lvlMax: 100, name: "Divine Apex Aegis",    material: "Divine Aegis",      filterColor: "rgba(251,191,36,0.85)", glow: "#fbbf24", hp: 27000,def: 600, reflect: 500 }
+      { tier: 1,  lvlMin: 1,  lvlMax: 5,   name: "Sprout Wooden Fence",   material: "Raw Wood",          filterColor: null,                  blendMode: null,           highlightColor: null,                      glow: null,     hp: 100,  def: 0,   reflect: 0 },
+      { tier: 2,  lvlMin: 6,  lvlMax: 10,  name: "Wooden Barricade 1",   material: "Oak Timber",         filterColor: "rgb(234, 150, 40)",   blendMode: "overlay",      highlightColor: "rgba(255, 220, 150, 0.4)",glow: null,     hp: 250,  def: 5,   reflect: 2 },
+      { tier: 3,  lvlMin: 11, lvlMax: 15,  name: "Cobblestone Masonry",  material: "Granite Stone",     filterColor: "rgb(148, 163, 184)",  blendMode: "hard-light",   highlightColor: "rgba(255, 255, 255, 0.5)",glow: null,     hp: 500,  def: 12,  reflect: 15 },
+      { tier: 4,  lvlMin: 16, lvlMax: 20,  name: "Brick Masonry Wall",   material: "Reinforced Brick",  filterColor: "rgb(220, 38, 38)",    blendMode: "hard-light",   highlightColor: "rgba(254, 202, 202, 0.5)",glow: null,     hp: 850,  def: 20,  reflect: 18 },
+      { tier: 5,  lvlMin: 21, lvlMax: 25,  name: "Iron Barricade 4",     material: "Polished Steel",    filterColor: "rgb(203, 213, 225)",  blendMode: "color-dodge",  highlightColor: "rgba(255, 255, 255, 0.65)",glow: "#94a3b8", hp: 1300, def: 30,  reflect: 25 },
+      { tier: 6,  lvlMin: 26, lvlMax: 30,  name: "Fortified Slate Wall", material: "Slate Granite",     filterColor: "rgb(59, 130, 246)",   blendMode: "hard-light",   highlightColor: "rgba(191, 219, 254, 0.55)",glow: "#60a5fa", hp: 1800, def: 42,  reflect: 30 },
+      { tier: 7,  lvlMin: 31, lvlMax: 35,  name: "Steel Guard Wall",     material: "Titanium Steel",    filterColor: "rgb(6, 182, 212)",    blendMode: "hard-light",   highlightColor: "rgba(207, 250, 254, 0.6)", glow: "#38bdf8", hp: 2400, def: 55,  reflect: 35 },
+      { tier: 8,  lvlMin: 36, lvlMax: 40,  name: "Cobalt Spiked Shield", material: "Cobalt Blue Steel", filterColor: "rgb(37, 99, 235)",    blendMode: "hard-light",   highlightColor: "rgba(147, 197, 253, 0.6)", glow: "#2563eb", hp: 3100, def: 70,  reflect: 45 },
+      { tier: 9,  lvlMin: 41, lvlMax: 45,  name: "Runic Bronze Wall",    material: "Ancient Bronze",    filterColor: "rgb(245, 158, 11)",   blendMode: "color-dodge",  highlightColor: "rgba(254, 243, 199, 0.65)",glow: "#f59e0b", hp: 3900, def: 88,  reflect: 55 },
+      { tier: 10, lvlMin: 46, lvlMax: 50,  name: "Obsidian Void Wall",   material: "Obsidian Stone",    filterColor: "rgb(168, 85, 247)",   blendMode: "hard-light",   highlightColor: "rgba(243, 232, 255, 0.65)",glow: "#a855f7", hp: 4800, def: 110, reflect: 70 },
+      { tier: 11, lvlMin: 51, lvlMax: 55,  name: "Molten Lava Guard",    material: "Fiery Magma",       filterColor: "rgb(249, 115, 22)",   blendMode: "color-dodge",  highlightColor: "rgba(255, 237, 213, 0.7)", glow: "#f97316", hp: 5800, def: 135, reflect: 90 },
+      { tier: 12, lvlMin: 56, lvlMax: 60,  name: "Frost Ice Crystal",    material: "Glacial Ice",       filterColor: "rgb(34, 211, 238)",   blendMode: "color-dodge",  highlightColor: "rgba(255, 255, 255, 0.75)",glow: "#22d3ee", hp: 7000, def: 165, reflect: 110 },
+      { tier: 13, lvlMin: 61, lvlMax: 65,  name: "Emerald Nature Shield",material: "Emerald Rune",      filterColor: "rgb(16, 185, 129)",   blendMode: "hard-light",   highlightColor: "rgba(209, 250, 229, 0.65)",glow: "#10b981", hp: 8300, def: 200, reflect: 130 },
+      { tier: 14, lvlMin: 66, lvlMax: 70,  name: "Void Plasma Barrier",  material: "Void Plasma",       filterColor: "rgb(236, 72, 153)",   blendMode: "color-dodge",  highlightColor: "rgba(252, 231, 243, 0.7)", glow: "#ec4899", hp: 9800, def: 240, reflect: 160 },
+      { tier: 15, lvlMin: 71, lvlMax: 75,  name: "Gilded Diamond Wall",  material: "Pure Gold",         filterColor: "rgb(250, 204, 21)",   blendMode: "color-dodge",  highlightColor: "rgba(255, 255, 255, 0.8)", glow: "#eab308", hp: 11500,def: 285, reflect: 195 },
+      { tier: 16, lvlMin: 76, lvlMax: 80,  name: "Radiant Starlight",    material: "Celestial Light",   filterColor: "rgb(56, 189, 248)",   blendMode: "color-dodge",  highlightColor: "rgba(255, 255, 255, 0.85)",glow: "#38bdf8", hp: 13500,def: 335, reflect: 235 },
+      { tier: 17, lvlMin: 81, lvlMax: 85,  name: "Ethereal Dark Matter", material: "Dark Matter",       filterColor: "rgb(192, 132, 252)",  blendMode: "hard-light",   highlightColor: "rgba(255, 255, 255, 0.7)", glow: "#c084fc", hp: 16000,def: 390, reflect: 280 },
+      { tier: 18, lvlMin: 86, lvlMax: 90,  name: "Dragon Crimson Aegis", material: "Dragon Scale",      filterColor: "rgb(244, 63, 94)",    blendMode: "color-dodge",  highlightColor: "rgba(255, 228, 230, 0.75)",glow: "#f43f5e", hp: 19000,def: 450, reflect: 340 },
+      { tier: 19, lvlMin: 91, lvlMax: 95,  name: "Cosmic Spiked Nebula", material: "Cosmic Nebula",     filterColor: "rgb(244, 114, 182)",  blendMode: "color-dodge",  highlightColor: "rgba(255, 255, 255, 0.85)",glow: "#f472b6", hp: 22500,def: 520, reflect: 410 },
+      { tier: 20, lvlMin: 96, lvlMax: 100, name: "Divine Apex Aegis",    material: "Divine Aegis",      filterColor: "rgb(251, 191, 36)",   blendMode: "color-dodge",  highlightColor: "rgba(255, 255, 255, 0.9)", glow: "#fbbf24", hp: 27000,def: 600, reflect: 500 }
     ];
 
     function getWallTier(lvl) {
@@ -2831,20 +2831,39 @@
 
     const tintedSpriteCache = new Map();
 
-    function getTintedBarricadeSprite(img, crop, filterColor) {
-      if (!filterColor || !img) return null;
-      const key = `${img.src}:${crop.sx}:${crop.sy}:${crop.sw}:${crop.sh}:${filterColor}`;
+    function getTintedBarricadeSprite(img, crop, wallTier) {
+      if (!wallTier || !wallTier.filterColor || !img) return null;
+      const blendMode = wallTier.blendMode || "hard-light";
+      const highlightColor = wallTier.highlightColor || "rgba(255,255,255,0.4)";
+      const key = `${img.src}:${crop.sx}:${crop.sy}:${crop.sw}:${crop.sh}:${wallTier.filterColor}:${blendMode}:${highlightColor}`;
       if (tintedSpriteCache.has(key)) return tintedSpriteCache.get(key);
 
       const c = document.createElement("canvas");
       c.width = crop.sw;
       c.height = crop.sh;
       const cx = c.getContext("2d");
+
+      // Pass 1: Draw base sprite
       cx.drawImage(img, crop.sx, crop.sy, crop.sw, crop.sh, 0, 0, crop.sw, crop.sh);
 
-      cx.globalCompositeOperation = "source-atop";
-      cx.fillStyle = filterColor;
+      // Pass 2: Color blend mode (e.g. hard-light, overlay, or color-dodge) to preserve highlights while adding vibrant color
+      cx.globalCompositeOperation = blendMode;
+      cx.fillStyle = wallTier.filterColor;
       cx.fillRect(0, 0, crop.sw, crop.sh);
+
+      // Pass 3: Mask back to original sprite alpha silhouette so transparent pixels stay clean
+      cx.globalCompositeOperation = "destination-in";
+      cx.drawImage(img, crop.sx, crop.sy, crop.sw, crop.sh, 0, 0, crop.sw, crop.sh);
+
+      // Pass 4: Metallic specular highlights (color-dodge) to make edges & textures pop tough & strong!
+      if (highlightColor) {
+        cx.globalCompositeOperation = "color-dodge";
+        cx.fillStyle = highlightColor;
+        cx.fillRect(0, 0, crop.sw, crop.sh);
+
+        cx.globalCompositeOperation = "destination-in";
+        cx.drawImage(img, crop.sx, crop.sy, crop.sw, crop.sh, 0, 0, crop.sw, crop.sh);
+      }
 
       tintedSpriteCache.set(key, c);
       return c;
@@ -2869,23 +2888,14 @@
           const dir = parts[3] || "down";
           const prefix = dir === "down" ? "D" : dir === "side" ? "S" : "U";
           let sheetUrl;
-          if (age < 600) {
-            // Build animation: play f0→f5 (first to last = construction fills in)
-            sheetUrl = `assets/magic_traps/2 Barricades/${prefix}_${variant}_Build.png`;
-            index = Math.min(5, Math.floor(age / 100));
-          } else if (plant.destroyedAt) {
-            // Destroy animation: f0→f5 (collapse plays out)
-            const destAge = now - plant.destroyedAt;
-            sheetUrl = `assets/magic_traps/2 Barricades/${prefix}_${variant}_Destroy.png`;
-            index = Math.min(5, Math.floor(destAge / 100));
-          } else {
-            // Idle: single static frame — Destroy sheet f0 is the clean complete barricade
-            sheetUrl = `assets/magic_traps/2 Barricades/${prefix}_${variant}_Destroy.png`;
-            index = 0;
-          }
+          if (variant === "1") sheetUrl = `assets/magic_traps/2 Barricades/${prefix}_Wooden_Barricade_1_Idle.png`;
+          else if (variant === "2") sheetUrl = `assets/magic_traps/2 Barricades/${prefix}_Spiked_Barricade_Idle.png`;
+          else if (variant === "3") sheetUrl = `assets/magic_traps/2 Barricades/${prefix}_Wooden_Barricade_2_Idle.png`;
+          else if (variant === "4") sheetUrl = `assets/magic_traps/2 Barricades/${prefix}_Iron_Barricade_4_Idle.png`;
+
           img = images[sheetUrl];
           if (img) {
-            plant.crop = { sx: index * 36, sy: 0, sw: 36, sh: 64 };
+            plant.crop = { sx: 0, sy: 0, sw: 36, sh: 64 };
           }
         } else if (plant.name.startsWith("trap_predator_")) {
           const parts = plant.name.split("_"); // ["trap", "predator", "1", "down"]
@@ -3003,7 +3013,7 @@
       let drawSource = img;
       let drawCrop = crop;
       if (isBarricadeOrWall && wallTier && wallTier.filterColor) {
-        const tintedCanvas = getTintedBarricadeSprite(img, crop, wallTier.filterColor);
+        const tintedCanvas = getTintedBarricadeSprite(img, crop, wallTier);
         if (tintedCanvas) {
           drawSource = tintedCanvas;
           drawCrop = { sx: 0, sy: 0, sw: tintedCanvas.width, sh: tintedCanvas.height };
