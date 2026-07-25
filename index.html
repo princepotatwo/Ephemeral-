@@ -2332,7 +2332,7 @@
               }
             }
           }
-          out[`${mode}-${dir}`] = Array.from({ length: count }, (_, i) => `assets/${base}/${mode}_${dir}_frame_${i}.png?v=38`);
+          out[`${mode}-${dir}`] = Array.from({ length: count }, (_, i) => `assets/${base}/${mode}_${dir}_frame_${i}.png?v=39`);
         }
       }
       return out;
@@ -2873,6 +2873,28 @@
       // Step 3: re-composite with the original to restore alpha channel (clamp to original pixels)
       cx.globalCompositeOperation = "destination-in";
       cx.drawImage(img, crop.sx, crop.sy, crop.sw, crop.sh, 0, 0, crop.sw, crop.sh);
+
+      tintedSpriteCache.set(key, c);
+      return c;
+    }
+
+    // Tint an NPC sprite frame with a color; caches result at source resolution
+    function getTintedNPCSprite(frame, tintColor) {
+      const key = `npc:${frame.image.src}:${frame.sx}:${frame.sy}:${frame.sw}:${frame.sh}:${tintColor}`;
+      if (tintedSpriteCache.has(key)) return tintedSpriteCache.get(key);
+
+      const c = document.createElement("canvas");
+      c.width = frame.sw;
+      c.height = frame.sh;
+      const cx = c.getContext("2d");
+
+      // Draw original sprite pixels
+      cx.imageSmoothingEnabled = false;
+      cx.drawImage(frame.image, frame.sx, frame.sy, frame.sw, frame.sh, 0, 0, frame.sw, frame.sh);
+      // Overlay tint only where pixels exist (no transparent bg affected)
+      cx.globalCompositeOperation = "source-atop";
+      cx.fillStyle = tintColor;
+      cx.fillRect(0, 0, frame.sw, frame.sh);
 
       tintedSpriteCache.set(key, c);
       return c;
@@ -3662,7 +3684,21 @@
 
               ctx.save();
               const finalScale = npc.scaleMultiplier !== undefined ? npc.scaleMultiplier : 1;
-              drawPlayerAt(npcFrameObj, npc.x, npc.y, shake, finalScale, npcYOff);
+
+              if (isFrozen) {
+                // Tint only actual sprite pixels ice-blue — no box, no outline
+                const { w: fw, h: fh } = playerDrawSize(npcFrameObj);
+                const drawW = Math.round(fw * finalScale);
+                const drawH = Math.round(fh * finalScale);
+                const drawX = Math.round(npc.x - drawW / 2 + shake);
+                const drawY = Math.round(npc.y - drawH + 10 + npcYOff);
+                const frozenSprite = getTintedNPCSprite(npcFrameObj, "rgba(150, 220, 255, 0.65)");
+                ctx.imageSmoothingEnabled = Boolean(npcFrameObj.smooth);
+                ctx.drawImage(frozenSprite, drawX, drawY, drawW, drawH);
+                ctx.imageSmoothingEnabled = false;
+              } else {
+                drawPlayerAt(npcFrameObj, npc.x, npc.y, shake, finalScale, npcYOff);
+              }
               ctx.restore();
 
               // Draw extra status visuals on top of the sprite
@@ -3675,21 +3711,10 @@
                 ctx.restore();
               }
               if (isFrozen) {
-                // Draw a beautiful ice block outline/fill around the sprite
-                ctx.save();
-                ctx.fillStyle = "rgba(186, 230, 253, 0.45)";
-                ctx.strokeStyle = "#38bdf8";
-                ctx.lineWidth = 1.0;
-                const iceW = 20 * finalScale;
-                const iceH = h * finalScale;
-                ctx.fillRect(Math.round(npc.x - iceW / 2 - 2), Math.round(npc.y - iceH + 10 - 2), Math.round(iceW + 4), Math.round(iceH + 4));
-                ctx.strokeRect(Math.round(npc.x - iceW / 2 - 2), Math.round(npc.y - iceH + 10 - 2), Math.round(iceW + 4), Math.round(iceH + 4));
-                ctx.restore();
-
                 ctx.save();
                 ctx.fillStyle = "#ffffff";
                 ctx.font = "bold 9px system-ui, sans-serif";
-                ctx.fillText("❄️", npc.x - 5, npc.y - iceH - 2);
+                ctx.fillText("❄️", npc.x - 5, npc.y - h * finalScale - 2);
                 ctx.restore();
               }
               if (isBurning) {
