@@ -2332,7 +2332,7 @@
               }
             }
           }
-          out[`${mode}-${dir}`] = Array.from({ length: count }, (_, i) => `assets/${base}/${mode}_${dir}_frame_${i}.png?v=31`);
+          out[`${mode}-${dir}`] = Array.from({ length: count }, (_, i) => `assets/${base}/${mode}_${dir}_frame_${i}.png?v=32`);
         }
       }
       return out;
@@ -3156,6 +3156,53 @@
       ctx.restore();
     }
     // ───────────────────────────────────────────────────────────────────────────
+
+    // Global active chain lightning visual beams storage
+    const activeChainLightningBeams = [];
+
+    function triggerChainLightningVisual(sourceX, sourceY, targetX, targetY) {
+      activeChainLightningBeams.push({
+        sx: sourceX,
+        sy: sourceY,
+        tx: targetX,
+        ty: targetY,
+        createdAt: performance.now(),
+        duration: 350
+      });
+    }
+
+    function drawChainLightningBeams() {
+      if (activeChainLightningBeams.length === 0) return;
+      const now = performance.now();
+      ctx.save();
+      for (let i = activeChainLightningBeams.length - 1; i >= 0; i--) {
+        const beam = activeChainLightningBeams[i];
+        const age = now - beam.createdAt;
+        if (age >= beam.duration) {
+          activeChainLightningBeams.splice(i, 1);
+          continue;
+        }
+        const alpha = (1 - age / beam.duration);
+        ctx.globalAlpha = alpha;
+        ctx.strokeStyle = age % 80 < 40 ? "#93c5fd" : "#ffffff";
+        ctx.lineWidth = 2.5;
+        ctx.shadowColor = "#3b82f6";
+        ctx.shadowBlur = 10;
+        
+        const segs = 6;
+        ctx.beginPath();
+        ctx.moveTo(beam.sx, beam.sy);
+        for (let s = 1; s <= segs; s++) {
+          const t = s / segs;
+          const mx = beam.sx + (beam.tx - beam.sx) * t;
+          const my = beam.sy + (beam.ty - beam.sy) * t;
+          const jitter = (s === segs) ? 0 : (Math.random() - 0.5) * 14;
+          ctx.lineTo(mx + jitter, my + jitter);
+        }
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
 
     function drawPlant(plant) {
       let img = plant.img;
@@ -5227,6 +5274,89 @@
         console.log(`[BARRICADE REFLECT] Dealt ${reflectDmg} reflection damage to ${attacker.base || attacker.name || "attacker"}. Attacker HP: ${attacker.hp}`);
         if (attacker.hp <= 0 && attacker.die) {
           attacker.die();
+        }
+      }
+
+      // Barricade Power Effects on Attacking Enemies!
+      if (attacker && wallTier && wallTier.effect && attacker.hp !== undefined) {
+        const effect = wallTier.effect;
+        const bx = building.x;
+        const by = building.y;
+        const ax = attacker.x;
+        const ay = attacker.y;
+
+        // ⚡ ELECTRIC: Chain lightning to nearby enemies within 120px!
+        if (effect === "electric") {
+          triggerChainLightningVisual(bx, by, ax, ay);
+          let prevEnemy = attacker;
+          let chainHits = 0;
+          const maxChains = 3;
+          const chainRange = 120;
+          const chainDmg = Math.round(15 + wallTier.tier * 3);
+          
+          for (const enemy of roamingNPCs) {
+            if (chainHits >= maxChains) break;
+            if (enemy === attacker || enemy.dead || enemy.hp === undefined) continue;
+            const dist = Math.hypot(enemy.x - prevEnemy.x, enemy.y - prevEnemy.y);
+            if (dist <= chainRange) {
+              triggerChainLightningVisual(prevEnemy.x, prevEnemy.y, enemy.x, enemy.y);
+              enemy.hp = Math.max(0, enemy.hp - chainDmg);
+              if (enemy.hp <= 0 && enemy.die) enemy.die();
+              prevEnemy = enemy;
+              chainHits++;
+            }
+          }
+        }
+
+        // 🔥 FIRE: Ignite attacker with burn overtime damage!
+        if (effect === "fire") {
+          attacker.burnEndTime = performance.now() + 2500;
+          attacker.burnDamagePerSec = Math.round(12 + wallTier.tier * 2);
+          spawnAcidSplats(ax, ay, 15); // visual burst
+        }
+
+        // ☠️ POISON: Toxic poison splash damaging all nearby enemies in 80px radius!
+        if (effect === "poison") {
+          spawnAcidSplats(bx, by, 30);
+          const poisonDmg = Math.round(10 + wallTier.tier * 2.5);
+          for (const enemy of roamingNPCs) {
+            if (enemy.dead || enemy.hp === undefined) continue;
+            if (Math.hypot(enemy.x - bx, enemy.y - by) <= 80) {
+              enemy.hp = Math.max(0, enemy.hp - poisonDmg);
+              if (enemy.hp <= 0 && enemy.die) enemy.die();
+            }
+          }
+        }
+
+        // ❄️ ICE: Chill and freeze attacker, slowing movement speed drastically!
+        if (effect === "ice") {
+          attacker.frozenUntil = performance.now() + 2000;
+        }
+
+        // 🌀 VOID: Void blast dealing heavy direct damage + pulling/knocking back attacker!
+        if (effect === "void") {
+          const voidDmg = Math.round(20 + wallTier.tier * 4);
+          attacker.hp = Math.max(0, attacker.hp - voidDmg);
+          if (attacker.hp <= 0 && attacker.die) attacker.die();
+        }
+
+        // 🌸 PLASMA: Disintegrating plasma wave dealing damage in an area!
+        if (effect === "plasma") {
+          const plasmaDmg = Math.round(25 + wallTier.tier * 3.5);
+          for (const enemy of roamingNPCs) {
+            if (enemy.dead || enemy.hp === undefined) continue;
+            if (Math.hypot(enemy.x - bx, enemy.y - by) <= 90) {
+              enemy.hp = Math.max(0, enemy.hp - plasmaDmg);
+              if (enemy.hp <= 0 && enemy.die) enemy.die();
+            }
+          }
+        }
+
+        // ✨ DIVINE: Holy smite dealing massive damage to attacker!
+        if (effect === "divine") {
+          const divineDmg = Math.round(40 + wallTier.tier * 5);
+          attacker.hp = Math.max(0, attacker.hp - divineDmg);
+          if (attacker.hp <= 0 && attacker.die) attacker.die();
         }
       }
 
@@ -7391,6 +7521,25 @@
           }
         }
 
+        // Barricade Burn DOT Effect
+        if (!npc.dead && npc.burnEndTime && now < npc.burnEndTime) {
+          if (!npc.lastBarricadeBurnTick) npc.lastBarricadeBurnTick = now;
+          if (now - npc.lastBarricadeBurnTick >= 400) {
+            const tickDmg = Math.max(1, Math.round((npc.burnDamagePerSec || 15) * 0.4));
+            npc.hp = Math.max(0, npc.hp - tickDmg);
+            npc.lastBarricadeBurnTick = now;
+            spawnAcidSplats(npc.x, npc.y, 4);
+            if (npc.hp <= 0 && npc.die) npc.die();
+          }
+        }
+
+        // Barricade Freeze Slow Effect
+        if (!npc.dead && npc.frozenUntil && now < npc.frozenUntil) {
+          npc.moveSpeedMultiplier = 0.25; // 75% slow down!
+        } else {
+          npc.moveSpeedMultiplier = 1.0;
+        }
+
         // Active fire/burn status tick for NPCs
         if (!npc.dead && npc.burnUntil && now < npc.burnUntil) {
           if (!npc.lastBurnTick) npc.lastBurnTick = now;
@@ -9000,6 +9149,7 @@
         drawAcidSplats();
         drawDepthSortedActors();
         drawFloatingItems();
+        drawChainLightningBeams();
         
         // Draw arrow projectiles
         if (state.projectiles) {
