@@ -277,6 +277,17 @@
       outline: 2px solid #90d39f;
       background: #eaf8df;
     }
+    .build-tool[data-build="upgrade"] {
+      background: rgba(37, 99, 235, 0.9);
+      border: 1px solid #60a5fa;
+      color: #ffffff;
+      box-shadow: inset 0 -2px rgba(0,0,0,.2), 0 0 10px rgba(59, 130, 246, 0.6);
+    }
+    .build-tool[data-build="upgrade"].active {
+      background: #1d4ed8;
+      outline: 2px solid #93c5fd;
+      box-shadow: 0 0 14px rgba(59, 130, 246, 0.9);
+    }
     .build-tool img {
       max-width: 23px;
       max-height: 23px;
@@ -1525,7 +1536,8 @@
       { id: "equip-water", label: "Equip watering can", name: "build_sprout_tool_water", count: 1, fps: 1, w: 34, h: 34, equipTool: "water", group: "tools" },
       { id: "seed-wheat", label: "Wheat seed", name: "build_sprout_seed_wheat", count: 1, fps: 1, w: 34, h: 34, equipTool: "seed-wheat", group: "tools" },
       { id: "seed-radish", label: "Radish seed", name: "build_sprout_seed_radish", count: 1, fps: 1, w: 34, h: 34, equipTool: "seed-radish", group: "tools" },
-      { id: "erase", label: "Erase", erase: true }
+      { id: "upgrade", label: "Upgrade Structure", upgrade: true },
+      { id: "erase", label: "Demolish", erase: true }
     ];
 
     const buildPaletteBase = (() => {
@@ -2315,7 +2327,7 @@
               }
             }
           }
-          out[`${mode}-${dir}`] = Array.from({ length: count }, (_, i) => `assets/${base}/${mode}_${dir}_frame_${i}.png?v=26`);
+          out[`${mode}-${dir}`] = Array.from({ length: count }, (_, i) => `assets/${base}/${mode}_${dir}_frame_${i}.png?v=27`);
         }
       }
       return out;
@@ -2993,6 +3005,30 @@
         }
       }
 
+      // Cute Squash & Stretch animation when upgraded!
+      let squashScaleX = 1;
+      let squashScaleY = 1;
+      if (plant.squashStartTime) {
+        const squashAge = performance.now() - plant.squashStartTime;
+        const dur = plant.squashDuration || 360;
+        if (squashAge < dur) {
+          const progress = squashAge / dur;
+          const bounce = Math.sin(progress * Math.PI);
+          squashScaleY = 1 - bounce * 0.32; // Squashes down to 68% height
+          squashScaleX = 1 + bounce * 0.28; // Stretches out to 128% width
+        } else {
+          plant.squashStartTime = null;
+        }
+      }
+      const isSquashing = squashScaleX !== 1 || squashScaleY !== 1;
+
+      if (isSquashing) {
+        ctx.save();
+        ctx.translate(Math.round(plant.x + shake), Math.round(plant.y));
+        ctx.scale(squashScaleX, squashScaleY);
+        ctx.translate(-Math.round(plant.x + shake), -Math.round(plant.y));
+      }
+
       if (rotateSteps || sway) {
         const drawW = plant.baseW || plant.w;
         const drawH = plant.baseH || plant.h;
@@ -3026,6 +3062,7 @@
           );
         }
         ctx.restore();
+        if (isSquashing) ctx.restore();
         return;
       }
       // Per-plant sprite Y offset: predator plant h=64, solid.y=-20 -> hitbox center=y-5, sprite center=y-32, need +27
@@ -3060,6 +3097,7 @@
           plant.h
         );
       }
+      if (isSquashing) ctx.restore();
 
       if (state.showHitboxes) {
         const solid = solidRectFor(plant);
@@ -3838,7 +3876,7 @@
       const y = state.buildHover.y;
       ctx.save();
       ctx.globalAlpha = 0.62;
-      if (item.erase) {
+      if (item.erase || item.upgrade) {
         let targeted = null;
         for (let i = placedSprites.length - 1; i >= 0; i--) {
           const sprite = placedSprites[i];
@@ -3859,19 +3897,34 @@
           const w = targeted.w || 16;
           const h = targeted.h || 16;
           const top = targeted.y - h;
+          const highlightColor = item.upgrade ? "#3b82f6" : "#ff2222";
           
           ctx.save();
-          ctx.shadowColor = "#ff2222";
-          ctx.shadowBlur = 8;
+          ctx.shadowColor = highlightColor;
+          ctx.shadowBlur = 10;
           ctx.globalAlpha = 0.95;
           drawPlant(targeted);
           ctx.restore();
           
-          ctx.strokeStyle = "#ff2222";
-          ctx.lineWidth = 1.5;
+          ctx.strokeStyle = highlightColor;
+          ctx.lineWidth = 2;
           ctx.strokeRect(Math.round(targeted.x - w / 2) - 0.5, Math.round(top) - 0.5, w + 1, h + 1);
+
+          if (item.upgrade) {
+            ctx.save();
+            const curLvl = targeted.level || 1;
+            const nextLvl = Math.min(100, curLvl + 1);
+            const badgeText = `Upgrade: Lv.${curLvl} ➔ Lv.${nextLvl}`;
+            ctx.font = "bold 11px sans-serif";
+            ctx.textAlign = "center";
+            ctx.fillStyle = "#ffffff";
+            ctx.shadowColor = "#000000";
+            ctx.shadowBlur = 4;
+            ctx.fillText(badgeText, Math.round(targeted.x), Math.round(top) - 10);
+            ctx.restore();
+          }
         } else {
-          ctx.strokeStyle = "rgba(255, 68, 68, 0.6)";
+          ctx.strokeStyle = item.upgrade ? "rgba(59, 130, 246, 0.6)" : "rgba(255, 68, 68, 0.6)";
           ctx.lineWidth = 1.5;
           ctx.strokeRect(Math.round(x - 8), Math.round(y - 8), 16, 16);
         }
@@ -4120,7 +4173,7 @@
 
     function updateBuildHover(clientX, clientY) {
       const item = activeBuildItem();
-      if (item && item.erase) {
+      if (item && (item.erase || item.upgrade)) {
         state.buildHover = { ...screenToWorld(clientX, clientY), active: true };
       } else {
         state.buildHover = { ...snapBuildPoint(screenToWorld(clientX, clientY)), active: true };
@@ -4139,6 +4192,41 @@
       if (item.erase) {
         removePlacedAt(x, y);
         playChopSound();
+        return;
+      }
+      if (item.upgrade) {
+        let targeted = null;
+        for (let i = placedSprites.length - 1; i >= 0; i--) {
+          const sprite = placedSprites[i];
+          if (sprite.scene !== state.scene) continue;
+          const w = sprite.w || 16;
+          const h = sprite.h || 16;
+          const left = sprite.x - w / 2;
+          const right = sprite.x + w / 2;
+          const top = sprite.y - h;
+          const bottom = sprite.y;
+          const pad = 4;
+          if (x >= left - pad && x <= right + pad && y >= top - pad && y <= bottom + pad) {
+            targeted = sprite;
+            break;
+          }
+        }
+        if (targeted) {
+          const now = performance.now();
+          targeted.level = (targeted.level || 1) + 1;
+          const wallTier = getWallTier(targeted.level);
+          if (wallTier) {
+            targeted.maxHp = wallTier.hp + (targeted.level - wallTier.lvlMin) * Math.round(wallTier.hp * 0.08);
+            targeted.hp = targeted.maxHp;
+          }
+          // Cute squash & stretch animation!
+          targeted.squashStartTime = now;
+          targeted.squashDuration = 360;
+
+          playLevelUpSound();
+          const tierTitle = wallTier ? wallTier.name : "Tier Up";
+          sayDialogue(`✨ Upgraded to Lv.${targeted.level}! (${tierTitle})`, 8, 1800);
+        }
         return;
       }
       if (wouldBlockPlayer(item, x, y)) return;
@@ -8227,7 +8315,11 @@
         if (display.name && display.name.startsWith("build_house_door")) {
           frameUrl = `assets/plants/build_house_door_0_1/frame_0.png`;
         }
-        const body = item.erase ? "<span>×</span>" : `<img src="${assetUrl(frameUrl)}" alt=""${rotateStyle}>`;
+        const body = item.erase
+          ? "<span>×</span>"
+          : item.upgrade
+            ? "<span style='font-weight:900; font-size:16px;'>▲</span>"
+            : `<img src="${assetUrl(frameUrl)}" alt=""${rotateStyle}>`;
         return `<button class="build-tool${active}" data-build="${item.id}" title="${item.label}${rotation}" aria-label="${item.label}${rotation}">${body}</button>`;
       };
       const renderSplitRow = (items, leftNode, rightNode) => {
@@ -8262,7 +8354,7 @@
       buildrowBuildings.classList.toggle("open", state.buildUiOpen);
       buildrowTools.classList.toggle("open", state.buildUiOpen);
       const item = currentBuildItem();
-      buildbarRotate.disabled = Boolean(item.equipTool || item.erase);
+      buildbarRotate.disabled = Boolean(item.equipTool || item.erase || item.upgrade);
     }
 
     function resetJoystick() {
