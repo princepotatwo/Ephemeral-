@@ -2332,7 +2332,7 @@
               }
             }
           }
-          out[`${mode}-${dir}`] = Array.from({ length: count }, (_, i) => `assets/${base}/${mode}_${dir}_frame_${i}.png?v=34`);
+          out[`${mode}-${dir}`] = Array.from({ length: count }, (_, i) => `assets/${base}/${mode}_${dir}_frame_${i}.png?v=35`);
         }
       }
       return out;
@@ -2804,44 +2804,44 @@
     const WALL_TIERS = [
       // tier 1: no tint — raw natural wood
       { tier: 1,  lvlMin: 1,  lvlMax: 5,   name: "Sprout Wooden Fence",   material: "Raw Wood",          filterColor: null,                    blendMode: null,       glow: null,      effect: null,       hp: 100,  def: 0,   reflect: 0 },
-      // tier 2: deep brown stain — darker, richer oak
+      // tier 2: deep brown oak
       { tier: 2,  lvlMin: 6,  lvlMax: 10,  name: "Rugged Oak Barricade",  material: "Charred Oak",       filterColor: "rgba(80,35,5,0.55)",    blendMode: "multiply", glow: null,      effect: null,       hp: 250,  def: 5,   reflect: 2 },
-      // tier 3: cold dark stone — heavy granite grey
+      // tier 3: cold dark granite
       { tier: 3,  lvlMin: 11, lvlMax: 15,  name: "Cobblestone Masonry",   material: "Dark Granite",      filterColor: "rgba(40,40,50,0.62)",   blendMode: "multiply", glow: null,      effect: null,       hp: 500,  def: 12,  reflect: 15 },
-      // tier 4: deep brick crimson — battle-worn red
+      // tier 4: deep brick crimson
       { tier: 4,  lvlMin: 16, lvlMax: 20,  name: "Brick Masonry Wall",    material: "Bloodied Brick",    filterColor: "rgba(160,10,10,0.65)",  blendMode: "multiply", glow: null,      effect: null,       hp: 850,  def: 20,  reflect: 18 },
-      // tier 5: dark steel — gunmetal iron — sparks start
-      { tier: 5,  lvlMin: 21, lvlMax: 25,  name: "Iron Guard Wall",       material: "Gunmetal Iron",     filterColor: "rgba(30,35,45,0.70)",   blendMode: "multiply", glow: "#64748b", effect: "spark",     hp: 1300, def: 30,  reflect: 25 },
-      // tier 6: midnight slate
-      { tier: 6,  lvlMin: 26, lvlMax: 30,  name: "Fortified Slate Wall",  material: "Midnight Slate",    filterColor: "rgba(20,25,40,0.72)",   blendMode: "multiply", glow: "#475569", effect: "spark",     hp: 1800, def: 42,  reflect: 30 },
-      // tier 7: electric blue steel
-      { tier: 7,  lvlMin: 31, lvlMax: 35,  name: "Titanium Steel Wall",   material: "Titanium Steel",    filterColor: "rgba(0,120,255,0.55)",  blendMode: "screen",   glow: "#3b82f6", effect: "electric",  hp: 2400, def: 55,  reflect: 35 },
-      // tier 8: deep cobalt
-      { tier: 8,  lvlMin: 36, lvlMax: 40,  name: "Cobalt Spiked Shield",  material: "Cobalt Blue Steel", filterColor: "rgba(15,50,180,0.72)",  blendMode: "multiply", glow: "#1d4ed8", effect: "electric",  hp: 3100, def: 70,  reflect: 45 },
-      // tier 9: dark molten bronze — fire begins
-      { tier: 9,  lvlMin: 41, lvlMax: 45,  name: "Runic Bronze Aegis",    material: "Ancient Bronze",    filterColor: "rgba(180,80,0,0.72)",   blendMode: "multiply", glow: "#d97706", effect: "fire",      hp: 3900, def: 88,  reflect: 55 },
-      // tier 10: void black obsidian
-      { tier: 10, lvlMin: 46, lvlMax: 50,  name: "Obsidian Void Wall",    material: "Void Obsidian",     filterColor: "rgba(30,0,60,0.80)",    blendMode: "multiply", glow: "#7c3aed", effect: "void",      hp: 4800, def: 110, reflect: 70 },
-      // tier 11: hellfire
-      { tier: 11, lvlMin: 51, lvlMax: 55,  name: "Hellfire Lava Guard",   material: "Scorched Magma",    filterColor: "rgba(220,60,0,0.68)",   blendMode: "screen",   glow: "#ea580c", effect: "fire",      hp: 5800, def: 135, reflect: 90 },
-      // tier 12: glacial ice
-      { tier: 12, lvlMin: 56, lvlMax: 60,  name: "Glacial Frost Wall",    material: "Deep Glacial Ice",  filterColor: "rgba(0,180,220,0.60)",  blendMode: "screen",   glow: "#06b6d4", effect: "ice",       hp: 7000, def: 165, reflect: 110 },
-      // tier 13: poison emerald
-      { tier: 13, lvlMin: 61, lvlMax: 65,  name: "Emerald Rune Shield",   material: "Ancient Emerald",   filterColor: "rgba(0,100,40,0.75)",   blendMode: "multiply", glow: "#059669", effect: "poison",    hp: 8300, def: 200, reflect: 130 },
-      // tier 14: void plasma
-      { tier: 14, lvlMin: 66, lvlMax: 70,  name: "Void Plasma Barrier",   material: "Dark Void Plasma",  filterColor: "rgba(180,0,120,0.72)",  blendMode: "screen",   glow: "#db2777", effect: "plasma",    hp: 9800, def: 240, reflect: 160 },
-      // tier 15: molten gold
-      { tier: 15, lvlMin: 71, lvlMax: 75,  name: "Gilded War Bastion",    material: "Molten Gold",       filterColor: "rgba(200,140,0,0.70)",  blendMode: "screen",   glow: "#ca8a04", effect: "divine",    hp: 11500,def: 285, reflect: 195 },
-      // tier 16: starforged
-      { tier: 16, lvlMin: 76, lvlMax: 80,  name: "Starforged Bastion",    material: "Celestial Metal",   filterColor: "rgba(0,60,200,0.75)",   blendMode: "screen",   glow: "#2563eb", effect: "electric",  hp: 13500,def: 335, reflect: 235 },
-      // tier 17: abyssal dark matter
-      { tier: 17, lvlMin: 81, lvlMax: 85,  name: "Abyssal Dark Matter",   material: "Compressed Dark",   filterColor: "rgba(40,0,80,0.88)",    blendMode: "multiply", glow: "#9333ea", effect: "void",      hp: 16000,def: 390, reflect: 280 },
-      // tier 18: dragon crimson
-      { tier: 18, lvlMin: 86, lvlMax: 90,  name: "Dragon Crimson Aegis",  material: "Dragonscale",       filterColor: "rgba(180,0,20,0.78)",   blendMode: "screen",   glow: "#be123c", effect: "fire",      hp: 19000,def: 450, reflect: 340 },
-      // tier 19: supernova
-      { tier: 19, lvlMin: 91, lvlMax: 95,  name: "Supernova Nebula Wall", material: "Cosmic Nebula",     filterColor: "rgba(160,0,200,0.80)",  blendMode: "screen",   glow: "#c026d3", effect: "plasma",    hp: 22500,def: 520, reflect: 410 },
-      // tier 20: divine apex
-      { tier: 20, lvlMin: 96, lvlMax: 100, name: "Divine Apex Aegis",     material: "Divine Aegis",      filterColor: "rgba(255,220,80,0.82)", blendMode: "screen",   glow: "#f59e0b", effect: "divine",    hp: 27000,def: 600, reflect: 500 }
+      // tier 5: steel sparks grey
+      { tier: 5,  lvlMin: 21, lvlMax: 25,  name: "Iron Guard Wall",       material: "Gunmetal Iron",     filterColor: "rgba(70,80,95,0.65)",   blendMode: "multiply", glow: "#64748b", effect: "spark",     hp: 1300, def: 30,  reflect: 25 },
+      // tier 6: slate sparks dark grey
+      { tier: 6,  lvlMin: 26, lvlMax: 30,  name: "Fortified Slate Wall",  material: "Midnight Slate",    filterColor: "rgba(50,55,65,0.68)",   blendMode: "multiply", glow: "#475569", effect: "spark",     hp: 1800, def: 42,  reflect: 30 },
+      // tier 7: electric blue (Skyblue/electric blue)
+      { tier: 7,  lvlMin: 31, lvlMax: 35,  name: "Titanium Steel Wall",   material: "Titanium Steel",    filterColor: "rgba(59,130,246,0.65)", blendMode: "screen",   glow: "#3b82f6", effect: "electric",  hp: 2400, def: 55,  reflect: 35 },
+      // tier 8: cobalt electric blue (Deep electric blue)
+      { tier: 8,  lvlMin: 36, lvlMax: 40,  name: "Cobalt Spiked Shield",  material: "Cobalt Blue Steel", filterColor: "rgba(29,78,216,0.68)",  blendMode: "multiply", glow: "#1d4ed8", effect: "electric",  hp: 3100, def: 70,  reflect: 45 },
+      // tier 9: fire bronze (Fire red-orange)
+      { tier: 9,  lvlMin: 41, lvlMax: 45,  name: "Runic Bronze Aegis",    material: "Ancient Bronze",    filterColor: "rgba(249,115,22,0.70)", blendMode: "multiply", glow: "#d97706", effect: "fire",      hp: 3900, def: 88,  reflect: 55 },
+      // tier 10: void black obsidian (Violet)
+      { tier: 10, lvlMin: 46, lvlMax: 50,  name: "Obsidian Void Wall",    material: "Void Obsidian",     filterColor: "rgba(139,92,246,0.72)", blendMode: "multiply", glow: "#7c3aed", effect: "void",      hp: 4800, def: 110, reflect: 70 },
+      // tier 11: hellfire lava (Fire red)
+      { tier: 11, lvlMin: 51, lvlMax: 55,  name: "Hellfire Lava Guard",   material: "Scorched Magma",    filterColor: "rgba(239,68,68,0.72)",  blendMode: "screen",   glow: "#ea580c", effect: "fire",      hp: 5800, def: 135, reflect: 90 },
+      // tier 12: glacial frost (Skyblue)
+      { tier: 12, lvlMin: 56, lvlMax: 60,  name: "Glacial Frost Wall",    material: "Deep Glacial Ice",  filterColor: "rgba(56,189,248,0.70)", blendMode: "screen",   glow: "#06b6d4", effect: "ice",       hp: 7000, def: 165, reflect: 110 },
+      // tier 13: poison emerald (Poison green)
+      { tier: 13, lvlMin: 61, lvlMax: 65,  name: "Emerald Rune Shield",   material: "Ancient Emerald",   filterColor: "rgba(34,197,94,0.72)",  blendMode: "multiply", glow: "#059669", effect: "poison",    hp: 8300, def: 200, reflect: 130 },
+      // tier 14: void plasma (Plasma magenta-pink)
+      { tier: 14, lvlMin: 66, lvlMax: 70,  name: "Void Plasma Barrier",   material: "Dark Void Plasma",  filterColor: "rgba(236,72,153,0.72)", blendMode: "screen",   glow: "#db2777", effect: "plasma",    hp: 9800, def: 240, reflect: 160 },
+      // tier 15: gilded gold (Divine gold-yellow)
+      { tier: 15, lvlMin: 71, lvlMax: 75,  name: "Gilded War Bastion",    material: "Molten Gold",       filterColor: "rgba(234,179,8,0.75)",  blendMode: "screen",   glow: "#ca8a04", effect: "divine",    hp: 11500,def: 285, reflect: 195 },
+      // tier 16: starforged electric (Electric blue)
+      { tier: 16, lvlMin: 76, lvlMax: 80,  name: "Starforged Bastion",    material: "Celestial Metal",   filterColor: "rgba(37,99,235,0.75)",  blendMode: "screen",   glow: "#2563eb", effect: "electric",  hp: 13500,def: 335, reflect: 235 },
+      // tier 17: abyssal void (Violet)
+      { tier: 17, lvlMin: 81, lvlMax: 85,  name: "Abyssal Dark Matter",   material: "Compressed Dark",   filterColor: "rgba(109,40,217,0.75)", blendMode: "multiply", glow: "#9333ea", effect: "void",      hp: 16000,def: 390, reflect: 280 },
+      // tier 18: dragon scale (Fire red)
+      { tier: 18, lvlMin: 86, lvlMax: 90,  name: "Dragon Crimson Aegis",  material: "Dragonscale",       filterColor: "rgba(220,38,38,0.75)",  blendMode: "screen",   glow: "#be123c", effect: "fire",      hp: 19000,def: 450, reflect: 340 },
+      // tier 19: supernova plasma (Plasma pink)
+      { tier: 19, lvlMin: 91, lvlMax: 95,  name: "Supernova Nebula Wall", material: "Cosmic Nebula",     filterColor: "rgba(219,39,119,0.75)", blendMode: "screen",   glow: "#c026d3", effect: "plasma",    hp: 22500,def: 520, reflect: 410 },
+      // tier 20: divine apex (Divine gold)
+      { tier: 20, lvlMin: 96, lvlMax: 100, name: "Divine Apex Aegis",     material: "Divine Aegis",      filterColor: "rgba(245,158,11,0.78)", blendMode: "screen",   glow: "#f59e0b", effect: "divine",    hp: 27000,def: 600, reflect: 500 }
     ];
 
     function getWallTier(lvl) {
@@ -3297,6 +3297,11 @@
         }
 
         const progress = age / bh.duration;
+        // Follow target enemy's position dynamically
+        if (bh.target && !bh.target.dead) {
+          bh.x = bh.target.x;
+          bh.y = bh.target.y;
+        }
         // Find and pull nearby enemies towards bh.x, bh.y
         for (const enemy of roamingNPCs) {
           if (enemy.dead || enemy.hp === undefined) continue;
@@ -8083,7 +8088,20 @@
             npc.aggroTarget = bestTarget;
             npc.aggroUntil = now + 2000;
           } else {
-            npc.aggroTarget = findNearestPlayerOrPet(npc.x, npc.y);
+            // Target player/pets, or nearest divine ally if they are in range
+            const pTarget = findNearestPlayerOrPet(npc.x, npc.y);
+            let nearestAlly = null;
+            let nearestAllyDist = 999999;
+            for (const other of roamingNPCs) {
+              if (other.divineAlly && !other.dead) {
+                const d = Math.hypot(other.x - npc.x, other.y - npc.y);
+                if (d < nearestAllyDist && d < 200) {
+                  nearestAllyDist = d;
+                  nearestAlly = other;
+                }
+              }
+            }
+            npc.aggroTarget = nearestAlly || pTarget;
             npc.aggroUntil = now + 5000;
           }
         }
@@ -8091,7 +8109,8 @@
         const isPlayerTarget = npc.aggroTarget === "player";
         const isPetTarget = npc.aggroTarget && petSlimes.includes(npc.aggroTarget) && !npc.aggroTarget.dead;
         const isNpcTarget = npc.divineAlly && npc.aggroTarget && roamingNPCs.includes(npc.aggroTarget) && !npc.aggroTarget.dead;
-        if (npc.aggroTarget && !isPlayerTarget && !isPetTarget && !isNpcTarget) {
+        const isAllyTarget = !npc.divineAlly && npc.aggroTarget && npc.aggroTarget.divineAlly && !npc.aggroTarget.dead;
+        if (npc.aggroTarget && !isPlayerTarget && !isPetTarget && !isNpcTarget && !isAllyTarget) {
           npc.aggroTarget = null;
         }
         if (npc.aggroTarget && now < npc.aggroUntil) {
@@ -8284,6 +8303,13 @@
             }
           } else {
             npc.dir = Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? "right" : "left") : (dy > 0 ? "front" : "back");
+          }
+          continue;
+        }
+        if (npc.divineAlly && now < npc.divineAllyUntil) {
+          if (!npc.aggroTarget) {
+            npc.mode = "idle";
+            npc.moveDir = { x: 0, y: 0 };
           }
           continue;
         }
