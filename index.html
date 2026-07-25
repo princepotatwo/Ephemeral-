@@ -2332,7 +2332,7 @@
               }
             }
           }
-          out[`${mode}-${dir}`] = Array.from({ length: count }, (_, i) => `assets/${base}/${mode}_${dir}_frame_${i}.png?v=30`);
+          out[`${mode}-${dir}`] = Array.from({ length: count }, (_, i) => `assets/${base}/${mode}_${dir}_frame_${i}.png?v=31`);
         }
       }
       return out;
@@ -2883,19 +2883,17 @@
         if (plant.chest) {
           index = chestFrameIndex(plant);
         } else if (plant.name.startsWith("magic_barricade_")) {
-          const parts = plant.name.split("_");
-          const variant = parts[2];
-          const dir = parts[3] || "down";
-          const prefix = dir === "down" ? "D" : dir === "side" ? "S" : "U";
-          let sheetUrl;
-          if (variant === "1") sheetUrl = `assets/magic_traps/2 Barricades/${prefix}_Wooden_Barricade_1_Idle.png`;
-          else if (variant === "2") sheetUrl = `assets/magic_traps/2 Barricades/${prefix}_Spiked_Barricade_Idle.png`;
-          else if (variant === "3") sheetUrl = `assets/magic_traps/2 Barricades/${prefix}_Wooden_Barricade_2_Idle.png`;
-          else if (variant === "4") sheetUrl = `assets/magic_traps/2 Barricades/${prefix}_Iron_Barricade_4_Idle.png`;
-
-          img = images[sheetUrl];
-          if (img) {
-            plant.crop = { sx: 0, sy: 0, sw: 36, sh: 64 };
+          name = plant.name;
+          index = 0;
+          if (plant.destroyedAt) {
+            const explAge = now - plant.destroyedAt;
+            if (explAge < 400) {
+              name = "magic_barrel_destroy";
+              index = Math.min(3, Math.floor(explAge / 100));
+            } else {
+              name = "magic_barrel_boom_1";
+              index = Math.min(7, Math.floor((explAge - 400) / 100));
+            }
           }
         } else if (plant.name.startsWith("trap_predator_")) {
           const parts = plant.name.split("_"); // ["trap", "predator", "1", "down"]
@@ -3847,7 +3845,7 @@
     }
 
     function buildPaletteGroup(item) {
-      return item.group === "tools" || item.equipTool || item.erase ? "tools" : "buildings";
+      return item.group === "tools" || item.equipTool || item.erase || item.upgrade ? "tools" : "buildings";
     }
 
     function setBuildUiOpen(open) {
