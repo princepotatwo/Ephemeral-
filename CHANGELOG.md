@@ -9,3 +9,6 @@
 ## July 28, 2026
 - Refactored character roster to remap standard Bubu and Dudu characters to 41x50 low-res variants for perfect size consistency.
 
+## July 29, 2026
+- Optimized offscreen cache thresholds, disabling on-the-fly cache allocations to eliminate frame-rate stutters.
+
