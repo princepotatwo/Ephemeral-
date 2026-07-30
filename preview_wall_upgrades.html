@@ -670,45 +670,13 @@
         offCtx.drawImage(img, 0, 0);
       }
 
-      // 3. 4-Pass Metallic Highlights & Composite Tinting
+      // 3. Apply Material Tint strictly to non-transparent sprite pixels using source-atop
       if (materialFilterEnabled && tier.filterColor) {
-        const blendMode = tier.blendMode || "hard-light";
-        const highlightColor = tier.highlightColor || "rgba(255,255,255,0.4)";
-
-        // Pass 2: Color blend mode (e.g. hard-light, overlay, or color-dodge)
         offCtx.save();
-        offCtx.globalCompositeOperation = blendMode;
+        offCtx.globalCompositeOperation = 'source-atop';
         offCtx.fillStyle = tier.filterColor;
         offCtx.fillRect(0, 0, drawW, drawH);
         offCtx.restore();
-
-        // Pass 3: Mask back to original sprite silhouette
-        offCtx.save();
-        offCtx.globalCompositeOperation = 'destination-in';
-        if (img.isSheet) {
-          offCtx.drawImage(img, 0, 0, 36, 64, 0, 0, 36, 64);
-        } else {
-          offCtx.drawImage(img, 0, 0);
-        }
-        offCtx.restore();
-
-        // Pass 4: Metallic specular highlights (color-dodge)
-        if (highlightColor) {
-          offCtx.save();
-          offCtx.globalCompositeOperation = 'color-dodge';
-          offCtx.fillStyle = highlightColor;
-          offCtx.fillRect(0, 0, drawW, drawH);
-          offCtx.restore();
-
-          offCtx.save();
-          offCtx.globalCompositeOperation = 'destination-in';
-          if (img.isSheet) {
-            offCtx.drawImage(img, 0, 0, 36, 64, 0, 0, 36, 64);
-          } else {
-            offCtx.drawImage(img, 0, 0);
-          }
-          offCtx.restore();
-        }
       }
 
       // Render clean sprite onto main canvas

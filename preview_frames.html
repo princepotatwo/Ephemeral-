@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Bubu & Dudu Frame Inspector</title>
+  <title>Bubu & Dudu Frame Inspector & Downloader</title>
   <style>
     body {
       background: #121214;
@@ -84,15 +84,23 @@
       margin-bottom: 12px;
       border: 2px solid #ffb74d;
       overflow: hidden;
+      position: relative;
     }
     .player-canvas-container canvas {
       image-rendering: pixelated;
       max-width: 100%;
       max-height: 100%;
+      cursor: default;
+    }
+    .player-canvas-container canvas.erase-mode-active {
+      cursor: crosshair;
     }
     .player-buttons {
       display: flex;
       gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 12px;
     }
     button {
       background: #3e2723;
@@ -108,6 +116,33 @@
       background: #5d4037;
       color: #fff;
     }
+    .btn-download {
+      background: #1b4332;
+      color: #d8f3dc;
+      border-color: #52b788;
+    }
+    .btn-download:hover {
+      background: #2d6a4f;
+      color: #fff;
+    }
+    .btn-save {
+      background: #102a43;
+      color: #9bccff;
+      border-color: #243b53;
+    }
+    .btn-save:hover {
+      background: #243b53;
+      color: #fff;
+    }
+    .btn-apply {
+      background: #ff9800;
+      color: #121214;
+      border-color: #e65100;
+    }
+    .btn-apply:hover {
+      background: #fb8c00;
+      color: #000;
+    }
     .frame-strip {
       display: flex;
       flex-wrap: wrap;
@@ -120,9 +155,12 @@
       border-radius: 12px;
       border: 1.5px solid #37474f;
       padding: 12px;
-      width: 130px;
+      width: 140px;
       text-align: center;
       box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
     .frame-number {
       font-size: 1.05rem;
@@ -138,7 +176,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: 0 auto;
+      margin: 0 auto 8px auto;
       overflow: hidden;
     }
     .canvas-container canvas {
@@ -149,7 +187,107 @@
     .frame-meta {
       font-size: 0.75rem;
       color: #90a4ae;
+      margin-bottom: 8px;
+    }
+    .card-dl-btn {
+      width: 100%;
+      padding: 4px 8px;
+      font-size: 0.75rem;
+      background: #1b4332;
+      border: 1px solid #40916c;
+      color: #d8f3dc;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .card-dl-btn:hover {
+      background: #2d6a4f;
+      color: #fff;
+    }
+    .card-save-btn {
+      width: 100%;
+      padding: 4px 8px;
+      font-size: 0.75rem;
+      background: #102a43;
+      border: 1px solid #243b53;
+      color: #9bccff;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-top: 4px;
+    }
+    .card-save-btn:hover {
+      background: #243b53;
+      color: #fff;
+    }
+    .card-flip-btn {
+      width: 100%;
+      padding: 4px 8px;
+      font-size: 0.75rem;
+      background: #2d1b69;
+      border: 1px solid #7c4dff;
+      color: #ede7f6;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-top: 4px;
+    }
+    .card-flip-btn:hover {
+      background: #4527a0;
+      color: #fff;
+    }
+    .erase-brush-panel {
+      background: #2a1f1f;
+      border: 1px solid #5c3030;
+      border-radius: 8px;
+      padding: 10px 14px;
+      width: 100%;
       margin-top: 8px;
+    }
+    .direction-report-panel {
+      background: #0d1b2a;
+      border: 1.5px solid #1e88e5;
+      border-radius: 8px;
+      padding: 12px 14px;
+      width: 100%;
+      margin-top: 8px;
+      box-sizing: border-box;
+    }
+    .direction-report-panel textarea {
+      width: 100%;
+      background: #101820;
+      color: #81d4fa;
+      border: 1px solid #1565c0;
+      border-radius: 4px;
+      font-size: 0.72rem;
+      font-family: monospace;
+      padding: 6px;
+      box-sizing: border-box;
+      resize: vertical;
+      min-height: 80px;
+    }
+    .btn-flip {
+      background: #2d1b69;
+      color: #ede7f6;
+      border-color: #7c4dff;
+    }
+    .btn-flip:hover {
+      background: #4527a0;
+      color: #fff;
+    }
+    .btn-flip.active {
+      background: #7c4dff;
+      color: #fff;
+      border-color: #ede7f6;
+    }
+    .btn-report {
+      background: #0d2b45;
+      color: #81d4fa;
+      border-color: #1e88e5;
+    }
+    .btn-report:hover {
+      background: #1565c0;
+      color: #fff;
     }
   </style>
 </head>
@@ -158,9 +296,9 @@
   <div style="text-align: center; margin-bottom: 12px;">
     <a href="preview_collection.html" style="color: #ffb74d; text-decoration: none; font-size: 14px; font-weight: 600;">👈 Return to Preview Collection Hub</a>
   </div>
-  <h1>Bubu & Dudu Frame Inspector</h1>
+  <h1>Bubu & Dudu Frame Inspector & Downloader</h1>
   <p class="desc">
-    Inspect each frame of the walk, idle, and attack animations individually. Choose a character, mode, and direction. Define a start and end frame to loop a specific sequence and see how it animates!
+    Inspect Bubu's HD frames individually. Erase watermarks directly in the browser, save the edited frames to your workspace, and apply the final clean assets instantly!
   </p>
 
   <div class="main-layout">
@@ -169,7 +307,7 @@
       <div class="controls">
         <div class="control-group">
           <label for="char-select">Character</label>
-          <select id="char-select" onchange="onConfigChange()">
+          <select id="char-select" onchange="onConfigChange(true)">
             <option value="bubu">Bubu the Panda</option>
             <option value="dudu">Dudu the Bear</option>
           </select>
@@ -177,17 +315,14 @@
 
         <div class="control-group">
           <label for="mode-select">Animation Mode</label>
-          <select id="mode-select" onchange="onConfigChange()">
-            <option value="idle">Idle Loop</option>
-            <option value="run">Walk Loop</option>
-            <option value="attack">Attack Action</option>
-            <option value="hit">Hurt Action</option>
+          <select id="mode-select" onchange="onConfigChange(false)">
+            <!-- Populated dynamically -->
           </select>
         </div>
 
         <div class="control-group">
           <label for="dir-select">Direction</label>
-          <select id="dir-select" onchange="onConfigChange()">
+          <select id="dir-select" onchange="onConfigChange(false)">
             <option value="left">Left Facing</option>
             <option value="right">Right Facing</option>
             <option value="front">Front Facing</option>
@@ -196,9 +331,9 @@
         </div>
       </div>
 
-      <!-- Right Panel: Custom Playback Range -->
+      <!-- Right Panel: Custom Playback Range & Download -->
       <div class="player-panel">
-        <h3 style="margin-top: 0; color: #ffb74d; text-align: center;">Loop Range Tester</h3>
+        <h3 style="margin-top: 0; color: #ffb74d; text-align: center;">Loop Range Tester & Export</h3>
         <div style="display: flex; gap: 16px; justify-content: center; margin-bottom: 12px;">
           <div class="control-group" style="margin: 0;">
             <label for="start-frame">Start Frame</label>
@@ -221,6 +356,36 @@
           </div>
           <div class="player-buttons">
             <button id="play-btn" onclick="togglePlay()">Pause</button>
+            <button class="btn-download" onclick="downloadCurrentFrame()">⬇️ PNG Current</button>
+            <button class="btn-save" onclick="saveCurrentFrameToServer()">💾 Save Frame</button>
+            <button class="btn-apply" onclick="applyChangesToGame()">🚀 Apply to Game</button>
+            <button class="btn-download" onclick="downloadAllFrames()">📦 PNG All</button>
+          </div>
+
+          <!-- Flip + Direction Report -->
+          <div style="display:flex; gap:8px; margin-top:8px; flex-wrap:wrap;">
+            <button id="flip-btn" class="btn-flip" onclick="flipAllFrames()" style="flex:1;">🔄 Flip All Frames</button>
+            <button class="btn-report" onclick="copyDirectionReport()" style="flex:1;">📋 Copy Direction Report</button>
+          </div>
+          <div class="direction-report-panel" id="dir-report-panel" style="display:none;">
+            <label style="color:#81d4fa; font-size:0.8rem; display:block; margin-bottom:6px;">📋 Paste this to the agent:</label>
+            <textarea id="dir-report-text" readonly></textarea>
+            <button onclick="navigator.clipboard.writeText(document.getElementById('dir-report-text').value).then(()=>{this.textContent='✅ Copied!'; setTimeout(()=>this.textContent='Copy',1500)})" style="margin-top:6px; font-size:0.75rem; padding:4px 10px;">Copy</button>
+          </div>
+
+          <!-- Eraser brush controls -->
+          <div class="erase-brush-panel">
+            <label style="color: #ff9999; font-size: 0.85rem; display: block; margin-bottom: 6px;">🧹 Erase Brush Tool</label>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <button id="erase-toggle-btn" onclick="toggleEraseMode()" style="background: #4a1515; color: #ffcccc; border: 1.5px solid #8c2e2e; padding: 6px 12px; font-size: 0.8rem;">Erase Mode: OFF</button>
+              <div style="display: flex; flex-direction: column; flex: 1; gap: 2px;">
+                <label for="brush-size" style="font-size: 0.75rem; color: #b0bec5; font-weight: normal;">Brush Size: <span id="brush-size-val">16</span>px</label>
+                <input type="range" id="brush-size" min="3" max="50" value="16" oninput="updateBrushSize(this.value)" style="padding: 2px; cursor: pointer;">
+              </div>
+            </div>
+            <span style="font-size: 0.7rem; color: #90a4ae; display: block; margin-top: 6px; line-height: 1.2;">
+              *Pause the animation, turn Erase Mode ON, and drag directly on the canvas to erase unwanted details.
+            </span>
           </div>
         </div>
       </div>
@@ -234,8 +399,19 @@
 
   <script>
     const counts = {
-      bubu: { idle: 13, idle2: 25, run: 16, attack: 6, hit: 16 },
-      dudu: { idle: 12, run: 12, attack: 6, hit: 24 }
+      bubu: { idle: 13, idle2: 25, run: 16, attack: 36, hit: 16 },
+      dudu: { idle: 12, idle2: 13, idle_build: 10, run: 12, run2: 4, run_build: 16, attack: 24, hit: 24 }
+    };
+
+    const modeLabels = {
+      idle: "Idle Loop",
+      idle2: "Sad / Alternate Idle",
+      idle_build: "Carry/Build Idle",
+      run: "Walk/Run Loop",
+      run2: "Run Loop 2 (fast)",
+      run_build: "Carry/Build Walk",
+      attack: "Attack Action (HD Frames)",
+      hit: "Hurt Action"
     };
 
     let playFrames = [];
@@ -246,7 +422,38 @@
     let playbackTimeout = null;
     let fps = 12;
 
-    function onConfigChange() {
+    // Erase brush state
+    let eraseMode = false;
+    let brushSize = 16;
+    let isDrawing = false;
+
+    const playerCanvas = document.getElementById('player-canvas');
+    const playerCtx = playerCanvas.getContext('2d');
+
+    function populateModes() {
+      const char = document.getElementById('char-select').value;
+      const modeSelect = document.getElementById('mode-select');
+      const prevVal = modeSelect.value;
+      
+      modeSelect.innerHTML = '';
+      
+      const availableModes = Object.keys(counts[char]);
+      availableModes.forEach(m => {
+        const option = new Option(modeLabels[m] || m, m);
+        modeSelect.add(option);
+      });
+      
+      if (availableModes.includes(prevVal)) {
+        modeSelect.value = prevVal;
+      } else {
+        modeSelect.value = availableModes[0];
+      }
+    }
+
+    function onConfigChange(isCharChange) {
+      if (isCharChange) {
+        populateModes();
+      }
       const char = document.getElementById('char-select').value;
       const mode = document.getElementById('mode-select').value;
       const count = counts[char][mode];
@@ -266,6 +473,22 @@
       startSelect.value = 0;
       endSelect.value = count - 1;
 
+      // Force turn off Erase Mode when changing configs to avoid accidental drawing
+      if (eraseMode) {
+        toggleEraseMode();
+      }
+
+      // Reset flip state on animation change
+      globalFlipActive = false;
+      const flipBtn = document.getElementById('flip-btn');
+      if (flipBtn) {
+        flipBtn.textContent = '🔄 Flip All Frames';
+        flipBtn.classList.remove('active');
+      }
+      // Hide report panel
+      const rp = document.getElementById('dir-report-panel');
+      if (rp) rp.style.display = 'none';
+
       renderFrames();
     }
 
@@ -283,6 +506,7 @@
       }
 
       currentPlayIdx = startFrameIdx;
+      drawPlayerCanvas();
     }
 
     function updateFps(val) {
@@ -297,6 +521,10 @@
       isPlaying = !isPlaying;
       document.getElementById('play-btn').textContent = isPlaying ? "Pause" : "Play";
       if (isPlaying) {
+        // Automatically turn off erase mode when playing
+        if (eraseMode) {
+          toggleEraseMode();
+        }
         tickPlayback();
       } else {
         clearTimeout(playbackTimeout);
@@ -328,33 +556,239 @@
             <canvas id="canvas-${i}" width="250" height="300"></canvas>
           </div>
           <div class="frame-meta">${char}_highres</div>
+          <button class="card-dl-btn" onclick="downloadSingleFrame(${i})">⬇️ Download PNG</button>
+          <button class="card-save-btn" onclick="saveFrameToServer(${i})">💾 Save Frame</button>
+          <button class="card-flip-btn" onclick="flipSingleFrame(${i})">🔄 Flip Frame</button>
         `;
         strip.appendChild(card);
 
-        const canvas = document.getElementById(`canvas-${i}`);
-        const ctx = canvas.getContext('2d');
+        const cardCanvas = document.getElementById(`canvas-${i}`);
+        const cardCtx = cardCanvas.getContext('2d');
+        
+        // Create offscreen canvas for modification
+        const frameCanvas = document.createElement('canvas');
+        frameCanvas.width = 250;
+        frameCanvas.height = 300;
+        const frameCtx = frameCanvas.getContext('2d');
+
         const img = new Image();
-        img.src = `assets/${char}_highres/${mode}_${dir}_frame_${i}.png`;
+        if (char === "bubu" && mode === "attack") {
+          img.src = `assets/bubu_highres/raw_attack/frame_${i}.png?v=200`;
+        } else if (char === "dudu" && mode === "attack") {
+          img.src = `assets/dudu_highres/raw_attack/frame_${i}.png?v=200`;
+        } else {
+          img.src = `assets/${char}_highres/${mode}_${dir}_frame_${i}.png?v=200`;
+        }
+
         img.onload = () => {
-          ctx.drawImage(img, 0, 0);
+          frameCtx.clearRect(0, 0, 250, 300);
+          frameCtx.save();
+          let shouldMirror = false;
+          if (mode === "attack") {
+            if (char === "bubu" && dir === "left") shouldMirror = true;
+            if (char === "dudu" && dir === "right") shouldMirror = true;
+          }
+          if (shouldMirror) {
+            frameCtx.translate(250, 0);
+            frameCtx.scale(-1, 1);
+          }
+          frameCtx.drawImage(img, 0, 0);
+          frameCtx.restore();
+
+          cardCtx.clearRect(0, 0, 250, 300);
+          cardCtx.drawImage(frameCanvas, 0, 0);
+          
+          if (i === currentPlayIdx) {
+            drawPlayerCanvas();
+          }
         };
-        playFrames.push(img);
+        playFrames.push(frameCanvas);
       }
 
       updatePlaybackRange();
       restartTimer();
     }
 
-    function tickPlayback() {
-      const canvas = document.getElementById('player-canvas');
-      const ctx = canvas.getContext('2d');
-      ctx.clearRect(0, 0, 250, 300);
-
-      // Play the current frame
-      const frameImg = playFrames[currentPlayIdx];
-      if (frameImg && frameImg.complete) {
-        ctx.drawImage(frameImg, 0, 0);
+    // Eraser Mode toggle
+    function toggleEraseMode() {
+      eraseMode = !eraseMode;
+      const btn = document.getElementById("erase-toggle-btn");
+      if (eraseMode) {
+        if (isPlaying) {
+          togglePlay();
+        }
+        btn.textContent = "Erase Mode: ON";
+        btn.style.background = "#992222";
+        btn.style.color = "#ffffff";
+        btn.style.borderColor = "#ff6666";
+        playerCanvas.classList.add("erase-mode-active");
+      } else {
+        btn.textContent = "Erase Mode: OFF";
+        btn.style.background = "#4a1515";
+        btn.style.color = "#ffcccc";
+        btn.style.borderColor = "#8c2e2e";
+        playerCanvas.classList.remove("erase-mode-active");
       }
+    }
+
+    function updateBrushSize(val) {
+      brushSize = parseInt(val);
+      document.getElementById("brush-size-val").textContent = brushSize;
+    }
+
+    // Pointer coordinates conversion
+    function getCanvasCoords(e) {
+      const rect = playerCanvas.getBoundingClientRect();
+      const x = (e.clientX - rect.left) * (playerCanvas.width / rect.width);
+      const y = (e.clientY - rect.top) * (playerCanvas.height / rect.height);
+      return { x, y };
+    }
+
+    function eraseAt(x, y) {
+      const frameCanvas = playFrames[currentPlayIdx];
+      if (!frameCanvas) return;
+      const fCtx = frameCanvas.getContext("2d");
+      
+      fCtx.save();
+      fCtx.globalCompositeOperation = "destination-out";
+      fCtx.beginPath();
+      fCtx.arc(x, y, brushSize, 0, Math.PI * 2);
+      fCtx.fill();
+      fCtx.restore();
+
+      // Sync to card canvas thumbnail
+      const cardCanvas = document.getElementById(`canvas-${currentPlayIdx}`);
+      if (cardCanvas) {
+        const cCtx = cardCanvas.getContext("2d");
+        cCtx.clearRect(0, 0, 250, 300);
+        cCtx.drawImage(frameCanvas, 0, 0);
+      }
+
+      // Refresh viewer
+      drawPlayerCanvas();
+    }
+
+    // Pointer events on playerCanvas
+    playerCanvas.addEventListener("pointerdown", (e) => {
+      if (!eraseMode) return;
+      isDrawing = true;
+      playerCanvas.setPointerCapture(e.pointerId);
+      const coords = getCanvasCoords(e);
+      eraseAt(coords.x, coords.y);
+    });
+
+    playerCanvas.addEventListener("pointermove", (e) => {
+      if (!isDrawing || !eraseMode) return;
+      const coords = getCanvasCoords(e);
+      eraseAt(coords.x, coords.y);
+    });
+
+    playerCanvas.addEventListener("pointerup", (e) => {
+      isDrawing = false;
+    });
+
+    playerCanvas.addEventListener("pointercancel", (e) => {
+      isDrawing = false;
+    });
+
+    function downloadSingleFrame(index) {
+      const char = document.getElementById('char-select').value;
+      const mode = document.getElementById('mode-select').value;
+      const dir = document.getElementById('dir-select').value;
+      
+      const frameCanvas = playFrames[index];
+      if (!frameCanvas) return;
+      
+      const link = document.createElement('a');
+      link.download = `${char}_${mode}_${dir}_frame_${index}.png`;
+      link.href = frameCanvas.toDataURL('image/png');
+      link.click();
+    }
+
+    function downloadCurrentFrame() {
+      downloadSingleFrame(currentPlayIdx);
+    }
+
+    function downloadAllFrames() {
+      const char = document.getElementById('char-select').value;
+      const mode = document.getElementById('mode-select').value;
+      const count = counts[char][mode];
+      for (let i = 0; i < count; i++) {
+        setTimeout(() => downloadSingleFrame(i), i * 200);
+      }
+    }
+
+    async function saveFrameToServer(index) {
+      const char = document.getElementById('char-select').value;
+      const frameCanvas = playFrames[index];
+      if (!frameCanvas) return;
+      
+      const imgDataUrl = frameCanvas.toDataURL('image/png');
+      
+      try {
+        const response = await fetch('/save_frame', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ char: char, index: index, image: imgDataUrl })
+        });
+        const result = await response.json();
+        if (result.status === "success") {
+          console.log(`Saved frame ${index}`);
+          // Light flash effect on thumbnail card as feedback
+          const card = document.querySelectorAll('.frame-card')[index];
+          if (card) {
+            card.style.transition = 'none';
+            card.style.background = '#1b4332';
+            setTimeout(() => {
+              card.style.transition = 'background 0.5s ease';
+              card.style.background = '#1e1e24';
+            }, 100);
+          }
+        } else {
+          alert(`Error: ${result.error}`);
+        }
+      } catch (err) {
+        alert(`Failed to connect to local workspace server: ${err.message}`);
+      }
+    }
+
+    function saveCurrentFrameToServer() {
+      saveFrameToServer(currentPlayIdx);
+    }
+
+    async function applyChangesToGame() {
+      const char = document.getElementById('char-select').value;
+      try {
+        const response = await fetch('/apply_changes', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ char: char })
+        });
+        const result = await response.json();
+        if (result.status === "success") {
+          alert("🚀 Edits applied to all game assets successfully! Refresh your game page to see them.");
+        } else {
+          alert(`Error applying changes: ${result.error}`);
+        }
+      } catch (err) {
+        alert(`Failed to apply changes: ${err.message}`);
+      }
+    }
+
+    function drawPlayerCanvas() {
+      playerCtx.clearRect(0, 0, 250, 300);
+      const frameCanvas = playFrames[currentPlayIdx];
+      if (frameCanvas) {
+        playerCtx.drawImage(frameCanvas, 0, 0);
+      }
+    }
+
+    function tickPlayback() {
+      drawPlayerCanvas();
 
       // Advance
       currentPlayIdx++;
@@ -367,8 +801,81 @@
       }
     }
 
+    // Flip state: tracks whether current session has applied a global flip
+    let globalFlipActive = false;
+
+    function flipSingleFrame(index) {
+      const frameCanvas = playFrames[index];
+      if (!frameCanvas) return;
+      const fCtx = frameCanvas.getContext('2d');
+      const tmp = document.createElement('canvas');
+      tmp.width = 250; tmp.height = 300;
+      const tCtx = tmp.getContext('2d');
+      tCtx.drawImage(frameCanvas, 0, 0);
+      fCtx.clearRect(0, 0, 250, 300);
+      fCtx.save();
+      fCtx.translate(250, 0);
+      fCtx.scale(-1, 1);
+      fCtx.drawImage(tmp, 0, 0);
+      fCtx.restore();
+
+      // Sync to card canvas
+      const cardCanvas = document.getElementById(`canvas-${index}`);
+      if (cardCanvas) {
+        const cCtx = cardCanvas.getContext('2d');
+        cCtx.clearRect(0, 0, 250, 300);
+        cCtx.drawImage(frameCanvas, 0, 0);
+      }
+      if (index === currentPlayIdx) drawPlayerCanvas();
+    }
+
+    function flipAllFrames() {
+      const count = playFrames.length;
+      for (let i = 0; i < count; i++) {
+        flipSingleFrame(i);
+      }
+      globalFlipActive = !globalFlipActive;
+      const btn = document.getElementById('flip-btn');
+      if (globalFlipActive) {
+        btn.textContent = '🔄 Flipped (click to restore)';
+        btn.classList.add('active');
+      } else {
+        btn.textContent = '🔄 Flip All Frames';
+        btn.classList.remove('active');
+      }
+    }
+
+    function copyDirectionReport() {
+      const char = document.getElementById('char-select').value;
+      const mode = document.getElementById('mode-select').value;
+      const dir = document.getElementById('dir-select').value;
+      const count = playFrames.length;
+      const modeLabel = modeLabels[mode] || mode;
+      const flipStatus = globalFlipActive ? 'FLIPPED (frames are mirrored from original)' : 'ORIGINAL (not flipped)';
+      const report = [
+        `=== DIRECTION REPORT ===`,
+        `Character : ${char}`,
+        `Animation : ${modeLabel} (mode: ${mode})`,
+        `Direction : ${dir}`,
+        `Frames    : ${count}`,
+        `Flip State: ${flipStatus}`,
+        ``,
+        `What I see on screen right now:`,
+        `  - The animation appears to be facing: [fill in: LEFT / RIGHT]`,
+        `  - Is this CORRECT for "${dir}" direction? [fill in: YES / NO]`,
+        ``,
+        `Action needed:`,
+        `  - If WRONG: please mirror the ${mode}_${dir} files on disk for ${char}`,
+        `  - If CORRECT: no change needed`,
+        `========================`,
+      ].join('\n');
+
+      document.getElementById('dir-report-text').value = report;
+      document.getElementById('dir-report-panel').style.display = 'block';
+    }
+
     // Initial render setup
-    onConfigChange();
+    onConfigChange(true);
   </script>
 </body>
 </html>

@@ -12,3 +12,6 @@
 ## July 29, 2026
 - Optimized offscreen cache thresholds, disabling on-the-fly cache allocations to eliminate frame-rate stutters.
 
+## July 30, 2026
+- Added directional, frame, and wall upgrade preview utility files to help trace sprite alignment.
+

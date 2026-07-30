@@ -167,11 +167,12 @@
       { character: 'bubu', mode: 'idle', count: 13, swapped: false },
       { character: 'bubu', mode: 'idle2', count: 25, swapped: false },
       { character: 'bubu', mode: 'run', count: 16, swapped: false },
-      { character: 'bubu', mode: 'attack', count: 6, swapped: false },
+      { character: 'bubu', mode: 'attack', count: 10, swapped: false },
       { character: 'bubu', mode: 'hit', count: 16, swapped: false },
       { character: 'dudu', mode: 'idle', count: 12, swapped: false },
+      { character: 'dudu', mode: 'idle2', count: 13, swapped: false },
       { character: 'dudu', mode: 'run', count: 12, swapped: false },
-      { character: 'dudu', mode: 'attack', count: 6, swapped: false },
+      { character: 'dudu', mode: 'attack', count: 5, swapped: false },
       { character: 'dudu', mode: 'hit', count: 24, swapped: false }
     ];
 
@@ -265,11 +266,15 @@
 
       for (let i = 0; i < row.count; i++) {
         const imgL = new Image();
-        imgL.src = `assets/${row.character}_highres/${row.mode}_left_frame_${i}.png`;
+        imgL.src = row.mode === "idle2"
+          ? `assets/${row.character}_highres/${row.mode}_front_frame_${i}.png`
+          : `assets/${row.character}_highres/${row.mode}_left_frame_${i}.png`;
         leftFrames.push(imgL);
 
         const imgR = new Image();
-        imgR.src = `assets/${row.character}_highres/${row.mode}_right_frame_${i}.png`;
+        imgR.src = row.mode === "idle2"
+          ? `assets/${row.character}_highres/${row.mode}_front_frame_${i}.png`
+          : `assets/${row.character}_highres/${row.mode}_right_frame_${i}.png`;
         rightFrames.push(imgR);
       }
 
@@ -282,10 +287,26 @@
         const drawRightFrame = config[rowIndex].swapped ? leftFrames[frameIndex] : rightFrames[frameIndex];
 
         if (drawLeftFrame && drawLeftFrame.complete) {
-          leftCtx.drawImage(drawLeftFrame, 0, 0);
+          if (row.mode === "idle2" && row.character === "bubu") {
+            leftCtx.save();
+            leftCtx.translate(250, 0);
+            leftCtx.scale(-1, 1);
+            leftCtx.drawImage(drawLeftFrame, 0, 0);
+            leftCtx.restore();
+          } else {
+            leftCtx.drawImage(drawLeftFrame, 0, 0);
+          }
         }
         if (drawRightFrame && drawRightFrame.complete) {
-          rightCtx.drawImage(drawRightFrame, 0, 0);
+          if (row.mode === "idle2" && row.character === "dudu") {
+            rightCtx.save();
+            rightCtx.translate(250, 0);
+            rightCtx.scale(-1, 1);
+            rightCtx.drawImage(drawRightFrame, 0, 0);
+            rightCtx.restore();
+          } else {
+            rightCtx.drawImage(drawRightFrame, 0, 0);
+          }
         }
 
         frameIndex = (frameIndex + 1) % row.count;
