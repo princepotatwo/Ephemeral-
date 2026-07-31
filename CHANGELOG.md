@@ -15,3 +15,6 @@
 ## July 30, 2026
 - Added directional, frame, and wall upgrade preview utility files to help trace sprite alignment.
 
+## July 31, 2026
+- Cleaned up duplicate/temporary asset filenames in local workspace to keep the structure clear.
+
