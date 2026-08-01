@@ -18,3 +18,6 @@
 ## July 31, 2026
 - Cleaned up duplicate/temporary asset filenames in local workspace to keep the structure clear.
 
+## August 1, 2026
+- Adjusted rendering layering: world-space rain now renders behind the night vignette, and screen-space gloom sits underneath biome filters.
+
