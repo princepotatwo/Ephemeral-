@@ -21,3 +21,6 @@
 ## August 1, 2026
 - Adjusted rendering layering: world-space rain now renders behind the night vignette, and screen-space gloom sits underneath biome filters.
 
+## August 2, 2026
+- Upgraded Service Worker cache version parameters to correctly invalidate old cached resources.
+
