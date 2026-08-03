@@ -24,3 +24,6 @@
 ## August 2, 2026
 - Upgraded Service Worker cache version parameters to correctly invalidate old cached resources.
 
+## August 3, 2026
+- Implemented dynamic wind-sway physics for all trees and vegetation to respond in unison during storms.
+
