@@ -27,3 +27,6 @@
 ## August 3, 2026
 - Implemented dynamic wind-sway physics for all trees and vegetation to respond in unison during storms.
 
+## August 4, 2026
+- Added dynamic leaf-rustle speedup scaling (up to 2.2x speed) depending on wind intensity.
+
