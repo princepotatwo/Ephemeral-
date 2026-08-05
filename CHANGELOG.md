@@ -30,3 +30,6 @@
 ## August 4, 2026
 - Added dynamic leaf-rustle speedup scaling (up to 2.2x speed) depending on wind intensity.
 
+## August 5, 2026
+- Integrated Web Audio API white noise lowpass frequency and gain modulation matching the visual sways.
+
