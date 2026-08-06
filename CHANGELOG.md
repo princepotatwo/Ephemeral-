@@ -33,3 +33,6 @@
 ## August 5, 2026
 - Integrated Web Audio API white noise lowpass frequency and gain modulation matching the visual sways.
 
+## August 6, 2026
+- Added windForce decay on storm termination to let trees smoothly settle back upright instead of freezing.
+
