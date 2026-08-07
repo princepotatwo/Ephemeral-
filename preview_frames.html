@@ -692,7 +692,7 @@
             frameCtx.scale(-1, 1);
           }
           
-          const px = Math.max(0, (fw - img.width) // 2);
+          const px = Math.max(0, Math.floor((fw - img.width) / 2));
           const py = Math.max(0, fh - img.height);
           frameCtx.drawImage(img, px, py);
           frameCtx.restore();
