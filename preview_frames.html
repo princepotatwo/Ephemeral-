@@ -387,6 +387,54 @@
               *Pause the animation, turn Erase Mode ON, and drag directly on the canvas to erase unwanted details.
             </span>
           </div>
+
+          <!-- Crop & Offset Adjuster -->
+          <div class="crop-offset-panel" style="background: #151a24; border: 1.5px solid #ffb74d; border-radius: 8px; padding: 12px; margin-top: 12px; width: 100%; box-sizing: border-box; text-align: left;">
+            <label style="color: #ffb74d; font-size: 0.85rem; display: block; margin-bottom: 8px; font-weight: bold;">📐 Crop & Position Offset Adjuster</label>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+              <div class="control-group" style="margin: 0;">
+                <label for="crop-x" style="font-size: 0.72rem; color: #b0bec5; font-weight: normal;">Crop X: <span id="crop-x-val">0</span>px</label>
+                <input type="range" id="crop-x" min="0" max="250" value="0" oninput="updateCropControls()" style="padding: 2px;">
+              </div>
+              <div class="control-group" style="margin: 0;">
+                <label for="crop-y" style="font-size: 0.72rem; color: #b0bec5; font-weight: normal;">Crop Y: <span id="crop-y-val">0</span>px</label>
+                <input type="range" id="crop-y" min="0" max="300" value="0" oninput="updateCropControls()" style="padding: 2px;">
+              </div>
+              <div class="control-group" style="margin: 0;">
+                <label for="crop-w" style="font-size: 0.72rem; color: #b0bec5; font-weight: normal;">Crop W: <span id="crop-w-val">250</span>px</label>
+                <input type="range" id="crop-w" min="10" max="250" value="250" oninput="updateCropControls()" style="padding: 2px;">
+              </div>
+              <div class="control-group" style="margin: 0;">
+                <label for="crop-h" style="font-size: 0.72rem; color: #b0bec5; font-weight: normal;">Crop H: <span id="crop-h-val">300</span>px</label>
+                <input type="range" id="crop-h" min="10" max="300" value="300" oninput="updateCropControls()" style="padding: 2px;">
+              </div>
+              <div class="control-group" style="margin: 0;">
+                <label for="offset-x" style="font-size: 0.72rem; color: #b0bec5; font-weight: normal;">Offset X: <span id="offset-x-val">0</span>px</label>
+                <input type="range" id="offset-x" min="-100" max="100" value="0" oninput="updateCropControls()" style="padding: 2px;">
+              </div>
+              <div class="control-group" style="margin: 0;">
+                <label for="offset-y" style="font-size: 0.72rem; color: #b0bec5; font-weight: normal;">Offset Y: <span id="offset-y-val">0</span>px</label>
+                <input type="range" id="offset-y" min="-100" max="100" value="0" oninput="updateCropControls()" style="padding: 2px;">
+              </div>
+            </div>
+            
+            <div style="display: flex; gap: 8px; align-items: center; margin-top: 10px;">
+              <input type="checkbox" id="show-crop-box" checked onchange="drawPlayerCanvas()" style="cursor: pointer;">
+              <label for="show-crop-box" style="font-size: 0.75rem; color: #b0bec5; font-weight: normal; cursor: pointer; user-select: none;">Show Crop Box Bounding Overlay</label>
+            </div>
+            
+            <div style="display: flex; gap: 8px; margin-top: 10px;">
+              <button onclick="applyCropOffset()" style="background: #1b4332; color: #d8f3dc; border-color: #40916c; flex: 1; padding: 6px 10px; font-size: 0.75rem;">Apply Crop & Offset</button>
+              <button onclick="resetCropOffset()" style="background: #2b2b36; color: #cfd8dc; border-color: #455a64; flex: 1; padding: 6px 10px; font-size: 0.75rem;">Reset Inputs</button>
+            </div>
+          </div>
+
+          <!-- Modifications Export Code Block -->
+          <div class="direction-report-panel" id="mods-export-panel" style="background: #1b1625; border: 1.5px solid #9c27b0; border-radius: 8px; padding: 12px 14px; width: 100%; margin-top: 12px; box-sizing: border-box; text-align: left;">
+            <label style="color:#e040fb; font-size:0.85rem; display:block; margin-bottom:6px; font-weight: bold;">📝 Sprite Modifications Config (Copy & Send me)</label>
+            <textarea id="mods-export-text" readonly style="width: 100%; background: #0c0812; color: #e040fb; border: 1px solid #7b1fa2; border-radius: 4px; font-size: 0.72rem; font-family: monospace; padding: 6px; box-sizing: border-box; resize: vertical; min-height: 80px;"></textarea>
+            <button onclick="navigator.clipboard.writeText(document.getElementById('mods-export-text').value).then(()=>{this.textContent='✅ Copied!'; setTimeout(()=>this.textContent='Copy Code',1500)})" style="margin-top:6px; font-size:0.75rem; padding:4px 10px; background: #4a125c; border-color: #ae3ec7; color: #fce4ec;">Copy Code</button>
+          </div>
         </div>
       </div>
     </div>
@@ -720,6 +768,8 @@
 
     async function saveFrameToServer(index) {
       const char = document.getElementById('char-select').value;
+      const mode = document.getElementById('mode-select').value;
+      const dir = document.getElementById('dir-select').value;
       const frameCanvas = playFrames[index];
       if (!frameCanvas) return;
       
@@ -731,7 +781,7 @@
           headers: {
             'Content-Type': 'application/json'
           },
-          body: JSON.stringify({ char: char, index: index, image: imgDataUrl })
+          body: JSON.stringify({ char: char, mode: mode, dir: dir, index: index, image: imgDataUrl })
         });
         const result = await response.json();
         if (result.status === "success") {
@@ -784,6 +834,133 @@
       const frameCanvas = playFrames[currentPlayIdx];
       if (frameCanvas) {
         playerCtx.drawImage(frameCanvas, 0, 0);
+      }
+
+      const showCropBox = document.getElementById("show-crop-box").checked;
+      if (showCropBox) {
+        const cx = parseInt(document.getElementById("crop-x").value);
+        const cy = parseInt(document.getElementById("crop-y").value);
+        const cw = parseInt(document.getElementById("crop-w").value);
+        const ch = parseInt(document.getElementById("crop-h").value);
+        
+        playerCtx.save();
+        playerCtx.strokeStyle = "rgba(255, 183, 77, 0.9)";
+        playerCtx.lineWidth = 1.5;
+        playerCtx.setLineDash([4, 4]);
+        playerCtx.strokeRect(cx, cy, cw, ch);
+        
+        // Handles
+        playerCtx.fillStyle = "#ffb74d";
+        playerCtx.fillRect(cx - 3, cy - 3, 6, 6);
+        playerCtx.fillRect(cx + cw - 3, cy - 3, 6, 6);
+        playerCtx.fillRect(cx - 3, cy + ch - 3, 6, 6);
+        playerCtx.fillRect(cx + cw - 3, cy + ch - 3, 6, 6);
+        playerCtx.restore();
+      }
+    }
+
+    function updateCropControls() {
+      const cx = parseInt(document.getElementById("crop-x").value);
+      const cy = parseInt(document.getElementById("crop-y").value);
+      const cw = parseInt(document.getElementById("crop-w").value);
+      const ch = parseInt(document.getElementById("crop-h").value);
+      const ox = parseInt(document.getElementById("offset-x").value);
+      const oy = parseInt(document.getElementById("offset-y").value);
+
+      document.getElementById("crop-x-val").textContent = cx;
+      document.getElementById("crop-y-val").textContent = cy;
+      document.getElementById("crop-w-val").textContent = cw;
+      document.getElementById("crop-h-val").textContent = ch;
+      document.getElementById("offset-x-val").textContent = ox;
+      document.getElementById("offset-y-val").textContent = oy;
+
+      drawPlayerCanvas();
+    }
+
+    function resetCropOffset() {
+      document.getElementById("crop-x").value = 0;
+      document.getElementById("crop-y").value = 0;
+      document.getElementById("crop-w").value = 250;
+      document.getElementById("crop-h").value = 300;
+      document.getElementById("offset-x").value = 0;
+      document.getElementById("offset-y").value = 0;
+      updateCropControls();
+    }
+
+    const sessionMods = [];
+
+    function logModification(index, cx, cy, cw, ch, ox, oy) {
+      const char = document.getElementById('char-select').value;
+      const mode = document.getElementById('mode-select').value;
+      const dir = document.getElementById('dir-select').value;
+      
+      const existingIdx = sessionMods.findIndex(m => m.char === char && m.mode === mode && m.dir === dir && m.index === index);
+      
+      const modData = {
+        char,
+        mode,
+        dir,
+        index,
+        crop: { x: cx, y: cy, w: cw, h: ch },
+        offset: { x: ox, y: oy }
+      };
+      
+      if (existingIdx >= 0) {
+        sessionMods[existingIdx] = modData;
+      } else {
+        sessionMods.push(modData);
+      }
+      
+      updateModsExportText();
+    }
+
+    function updateModsExportText() {
+      document.getElementById("mods-export-text").value = JSON.stringify(sessionMods, null, 2);
+    }
+
+    function applyCropOffset() {
+      const frameCanvas = playFrames[currentPlayIdx];
+      if (!frameCanvas) return;
+      
+      const cx = parseInt(document.getElementById("crop-x").value);
+      const cy = parseInt(document.getElementById("crop-y").value);
+      const cw = parseInt(document.getElementById("crop-w").value);
+      const ch = parseInt(document.getElementById("crop-h").value);
+      const ox = parseInt(document.getElementById("offset-x").value);
+      const oy = parseInt(document.getElementById("offset-y").value);
+      
+      const tmp = document.createElement("canvas");
+      tmp.width = 250;
+      tmp.height = 300;
+      const tmpCtx = tmp.getContext("2d");
+      
+      // Draw the cropped region shifted by offset
+      tmpCtx.drawImage(frameCanvas, cx, cy, cw, ch, cx + ox, cy + oy, cw, ch);
+      
+      const fCtx = frameCanvas.getContext("2d");
+      fCtx.clearRect(0, 0, 250, 300);
+      fCtx.drawImage(tmp, 0, 0);
+      
+      // Sync to card canvas
+      const cardCanvas = document.getElementById(`canvas-${currentPlayIdx}`);
+      if (cardCanvas) {
+        const cCtx = cardCanvas.getContext("2d");
+        cCtx.clearRect(0, 0, 250, 300);
+        cCtx.drawImage(frameCanvas, 0, 0);
+      }
+      
+      logModification(currentPlayIdx, cx, cy, cw, ch, ox, oy);
+      drawPlayerCanvas();
+      
+      // Feedback flash on card
+      const card = document.querySelectorAll('.frame-card')[currentPlayIdx];
+      if (card) {
+        card.style.transition = 'none';
+        card.style.background = '#004d40';
+        setTimeout(() => {
+          card.style.transition = 'background 0.5s ease';
+          card.style.background = '#1e1e24';
+        }, 200);
       }
     }
 
