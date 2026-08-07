@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Knight Animation Preview</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0d0d12;
+      color: #e2deff;
+      font-family: 'Inter', system-ui, sans-serif;
+      padding: 32px 24px;
+      min-height: 100vh;
+    }
+    h1 {
+      font-size: 28px; font-weight: 800; letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #a78bfa, #60a5fa, #f472b6);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin-bottom: 6px;
+    }
+    .subtitle { font-size: 13px; color: #6b7280; margin-bottom: 32px; }
+    .knight-tabs {
+      display: flex; gap: 10px; margin-bottom: 32px;
+    }
+    .knight-tab {
+      padding: 10px 24px; border-radius: 8px; border: 1.5px solid #2d2a45;
+      background: #1a1830; color: #9ca3af; font-weight: 700; font-size: 14px;
+      cursor: pointer; transition: all 0.18s;
+    }
+    .knight-tab:hover { border-color: #6b7280; color: #e2deff; }
+    .knight-tab.active { color: #fff; border-color: transparent; }
+    .knight-tab.orange.active { background: linear-gradient(135deg, #c2590a, #f97316); }
+    .knight-tab.green.active  { background: linear-gradient(135deg, #15803d, #4ade80); }
+    .knight-tab.blue.active   { background: linear-gradient(135deg, #1d4ed8, #60a5fa); }
+
+    .section-title {
+      font-size: 11px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase;
+      color: #6b7280; margin: 28px 0 14px; padding-bottom: 8px;
+      border-bottom: 1px solid #1e1b33;
+    }
+    .anim-grid {
+      display: flex; flex-wrap: wrap; gap: 20px; margin-bottom: 8px;
+    }
+    .anim-card {
+      background: #14121f; border: 1.5px solid #1e1b33; border-radius: 12px;
+      padding: 16px; min-width: 190px; transition: border-color 0.18s;
+    }
+    .anim-card:hover { border-color: #4b4580; }
+    .anim-label {
+      font-size: 11px; font-weight: 700; color: #a78bfa; margin-bottom: 10px;
+      text-transform: uppercase; letter-spacing: 1px;
+    }
+    .canvas-wrap {
+      background: #0a0812; border-radius: 8px; border: 1px dashed #1e1b33;
+      display: flex; align-items: center; justify-content: center;
+      padding: 12px; margin-bottom: 10px; min-height: 96px;
+      position: relative;
+    }
+    canvas.preview { image-rendering: pixelated; }
+    .frame-strip {
+      display: flex; gap: 3px; overflow-x: auto; padding-bottom: 4px;
+      scrollbar-width: thin; scrollbar-color: #2d2a45 transparent;
+    }
+    .frame-strip canvas {
+      image-rendering: pixelated; border: 1.5px solid #1e1b33; border-radius: 3px;
+      cursor: pointer; flex-shrink: 0; transition: border-color 0.12s;
+    }
+    .frame-strip canvas:hover { border-color: #6b7280; }
+    .frame-strip canvas.active { border-color: #a78bfa; }
+    .card-meta {
+      display: flex; align-items: center; justify-content: space-between; margin-top: 8px;
+    }
+    .btn {
+      background: #2a2540; border: 1px solid #3d3860; color: #c4b5fd;
+      padding: 3px 10px; border-radius: 5px; cursor: pointer; font-size: 11px;
+      font-weight: 600; font-family: inherit; transition: background 0.15s;
+    }
+    .btn:hover { background: #3d3860; }
+    .meta-text { font-size: 10px; color: #4b4580; }
+    .err { font-size: 11px; color: #ef4444; text-align: center; padding: 12px; }
+  </style>
+</head>
+<body>
+  <h1>⚔️ Knight Animation Preview</h1>
+  <p class="subtitle">Slicing directly from <code>assets/knight_orange|green|blue/spritesheet.png</code> — 210×148 px per frame · 28 animation rows</p>
+
+  <div class="knight-tabs">
+    <button class="knight-tab orange active" onclick="selectKnight('orange', this)">🟠 Orange Knight</button>
+    <button class="knight-tab green"         onclick="selectKnight('green', this)">🟢 Green Knight</button>
+    <button class="knight-tab blue"          onclick="selectKnight('blue', this)">🔵 Blue Knight</button>
+  </div>
+
+  <div id="root"></div>
+
+  <script>
+    // Mirrors the metadata from spritesheets_metadata.json
+    const METADATA = {
+      knight_orange: {
+        frameWidth: 210, frameHeight: 148,
+        animations: {
+          "attack-back":   { row: 0,  count: 8 },
+          "attack-front":  { row: 1,  count: 8 },
+          "attack-left":   { row: 2,  count: 8 },
+          "attack-right":  { row: 3,  count: 8 },
+          "defense-back":  { row: 4,  count: 4 },
+          "defense-front": { row: 5,  count: 5 },
+          "defense-left":  { row: 6,  count: 5 },
+          "defense-right": { row: 7,  count: 5 },
+          "die-back":      { row: 8,  count: 8 },
+          "die-front":     { row: 9,  count: 8 },
+          "die-left":      { row: 10, count: 8 },
+          "die-right":     { row: 11, count: 8 },
+          "hit-back":      { row: 12, count: 6 },
+          "hit-front":     { row: 13, count: 5 },
+          "hit-left":      { row: 14, count: 8 },
+          "hit-right":     { row: 15, count: 8 },
+          "idle-back":     { row: 16, count: 8 },
+          "idle-front":    { row: 17, count: 8 },
+          "idle-left":     { row: 18, count: 8 },
+          "idle-right":    { row: 19, count: 8 },
+          "run-back":      { row: 20, count: 8 },
+          "run-front":     { row: 21, count: 8 },
+          "run-left":      { row: 22, count: 8 },
+          "run-right":     { row: 23, count: 8 },
+          "special_attack-back":  { row: 24, count: 13 },
+          "special_attack-front": { row: 25, count: 15 },
+          "special_attack-left":  { row: 26, count: 15 },
+          "special_attack-right": { row: 27, count: 15 },
+        }
+      },
+      knight_green: {
+        frameWidth: 210, frameHeight: 148,
+        animations: {
+          "attack-back":   { row: 0,  count: 8 },
+          "attack-front":  { row: 1,  count: 8 },
+          "attack-left":   { row: 2,  count: 8 },
+          "attack-right":  { row: 3,  count: 8 },
+          "defense-back":  { row: 4,  count: 4 },
+          "defense-front": { row: 5,  count: 5 },
+          "defense-left":  { row: 6,  count: 5 },
+          "defense-right": { row: 7,  count: 5 },
+          "die-back":      { row: 8,  count: 8 },
+          "die-front":     { row: 9,  count: 8 },
+          "die-left":      { row: 10, count: 8 },
+          "die-right":     { row: 11, count: 8 },
+          "hit-back":      { row: 12, count: 6 },
+          "hit-front":     { row: 13, count: 5 },
+          "hit-left":      { row: 14, count: 8 },
+          "hit-right":     { row: 15, count: 8 },
+          "idle-back":     { row: 16, count: 8 },
+          "idle-front":    { row: 17, count: 8 },
+          "idle-left":     { row: 18, count: 8 },
+          "idle-right":    { row: 19, count: 8 },
+          "run-back":      { row: 20, count: 8 },
+          "run-front":     { row: 21, count: 8 },
+          "run-left":      { row: 22, count: 8 },
+          "run-right":     { row: 23, count: 8 },
+          "special_attack-back":  { row: 24, count: 6 },
+          "special_attack-front": { row: 25, count: 6 },
+          "special_attack-left":  { row: 26, count: 15 },
+          "special_attack-right": { row: 27, count: 15 },
+        }
+      },
+      knight_blue: {
+        frameWidth: 210, frameHeight: 148,
+        animations: {
+          "attack-back":   { row: 0,  count: 8 },
+          "attack-front":  { row: 1,  count: 8 },
+          "attack-left":   { row: 2,  count: 8 },
+          "attack-right":  { row: 3,  count: 8 },
+          "defense-back":  { row: 4,  count: 4 },
+          "defense-front": { row: 5,  count: 5 },
+          "defense-left":  { row: 6,  count: 5 },
+          "defense-right": { row: 7,  count: 5 },
+          "die-back":      { row: 8,  count: 8 },
+          "die-front":     { row: 9,  count: 8 },
+          "die-left":      { row: 10, count: 8 },
+          "die-right":     { row: 11, count: 8 },
+          "hit-back":      { row: 12, count: 8 },
+          "hit-front":     { row: 13, count: 8 },
+          "hit-left":      { row: 14, count: 8 },
+          "hit-right":     { row: 15, count: 8 },
+          "idle-back":     { row: 16, count: 8 },
+          "idle-front":    { row: 17, count: 8 },
+          "idle-left":     { row: 18, count: 8 },
+          "idle-right":    { row: 19, count: 8 },
+          "run-back":      { row: 20, count: 8 },
+          "run-front":     { row: 21, count: 8 },
+          "run-left":      { row: 22, count: 8 },
+          "run-right":     { row: 23, count: 8 },
+          "special_attack-back":  { row: 24, count: 14 },
+          "special_attack-front": { row: 25, count: 14 },
+          "special_attack-left":  { row: 26, count: 15 },
+          "special_attack-right": { row: 27, count: 15 },
+        }
+      },
+    };
+
+    // Animation groups for clean sectioning
+    const SECTIONS = [
+      { label: "Idle",           anims: ["idle-front","idle-back","idle-left","idle-right"] },
+      { label: "Run / Walk",     anims: ["run-front","run-back","run-left","run-right"] },
+      { label: "Attack",         anims: ["attack-front","attack-back","attack-left","attack-right"] },
+      { label: "Special Attack", anims: ["special_attack-front","special_attack-back","special_attack-left","special_attack-right"] },
+      { label: "Defense",        anims: ["defense-front","defense-back","defense-left","defense-right"] },
+      { label: "Hit",            anims: ["hit-front","hit-back","hit-left","hit-right"] },
+      { label: "Die",            anims: ["die-front","die-back","die-left","die-right"] },
+    ];
+
+    // Preview display scale — show at 50% of 210x148 = 105x74 per frame
+    const DISPLAY_SCALE = 0.6;
+    const THUMB = 24;
+    const FPS = 8; // 8 fps animation speed
+    let currentKnight = 'orange';
+    let allTimers = [];
+
+    function clearTimers() {
+      allTimers.forEach(id => clearInterval(id));
+      allTimers = [];
+    }
+
+    function makeCard(img, meta, animName, animData) {
+      const { frameWidth: fw, frameHeight: fh } = meta;
+      const { row, count } = animData;
+      const dw = Math.round(fw * DISPLAY_SCALE);
+      const dh = Math.round(fh * DISPLAY_SCALE);
+
+      const card = document.createElement('div');
+      card.className = 'anim-card';
+      card.innerHTML = `
+        <div class="anim-label">${animName.replace(/_/g,' ')}</div>
+        <div class="canvas-wrap">
+          <canvas class="preview" width="${dw}" height="${dh}"></canvas>
+        </div>
+        <div class="frame-strip"></div>
+        <div class="card-meta">
+          <button class="btn">⏸</button>
+          <span class="meta-text">— / ${count} · ${fw}×${fh}</span>
+        </div>
+      `;
+
+      const canvas = card.querySelector('canvas.preview');
+      const ctx = canvas.getContext('2d');
+      const strip = card.querySelector('.frame-strip');
+      const btn = card.querySelector('.btn');
+      const metaText = card.querySelector('.meta-text');
+
+      let fi = 0, playing = true, activeThumb = null;
+
+      const drawFrame = (targetCtx, targetW, targetH, frameIdx) => {
+        targetCtx.clearRect(0, 0, targetW, targetH);
+        targetCtx.imageSmoothingEnabled = false;
+        targetCtx.drawImage(
+          img,
+          frameIdx * fw, row * fh, fw, fh,  // source: col=frameIdx, row=row
+          0, 0, targetW, targetH             // destination
+        );
+      };
+
+      // Build thumbnail strip
+      for (let i = 0; i < count; i++) {
+        const t = document.createElement('canvas');
+        t.width = THUMB; t.height = THUMB;
+        const tc = t.getContext('2d');
+        drawFrame(tc, THUMB, THUMB, i);
+        t.title = `Frame ${i + 1}`;
+        t.onclick = ((idx, el) => () => {
+          fi = idx; playing = false; btn.textContent = '▶';
+          if (activeThumb) activeThumb.classList.remove('active');
+          el.classList.add('active'); activeThumb = el;
+          drawFrame(ctx, dw, dh, fi);
+          metaText.textContent = `f${fi + 1}/${count} · ${fw}×${fh}`;
+        })(i, t);
+        if (i === 0) { t.classList.add('active'); activeThumb = t; }
+        strip.appendChild(t);
+      }
+
+      // Draw first frame
+      drawFrame(ctx, dw, dh, 0);
+      metaText.textContent = `f1/${count} · ${fw}×${fh}`;
+
+      // Animation loop
+      const timer = setInterval(() => {
+        if (!playing) return;
+        fi = (fi + 1) % count;
+        if (activeThumb) activeThumb.classList.remove('active');
+        activeThumb = strip.children[fi];
+        if (activeThumb) activeThumb.classList.add('active');
+        drawFrame(ctx, dw, dh, fi);
+        metaText.textContent = `f${fi + 1}/${count} · ${fw}×${fh}`;
+      }, 1000 / FPS);
+      allTimers.push(timer);
+
+      btn.onclick = () => { playing = !playing; btn.textContent = playing ? '⏸' : '▶'; };
+
+      return card;
+    }
+
+    function renderKnight(name) {
+      clearTimers();
+      const root = document.getElementById('root');
+      root.innerHTML = '<p style="color:#6b7280;font-size:13px;padding:20px 0">Loading spritesheet…</p>';
+
+      const meta = METADATA[`knight_${name}`];
+      const img = new Image();
+      img.onload = () => {
+        root.innerHTML = '';
+        const sheetInfo = document.createElement('p');
+        sheetInfo.style.cssText = 'font-size:12px;color:#4b4580;margin-bottom:16px';
+        sheetInfo.textContent = `Spritesheet: ${img.naturalWidth}×${img.naturalHeight}px · ${Object.keys(meta.animations).length} animations · ${meta.frameWidth}×${meta.frameHeight} per frame`;
+        root.appendChild(sheetInfo);
+
+        for (const section of SECTIONS) {
+          const secTitle = document.createElement('div');
+          secTitle.className = 'section-title';
+          secTitle.textContent = section.label;
+          root.appendChild(secTitle);
+
+          const grid = document.createElement('div');
+          grid.className = 'anim-grid';
+          for (const animName of section.anims) {
+            const animData = meta.animations[animName];
+            if (!animData) continue;
+            grid.appendChild(makeCard(img, meta, animName, animData));
+          }
+          root.appendChild(grid);
+        }
+      };
+      img.onerror = () => {
+        root.innerHTML = `<div class="err">⚠ Could not load <code>assets/knight_${name}/spritesheet.png</code><br>Make sure the server is running on port 8080.</div>`;
+      };
+      img.src = `assets/knight_${name}/spritesheet.png`;
+    }
+
+    function selectKnight(name, el) {
+      currentKnight = name;
+      document.querySelectorAll('.knight-tab').forEach(t => t.classList.remove('active'));
+      el.classList.add('active');
+      renderKnight(name);
+    }
+
+    // Initial render
+    renderKnight('orange');
+  </script>
+</body>
+</html>
