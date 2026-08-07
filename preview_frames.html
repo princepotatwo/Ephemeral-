@@ -537,6 +537,51 @@
       const rp = document.getElementById('dir-report-panel');
       if (rp) rp.style.display = 'none';
 
+      // DYNAMIC CANVAS SIZE ADJUSTMENT BASED ON METADATA
+      const metaKey = char + "_highres";
+      const meta = spritesheetsMetadata[metaKey] || { frameWidth: 250, frameHeight: 300 };
+      const fw = meta.frameWidth;
+      const fh = meta.frameHeight;
+
+      // Update player canvas attributes and dimensions
+      playerCanvas.width = fw;
+      playerCanvas.height = fh;
+      playerCanvas.style.width = fw + "px";
+      playerCanvas.style.height = fh + "px";
+
+      // Also adjust the container wrapper to adapt to the new aspect ratio
+      const playerContainer = document.querySelector(".player-canvas-container");
+      if (playerContainer) {
+        playerContainer.style.width = Math.min(fw, 400) + "px";
+        playerContainer.style.height = Math.min(fh, 400) + "px";
+      }
+
+      // Update Crop & Position Slider Limits dynamically!
+      const cropX = document.getElementById("crop-x");
+      const cropY = document.getElementById("crop-y");
+      const cropW = document.getElementById("crop-w");
+      const cropH = document.getElementById("crop-h");
+      const offsetX = document.getElementById("offset-x");
+      const offsetY = document.getElementById("offset-y");
+
+      cropX.max = fw;
+      cropY.max = fh;
+      cropW.max = fw;
+      cropH.max = fh;
+      offsetX.min = -Math.round(fw/2);
+      offsetX.max = Math.round(fw/2);
+      offsetY.min = -Math.round(fh/2);
+      offsetY.max = Math.round(fh/2);
+
+      // Default slider values
+      cropX.value = 0;
+      cropY.value = 0;
+      cropW.value = fw;
+      cropH.value = fh;
+      offsetX.value = 0;
+      offsetY.value = 0;
+
+      updateCropControls();
       renderFrames();
     }
 
@@ -595,13 +640,19 @@
 
       playFrames = [];
 
+      const metaKey = char + "_highres";
+      const meta = spritesheetsMetadata[metaKey] || { frameWidth: 250, frameHeight: 300 };
+      const fw = meta.frameWidth;
+      const fh = meta.frameHeight;
+
       for (let i = 0; i < count; i++) {
         const card = document.createElement('div');
         card.className = 'frame-card';
+        card.style.width = Math.max(fw + 20, 140) + "px";
         card.innerHTML = `
           <div class="frame-number">Frame ${i}</div>
-          <div class="canvas-container">
-            <canvas id="canvas-${i}" width="250" height="300"></canvas>
+          <div class="canvas-container" style="width: ${Math.max(fw + 10, 110)}px; height: ${Math.max(fh + 10, 130)}px;">
+            <canvas id="canvas-${i}" width="${fw}" height="${fh}"></canvas>
           </div>
           <div class="frame-meta">${char}_highres</div>
           <button class="card-dl-btn" onclick="downloadSingleFrame(${i})">⬇️ Download PNG</button>
@@ -615,8 +666,8 @@
         
         // Create offscreen canvas for modification
         const frameCanvas = document.createElement('canvas');
-        frameCanvas.width = 250;
-        frameCanvas.height = 300;
+        frameCanvas.width = fw;
+        frameCanvas.height = fh;
         const frameCtx = frameCanvas.getContext('2d');
 
         const img = new Image();
@@ -629,7 +680,7 @@
         }
 
         img.onload = () => {
-          frameCtx.clearRect(0, 0, 250, 300);
+          frameCtx.clearRect(0, 0, fw, fh);
           frameCtx.save();
           let shouldMirror = false;
           if (mode === "attack") {
@@ -637,13 +688,16 @@
             if (char === "dudu" && dir === "right") shouldMirror = true;
           }
           if (shouldMirror) {
-            frameCtx.translate(250, 0);
+            frameCtx.translate(fw, 0);
             frameCtx.scale(-1, 1);
           }
-          frameCtx.drawImage(img, 0, 0);
+          
+          const px = Math.max(0, (fw - img.width) // 2);
+          const py = Math.max(0, fh - img.height);
+          frameCtx.drawImage(img, px, py);
           frameCtx.restore();
 
-          cardCtx.clearRect(0, 0, 250, 300);
+          cardCtx.clearRect(0, 0, fw, fh);
           cardCtx.drawImage(frameCanvas, 0, 0);
           
           if (i === currentPlayIdx) {
@@ -984,14 +1038,20 @@
     function flipSingleFrame(index) {
       const frameCanvas = playFrames[index];
       if (!frameCanvas) return;
+      const char = document.getElementById('char-select').value;
+      const metaKey = char + "_highres";
+      const meta = spritesheetsMetadata[metaKey] || { frameWidth: 250, frameHeight: 300 };
+      const fw = meta.frameWidth;
+      const fh = meta.frameHeight;
+
       const fCtx = frameCanvas.getContext('2d');
       const tmp = document.createElement('canvas');
-      tmp.width = 250; tmp.height = 300;
+      tmp.width = fw; tmp.height = fh;
       const tCtx = tmp.getContext('2d');
       tCtx.drawImage(frameCanvas, 0, 0);
-      fCtx.clearRect(0, 0, 250, 300);
+      fCtx.clearRect(0, 0, fw, fh);
       fCtx.save();
-      fCtx.translate(250, 0);
+      fCtx.translate(fw, 0);
       fCtx.scale(-1, 1);
       fCtx.drawImage(tmp, 0, 0);
       fCtx.restore();
@@ -1000,7 +1060,7 @@
       const cardCanvas = document.getElementById(`canvas-${index}`);
       if (cardCanvas) {
         const cCtx = cardCanvas.getContext('2d');
-        cCtx.clearRect(0, 0, 250, 300);
+        cCtx.clearRect(0, 0, fw, fh);
         cCtx.drawImage(frameCanvas, 0, 0);
       }
       if (index === currentPlayIdx) drawPlayerCanvas();
@@ -1051,8 +1111,19 @@
       document.getElementById('dir-report-panel').style.display = 'block';
     }
 
+    let spritesheetsMetadata = {};
+    async function loadMetadata() {
+      try {
+        const response = await fetch("assets/spritesheets_metadata.json?v=" + Date.now());
+        spritesheetsMetadata = await response.json();
+      } catch (err) {
+        console.error("Failed to load metadata:", err);
+      }
+      onConfigChange(true);
+    }
+
     // Initial render setup
-    onConfigChange(true);
+    loadMetadata();
   </script>
 </body>
 </html>
