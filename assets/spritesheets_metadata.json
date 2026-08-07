@@ -1,0 +1,9850 @@
+{
+  "pipoya_teacher_female_02": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "rgs_monster_square": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "kenney_chick": {
+    "frameWidth": 42,
+    "frameHeight": 42,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "pipoya_headmaster_female": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "kenney_walrus": {
+    "frameWidth": 42,
+    "frameHeight": 42,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "pipoya_su1_student_male_12": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "knight_green": {
+    "frameWidth": 210,
+    "frameHeight": 148,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 8
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 8
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 8
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 8
+      },
+      "defense-back": {
+        "row": 4,
+        "count": 4
+      },
+      "defense-front": {
+        "row": 5,
+        "count": 5
+      },
+      "defense-left": {
+        "row": 6,
+        "count": 5
+      },
+      "defense-right": {
+        "row": 7,
+        "count": 5
+      },
+      "die-back": {
+        "row": 8,
+        "count": 8
+      },
+      "die-front": {
+        "row": 9,
+        "count": 8
+      },
+      "die-left": {
+        "row": 10,
+        "count": 8
+      },
+      "die-right": {
+        "row": 11,
+        "count": 8
+      },
+      "hit-back": {
+        "row": 12,
+        "count": 6
+      },
+      "hit-front": {
+        "row": 13,
+        "count": 5
+      },
+      "hit-left": {
+        "row": 14,
+        "count": 8
+      },
+      "hit-right": {
+        "row": 15,
+        "count": 8
+      },
+      "idle-back": {
+        "row": 16,
+        "count": 8
+      },
+      "idle-front": {
+        "row": 17,
+        "count": 8
+      },
+      "idle-left": {
+        "row": 18,
+        "count": 8
+      },
+      "idle-right": {
+        "row": 19,
+        "count": 8
+      },
+      "run-back": {
+        "row": 20,
+        "count": 8
+      },
+      "run-front": {
+        "row": 21,
+        "count": 8
+      },
+      "run-left": {
+        "row": 22,
+        "count": 8
+      },
+      "run-right": {
+        "row": 23,
+        "count": 8
+      },
+      "special_attack-back": {
+        "row": 24,
+        "count": 6
+      },
+      "special_attack-front": {
+        "row": 25,
+        "count": 6
+      },
+      "special_attack-left": {
+        "row": 26,
+        "count": 15
+      },
+      "special_attack-right": {
+        "row": 27,
+        "count": 15
+      }
+    }
+  },
+  "blue_slime": {
+    "frameWidth": 64,
+    "frameHeight": 58,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "pipoya_teacher_female_03": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "pipoya_teacher_female_04": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "kenney_pig": {
+    "frameWidth": 42,
+    "frameHeight": 42,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "pig": {
+    "frameWidth": 54,
+    "frameHeight": 46,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "pipoya_su1_student_male_13": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "kenney_elephant": {
+    "frameWidth": 42,
+    "frameHeight": 42,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "kenney_whale": {
+    "frameWidth": 42,
+    "frameHeight": 42,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "kenney_rabbit": {
+    "frameWidth": 42,
+    "frameHeight": 42,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "pipoya_su1_student_female_11": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "kenney_chicken": {
+    "frameWidth": 42,
+    "frameHeight": 42,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "nekonin_pipo_nekonin019": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "nekonin_pipo_nekonin026": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "cutie_sheep": {
+    "frameWidth": 67,
+    "frameHeight": 63,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 8
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 8
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 8
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 8
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 3
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 3
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 3
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 3
+      },
+      "idle2-back": {
+        "row": 8,
+        "count": 8
+      },
+      "idle2-front": {
+        "row": 9,
+        "count": 8
+      },
+      "idle2-left": {
+        "row": 10,
+        "count": 8
+      },
+      "idle2-right": {
+        "row": 11,
+        "count": 8
+      },
+      "run-back": {
+        "row": 12,
+        "count": 8
+      },
+      "run-front": {
+        "row": 13,
+        "count": 8
+      },
+      "run-left": {
+        "row": 14,
+        "count": 8
+      },
+      "run-right": {
+        "row": 15,
+        "count": 8
+      }
+    }
+  },
+  "pipoya_su1_student_female_16": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "nekonin_pipo_nekonin021": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "nekonin_pipo_nekonin028": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "nekonin_pipo_nekonin017": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "pipoya_su1_student_female_18": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "nekonin_pipo_nekonin010": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "scary_zombie": {
+    "frameWidth": 64,
+    "frameHeight": 96,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "kenney_panda": {
+    "frameWidth": 42,
+    "frameHeight": 42,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "turtle": {
+    "frameWidth": 30,
+    "frameHeight": 30,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "nekonin_pipo_nekonin011": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "sprout_cat": {
+    "frameWidth": 42,
+    "frameHeight": 46,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "nekonin_pipo_nekonin029": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "nekonin_pipo_nekonin016": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "pipoya_su1_student_female_17": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "nekonin_pipo_nekonin020": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "kenney_zebra": {
+    "frameWidth": 42,
+    "frameHeight": 42,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "nekonin_pipo_nekonin018": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "pipoya_su1_student_female_10": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "nekonin_pipo_nekonin027": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "kenney_buffalo": {
+    "frameWidth": 42,
+    "frameHeight": 42,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "pipoya_teacher_male_01": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "fox": {
+    "frameWidth": 35,
+    "frameHeight": 32,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "kenney_dog": {
+    "frameWidth": 42,
+    "frameHeight": 42,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "nekonin_pipo_nekonin005": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "nekonin_pipo_nekonin002": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "kenney_hippo": {
+    "frameWidth": 42,
+    "frameHeight": 42,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "creature_bear": {
+    "frameWidth": 131,
+    "frameHeight": 113,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 6
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 6
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 6
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 6
+      },
+      "die-back": {
+        "row": 4,
+        "count": 8
+      },
+      "die-front": {
+        "row": 5,
+        "count": 8
+      },
+      "die-left": {
+        "row": 6,
+        "count": 8
+      },
+      "die-right": {
+        "row": 7,
+        "count": 8
+      },
+      "idle-back": {
+        "row": 8,
+        "count": 6
+      },
+      "idle-front": {
+        "row": 9,
+        "count": 6
+      },
+      "idle-left": {
+        "row": 10,
+        "count": 6
+      },
+      "idle-right": {
+        "row": 11,
+        "count": 6
+      },
+      "run-back": {
+        "row": 12,
+        "count": 6
+      },
+      "run-front": {
+        "row": 13,
+        "count": 6
+      },
+      "run-left": {
+        "row": 14,
+        "count": 6
+      },
+      "run-right": {
+        "row": 15,
+        "count": 6
+      }
+    }
+  },
+  "pipoya_su1_student_female_03": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "pipoya_su1_student_female_04": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "sheep": {
+    "frameWidth": 58,
+    "frameHeight": 50,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "kenney_owl": {
+    "frameWidth": 42,
+    "frameHeight": 42,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "dudu_pixel": {
+    "frameWidth": 113,
+    "frameHeight": 108,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 5
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 5
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 5
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 5
+      },
+      "hit-back": {
+        "row": 4,
+        "count": 24
+      },
+      "hit-front": {
+        "row": 5,
+        "count": 24
+      },
+      "hit-left": {
+        "row": 6,
+        "count": 24
+      },
+      "hit-right": {
+        "row": 7,
+        "count": 24
+      },
+      "idle-back": {
+        "row": 8,
+        "count": 12
+      },
+      "idle-front": {
+        "row": 9,
+        "count": 12
+      },
+      "idle-left": {
+        "row": 10,
+        "count": 12
+      },
+      "idle-right": {
+        "row": 11,
+        "count": 12
+      },
+      "idle2-back": {
+        "row": 12,
+        "count": 13
+      },
+      "idle2-front": {
+        "row": 13,
+        "count": 13
+      },
+      "idle2-left": {
+        "row": 14,
+        "count": 13
+      },
+      "idle2-right": {
+        "row": 15,
+        "count": 13
+      },
+      "idle_build-back": {
+        "row": 16,
+        "count": 10
+      },
+      "idle_build-front": {
+        "row": 17,
+        "count": 10
+      },
+      "idle_build-left": {
+        "row": 18,
+        "count": 10
+      },
+      "idle_build-right": {
+        "row": 19,
+        "count": 10
+      },
+      "run-back": {
+        "row": 20,
+        "count": 12
+      },
+      "run-front": {
+        "row": 21,
+        "count": 12
+      },
+      "run-left": {
+        "row": 22,
+        "count": 12
+      },
+      "run-right": {
+        "row": 23,
+        "count": 12
+      },
+      "run2-back": {
+        "row": 24,
+        "count": 4
+      },
+      "run2-front": {
+        "row": 25,
+        "count": 4
+      },
+      "run2-left": {
+        "row": 26,
+        "count": 4
+      },
+      "run2-right": {
+        "row": 27,
+        "count": 4
+      },
+      "run_build-back": {
+        "row": 28,
+        "count": 16
+      },
+      "run_build-front": {
+        "row": 29,
+        "count": 16
+      },
+      "run_build-left": {
+        "row": 30,
+        "count": 16
+      },
+      "run_build-right": {
+        "row": 31,
+        "count": 16
+      }
+    }
+  },
+  "gold_slime": {
+    "frameWidth": 64,
+    "frameHeight": 58,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "kenney_moose": {
+    "frameWidth": 42,
+    "frameHeight": 42,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "nekonin_pipo_nekonin032": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "pipoya_su1_student_female_05": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "owl": {
+    "frameWidth": 28,
+    "frameHeight": 24,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "pipoya_su1_student_female_02": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "nekonin_pipo_nekonin003": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "pipoya_pipo_xmaschara06": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "pipoya_pipo_xmaschara01": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "nekonin_pipo_nekonin004": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "bubu_highres": {
+    "frameWidth": 400,
+    "frameHeight": 400,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 10
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 10
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 10
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 10
+      },
+      "hit-back": {
+        "row": 4,
+        "count": 16
+      },
+      "hit-front": {
+        "row": 5,
+        "count": 16
+      },
+      "hit-left": {
+        "row": 6,
+        "count": 16
+      },
+      "hit-right": {
+        "row": 7,
+        "count": 16
+      },
+      "idle-back": {
+        "row": 8,
+        "count": 13
+      },
+      "idle-front": {
+        "row": 9,
+        "count": 13
+      },
+      "idle-left": {
+        "row": 10,
+        "count": 13
+      },
+      "idle-right": {
+        "row": 11,
+        "count": 13
+      },
+      "idle2-back": {
+        "row": 12,
+        "count": 25
+      },
+      "idle2-front": {
+        "row": 13,
+        "count": 25
+      },
+      "idle2-left": {
+        "row": 14,
+        "count": 25
+      },
+      "idle2-right": {
+        "row": 15,
+        "count": 25
+      },
+      "run-back": {
+        "row": 16,
+        "count": 16
+      },
+      "run-front": {
+        "row": 17,
+        "count": 16
+      },
+      "run-left": {
+        "row": 18,
+        "count": 16
+      },
+      "run-right": {
+        "row": 19,
+        "count": 16
+      }
+    }
+  },
+  "pipoya_su1_student_male_07": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "kenney_monkey": {
+    "frameWidth": 42,
+    "frameHeight": 42,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "axulart_cap_boy": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "knight_blue": {
+    "frameWidth": 210,
+    "frameHeight": 148,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 8
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 8
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 8
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 8
+      },
+      "defense-back": {
+        "row": 4,
+        "count": 4
+      },
+      "defense-front": {
+        "row": 5,
+        "count": 5
+      },
+      "defense-left": {
+        "row": 6,
+        "count": 5
+      },
+      "defense-right": {
+        "row": 7,
+        "count": 5
+      },
+      "die-back": {
+        "row": 8,
+        "count": 8
+      },
+      "die-front": {
+        "row": 9,
+        "count": 8
+      },
+      "die-left": {
+        "row": 10,
+        "count": 8
+      },
+      "die-right": {
+        "row": 11,
+        "count": 8
+      },
+      "hit-back": {
+        "row": 12,
+        "count": 8
+      },
+      "hit-front": {
+        "row": 13,
+        "count": 8
+      },
+      "hit-left": {
+        "row": 14,
+        "count": 8
+      },
+      "hit-right": {
+        "row": 15,
+        "count": 8
+      },
+      "idle-back": {
+        "row": 16,
+        "count": 8
+      },
+      "idle-front": {
+        "row": 17,
+        "count": 8
+      },
+      "idle-left": {
+        "row": 18,
+        "count": 8
+      },
+      "idle-right": {
+        "row": 19,
+        "count": 8
+      },
+      "run-back": {
+        "row": 20,
+        "count": 8
+      },
+      "run-front": {
+        "row": 21,
+        "count": 8
+      },
+      "run-left": {
+        "row": 22,
+        "count": 8
+      },
+      "run-right": {
+        "row": 23,
+        "count": 8
+      },
+      "special_attack-back": {
+        "row": 24,
+        "count": 14
+      },
+      "special_attack-front": {
+        "row": 25,
+        "count": 14
+      },
+      "special_attack-left": {
+        "row": 26,
+        "count": 15
+      },
+      "special_attack-right": {
+        "row": 27,
+        "count": 15
+      }
+    }
+  },
+  "bunny": {
+    "frameWidth": 42,
+    "frameHeight": 42,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "pipoya_su1_student_male_09": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "creature_slasher": {
+    "frameWidth": 435,
+    "frameHeight": 358,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 11
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 11
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 11
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 11
+      },
+      "die-back": {
+        "row": 4,
+        "count": 8
+      },
+      "die-front": {
+        "row": 5,
+        "count": 8
+      },
+      "die-left": {
+        "row": 6,
+        "count": 8
+      },
+      "die-right": {
+        "row": 7,
+        "count": 8
+      },
+      "idle-back": {
+        "row": 8,
+        "count": 8
+      },
+      "idle-front": {
+        "row": 9,
+        "count": 8
+      },
+      "idle-left": {
+        "row": 10,
+        "count": 8
+      },
+      "idle-right": {
+        "row": 11,
+        "count": 8
+      },
+      "run-back": {
+        "row": 12,
+        "count": 8
+      },
+      "run-front": {
+        "row": 13,
+        "count": 8
+      },
+      "run-left": {
+        "row": 14,
+        "count": 8
+      },
+      "run-right": {
+        "row": 15,
+        "count": 8
+      }
+    }
+  },
+  "bubu_pixel": {
+    "frameWidth": 67,
+    "frameHeight": 67,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 10
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 10
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 10
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 10
+      },
+      "hit-back": {
+        "row": 4,
+        "count": 16
+      },
+      "hit-front": {
+        "row": 5,
+        "count": 16
+      },
+      "hit-left": {
+        "row": 6,
+        "count": 16
+      },
+      "hit-right": {
+        "row": 7,
+        "count": 16
+      },
+      "idle-back": {
+        "row": 8,
+        "count": 13
+      },
+      "idle-front": {
+        "row": 9,
+        "count": 13
+      },
+      "idle-left": {
+        "row": 10,
+        "count": 13
+      },
+      "idle-right": {
+        "row": 11,
+        "count": 13
+      },
+      "idle2-back": {
+        "row": 12,
+        "count": 25
+      },
+      "idle2-front": {
+        "row": 13,
+        "count": 25
+      },
+      "idle2-left": {
+        "row": 14,
+        "count": 25
+      },
+      "idle2-right": {
+        "row": 15,
+        "count": 25
+      },
+      "run-back": {
+        "row": 16,
+        "count": 16
+      },
+      "run-front": {
+        "row": 17,
+        "count": 16
+      },
+      "run-left": {
+        "row": 18,
+        "count": 16
+      },
+      "run-right": {
+        "row": 19,
+        "count": 16
+      }
+    }
+  },
+  "rgs_base_square": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "knight_orange": {
+    "frameWidth": 210,
+    "frameHeight": 148,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 8
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 8
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 8
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 8
+      },
+      "defense-back": {
+        "row": 4,
+        "count": 4
+      },
+      "defense-front": {
+        "row": 5,
+        "count": 5
+      },
+      "defense-left": {
+        "row": 6,
+        "count": 5
+      },
+      "defense-right": {
+        "row": 7,
+        "count": 5
+      },
+      "die-back": {
+        "row": 8,
+        "count": 8
+      },
+      "die-front": {
+        "row": 9,
+        "count": 8
+      },
+      "die-left": {
+        "row": 10,
+        "count": 8
+      },
+      "die-right": {
+        "row": 11,
+        "count": 8
+      },
+      "hit-back": {
+        "row": 12,
+        "count": 6
+      },
+      "hit-front": {
+        "row": 13,
+        "count": 5
+      },
+      "hit-left": {
+        "row": 14,
+        "count": 8
+      },
+      "hit-right": {
+        "row": 15,
+        "count": 8
+      },
+      "idle-back": {
+        "row": 16,
+        "count": 8
+      },
+      "idle-front": {
+        "row": 17,
+        "count": 8
+      },
+      "idle-left": {
+        "row": 18,
+        "count": 8
+      },
+      "idle-right": {
+        "row": 19,
+        "count": 8
+      },
+      "run-back": {
+        "row": 20,
+        "count": 8
+      },
+      "run-front": {
+        "row": 21,
+        "count": 8
+      },
+      "run-left": {
+        "row": 22,
+        "count": 8
+      },
+      "run-right": {
+        "row": 23,
+        "count": 8
+      },
+      "special_attack-back": {
+        "row": 24,
+        "count": 13
+      },
+      "special_attack-front": {
+        "row": 25,
+        "count": 15
+      },
+      "special_attack-left": {
+        "row": 26,
+        "count": 15
+      },
+      "special_attack-right": {
+        "row": 27,
+        "count": 15
+      }
+    }
+  },
+  "sprout_chicken": {
+    "frameWidth": 34,
+    "frameHeight": 34,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "silksong_lifeblood_worm": {
+    "frameWidth": 584,
+    "frameHeight": 480,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 8
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 8
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 8
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 8
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 14
+      },
+      "run-front": {
+        "row": 9,
+        "count": 14
+      },
+      "run-left": {
+        "row": 10,
+        "count": 14
+      },
+      "run-right": {
+        "row": 11,
+        "count": 14
+      },
+      "skid-back": {
+        "row": 12,
+        "count": 4
+      },
+      "skid-front": {
+        "row": 13,
+        "count": 4
+      },
+      "skid-left": {
+        "row": 14,
+        "count": 4
+      },
+      "skid-right": {
+        "row": 15,
+        "count": 4
+      },
+      "stop-back": {
+        "row": 16,
+        "count": 4
+      },
+      "stop-front": {
+        "row": 17,
+        "count": 4
+      },
+      "stop-left": {
+        "row": 18,
+        "count": 4
+      },
+      "stop-right": {
+        "row": 19,
+        "count": 4
+      }
+    }
+  },
+  "pipoya_su1_student_male_08": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "pipoya_su1_student_male_01": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "pipoya_su1_student_male_06": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "kenney_parrot": {
+    "frameWidth": 42,
+    "frameHeight": 42,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "kenney_frog": {
+    "frameWidth": 42,
+    "frameHeight": 42,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "split_slime": {
+    "frameWidth": 64,
+    "frameHeight": 58,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "axulart_orange_girl": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "silksong_hornet": {
+    "frameWidth": 708,
+    "frameHeight": 321,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 6
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 6
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 6
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 6
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 6
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 6
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 6
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 6
+      },
+      "run-back": {
+        "row": 8,
+        "count": 10
+      },
+      "run-front": {
+        "row": 9,
+        "count": 10
+      },
+      "run-left": {
+        "row": 10,
+        "count": 10
+      },
+      "run-right": {
+        "row": 11,
+        "count": 10
+      },
+      "skid-back": {
+        "row": 12,
+        "count": 6
+      },
+      "skid-front": {
+        "row": 13,
+        "count": 6
+      },
+      "skid-left": {
+        "row": 14,
+        "count": 6
+      },
+      "skid-right": {
+        "row": 15,
+        "count": 6
+      },
+      "stop-back": {
+        "row": 16,
+        "count": 6
+      },
+      "stop-front": {
+        "row": 17,
+        "count": 6
+      },
+      "stop-left": {
+        "row": 18,
+        "count": 6
+      },
+      "stop-right": {
+        "row": 19,
+        "count": 6
+      }
+    }
+  },
+  "kenney_snake": {
+    "frameWidth": 42,
+    "frameHeight": 42,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "pipoya_su1_student_male_11": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "pipoya_teacher_female_01": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "kenney_crocodile": {
+    "frameWidth": 42,
+    "frameHeight": 42,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "kenney_sloth": {
+    "frameWidth": 42,
+    "frameHeight": 42,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "pipoya_su1_student_male_10": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "creature_crawler": {
+    "frameWidth": 403,
+    "frameHeight": 187,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 7
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 7
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 7
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 7
+      },
+      "die-back": {
+        "row": 4,
+        "count": 7
+      },
+      "die-front": {
+        "row": 5,
+        "count": 7
+      },
+      "die-left": {
+        "row": 6,
+        "count": 7
+      },
+      "die-right": {
+        "row": 7,
+        "count": 7
+      },
+      "idle-back": {
+        "row": 8,
+        "count": 7
+      },
+      "idle-front": {
+        "row": 9,
+        "count": 7
+      },
+      "idle-left": {
+        "row": 10,
+        "count": 7
+      },
+      "idle-right": {
+        "row": 11,
+        "count": 7
+      },
+      "run-back": {
+        "row": 12,
+        "count": 7
+      },
+      "run-front": {
+        "row": 13,
+        "count": 7
+      },
+      "run-left": {
+        "row": 14,
+        "count": 7
+      },
+      "run-right": {
+        "row": 15,
+        "count": 7
+      }
+    }
+  },
+  "huge_split_slime": {
+    "frameWidth": 64,
+    "frameHeight": 58,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "kenney_gorilla": {
+    "frameWidth": 42,
+    "frameHeight": 42,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "kenney_horse": {
+    "frameWidth": 42,
+    "frameHeight": 42,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "silksong_bone_worm": {
+    "frameWidth": 312,
+    "frameHeight": 395,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 7
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 7
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 7
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 7
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      },
+      "skid-back": {
+        "row": 12,
+        "count": 4
+      },
+      "skid-front": {
+        "row": 13,
+        "count": 4
+      },
+      "skid-left": {
+        "row": 14,
+        "count": 4
+      },
+      "skid-right": {
+        "row": 15,
+        "count": 4
+      },
+      "stop-back": {
+        "row": 16,
+        "count": 4
+      },
+      "stop-front": {
+        "row": 17,
+        "count": 4
+      },
+      "stop-left": {
+        "row": 18,
+        "count": 4
+      },
+      "stop-right": {
+        "row": 19,
+        "count": 4
+      }
+    }
+  },
+  "pipoya_teacher_male_03": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "pipoya_teacher_male_04": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "dudu": {
+    "frameWidth": 113,
+    "frameHeight": 108,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 5
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 5
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 5
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 5
+      },
+      "hit-back": {
+        "row": 4,
+        "count": 24
+      },
+      "hit-front": {
+        "row": 5,
+        "count": 24
+      },
+      "hit-left": {
+        "row": 6,
+        "count": 24
+      },
+      "hit-right": {
+        "row": 7,
+        "count": 24
+      },
+      "idle-back": {
+        "row": 8,
+        "count": 12
+      },
+      "idle-front": {
+        "row": 9,
+        "count": 12
+      },
+      "idle-left": {
+        "row": 10,
+        "count": 12
+      },
+      "idle-right": {
+        "row": 11,
+        "count": 12
+      },
+      "idle2-back": {
+        "row": 12,
+        "count": 13
+      },
+      "idle2-front": {
+        "row": 13,
+        "count": 13
+      },
+      "idle2-left": {
+        "row": 14,
+        "count": 13
+      },
+      "idle2-right": {
+        "row": 15,
+        "count": 13
+      },
+      "idle_build-back": {
+        "row": 16,
+        "count": 10
+      },
+      "idle_build-front": {
+        "row": 17,
+        "count": 10
+      },
+      "idle_build-left": {
+        "row": 18,
+        "count": 10
+      },
+      "idle_build-right": {
+        "row": 19,
+        "count": 10
+      },
+      "run-back": {
+        "row": 20,
+        "count": 12
+      },
+      "run-front": {
+        "row": 21,
+        "count": 12
+      },
+      "run-left": {
+        "row": 22,
+        "count": 12
+      },
+      "run-right": {
+        "row": 23,
+        "count": 12
+      },
+      "run2-back": {
+        "row": 24,
+        "count": 4
+      },
+      "run2-front": {
+        "row": 25,
+        "count": 4
+      },
+      "run2-left": {
+        "row": 26,
+        "count": 4
+      },
+      "run2-right": {
+        "row": 27,
+        "count": 4
+      },
+      "run_build-back": {
+        "row": 28,
+        "count": 16
+      },
+      "run_build-front": {
+        "row": 29,
+        "count": 16
+      },
+      "run_build-left": {
+        "row": 30,
+        "count": 16
+      },
+      "run_build-right": {
+        "row": 31,
+        "count": 16
+      }
+    }
+  },
+  "pipoya_su1_student_female_15": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "nekonin_pipo_nekonin022": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "pipoya_su1_student_female_12": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "galaxy_slime": {
+    "frameWidth": 64,
+    "frameHeight": 58,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "rgs_hero_square": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "doe": {
+    "frameWidth": 41,
+    "frameHeight": 33,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "nekonin_pipo_nekonin025": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "nekonin_pipo_nekonin013": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "nekonin_pipo_nekonin014": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "pipoya_teacher_male_02": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "shadow_slime": {
+    "frameWidth": 64,
+    "frameHeight": 58,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "chicken": {
+    "frameWidth": 36,
+    "frameHeight": 36,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "silksong_pilgrim_hiker": {
+    "frameWidth": 689,
+    "frameHeight": 348,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 8
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 8
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 8
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 8
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 5
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 5
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 5
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 5
+      },
+      "run-back": {
+        "row": 8,
+        "count": 10
+      },
+      "run-front": {
+        "row": 9,
+        "count": 10
+      },
+      "run-left": {
+        "row": 10,
+        "count": 10
+      },
+      "run-right": {
+        "row": 11,
+        "count": 10
+      },
+      "skid-back": {
+        "row": 12,
+        "count": 5
+      },
+      "skid-front": {
+        "row": 13,
+        "count": 5
+      },
+      "skid-left": {
+        "row": 14,
+        "count": 5
+      },
+      "skid-right": {
+        "row": 15,
+        "count": 5
+      },
+      "stop-back": {
+        "row": 16,
+        "count": 5
+      },
+      "stop-front": {
+        "row": 17,
+        "count": 5
+      },
+      "stop-left": {
+        "row": 18,
+        "count": 5
+      },
+      "stop-right": {
+        "row": 19,
+        "count": 5
+      }
+    }
+  },
+  "nekonin_pipo_nekonin015": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "rgs_skeleton_square": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "nekonin_pipo_nekonin012": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "pipoya_su1_student_female_13": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "bubu_outlined": {
+    "frameWidth": 450,
+    "frameHeight": 420,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 10
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 10
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 10
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 10
+      },
+      "hit-back": {
+        "row": 4,
+        "count": 16
+      },
+      "hit-front": {
+        "row": 5,
+        "count": 16
+      },
+      "hit-left": {
+        "row": 6,
+        "count": 16
+      },
+      "hit-right": {
+        "row": 7,
+        "count": 16
+      },
+      "idle-back": {
+        "row": 8,
+        "count": 13
+      },
+      "idle-front": {
+        "row": 9,
+        "count": 13
+      },
+      "idle-left": {
+        "row": 10,
+        "count": 13
+      },
+      "idle-right": {
+        "row": 11,
+        "count": 13
+      },
+      "idle2-back": {
+        "row": 12,
+        "count": 25
+      },
+      "idle2-front": {
+        "row": 13,
+        "count": 25
+      },
+      "idle2-left": {
+        "row": 14,
+        "count": 25
+      },
+      "idle2-right": {
+        "row": 15,
+        "count": 25
+      },
+      "run-back": {
+        "row": 16,
+        "count": 16
+      },
+      "run-front": {
+        "row": 17,
+        "count": 16
+      },
+      "run-left": {
+        "row": 18,
+        "count": 16
+      },
+      "run-right": {
+        "row": 19,
+        "count": 16
+      }
+    }
+  },
+  "nekonin_pipo_nekonin024": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "pipoya_su1_student_female_14": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "silksong_shakra_rest": {
+    "frameWidth": 319,
+    "frameHeight": 268,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 10
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 10
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 10
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 10
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 25
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 25
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 25
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 25
+      },
+      "run-back": {
+        "row": 8,
+        "count": 25
+      },
+      "run-front": {
+        "row": 9,
+        "count": 25
+      },
+      "run-left": {
+        "row": 10,
+        "count": 25
+      },
+      "run-right": {
+        "row": 11,
+        "count": 25
+      },
+      "skid-back": {
+        "row": 12,
+        "count": 25
+      },
+      "skid-front": {
+        "row": 13,
+        "count": 25
+      },
+      "skid-left": {
+        "row": 14,
+        "count": 25
+      },
+      "skid-right": {
+        "row": 15,
+        "count": 25
+      },
+      "stop-back": {
+        "row": 16,
+        "count": 25
+      },
+      "stop-front": {
+        "row": 17,
+        "count": 25
+      },
+      "stop-left": {
+        "row": 18,
+        "count": 25
+      },
+      "stop-right": {
+        "row": 19,
+        "count": 25
+      }
+    }
+  },
+  "nekonin_pipo_nekonin023": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "pipoya_pipo_xmaschara04": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "pipoya_su1_student_female_09": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "nekonin_pipo_nekonin001": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "sprout_cow": {
+    "frameWidth": 54,
+    "frameHeight": 42,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "nekonin_pipo_nekonin006": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "pipoya_pipo_xmaschara03": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "green_slime": {
+    "frameWidth": 64,
+    "frameHeight": 58,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "nekonin_pipo_nekonin030": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "pipoya_su1_student_female_07": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "nekonin_pipo_nekonin008": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "silksong_ladybug": {
+    "frameWidth": 667,
+    "frameHeight": 245,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 2
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 2
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 2
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 2
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 7
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 7
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 7
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 7
+      },
+      "run-back": {
+        "row": 8,
+        "count": 22
+      },
+      "run-front": {
+        "row": 9,
+        "count": 22
+      },
+      "run-left": {
+        "row": 10,
+        "count": 22
+      },
+      "run-right": {
+        "row": 11,
+        "count": 22
+      },
+      "skid-back": {
+        "row": 12,
+        "count": 7
+      },
+      "skid-front": {
+        "row": 13,
+        "count": 7
+      },
+      "skid-left": {
+        "row": 14,
+        "count": 7
+      },
+      "skid-right": {
+        "row": 15,
+        "count": 7
+      },
+      "stop-back": {
+        "row": 16,
+        "count": 7
+      },
+      "stop-front": {
+        "row": 17,
+        "count": 7
+      },
+      "stop-left": {
+        "row": 18,
+        "count": 7
+      },
+      "stop-right": {
+        "row": 19,
+        "count": 7
+      }
+    }
+  },
+  "kenney_rhino": {
+    "frameWidth": 42,
+    "frameHeight": 42,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "nekonin_pipo_nekonin009": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "pipoya_su1_student_female_01": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "kenney_penguin": {
+    "frameWidth": 42,
+    "frameHeight": 42,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "frog": {
+    "frameWidth": 24,
+    "frameHeight": 21,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 2
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 2
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 2
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 2
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "nekonin_pipo_nekonin031": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "pipoya_su1_student_female_06": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "pipoya_pipo_xmaschara02": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "nekonin_pipo_nekonin007": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "pipoya_pipo_xmaschara05": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "pipoya_su1_student_female_08": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "kenney_goat": {
+    "frameWidth": 42,
+    "frameHeight": 42,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "dudu_outlined": {
+    "frameWidth": 480,
+    "frameHeight": 450,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 5
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 5
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 5
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 5
+      },
+      "hit-back": {
+        "row": 4,
+        "count": 24
+      },
+      "hit-front": {
+        "row": 5,
+        "count": 24
+      },
+      "hit-left": {
+        "row": 6,
+        "count": 24
+      },
+      "hit-right": {
+        "row": 7,
+        "count": 24
+      },
+      "idle-back": {
+        "row": 8,
+        "count": 12
+      },
+      "idle-front": {
+        "row": 9,
+        "count": 12
+      },
+      "idle-left": {
+        "row": 10,
+        "count": 12
+      },
+      "idle-right": {
+        "row": 11,
+        "count": 12
+      },
+      "idle2-back": {
+        "row": 12,
+        "count": 13
+      },
+      "idle2-front": {
+        "row": 13,
+        "count": 13
+      },
+      "idle2-left": {
+        "row": 14,
+        "count": 13
+      },
+      "idle2-right": {
+        "row": 15,
+        "count": 13
+      },
+      "idle_build-back": {
+        "row": 16,
+        "count": 10
+      },
+      "idle_build-front": {
+        "row": 17,
+        "count": 10
+      },
+      "idle_build-left": {
+        "row": 18,
+        "count": 10
+      },
+      "idle_build-right": {
+        "row": 19,
+        "count": 10
+      },
+      "run-back": {
+        "row": 20,
+        "count": 12
+      },
+      "run-front": {
+        "row": 21,
+        "count": 12
+      },
+      "run-left": {
+        "row": 22,
+        "count": 12
+      },
+      "run-right": {
+        "row": 23,
+        "count": 12
+      },
+      "run2-back": {
+        "row": 24,
+        "count": 4
+      },
+      "run2-front": {
+        "row": 25,
+        "count": 4
+      },
+      "run2-left": {
+        "row": 26,
+        "count": 4
+      },
+      "run2-right": {
+        "row": 27,
+        "count": 4
+      },
+      "run_build-back": {
+        "row": 28,
+        "count": 16
+      },
+      "run_build-front": {
+        "row": 29,
+        "count": 16
+      },
+      "run_build-left": {
+        "row": 30,
+        "count": 16
+      },
+      "run_build-right": {
+        "row": 31,
+        "count": 16
+      }
+    }
+  },
+  "kenney_giraffe": {
+    "frameWidth": 42,
+    "frameHeight": 42,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "squirle": {
+    "frameWidth": 30,
+    "frameHeight": 28,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "axulart_blue_girl": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "kenney_narwhal": {
+    "frameWidth": 42,
+    "frameHeight": 42,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "pink_slime": {
+    "frameWidth": 64,
+    "frameHeight": 58,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "dudu_highres": {
+    "frameWidth": 480,
+    "frameHeight": 450,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 5
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 5
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 5
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 5
+      },
+      "hit-back": {
+        "row": 4,
+        "count": 24
+      },
+      "hit-front": {
+        "row": 5,
+        "count": 24
+      },
+      "hit-left": {
+        "row": 6,
+        "count": 24
+      },
+      "hit-right": {
+        "row": 7,
+        "count": 24
+      },
+      "idle-back": {
+        "row": 8,
+        "count": 12
+      },
+      "idle-front": {
+        "row": 9,
+        "count": 12
+      },
+      "idle-left": {
+        "row": 10,
+        "count": 12
+      },
+      "idle-right": {
+        "row": 11,
+        "count": 12
+      },
+      "idle2-back": {
+        "row": 12,
+        "count": 13
+      },
+      "idle2-front": {
+        "row": 13,
+        "count": 13
+      },
+      "idle2-left": {
+        "row": 14,
+        "count": 13
+      },
+      "idle2-right": {
+        "row": 15,
+        "count": 13
+      },
+      "idle_build-back": {
+        "row": 16,
+        "count": 10
+      },
+      "idle_build-front": {
+        "row": 17,
+        "count": 10
+      },
+      "idle_build-left": {
+        "row": 18,
+        "count": 10
+      },
+      "idle_build-right": {
+        "row": 19,
+        "count": 10
+      },
+      "run-back": {
+        "row": 20,
+        "count": 12
+      },
+      "run-front": {
+        "row": 21,
+        "count": 12
+      },
+      "run-left": {
+        "row": 22,
+        "count": 12
+      },
+      "run-right": {
+        "row": 23,
+        "count": 12
+      },
+      "run2-back": {
+        "row": 24,
+        "count": 4
+      },
+      "run2-front": {
+        "row": 25,
+        "count": 4
+      },
+      "run2-left": {
+        "row": 26,
+        "count": 4
+      },
+      "run2-right": {
+        "row": 27,
+        "count": 4
+      },
+      "run_build-back": {
+        "row": 28,
+        "count": 16
+      },
+      "run_build-front": {
+        "row": 29,
+        "count": 16
+      },
+      "run_build-left": {
+        "row": 30,
+        "count": 16
+      },
+      "run_build-right": {
+        "row": 31,
+        "count": 16
+      }
+    }
+  },
+  "scary_monster": {
+    "frameWidth": 96,
+    "frameHeight": 96,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "pipoya_su1_student_male_03": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "pipoya_su1_student_male_04": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "silksong_staff_pilgrim": {
+    "frameWidth": 569,
+    "frameHeight": 460,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 13
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 13
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 13
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 13
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 6
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 6
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 6
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 6
+      },
+      "run-back": {
+        "row": 8,
+        "count": 10
+      },
+      "run-front": {
+        "row": 9,
+        "count": 10
+      },
+      "run-left": {
+        "row": 10,
+        "count": 10
+      },
+      "run-right": {
+        "row": 11,
+        "count": 10
+      },
+      "skid-back": {
+        "row": 12,
+        "count": 6
+      },
+      "skid-front": {
+        "row": 13,
+        "count": 6
+      },
+      "skid-left": {
+        "row": 14,
+        "count": 6
+      },
+      "skid-right": {
+        "row": 15,
+        "count": 6
+      },
+      "stop-back": {
+        "row": 16,
+        "count": 6
+      },
+      "stop-front": {
+        "row": 17,
+        "count": 6
+      },
+      "stop-left": {
+        "row": 18,
+        "count": 6
+      },
+      "stop-right": {
+        "row": 19,
+        "count": 6
+      }
+    }
+  },
+  "kenney_bear": {
+    "frameWidth": 42,
+    "frameHeight": 42,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "cow": {
+    "frameWidth": 64,
+    "frameHeight": 52,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "bubu": {
+    "frameWidth": 75,
+    "frameHeight": 70,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 10
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 10
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 10
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 10
+      },
+      "hit-back": {
+        "row": 4,
+        "count": 16
+      },
+      "hit-front": {
+        "row": 5,
+        "count": 16
+      },
+      "hit-left": {
+        "row": 6,
+        "count": 16
+      },
+      "hit-right": {
+        "row": 7,
+        "count": 16
+      },
+      "idle-back": {
+        "row": 8,
+        "count": 13
+      },
+      "idle-front": {
+        "row": 9,
+        "count": 13
+      },
+      "idle-left": {
+        "row": 10,
+        "count": 13
+      },
+      "idle-right": {
+        "row": 11,
+        "count": 13
+      },
+      "idle2-back": {
+        "row": 12,
+        "count": 25
+      },
+      "idle2-front": {
+        "row": 13,
+        "count": 25
+      },
+      "idle2-left": {
+        "row": 14,
+        "count": 25
+      },
+      "idle2-right": {
+        "row": 15,
+        "count": 25
+      },
+      "run-back": {
+        "row": 16,
+        "count": 16
+      },
+      "run-front": {
+        "row": 17,
+        "count": 16
+      },
+      "run-left": {
+        "row": 18,
+        "count": 16
+      },
+      "run-right": {
+        "row": 19,
+        "count": 16
+      }
+    }
+  },
+  "silksong_moss_crawler": {
+    "frameWidth": 190,
+    "frameHeight": 148,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 3
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 3
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 3
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 3
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 3
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 3
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 3
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 3
+      },
+      "run-back": {
+        "row": 8,
+        "count": 23
+      },
+      "run-front": {
+        "row": 9,
+        "count": 23
+      },
+      "run-left": {
+        "row": 10,
+        "count": 23
+      },
+      "run-right": {
+        "row": 11,
+        "count": 23
+      },
+      "skid-back": {
+        "row": 12,
+        "count": 3
+      },
+      "skid-front": {
+        "row": 13,
+        "count": 3
+      },
+      "skid-left": {
+        "row": 14,
+        "count": 3
+      },
+      "skid-right": {
+        "row": 15,
+        "count": 3
+      },
+      "stop-back": {
+        "row": 16,
+        "count": 3
+      },
+      "stop-front": {
+        "row": 17,
+        "count": 3
+      },
+      "stop-left": {
+        "row": 18,
+        "count": 3
+      },
+      "stop-right": {
+        "row": 19,
+        "count": 3
+      }
+    }
+  },
+  "pipoya_headmaster_male": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "kenney_cow": {
+    "frameWidth": 42,
+    "frameHeight": 42,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "pipoya_su1_student_male_05": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "silksong_moss_creep": {
+    "frameWidth": 398,
+    "frameHeight": 386,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 6
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 6
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 6
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 6
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 6
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 6
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 6
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 6
+      },
+      "run-back": {
+        "row": 8,
+        "count": 3
+      },
+      "run-front": {
+        "row": 9,
+        "count": 3
+      },
+      "run-left": {
+        "row": 10,
+        "count": 3
+      },
+      "run-right": {
+        "row": 11,
+        "count": 3
+      },
+      "skid-back": {
+        "row": 12,
+        "count": 6
+      },
+      "skid-front": {
+        "row": 13,
+        "count": 6
+      },
+      "skid-left": {
+        "row": 14,
+        "count": 6
+      },
+      "skid-right": {
+        "row": 15,
+        "count": 6
+      },
+      "stop-back": {
+        "row": 16,
+        "count": 6
+      },
+      "stop-front": {
+        "row": 17,
+        "count": 6
+      },
+      "stop-left": {
+        "row": 18,
+        "count": 6
+      },
+      "stop-right": {
+        "row": 19,
+        "count": 6
+      }
+    }
+  },
+  "kenney_duck": {
+    "frameWidth": 42,
+    "frameHeight": 42,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  },
+  "pipoya_su1_student_male_02": {
+    "frameWidth": 48,
+    "frameHeight": 54,
+    "animations": {
+      "attack-back": {
+        "row": 0,
+        "count": 4
+      },
+      "attack-front": {
+        "row": 1,
+        "count": 4
+      },
+      "attack-left": {
+        "row": 2,
+        "count": 4
+      },
+      "attack-right": {
+        "row": 3,
+        "count": 4
+      },
+      "idle-back": {
+        "row": 4,
+        "count": 4
+      },
+      "idle-front": {
+        "row": 5,
+        "count": 4
+      },
+      "idle-left": {
+        "row": 6,
+        "count": 4
+      },
+      "idle-right": {
+        "row": 7,
+        "count": 4
+      },
+      "run-back": {
+        "row": 8,
+        "count": 4
+      },
+      "run-front": {
+        "row": 9,
+        "count": 4
+      },
+      "run-left": {
+        "row": 10,
+        "count": 4
+      },
+      "run-right": {
+        "row": 11,
+        "count": 4
+      }
+    }
+  }
+}
