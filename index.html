@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Ethereal RPG</title>
   <link rel="manifest" href="manifest.json">
+  <link rel="shortcut icon" href="assets/icon-192.png">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -354,6 +355,28 @@
       font-size: 14px;
     }
 
+    /* ── Quest Text HUD ────────────────────────────────── */
+    .quest-banner {
+      position: absolute;
+      top: 38px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: #ffffff;
+      font-family: system-ui, -apple-system, sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      z-index: 120;
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9), 0 0 8px rgba(0, 0, 0, 0.7);
+      pointer-events: none;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      white-space: nowrap;
+    }
+    .quest-banner.hidden {
+      opacity: 0;
+      transform: translate(-50%, -6px);
+      pointer-events: none;
+    }
+
     /* ── Pet HUD ──────────────────────────────────────── */
     .pet-hud {
       position: absolute;
@@ -563,6 +586,9 @@
       <audio id="sfx-chop" src="sounds/chop.mp3" preload="auto"></audio>
       <div class="bar-zone bar-zone-top" id="bar-zone-top"></div>
       <div class="bar-zone bar-zone-bottom" id="bar-zone-bottom"></div>
+      <div class="quest-banner" id="quest-banner">
+        <span id="quest-banner-text">📦 QUEST: Tap anywhere to place the mysterious box</span>
+      </div>
       <div class="hud" id="hud" aria-live="polite"></div>
       <div class="game-chat-wrapper">
         <div class="game-chat-log" id="game-chat-log"></div>
@@ -607,6 +633,9 @@
         <button id="toggle-sound-btn" class="time-toggle-btn" type="button" style="padding: 6px 12px; font-weight: 600; border-radius: 8px; border: 1px solid #c2b399; background: #fffcf8; color: #5c4b37; cursor: pointer; transition: all 0.2s ease; font-family: monospace; font-size: 11px;">
           🔊 Sound: ON
         </button>
+        <button id="toggle-storm-btn" class="time-toggle-btn" type="button" style="padding: 6px 12px; font-weight: 600; border-radius: 8px; border: 1px solid #c2b399; background: #fffcf8; color: #5c4b37; cursor: pointer; transition: all 0.2s ease; font-family: monospace; font-size: 11px;">
+          ⛈️ Storm: OFF
+        </button>
         <div style="display: flex; align-items: center; gap: 6px;">
           <label for="night-darkness-slider" style="font-size: 11px; color: #7c6c56; font-family: monospace; font-weight: bold; user-select: none;">Night Darkness:</label>
           <input id="night-darkness-slider" type="range" min="0.0" max="1.0" step="0.02" value="0.82" style="width: 90px; cursor: pointer; accent-color: #5c4b37; outline: none; margin: 0;">
@@ -621,6 +650,11 @@
           <label for="pet-chance-slider" style="font-size: 11px; color: #7c6c56; font-family: monospace; font-weight: bold; user-select: none;">Pet Chance:</label>
           <input id="pet-chance-slider" type="range" min="0" max="100" step="5" value="20" style="width: 90px; cursor: pointer; accent-color: #5c4b37; outline: none; margin: 0;">
           <span id="pet-chance-value" style="font-size: 11px; color: #7c6c56; font-family: monospace; width: 32px; font-weight: bold;">20%</span>
+        </div>
+        <div style="display: flex; align-items: center; gap: 6px;">
+          <label for="tummy-widen-slider" style="font-size: 11px; color: #7c6c56; font-family: monospace; font-weight: bold; user-select: none;">Tummy Widen (Fatness):</label>
+          <input id="tummy-widen-slider" type="range" min="1.0" max="2.5" step="0.05" value="1.0" style="width: 90px; cursor: pointer; accent-color: #5c4b37; outline: none; margin: 0;">
+          <span id="tummy-widen-value" style="font-size: 11px; color: #7c6c56; font-family: monospace; width: 36px; font-weight: bold;">1.0x</span>
         </div>
         <span id="test-time-label" style="font-size: 11px; color: #7c6c56; font-family: monospace; margin-left: auto;">Current Phase: DAY (T-Minus 60s)</span>
       </div>
@@ -672,6 +706,7 @@
     <div class="caption">Online sprite credits: inkBubi, PIPOYA, AxulArt, RGS_Dev, karsiori, Cup Nooble, Kettoman, Shaade, Tayziulei, Daniel Eddeland, Stephen Challener / PixelFarm, patvanmackelberg, Bouste, and Kenney.</div>
   </div>
   <script>
+
     const COMMON_ENGLISH_WORDS = ["the", "be", "to", "of", "and", "a", "in", "that", "have", "i", "it", "for", "not", "on", "with", "he", "as", "you", "do", "at", "this", "but", "his", "by", "from", "they", "we", "say", "her", "she", "or", "an", "will", "my", "one", "all", "would", "there", "their", "what", "so", "up", "out", "if", "about", "who", "get", "which", "go", "me", "when", "make", "can", "like", "time", "no", "just", "him", "know", "take", "people", "into", "year", "your", "good", "some", "could", "them", "see", "other", "than", "then", "now", "look", "only", "come", "its", "over", "think", "also", "back", "after", "use", "two", "how", "our", "work", "first", "well", "way", "even", "new", "want", "because", "any", "these", "give", "day", "most", "us", "hello", "hi", "hey", "hoi", "snowman", "build", "nothing", "yes", "ok", "okay", "slime", "forest", "wood", "stone", "water", "crops", "planting", "watering", "tilling", "protect", "friend"];
     const ABBREVIATIONS = {
       "u": "you",
@@ -948,8 +983,10 @@
       blue_slime: { label: "Blue Slime", rarity: "Uncommon", kind: "forest", base: "blue_slime", scale: 1.18, attackMs: 480 },
       pink_slime: { label: "Ribbon Slime", rarity: "Rare", kind: "forest", base: "pink_slime", scale: 1.18, attackMs: 480 },
       cutie_sheep: { label: "Cloud Sheep", rarity: "Legendary", kind: "forest", base: "cutie_sheep", scale: 0.65, attackMs: 480, sideView: true },
-      bubu: { label: "Bubu the Panda", rarity: "Legendary", kind: "forest", base: "bubu_highres", scale: 0.1875, attackMs: 375, sideView: true, smooth: true, idleFps: 12, runFps: 24, attackFps: 16 },
-      dudu: { label: "Dudu the Bear", rarity: "Legendary", kind: "forest", base: "dudu_highres", scale: 0.1875, attackMs: 375, sideView: true, smooth: true, idleFps: 12, runFps: 24, attackFps: 16 },
+      bubu: { label: "Bubu the Panda", rarity: "Legendary", kind: "forest", base: "bubu", scale: 1.15, attackMs: 375, sideView: true, smooth: false, idleFps: 12, runFps: 24, attackFps: 16 },
+      bubu_highres: { label: "Bubu the Panda (High-Res)", rarity: "Legendary", kind: "forest", base: "bubu_highres", scale: 0.1875, attackMs: 375, sideView: true, smooth: true, idleFps: 12, runFps: 24, attackFps: 16 },
+      dudu: { label: "Dudu the Bear", rarity: "Legendary", kind: "forest", base: "dudu", scale: 1.15, attackMs: 375, sideView: true, smooth: false, idleFps: 12, runFps: 24, attackFps: 16 },
+      dudu_highres: { label: "Dudu the Bear (High-Res)", rarity: "Legendary", kind: "forest", base: "dudu_highres", scale: 0.1875, attackMs: 375, sideView: true, smooth: true, idleFps: 12, runFps: 24, attackFps: 16 },
       split_slime: { label: "Split Slime", rarity: "Epic", kind: "forest", base: "split_slime", scale: 1.18, attackMs: 480 },
       gold_slime: { label: "Crown Slime", rarity: "Legendary", kind: "forest", base: "gold_slime", scale: 1.18, attackMs: 480 },
       shadow_slime: { label: "Invert Slime", rarity: "Mythic", kind: "forest", base: "shadow_slime", scale: 1.18, attackMs: 480 },
@@ -981,7 +1018,8 @@
       grass: "assets/forest/sprout_grass.png",
       water: "assets/forest/sprout_water.png",
       farmSoil: "assets/plants/farm_soil_tilled.png",
-      toolSheet: "assets/Tools.png"
+      toolSheet: "assets/Tools.png",
+      rainEffect: "assets/Rain effect/rain effect.png"
     };
     const forestFrameCounts = {
       silksong_hornet: { idle: 6, run: 10, stop: 6, skid: 6, attack: 6 },
@@ -1000,10 +1038,10 @@
       silksong_lifeblood_worm: { idle: 4, run: 14, stop: 4, attack: 8 },
       silksong_shakra_rest: { idle: 25, run: 25, stop: 25, attack: 10 },
       cutie_sheep: { idle: 3, idle2: 8, run: 8, attack: 8 },
-      bubu: { idle: 13, idle2: 25, run: 16, attack: 6, hit: 16 },
-      bubu_highres: { idle: 13, idle2: 25, run: 16, attack: 6, hit: 16 },
-      dudu: { idle: 12, idle2: 13, idle_build: 10, run: 12, run2: 4, run_build: 16, attack: 6, hit: 24 },
-      dudu_highres: { idle: 12, idle2: 13, idle_build: 10, run: 12, run2: 4, run_build: 16, attack: 6, hit: 24 }
+      bubu: { idle: 13, idle2: 25, run: 16, attack: 10, hit: 16 },
+      bubu_highres: { idle: 13, idle2: 25, run: 16, attack: 10, hit: 16 },
+      dudu: { idle: 12, idle2: 13, idle_build: 10, run: 12, run2: 4, run_build: 16, attack: 5, hit: 24 },
+      dudu_highres: { idle: 12, idle2: 13, idle_build: 10, run: 12, run2: 4, run_build: 16, attack: 5, hit: 24 }
     };
     const farmCrops = {
       wheat: { label: "Wheat", name: "farm_crop_wheat", stages: 4 },
@@ -1340,6 +1378,7 @@
     }
 
     const coreBuildPaletteBase = [
+      { id: "mysterious_box", label: "Mysterious Box 🎁", name: "prop_sprout_chest", count: 5, fps: 12, w: 44, h: 44, solid: { x: -14, y: -14, w: 28, h: 18 }, isMysteriousBox: true, group: "buildings" },
       { id: "wall", label: "Wall", name: "build_sprout_fence_post", count: 1, fps: 1, w: 32, h: 32, maxHp: 100, solid: { x: -12, y: -16, w: 24, h: 18 } },
       { id: "bed-green", label: "Green bed", name: "build_sprout_bed_green", count: 1, fps: 1, w: 40, h: 70, solid: { x: -16, y: -46, w: 32, h: 44 } },
       { id: "bed-blue", label: "Blue bed", name: "build_sprout_bed_blue", count: 1, fps: 1, w: 40, h: 70, solid: { x: -16, y: -46, w: 32, h: 44 } },
@@ -1454,7 +1493,7 @@
         ]
       },
       // Single Magic Barrel
-      { id: "magic_barrel", label: "Magic Barrel", name: "magic_barrel", count: 4, fps: 4, w: 48, h: 48, group: "buildings", solid: { x: -16, y: -16, w: 32, h: 32 } },
+      { id: "magic_barrel", label: "Magic Barrel", name: "magic_barrel", count: 3, fps: 4, w: 48, h: 48, group: "buildings", solid: { x: -16, y: -16, w: 32, h: 32 } },
       // Archer Turret (Down, Side, Up as variants)
       {
         id: "trap_archer",
@@ -1462,12 +1501,7 @@
         name: "trap_archer_down_idle",
         count: 4, fps: 4, w: 48, h: 48,
         group: "buildings",
-        solid: { x: -16, y: -16, w: 32, h: 32 },
-        variants: [
-          { name: "trap_archer_down", label: "Down", count: 4 },
-          { name: "trap_archer_side", label: "Side", count: 4 },
-          { name: "trap_archer_up", label: "Up", count: 4 }
-        ]
+        solid: { x: -16, y: -16, w: 32, h: 32 }
       },
       // Predator plant trap (starts with growth, then goes to idle)
       {
@@ -1694,11 +1728,14 @@
       }
     }
     const keys = new Set();
-    const ASSET_REV = "one-tree-biomes-water-v61";
-    const APP_VERSION = "1.2.0";
+    const ASSET_REV = "one-tree-biomes-water-v78";
+    const APP_VERSION = "1.2.3";
     const images = {};
+    const frameCache = {}; // Offscreen canvas cache for high-res spritesheets
+    const preloadedFrames = {}; // Pre-sliced frame cache for high-res spritesheets
     const imagePromises = {};
     const forestFrames = {};
+    let spritesheetsMetadata = {};
     let staticMap;
     const placedSprites = [];
     const farmPlots = [];
@@ -1816,14 +1853,27 @@
       stopMode: "stop",
       moveStarted: 0,
       wasMoving: false,
+      subject1Released: false,
+      questBoxPlaced: false,
+      subject1Brain: {
+        telemetry: [],
+        attackCount: 0,
+        attackDirCount: { left: 0, right: 0, front: 0, back: 0 }
+      },
       timeOfDay: "day",
       timeRemaining: 60,
       nightDarkness: 0.82,
       attackDamage: 1,
       petChance: 0.20,
+      tummyWiden: 1.0,
       burnUntil: 0,
       lastBurnTick: 0,
       announcement: null,
+      storm: false,
+      nextLightningTime: 0,
+      lightningFlashUntil: 0,
+      lightningFlashIntensity: 0,
+      rainParticles: [],
       announcementStart: 0,
       announcementVisible: 0,
       announced60: false,
@@ -1916,22 +1966,67 @@
       });
     }
 
-    function loadImageCached(src, retries = 2) {
-      if (images[src]) return Promise.resolve(images[src]);
-      if (!imagePromises[src]) {
-        const attempt = (tries) => loadImage(src).then(img => {
-          images[src] = img;
-          return img;
-        }).catch(err => {
-          if (tries > 0) {
-            // wait 400ms then retry
-            return new Promise(r => setTimeout(r, 400)).then(() => attempt(tries - 1));
+    async function loadImageCached(src, retries = 3) {
+      if (images[src]) return images[src];
+      if (imagePromises[src]) return imagePromises[src];
+
+      const promise = (async () => {
+        let cache = null;
+        // Use the versioned URL as the cache key so ASSET_REV bumps bust stale entries
+        const versionedSrc = assetUrl(src);
+        if ("caches" in window) {
+          try {
+            cache = await caches.open("ethereal-local-assets");
+            const cachedResponse = await cache.match(versionedSrc);
+            if (cachedResponse) {
+              const blob = await cachedResponse.blob();
+              const objectUrl = URL.createObjectURL(blob);
+              const img = await new Promise((resolve, reject) => {
+                const i = new Image();
+                i.onload = () => resolve(i);
+                i.onerror = () => reject(new Error(src));
+                i.src = objectUrl;
+              });
+              images[src] = img;
+              return img;
+            }
+          } catch (e) {
+            console.warn("Cache read error:", e);
           }
-          return null; // give up silently
-        });
-        imagePromises[src] = attempt(retries);
-      }
-      return imagePromises[src];
+        }
+
+        // Fetch from network with retries
+        for (let attempt = 0; attempt <= retries; attempt++) {
+          try {
+            const resp = await fetch(versionedSrc);
+            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+            
+            if (cache) {
+              try {
+                // Store under the versioned key so next load hits the right version
+                await cache.put(versionedSrc, resp.clone());
+              } catch (e) {}
+            }
+            
+            const blob = await resp.blob();
+            const objectUrl = URL.createObjectURL(blob);
+            const img = await new Promise((resolve, reject) => {
+              const i = new Image();
+              i.onload = () => resolve(i);
+              i.onerror = () => reject(new Error(src));
+              i.src = objectUrl;
+            });
+            images[src] = img;
+            return img;
+          } catch (err) {
+            if (attempt === retries) throw err;
+            await new Promise(r => setTimeout(r, 300));
+          }
+        }
+      })();
+
+      imagePromises[src] = promise;
+      return promise;
     }
 
     function roundedRect(target, x, y, w, h, r) {
@@ -2332,24 +2427,46 @@
               }
             }
           }
-          out[`${mode}-${dir}`] = Array.from({ length: count }, (_, i) => `assets/${base}/${mode}_${dir}_frame_${i}.png?v=39`);
+          out[`${mode}-${dir}`] = Array.from({ length: count }, (_, i) => `assets/${base}/${mode}_${dir}_frame_${i}.png`);
         }
       }
       return out;
     }
 
     async function loadForestAnimal(base) {
-      if (!forestFrames[base]) forestFrames[base] = getForestFramePaths(base);
-      if (forestFrames[base].loaded) return;
-      await Promise.all(
-        Object.values(forestFrames[base]).flat().map(src =>
-          loadImageCached(src).catch(err => {
-            console.error(`[loadForestAnimal] Failed to load frame image for base "${base}": ${src}`);
-            return null;
-          })
-        )
-      );
-      forestFrames[base].loaded = true;
+      const src = `assets/${base}/spritesheet.png`;
+      let img = images[src];
+      if (!img) {
+        img = await loadImageCached(src).catch(err => {
+          console.error(`[loadForestAnimal] Failed to load spritesheet for base "${base}":`, err);
+        });
+      }
+      
+      if (img && !preloadedFrames[base]) {
+        const meta = spritesheetsMetadata[base];
+        const isGiant = img.width > 2000 || img.height > 2000 || (meta && (meta.frameWidth > 200 || meta.frameHeight > 200));
+        if (isGiant && meta && meta.animations) {
+          const framesList = {};
+          const fw = meta.frameWidth;
+          const fh = meta.frameHeight;
+          
+          for (const [animName, animData] of Object.entries(meta.animations)) {
+            const row = animData.row;
+            const count = animData.count;
+            framesList[row] = [];
+            
+            for (let col = 0; col < count; col++) {
+              const canvas = document.createElement("canvas");
+              canvas.width = fw;
+              canvas.height = fh;
+              const ctx2d = canvas.getContext("2d");
+              ctx2d.drawImage(img, col * fw, row * fh, fw, fh, 0, 0, fw, fh);
+              framesList[row][col] = canvas;
+            }
+          }
+          preloadedFrames[base] = framesList;
+        }
+      }
     }
 
     function plantFramePaths(plant) {
@@ -2495,22 +2612,45 @@
     function currentFrame() {
       const cfg = roster[state.current];
       if (cfg.kind === "forest") {
-        const isKnight = ["knight_orange", "knight_green", "knight_blue"].includes(cfg.base);
         const activeDir = state.mode === "attack" ? state.attackDir : state.dir;
         const isIdleMode = state.mode === "idle" || state.mode === "idle2" || state.mode === "idle_build";
-        const dir = cfg.sideView ? sideFacingDir(activeDir) : isIdleMode && cfg.idleDir ? cfg.idleDir : activeDir;
-        const isStopMode = state.mode === "stop" || state.mode === "skid";
-        
         const base = cfg.base;
+        let dir = cfg.sideView ? sideFacingDir(activeDir) : isIdleMode && cfg.idleDir ? cfg.idleDir : activeDir;
+        let flipH = false;
+        if (state.mode === "idle2" && (base.includes("bubu") || base.includes("dudu"))) {
+          const isBubu = base.includes("bubu");
+          if (isBubu) {
+            if (dir === "left") {
+              flipH = true;
+            }
+          } else { // dudu
+            if (dir === "right") {
+              flipH = true;
+            }
+          }
+          dir = "front";
+        }
+        const isStopMode = state.mode === "stop" || state.mode === "skid";
         const smooth = cfg.smooth;
-        const scale = cfg.scale;
         
-        const mode = isStopMode && !forestFrames[base][`${state.mode}-${dir}`] ? "idle" : state.mode;
+        const meta = spritesheetsMetadata[base];
+        let mode = state.mode;
+        if (isStopMode && (!meta || !meta.animations[`${state.mode}-${dir}`])) {
+          mode = "idle";
+        }
         
-        let frames = forestFrames[base][`${mode}-${dir}`];
-        // Fallback checks for optional modes like hit/defense in case direction isn't fully loaded
-        if (!frames) {
-          frames = forestFrames[base][`idle-${dir}`];
+        let scale = cfg.scale * (meta?.scaleMult || 1.0);
+        if (mode === "attack" && (base === "bubu_highres" || base === "dudu_highres" || base === "bubu" || base === "dudu" || base === "bubu_pixel" || base === "dudu_pixel" || base === "bubu_outlined" || base === "dudu_outlined")) {
+          scale *= 2.0;
+        }
+        
+        const anim = meta?.animations[`${mode}-${dir}`] || meta?.animations[`idle-${dir}`];
+        if (!anim) {
+          const image = images[`assets/${base}/spritesheet.png`];
+          if (!image) {
+            return { image: null, sx: 0, sy: 0, sw: 1, sh: 1, scale, smooth, base, flipH };
+          }
+          return { image, sx: 0, sy: 0, sw: image.width, sh: image.height, scale, smooth, base, flipH };
         }
         
         let fps = cfg.idleFps || 5;
@@ -2526,13 +2666,28 @@
         const started = mode === "attack" ? state.attackStarted : mode === "die" ? state.dieStarted : mode === "stop" || mode === "skid" ? state.stopStarted : mode === "hit" ? state.hitStarted : mode === "defense" ? state.defenseStarted : 0;
         const playOnce = mode === "attack" || mode === "stop" || mode === "skid" || mode === "die" || mode === "hit";
         const t = playOnce ? Math.max(0, performance.now() - started) / 1000 : (mode === "defense" ? (performance.now() - started) / 1000 : state.t);
-        const index = playOnce ? Math.min(frames.length - 1, Math.floor(t * fps)) : Math.floor(t * fps) % frames.length;
-        const image = images[frames[index]];
-        return { image, sx: 0, sy: 0, sw: image.width, sh: image.height, scale: scale, smooth: smooth };
+        const index = playOnce ? Math.min(anim.count - 1, Math.floor(t * fps)) : Math.floor(t * fps) % anim.count;
+        
+        if (preloadedFrames[base] && preloadedFrames[base][anim.row] && preloadedFrames[base][anim.row][index]) {
+          const frameCanvas = preloadedFrames[base][anim.row][index];
+          return { image: frameCanvas, sx: 0, sy: 0, sw: meta.frameWidth, sh: meta.frameHeight, scale, smooth, base, flipH };
+        }
+
+        const image = images[`assets/${base}/spritesheet.png`];
+        if (!image) {
+          return { image: null, sx: 0, sy: 0, sw: 1, sh: 1, scale, smooth, base, flipH };
+        }
+        const sx = index * meta.frameWidth;
+        const sy = anim.row * meta.frameHeight;
+        return { image, sx, sy, sw: meta.frameWidth, sh: meta.frameHeight, scale, smooth, base, flipH };
       }
       const index = Math.floor(state.t * (cfg.fps || 6)) % cfg.frames.length;
       const [sx, sy] = cfg.frames[index];
-      return { image: images[cfg.src], sx, sy, sw: cfg.frameW, sh: cfg.frameH, scale: cfg.scale };
+      const image = images[cfg.src];
+      if (!image) {
+        return { image: null, sx, sy, sw: cfg.frameW, sh: cfg.frameH, scale: cfg.scale };
+      }
+      return { image, sx, sy, sw: cfg.frameW, sh: cfg.frameH, scale: cfg.scale };
     }
 
     function npcFrame(npc) {
@@ -2540,12 +2695,29 @@
       if (!cfg || cfg.kind !== "forest") return null;
       const isKnight = ["knight_orange", "knight_green", "knight_blue"].includes(npc.base);
       const isBubuDudu = ["bubu_highres", "dudu_highres", "bubu_outlined", "dudu_outlined", "bubu", "dudu", "bubu_pixel", "dudu_pixel"].includes(npc.base);
-      const dir = cfg.sideView ? sideFacingDir(npc.dir) : npc.dir;
       const base = npc.base;
+      const meta = spritesheetsMetadata[base];
+      if (!meta) {
+        console.error(`[npcFrame] spritesheetsMetadata["${base}"] is undefined! Making loadForestAnimal call...`);
+        loadForestAnimal(base);
+        return null;
+      }
+      let dir = cfg.sideView ? sideFacingDir(npc.dir) : npc.dir;
+      let flipH = false;
+      if (npc.mode === "idle2" && (base.includes("bubu") || base.includes("dudu"))) {
+        const isBubu = base.includes("bubu");
+        if (isBubu) {
+          if (dir === "left") {
+            flipH = true;
+          }
+        } else { // dudu
+          if (dir === "right") {
+            flipH = true;
+          }
+        }
+        dir = "front";
+      }
       const smooth = cfg.smooth;
-      const scale = npc.scaleOverride || cfg.scale;
-      
-      // Determine mode for enemy knights and Bubu/Dudu
       let mode = npc.mode;
       if (isKnight || isBubuDudu) {
         const hitDuration = base.includes("bubu") ? 667 : (base.includes("dudu") ? 1000 : 600);
@@ -2558,16 +2730,17 @@
         }
       }
 
-      if (!forestFrames[base]) {
-        console.error(`[npcFrame] forestFrames["${base}"] is completely undefined! Making loadForestAnimal call...`);
-        loadForestAnimal(base);
+      let scale = (npc.scaleOverride || cfg.scale) * (meta.scaleMult || 1.0);
+      if (mode === "attack" && (base === "bubu_highres" || base === "dudu_highres" || base === "bubu" || base === "dudu" || base === "bubu_pixel" || base === "dudu_pixel" || base === "bubu_outlined" || base === "dudu_outlined")) {
+        scale *= 2.0;
+      }
+      
+      const anim = meta.animations[`${mode}-${dir}`] || meta.animations[`idle-${dir}`];
+      if (!anim) {
+        console.error(`[npcFrame] No animation found in metadata for base "${base}" in mode "${mode}" facing "${dir}".`);
         return null;
       }
-      const dirFrames = forestFrames[base][`${mode}-${dir}`] || forestFrames[base][`idle-${dir}`];
-      if (!dirFrames) {
-        console.error(`[npcFrame] No frame paths found in forestFrames for base "${base}" in mode "${mode}" facing "${dir}".`);
-        return null;
-      }
+      
       const npcInWater = state.scene === "outside" && waterTileAt(npc.x, npc.y);
       const speedMult = npcInWater ? 0.5 : 1.0;
       const baseSpeed = npc.speed || (roster[npc.base] ? wildNpcStats(npc.base).speed : 55);
@@ -2585,48 +2758,128 @@
       const started = (mode === "attack" || mode === "special_attack") ? (npc.attackStarted || npc.t) : (mode === "hit" ? npc.hitStarted : 0);
       const playOnce = mode === "attack" || mode === "special_attack" || mode === "hit";
       const t = playOnce ? Math.max(0, performance.now() - started) / 1000 : npc.t;
-      const index = playOnce ? Math.min(dirFrames.length - 1, Math.floor(t * fps)) : Math.floor(t * fps) % dirFrames.length;
-      const image = images[dirFrames[index]];
+      const index = playOnce ? Math.min(anim.count - 1, Math.floor(t * fps)) : Math.floor(t * fps) % anim.count;
+      
+      if (preloadedFrames[base] && preloadedFrames[base][anim.row] && preloadedFrames[base][anim.row][index]) {
+        const frameCanvas = preloadedFrames[base][anim.row][index];
+        return { image: frameCanvas, sx: 0, sy: 0, sw: meta.frameWidth, sh: meta.frameHeight, scale, smooth, base, flipH };
+      }
+
+      const image = images[`assets/${base}/spritesheet.png`];
       if (!image) {
-        // Fallback 1: Look for any loaded frame of this specific knight in ANY mode/direction
-        for (const key of Object.keys(forestFrames[base])) {
-          if (key === "loaded") continue;
-          const frameList = forestFrames[base][key] || [];
-          for (const framePath of frameList) {
-            if (images[framePath]) {
-              const fallbackImage = images[framePath];
-              return { image: fallbackImage, sx: 0, sy: 0, sw: fallbackImage.width, sh: fallbackImage.height, scale: scale, smooth: smooth };
-            }
-          }
-        }
-        // Fallback 2: If no frames at all are loaded for this knight, draw a tiny colored dot or skip to prevent canvas break,
-        // but try to grab a loaded green/blue/orange slime or sheep to draw so it's not invisible.
+        // Fallback 1: Look for any loaded green/blue/orange slime or sheep to draw so it's not invisible.
         for (const fallbackBase of ["green_slime", "cutie_sheep"]) {
-          const list = (forestFrames[fallbackBase] && forestFrames[fallbackBase]["idle-front"]) || [];
-          for (const path of list) {
-            if (images[path]) {
-              const fallbackImage = images[path];
-              return { image: fallbackImage, sx: 0, sy: 0, sw: fallbackImage.width, sh: fallbackImage.height, scale: scale, smooth: smooth };
+          const fbImage = images[`assets/${fallbackBase}/spritesheet.png`];
+          if (fbImage) {
+            const fbMeta = spritesheetsMetadata[fallbackBase];
+            const fbAnim = fbMeta?.animations["idle-front"];
+            if (fbAnim) {
+              return { image: fbImage, sx: 0, sy: fbAnim.row * fbMeta.frameHeight, sw: fbMeta.frameWidth, sh: fbMeta.frameHeight, scale, smooth, base: fallbackBase, flipH: false };
             }
           }
         }
         return null;
       }
-      return { image, sx: 0, sy: 0, sw: image.width, sh: image.height, scale: scale, smooth: smooth };
+      
+      const sx = index * meta.frameWidth;
+      const sy = anim.row * meta.frameHeight;
+      return { image, sx, sy, sw: meta.frameWidth, sh: meta.frameHeight, scale, smooth, base, flipH };
     }
 
     function playerDrawSize(frame) {
-      const w = Math.round(frame.sw * frame.scale * CHARACTER_WORLD_SCALE);
-      const h = Math.round(frame.sh * frame.scale * CHARACTER_WORLD_SCALE);
+      if (!frame) return { w: 1, h: 1 };
+      const w = Math.round((frame.sw || 1) * (frame.scale || 1) * CHARACTER_WORLD_SCALE);
+      const h = Math.round((frame.sh || 1) * (frame.scale || 1) * CHARACTER_WORLD_SCALE);
       return { w, h };
     }
 
+    function drawCharacterFrame(frame, drawX, drawY, drawW, drawH, x, shake = 0) {
+      if (!frame || !frame.image) return;
+      const isBubuDudu = frame.base && ["bubu_highres", "dudu_highres", "bubu_outlined", "dudu_outlined", "bubu", "dudu", "bubu_pixel", "dudu_pixel"].includes(frame.base);
+      
+      ctx.save();
+      if (frame.flipH) {
+        ctx.translate(x, 0);
+        ctx.scale(-1, 1);
+        ctx.translate(-x, 0);
+      }
+
+      // Disable offscreen canvas caching completely. Modern browsers hardware-accelerate
+      // direct sub-rectangle drawing from spritesheets natively. Dynamic canvas creation
+      // and texture uploads in the draw loop actually cause severe stutter/lag.
+      const shouldCache = false;
+      let drawSource = frame.image;
+      let srcX = frame.sx;
+
+      if (isBubuDudu && state.tummyWiden && state.tummyWiden !== 1.0) {
+        const slices = 16;
+        for (let i = 0; i < slices; i++) {
+          const pct = i / (slices - 1);
+          
+          let sliceScale = 1.0;
+          if (pct < 0.35) {
+            sliceScale = 1.0; // Head remains completely normal
+          } else if (pct <= 0.82) {
+            // Smooth bell curve for the tummy
+            const t = (pct - 0.35) / (0.82 - 0.35);
+            const bell = Math.sin(t * Math.PI); // peak is at t = 0.5 (pct = 0.585)
+            sliceScale = 1.0 + (state.tummyWiden - 1.0) * bell;
+          } else {
+            // Feet/legs stay slightly thicker to match the fat body, fading out at the very bottom
+            const fade = (1.0 - pct) / (1.0 - 0.82);
+            sliceScale = 1.0 + (state.tummyWiden - 1.0) * 0.15 * fade;
+          }
+          
+          // If cached, the Y-offset is relative to the cached canvas (0 to frame.sh) instead of frame.sy
+          const srcY = (shouldCache ? 0 : frame.sy) + (frame.sh / slices) * i;
+          const srcH = frame.sh / slices;
+          
+          const drawSliceY = drawY + (drawH / slices) * i;
+          // Tiny vertical overlap to prevent transparent seams/gaps
+          const drawSliceH = (drawH / slices) + 0.8;
+          
+          const sliceW = drawW * sliceScale;
+          const sliceX = Math.round(x - sliceW / 2 + shake);
+          
+          ctx.drawImage(
+            drawSource,
+            srcX,
+            srcY,
+            frame.sw,
+            srcH,
+            sliceX,
+            drawSliceY,
+            sliceW,
+            drawSliceH
+          );
+        }
+      } else {
+        if (shouldCache) {
+          ctx.drawImage(drawSource, 0, 0, frame.sw, frame.sh, drawX, drawY, drawW, drawH);
+        } else {
+          ctx.drawImage(frame.image, frame.sx, frame.sy, frame.sw, frame.sh, drawX, drawY, drawW, drawH);
+        }
+      }
+      ctx.restore();
+    }
+
     function drawPlayerAt(frame, x, y, shake = 0, scaleFactor = 1, yOff = 0) {
+      if (!frame || !frame.image) return;
       const { w, h } = playerDrawSize(frame);
-      const drawW = Math.round(w * scaleFactor);
-      const drawH = Math.round(h * scaleFactor);
+      let drawW = Math.round(w * scaleFactor);
+      let drawH = Math.round(h * scaleFactor);
+      
+      const isBubuDudu = frame.base && ["bubu_highres", "dudu_highres", "bubu_outlined", "dudu_outlined", "bubu", "dudu", "bubu_pixel", "dudu_pixel"].includes(frame.base);
+      if (isBubuDudu && state.tummyWiden && state.tummyWiden !== 1.0) {
+        // Squish height to look squat/obese
+        const squish = 1.0 - (state.tummyWiden - 1.0) * 0.12;
+        drawH = Math.round(drawH * squish);
+      }
+
+      const drawX = Math.round(x - drawW / 2 + shake);
+      const drawY = Math.round(y - drawH + 10 + yOff);
       ctx.imageSmoothingEnabled = Boolean(frame.smooth);
-      ctx.drawImage(frame.image, frame.sx, frame.sy, frame.sw, frame.sh, Math.round(x - drawW / 2 + shake), Math.round(y - drawH + 10 + yOff), drawW, drawH);
+      drawCharacterFrame(frame, drawX, drawY, drawW, drawH, x, shake);
       ctx.imageSmoothingEnabled = false;
 
       if (state.showHitboxes) {
@@ -2645,14 +2898,21 @@
       const alpha = 1 - p;
       const scale = 1 - p * 0.25;
       const driftY = -p * 12;
-      const drawW = Math.round(w * scale);
-      const drawH = Math.round(h * scale);
+      let drawW = Math.round(w * scale);
+      let drawH = Math.round(h * scale);
+      
+      const isBubuDudu = frame.base && ["bubu_highres", "dudu_highres", "bubu_outlined", "dudu_outlined", "bubu", "dudu", "bubu_pixel", "dudu_pixel"].includes(frame.base);
+      if (isBubuDudu && state.tummyWiden && state.tummyWiden !== 1.0) {
+        const squish = 1.0 - (state.tummyWiden - 1.0) * 0.12;
+        drawH = Math.round(drawH * squish);
+      }
+
       const drawX = Math.round(x - drawW / 2 + shake);
       const drawY = Math.round(y - drawH + 10 + driftY);
       ctx.save();
       ctx.globalAlpha = alpha;
       ctx.imageSmoothingEnabled = Boolean(frame.smooth);
-      ctx.drawImage(frame.image, frame.sx, frame.sy, frame.sw, frame.sh, drawX, drawY, drawW, drawH);
+      drawCharacterFrame(frame, drawX, drawY, drawW, drawH, x, shake);
       ctx.imageSmoothingEnabled = false;
       
       const seed = Math.floor(x * 1000 + y);
@@ -2680,6 +2940,262 @@
         }
       }
       ctx.restore();
+    }
+
+    function updateQuestBanner(text) {
+      const textEl = document.getElementById("quest-banner-text");
+      if (textEl) textEl.innerHTML = text;
+    }
+
+    function autoPlaceInitialBox() {
+      if (state.questBoxPlaced) return;
+      state.questBoxPlaced = true;
+      const boxX = Math.round(state.x + 36);
+      const boxY = Math.round(state.y);
+      placedSprites.push({
+        id: "mysterious_box",
+        label: "Mysterious Box 🎁",
+        name: "prop_sprout_chest",
+        count: 5,
+        fps: 12,
+        w: 44,
+        h: 44,
+        solid: { x: -14, y: -14, w: 28, h: 18 },
+        isMysteriousBox: true,
+        group: "buildings",
+        scene: state.scene,
+        buildId: "mysterious_box",
+        x: boxX,
+        y: boxY,
+        built: true,
+        placedAt: performance.now(),
+        level: 1,
+        isOpened: false
+      });
+      const banner = document.getElementById("quest-banner");
+      if (banner) banner.classList.add("hidden");
+    }
+
+    addEventListener("pointerdown", () => {
+      if (!state.questBoxPlaced) autoPlaceInitialBox();
+    });
+
+    function drawNPCDialogueBubble(npc) {
+      const now = performance.now();
+      if (!npc.dialogueText || now > npc.dialogueUntil) return;
+      const age = now - (npc.dialogueStarted || now);
+      const fadeIn = Math.min(1, age / 120);
+      const fadeOut = Math.min(1, Math.max(0, npc.dialogueUntil - now) / 260);
+      const alpha = Math.min(fadeIn, fadeOut);
+      ctx.save();
+      ctx.font = "bold 9px system-ui, sans-serif";
+      const tw = ctx.measureText(npc.dialogueText).width;
+      const bx = Math.round(npc.x - tw / 2 - 6);
+      const by = Math.round(npc.y - 42);
+      ctx.globalAlpha = alpha * 0.92;
+      ctx.fillStyle = "rgba(20, 16, 28, 0.88)";
+      ctx.strokeStyle = "#f472b6";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.rect(bx, by, tw + 12, 18);
+      ctx.fill();
+      ctx.stroke();
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = "#fff";
+      ctx.textAlign = "left";
+      ctx.textBaseline = "middle";
+      ctx.fillText(npc.dialogueText, bx + 6, by + 9);
+      ctx.restore();
+    }
+
+    function updateSubject1AI(npc, now, dt) {
+      if (!npc || npc.dead) return;
+
+      // Prevent attack animation from being cancelled midway
+      if (npc.mode === "attack" && npc.attackStarted && now - npc.attackStarted < 450) {
+        return;
+      }
+
+      if (npc.releaseBoxX === undefined) {
+        const box = placedSprites.find(item => item.isMysteriousBox);
+        if (box) {
+          npc.releaseBoxX = box.x + 24;
+          npc.releaseBoxY = box.y + 12;
+        }
+      }
+
+      const isNight = state.timeOfDay === "night";
+      if (isNight && npc.releaseBoxX !== undefined && npc.releaseBoxY !== undefined) {
+        const boxX = npc.releaseBoxX;
+        const boxY = npc.releaseBoxY;
+        const distToBox = Math.hypot(boxX - npc.x, boxY - npc.y);
+        
+        if (distToBox > 80) {
+          // Walk back to box
+          const angle = Math.atan2(boxY - npc.y, boxX - npc.x);
+          const speed = (npc.speed || 68) * 1.35;
+          npc.x = Math.max(40, Math.min(WORLD_W - 40, npc.x + Math.cos(angle) * speed * dt));
+          npc.y = Math.max(40, Math.min(WORLD_H - 40, npc.y + Math.sin(angle) * speed * dt));
+          npc.dir = Math.cos(angle) >= 0 ? "right" : "left";
+          npc.mode = "run";
+        } else {
+          // Wander around the box (within 80px)
+          if (!npc.wanderTarget || Math.hypot(npc.wanderTarget.x - npc.x, npc.wanderTarget.y - npc.y) < 15 || now > npc.wanderUntil) {
+            const angle = Math.random() * Math.PI * 2;
+            const dist = 25 + Math.random() * 40;
+            npc.wanderTarget = {
+              x: Math.max(40, Math.min(WORLD_W - 40, boxX + Math.cos(angle) * dist)),
+              y: Math.max(40, Math.min(WORLD_H - 40, boxY + Math.sin(angle) * dist))
+            };
+            npc.wanderUntil = now + 1500 + Math.random() * 2000;
+          }
+          
+          const angle = Math.atan2(npc.wanderTarget.y - npc.y, npc.wanderTarget.x - npc.x);
+          const speed = (npc.speed || 68) * 0.7;
+          npc.x = Math.max(40, Math.min(WORLD_W - 40, npc.x + Math.cos(angle) * speed * dt));
+          npc.y = Math.max(40, Math.min(WORLD_H - 40, npc.y + Math.sin(angle) * speed * dt));
+          npc.dir = Math.cos(angle) >= 0 ? "right" : "left";
+          npc.mode = "run";
+        }
+        return;
+      }
+
+      // 1. Proactive Chatting AI (replaces simple quotes)
+      let nearestEnemy = null;
+      let checkDist = 220;
+      for (const enemy of roamingNPCs) {
+        if (enemy === npc || enemy.dead || enemy.isSubject1 || enemy.divineAlly) continue;
+        const d = Math.hypot(enemy.x - npc.x, enemy.y - npc.y);
+        if (d < checkDist) {
+          checkDist = d;
+          nearestEnemy = enemy;
+        }
+      }
+
+      let distToPlayer = Math.hypot(state.x - npc.x, state.y - npc.y);
+      if (!nearestEnemy && distToPlayer <= 350 && !state.chatOpen && !npc.personality.lastQuestion) {
+        const lastChatTime = state.lastChatMessageAt || 0;
+        if (now - lastChatTime > 8000 + Math.random() * 6000) {
+          state.lastChatMessageAt = now;
+          npc.lastSpeechTime = now;
+          
+          let starter = "hi";
+          const memoryKeys = Object.keys(npc.personality.subject0Memory);
+          if (memoryKeys.length > 0 && Math.random() < 0.7) {
+            const randKey = memoryKeys[Math.floor(Math.random() * memoryKeys.length)];
+            const pool = npc.personality.subject0Memory[randKey];
+            if (pool && Object.keys(pool).length > 0) {
+              starter = Object.keys(pool)[Math.floor(Math.random() * Object.keys(pool).length)];
+            }
+          } else {
+            const quotes = [
+              "I learned this from you! 🧠✨",
+              "I'm Bubu! 🐼",
+              "Fighting with you! ⚔️",
+              "I know how to roam! 🌲",
+              "My brain remembers your moves! 💖",
+              "Let's explore together! ✨"
+            ];
+            starter = quotes[Math.floor(Math.random() * quotes.length)];
+          }
+
+          const dx = state.x - npc.x;
+          if (Math.abs(dx) > 10) {
+            npc.dir = dx > 0 ? "right" : "left";
+          }
+          npc.mode = "idle2";
+          
+          const indicator = addTypingIndicator("Bubu");
+          const delay = Math.min(2000, Math.max(700, starter.length * 45));
+          setTimeout(() => {
+            if (indicator) indicator.remove();
+            addChatMessage("Bubu", starter);
+            npc.personality.listeningKey = normalizePhrase(starter);
+          }, delay);
+        }
+      }
+
+      // 2. Combat AI: search for wild enemies (slimes, knights, etc.)
+      let nearestTarget = null;
+      let minDist = 220;
+      for (const enemy of roamingNPCs) {
+        if (enemy === npc || enemy.dead || enemy.isSubject1 || enemy.divineAlly) continue;
+        const d = Math.hypot(enemy.x - npc.x, enemy.y - npc.y);
+        if (d < minDist) {
+          minDist = d;
+          nearestTarget = enemy;
+        }
+      }
+
+      if (nearestTarget) {
+        const angle = Math.atan2(nearestTarget.y - npc.y, nearestTarget.x - npc.x);
+        const speed = (npc.speed || 68) * (npc.moveSpeedMultiplier || 1);
+        const dx = Math.cos(angle);
+        const dy = Math.sin(angle);
+
+        if (minDist > 32) {
+          npc.x = Math.max(40, Math.min(WORLD_W - 40, npc.x + dx * speed * dt));
+          npc.y = Math.max(40, Math.min(WORLD_H - 40, npc.y + dy * speed * dt));
+          npc.dir = dx >= 0 ? "right" : "left";
+          npc.mode = "run";
+        } else {
+          if (!npc.attackStarted || now - npc.attackStarted > 450) {
+            npc.attackStarted = now;
+            npc.mode = "attack";
+            playSwingSound();
+            // Match player attack damage stats (not 1-hit kill)
+            const dmg = state.attackDamage || 1;
+            nearestTarget.hp -= dmg;
+            spawnBloodSplats(nearestTarget.x, nearestTarget.y, 2);
+            if (nearestTarget.hp <= 0) {
+              nearestTarget.dead = true;
+              nearestTarget.deadAt = now;
+              nearestTarget.mode = "die";
+            }
+          }
+        }
+        return;
+      }
+
+      // 3. Follow or Wander AI using learned player telemetry
+      distToPlayer = Math.hypot(state.x - npc.x, state.y - npc.y);
+      if (distToPlayer > 180) {
+        const angle = Math.atan2(state.y - npc.y, state.x - npc.x);
+        const speed = (npc.speed || 68) * 1.35;
+        npc.x += Math.cos(angle) * speed * dt;
+        npc.y += Math.sin(angle) * speed * dt;
+        npc.dir = Math.cos(angle) >= 0 ? "right" : "left";
+        npc.mode = "run";
+      } else if (distToPlayer > 60) {
+        if (!npc.wanderTarget || Math.hypot(npc.wanderTarget.x - npc.x, npc.wanderTarget.y - npc.y) < 15 || now > npc.wanderUntil) {
+          const brain = state.subject1Brain;
+          let biasX = 0, biasY = 0;
+          if (brain && brain.telemetry.length > 0) {
+            const sample = brain.telemetry[Math.floor(Math.random() * brain.telemetry.length)];
+            biasX = (sample.dx || 0) * 80;
+            biasY = (sample.dy || 0) * 80;
+          }
+          const offsetX = (Math.random() - 0.5) * 140 + biasX;
+          const offsetY = (Math.random() - 0.5) * 140 + biasY;
+          npc.wanderTarget = {
+            x: Math.max(40, Math.min(WORLD_W - 40, state.x + offsetX)),
+            y: Math.max(40, Math.min(WORLD_H - 40, state.y + offsetY))
+          };
+          npc.wanderUntil = now + 2500 + Math.random() * 2500;
+        }
+        const angle = Math.atan2(npc.wanderTarget.y - npc.y, npc.wanderTarget.x - npc.x);
+        const speed = (npc.speed || 55);
+        npc.x += Math.cos(angle) * speed * dt;
+        npc.y += Math.sin(angle) * speed * dt;
+        npc.dir = Math.cos(angle) >= 0 ? "right" : "left";
+        npc.mode = "run";
+      } else {
+        if (Math.random() < 0.008) {
+          npc.mode = "idle2";
+        } else if (npc.mode !== "idle2" || Math.random() < 0.02) {
+          npc.mode = "idle";
+        }
+      }
     }
 
     function wrapDialogueText(text, maxChars) {
@@ -3285,6 +3801,50 @@
       let img = plant.img;
       let name = plant.name;
       let index = 0;
+      const isVegetation = plant.tree || plant.biomeTree || (plant.name && (
+        plant.name.includes("tree") ||
+        plant.name.includes("sprout") ||
+        plant.name.includes("flower") ||
+        plant.name.includes("bush") ||
+        plant.name.startsWith("plant_")
+      ));
+
+      if (plant.isMysteriousBox) {
+        const now = performance.now();
+        const cx = Math.round(plant.x);
+        const cy = Math.round(plant.y - 14);
+        if (plant.isOpened) {
+          const pulse = 1 + Math.sin(now * 0.005) * 0.14;
+          ctx.save();
+          const radGrad = ctx.createRadialGradient(cx, cy, 2, cx, cy, 30 * pulse);
+          radGrad.addColorStop(0, "rgba(244, 114, 182, 0.75)");
+          radGrad.addColorStop(1, "rgba(244, 114, 182, 0)");
+          ctx.fillStyle = radGrad;
+          ctx.beginPath();
+          ctx.arc(cx, cy, 30 * pulse, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.font = `${Math.round(26 * pulse)}px system-ui, sans-serif`;
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText("💖", cx, cy);
+          ctx.font = "bold 9px system-ui, sans-serif";
+          ctx.fillStyle = "#f472b6";
+          ctx.fillText("Heart of Subject 1", cx, cy - 22);
+          ctx.restore();
+          return;
+        } else if (plant.level === 2) {
+          ctx.save();
+          const pulse = 1 + Math.sin(now * 0.008) * 0.16;
+          const radGrad = ctx.createRadialGradient(cx, cy, 2, cx, cy, 24 * pulse);
+          radGrad.addColorStop(0, "rgba(250, 204, 21, 0.7)");
+          radGrad.addColorStop(1, "rgba(250, 204, 21, 0)");
+          ctx.fillStyle = radGrad;
+          ctx.beginPath();
+          ctx.arc(cx, cy, 24 * pulse, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.restore();
+        }
+      }
       if (plant.door) {
         const idx = doorFrameIndex(plant);
         img = images[`assets/plants/build_house_door_0_${idx}/frame_0.png`];
@@ -3386,7 +3946,9 @@
           // Far tree: freeze at a static frame to save animation calc
           index = Math.floor(plant.x * 0.003 * plant.fps) % plant.count;
         } else {
-          index = Math.floor((state.t + plant.x * 0.003) * (plant.fps || 6)) % (plant.count || 1);
+          // Frame animation speed scales dynamically with the wind force from 1.0x to 2.2x
+          const animSpeedMult = (isVegetation && state.windForce > 0.01) ? (1.0 + state.windForce * 1.2) : 1.0;
+          index = Math.floor((state.t + plant.x * 0.003) * (plant.fps || 6) * animSpeedMult) % (plant.count || 1);
         }
         if (!img) img = images[`assets/plants/${name}/frame_${index}.png`];
       }
@@ -3405,6 +3967,14 @@
       if (plant.tree && plant.isAttacking) {
         sway = Math.sin(performance.now() * 0.009) * 0.12;
       }
+      // Wind sway during storm: each tree/biome-tree/sprout/bush/flower bends to the right
+      // in unison proportional to the wind force, with a high-frequency jitter/rustle.
+      // Ramping down windForce when the storm stops lets them settle back to upright.
+      if (isVegetation && state.windForce > 0.005) {
+        const baseSway = state.windForce * 0.092; // Max bend of ~5.3 degrees
+        const jitter = Math.sin(performance.now() * 0.012) * 0.015 * state.windForce; // rapid wind rustle
+        sway = baseSway + jitter;
+      }
 
       // Check if this structure is a barricade or wall eligible for Material Tint & Night-Only Aura
       const isBarricadeOrWall = plant.name && (plant.name.startsWith("magic_barricade_") || plant.name.startsWith("build_sprout_fence_") || plant.name === "build_house_wall_floor_3_2");
@@ -3414,16 +3984,15 @@
 
       // 1. Draw smooth circular organic radial aura glow BEHIND barricade ONLY AT NIGHT!
       if (isBarricadeOrWall && isNight && wallTier && wallTier.glow) {
-        ctx.save();
         const cx = Math.round(plant.x + shake);
         const cy = Math.round(plant.y - plant.h / 2);
         const auraRadius = Math.min(36, 16 + (wallTier.tier * 0.9));
         const radGrad = ctx.createRadialGradient(cx, cy, 2, cx, cy, auraRadius);
-        const hex = wallTier.glow;
-        radGrad.addColorStop(0, hex + "88"); // 50% opacity center
-        radGrad.addColorStop(0.6, hex + "33"); // 20% opacity mid
-        radGrad.addColorStop(1, hex + "00"); // 0% opacity edge
+        radGrad.addColorStop(0, wallTier.glow.color0);
+        radGrad.addColorStop(1, wallTier.glow.color1);
         ctx.fillStyle = radGrad;
+        ctx.save();
+        ctx.globalCompositeOperation = wallTier.glow.blend || "screen";
         ctx.beginPath();
         ctx.arc(cx, cy, auraRadius, 0, Math.PI * 2);
         ctx.fill();
@@ -3470,6 +4039,9 @@
         const drawH = plant.baseH || plant.h;
         ctx.save();
         ctx.translate(Math.round(plant.x + shake), Math.round(plant.y));
+        if (plant.flipX) {
+          ctx.scale(-1, 1);
+        }
         if (rotateSteps) {
           ctx.translate(0, -plant.h / 2);
           ctx.rotate(rotateSteps * Math.PI / 2);
@@ -3485,6 +4057,9 @@
             drawH
           );
         } else {
+          if (sway) {
+            ctx.rotate(sway);
+          }
           ctx.drawImage(
             drawSource,
             drawCrop.sx,
@@ -3549,6 +4124,15 @@
           ctx.strokeRect(solid.x, solid.y, solid.w, solid.h);
           ctx.restore();
         }
+      }
+
+      if (plant.isMysteriousBox && !plant.isOpened) {
+        ctx.save();
+        ctx.font = "bold 9px system-ui, sans-serif";
+        ctx.fillStyle = "#facc15";
+        ctx.textAlign = "center";
+        ctx.fillText(`📦 Box (Lv.${plant.level || 1})`, Math.round(plant.x), Math.round(plant.y - plant.h - 4));
+        ctx.restore();
       }
     }
 
@@ -3643,8 +4227,8 @@
             draw: () => drawFarmCrop(plot, stage)
           });
         }
-        // Add roaming NPCs (slimes) to the depth-sorted draw list
         for (const npc of roamingNPCs) {
+          if (npc.isHiddenAtNight) continue;
           const npcFrameObj = npcFrame(npc);
           if (!npcFrameObj) continue;
           const pad = 400;
@@ -3676,6 +4260,13 @@
             y: npc.y,
             draw: () => {
               const pNow = performance.now();
+              const finalScale = npc.scaleMultiplier !== undefined ? npc.scaleMultiplier : 1;
+
+              if (npc.isSubject1) {
+                drawPlayerAt(npcFrameObj, npc.x, npc.y, shake, finalScale, npcYOff);
+                return;
+              }
+
               const hasGlow = npc.divineAlly && pNow < npc.divineAllyUntil;
               const isFrozen = npc.frozenUntil && pNow < npc.frozenUntil;
               const isPoisoned = npc.poisonUntil && pNow < npc.poisonUntil;
@@ -3683,7 +4274,6 @@
               const isViolet = npc.voidEndTime && pNow < npc.voidEndTime;
 
               ctx.save();
-              const finalScale = npc.scaleMultiplier !== undefined ? npc.scaleMultiplier : 1;
 
               if (isFrozen) {
                 // Tint only actual sprite pixels ice-blue — no box, no outline
@@ -4722,6 +5312,70 @@
         }
         if (targeted) {
           const now = performance.now();
+          if (targeted.isMysteriousBox) {
+            if (targeted.isOpened) {
+              sayDialogue("💖 Subject 1 is already unlocked!", 8, 1800);
+              return;
+            }
+            targeted.level = (targeted.level || 1) + 1;
+            playLevelUpSound();
+            targeted.squashStartTime = now;
+            targeted.squashDuration = 360;
+
+            if (targeted.level >= 2) {
+              targeted.isOpened = true;
+              state.subject1Released = true;
+
+              const sub1 = {
+                id: "subject1",
+                name: "Subject 1",
+                base: "bubu_highres",
+                kind: "forest",
+                scaleOverride: 0.1875,
+                x: targeted.x + 24,
+                y: targeted.y + 12,
+                releaseBoxX: targeted.x + 24,
+                releaseBoxY: targeted.y + 12,
+                dir: "right",
+                mode: "idle",
+                speed: 68,
+                hp: 100,
+                maxHp: 100,
+                isSubject1: true,
+                t: performance.now(),
+                lastSpeechTime: performance.now(),
+                personality: {
+                  subject0Memory: {},
+                  playerStarters: {},
+                  lastQuestion: null,
+                  listeningKey: null,
+                  learnedRules: [],
+                  learnedAnswers: {},
+                  diaryEntries: [],
+                  vocabulary: new Set(["hello", "hi", "what", "is", "that", "why", "who", "are", "you", "am", "i", "the", "near", "tree", "slime", "plant", "water", "farm", "crop", "wood", "stone", "night", "day"])
+                }
+              };
+              try {
+                const storedMem = localStorage.getItem("subject1Memory") || localStorage.getItem("subject0Memory");
+                if (storedMem) {
+                  sub1.personality.subject0Memory = JSON.parse(storedMem);
+                }
+                const storedStarters = localStorage.getItem("playerStarters");
+                if (storedStarters) {
+                  sub1.personality.playerStarters = JSON.parse(storedStarters);
+                }
+              } catch (e) {
+                console.error("Failed to load memory", e);
+              }
+              roamingNPCs.push(sub1);
+              loadForestAnimal("bubu");
+              loadForestAnimal("bubu_highres");
+
+              spawnBloodSplats(targeted.x, targeted.y, 10);
+              sayDialogue("💖 Subject 1 (Bubu) released! Her AI brain is active!", 10, 3500);
+            }
+            return;
+          }
           targeted.level = (targeted.level || 1) + 1;
           const wallTier = getWallTier(targeted.level);
           if (wallTier) {
@@ -4805,6 +5459,12 @@
         placed.respawnMs = TREE_RESPAWN_MS + TREE_RESPAWN_JITTER_MS * 0.5;
       }
       placedSprites.push(placed);
+      if (item.isMysteriousBox) {
+        state.questBoxPlaced = true;
+        const banner = document.getElementById("quest-banner");
+        if (banner) banner.classList.add("hidden");
+        sayDialogue("📦 Mysterious Box placed! Upgrade it to open!", 8, 2200);
+      }
       playBuildSound();
       refreshWallConnections();
     }
@@ -5151,8 +5811,8 @@
       state.announcement = { title, sentence, english, info, status, extra };
       state.announcementStart = performance.now();
       state.announcementVisible = performance.now() + durationMs;
-      notifySubject0OfText(sentence);
-      notifySubject0OfText(english);
+      notifySubject1OfText(sentence);
+      notifySubject1OfText(english);
     }
 
     function updateDayNightCycle(now, dt) {
@@ -6097,6 +6757,114 @@
       }
     }
 
+    let stormAudioSource = null;
+    let stormGainNode = null;
+    let stormFilterNode = null;
+
+    function startStormAudio() {
+      if (state && state.audioMuted) return;
+      initAudio();
+      if (!audioCtx) return;
+      if (stormAudioSource) return;
+
+      const bufferSize = 4 * audioCtx.sampleRate;
+      const noiseBuffer = audioCtx.createBuffer(2, bufferSize, audioCtx.sampleRate);
+      for (let channel = 0; channel < 2; channel++) {
+        const output = noiseBuffer.getChannelData(channel);
+        for (let i = 0; i < bufferSize; i++) {
+          output[i] = Math.random() * 2 - 1;
+        }
+      }
+
+      stormAudioSource = audioCtx.createBufferSource();
+      stormAudioSource.buffer = noiseBuffer;
+      stormAudioSource.loop = true;
+
+      stormFilterNode = audioCtx.createBiquadFilter();
+      stormFilterNode.type = "lowpass";
+      stormFilterNode.frequency.setValueAtTime(350, audioCtx.currentTime);
+
+      stormGainNode = audioCtx.createGain();
+      stormGainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+      stormGainNode.gain.linearRampToValueAtTime(0.04, audioCtx.currentTime + 1.5);
+
+      stormAudioSource.connect(stormFilterNode);
+      stormFilterNode.connect(stormGainNode);
+      stormGainNode.connect(audioCtx.destination);
+
+      stormAudioSource.start();
+    }
+
+    function stopStormAudio() {
+      if (stormGainNode && audioCtx) {
+        stormGainNode.gain.setValueAtTime(stormGainNode.gain.value, audioCtx.currentTime);
+        stormGainNode.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 1.5);
+        const sourceToStop = stormAudioSource;
+        setTimeout(() => {
+          try {
+            sourceToStop.stop();
+          } catch(e) {}
+        }, 1600);
+      }
+      stormAudioSource = null;
+      stormGainNode = null;
+      stormFilterNode = null;
+    }
+
+    function playThunderSound() {
+      if (state && state.audioMuted) return;
+      initAudio();
+      if (!audioCtx) return;
+
+      const now = audioCtx.currentTime;
+
+      const osc = audioCtx.createOscillator();
+      const oscGain = audioCtx.createGain();
+      osc.type = "sawtooth";
+      osc.frequency.setValueAtTime(55, now);
+      osc.frequency.exponentialRampToValueAtTime(20, now + 2.5);
+
+      const oscFilter = audioCtx.createBiquadFilter();
+      oscFilter.type = "lowpass";
+      oscFilter.frequency.setValueAtTime(80, now);
+
+      oscGain.gain.setValueAtTime(0, now);
+      oscGain.gain.linearRampToValueAtTime(0.4, now + 0.05);
+      oscGain.gain.exponentialRampToValueAtTime(0.001, now + 2.5);
+
+      osc.connect(oscFilter);
+      oscFilter.connect(oscGain);
+      oscGain.connect(audioCtx.destination);
+
+      const bufferSize = 1.5 * audioCtx.sampleRate;
+      const noiseBuffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
+      const output = noiseBuffer.getChannelData(0);
+      for (let i = 0; i < bufferSize; i++) {
+        output[i] = Math.random() * 2 - 1;
+      }
+      const noise = audioCtx.createBufferSource();
+      noise.buffer = noiseBuffer;
+
+      const noiseFilter = audioCtx.createBiquadFilter();
+      noiseFilter.type = "bandpass";
+      noiseFilter.frequency.setValueAtTime(200, now);
+      noiseFilter.frequency.exponentialRampToValueAtTime(40, now + 1.5);
+
+      const noiseGain = audioCtx.createGain();
+      noiseGain.gain.setValueAtTime(0, now);
+      noiseGain.gain.linearRampToValueAtTime(0.3, now + 0.02);
+      noiseGain.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+
+      noise.connect(noiseFilter);
+      noiseFilter.connect(noiseGain);
+      noiseGain.connect(audioCtx.destination);
+
+      osc.start(now);
+      osc.stop(now + 3.0);
+      noise.start(now);
+      noise.stop(now + 2.0);
+    }
+
     function playSfx(id, volume = 0.22) {
       if (state && state.audioMuted) return;
       const original = document.getElementById(id);
@@ -6748,14 +7516,14 @@
       if (tool === "hoe") {
         if (!plot) {
           farmPlots.push({ x: target.x, y: target.y, crop: "", plantedAt: 0, watered: false });
-          notifySubject0OfAction("tilling soil");
+          notifySubject1OfAction("tilling soil");
         }
         return;
       }
       if (tool === "water") {
         if (plot) {
           plot.watered = true;
-          notifySubject0OfAction("watering crops");
+          notifySubject1OfAction("watering crops");
         }
         return;
       }
@@ -6765,7 +7533,7 @@
           plot.crop = crop;
           plot.plantedAt = performance.now();
           plot.watered = false;
-          notifySubject0OfAction("planting seeds");
+          notifySubject1OfAction("planting seeds");
         }
       }
     }
@@ -6844,8 +7612,8 @@
       sayDialogue(pickDialogue("attack"), 5, 2300);
       const treeTarget = hitTreeInFront();
       const slimeTarget = hitSlimeInFront();
-      if (treeTarget) notifySubject0OfAction("chopping tree");
-      if (slimeTarget) notifySubject0OfAction("fighting monsters");
+      if (treeTarget) notifySubject1OfAction("chopping tree");
+      if (slimeTarget) notifySubject1OfAction("fighting monsters");
       const target = treeTarget || slimeTarget;
       triggerPetAttacks(target);
     }
@@ -7011,6 +7779,7 @@
     function createWildNpc(base, x, y, biomeId) {
       const cfg = roster[base];
       if (!cfg || cfg.kind !== "forest") return null;
+      loadForestAnimal(base);
       const now = performance.now();
       const stats = wildNpcStats(base);
       return {
@@ -7057,35 +7826,6 @@
       WILD_NPC_BIOMES.forEach(group => {
         for (let i = 0; i < group.count; i++) spawnWildNpcForGroup(group);
       });
-      // Spawn unique Student Girl 10 as Subject 0
-      const sub0 = createWildNpc("pipoya_su1_student_female_10", SAFE_CENTER_X + 80, SAFE_CENTER_Y + 80, "safe");
-      if (sub0) {
-        sub0.isSubject0 = true;
-        sub0.name = "subject0";
-        sub0.personality = {
-          subject0Memory: {},
-          playerStarters: {},
-          lastQuestion: null,
-          listeningKey: null,
-          learnedRules: [],
-          learnedAnswers: {},
-          diaryEntries: [],
-          vocabulary: new Set(["hello", "hi", "what", "is", "that", "why", "who", "are", "you", "am", "i", "the", "near", "tree", "slime", "plant", "water", "farm", "crop", "wood", "stone", "night", "day"])
-        };
-        try {
-          const storedMem = localStorage.getItem("subject0Memory");
-          if (storedMem) {
-            sub0.personality.subject0Memory = JSON.parse(storedMem);
-          }
-          const storedStarters = localStorage.getItem("playerStarters");
-          if (storedStarters) {
-            sub0.personality.playerStarters = JSON.parse(storedStarters);
-          }
-        } catch (e) {
-          console.error("Failed to load memory", e);
-        }
-        roamingNPCs.push(sub0);
-      }
     }
 
     function openGameChat() {
@@ -7146,27 +7886,27 @@
       const text = input.value.trim();
       if (text) {
         addChatMessage("player", text);
-        triggerSubject0Response(text);
+        triggerSubject1Response(text);
       }
       closeGameChat();
     }
 
-    async function triggerSubject0Response(playerText) {
-      const sub0 = roamingNPCs.find(n => n.isSubject0);
-      if (!sub0) return;
+    async function triggerSubject1Response(playerText) {
+      const sub1 = roamingNPCs.find(n => n.isSubject1);
+      if (!sub1) return;
       
-      const dx = state.x - sub0.x;
+      const dx = state.x - sub1.x;
       if (Math.abs(dx) > 10) {
-        sub0.dir = dx > 0 ? "right" : "left";
+        sub1.dir = dx > 0 ? "right" : "left";
       }
-      sub0.mode = "idle2";
+      sub1.mode = "idle2";
 
-      function queueSubject0Reply(replyText) {
-        const indicator = addTypingIndicator("subject0");
+      function queueSubject1Reply(replyText) {
+        const indicator = addTypingIndicator("Bubu");
         const delay = Math.min(2500, Math.max(800, replyText.length * 40));
         setTimeout(() => {
           if (indicator) indicator.remove();
-          addChatMessage("subject0", replyText);
+          addChatMessage("Bubu", replyText);
         }, delay);
       }
 
@@ -7176,65 +7916,65 @@
       const isInputGibberish = gibberishWords.length > 0 && (gibberishWords.length / words.length >= 0.5);
 
       // Clarification/Question expectation state
-      if (sub0.personality.lastQuestion) {
-        const q = sub0.personality.lastQuestion;
-        sub0.personality.lastQuestion = null;
+      if (sub1.personality.lastQuestion) {
+        const q = sub1.personality.lastQuestion;
+        sub1.personality.lastQuestion = null;
         if (isInputGibberish) {
-          queueSubject0Reply("...?");
+          queueSubject1Reply("...?");
           return;
         }
-        if (!sub0.personality.subject0Memory[q]) {
-          sub0.personality.subject0Memory[q] = {};
+        if (!sub1.personality.subject0Memory[q]) {
+          sub1.personality.subject0Memory[q] = {};
         }
-        sub0.personality.subject0Memory[q][playerText] = (sub0.personality.subject0Memory[q][playerText] || 0) + 1;
+        sub1.personality.subject0Memory[q][playerText] = (sub1.personality.subject0Memory[q][playerText] || 0) + 1;
         try {
-          localStorage.setItem("subject0Memory", JSON.stringify(sub0.personality.subject0Memory));
+          localStorage.setItem("subject1Memory", JSON.stringify(sub1.personality.subject0Memory));
         } catch (e) {}
 
-        queueSubject0Reply(`i understand now. "${q}" means "${playerText}".`);
+        queueSubject1Reply(`i understand now. "${q}" means "${playerText}".`);
         return;
       }
 
       // Listening state for a mirrored key
-      if (sub0.personality.listeningKey) {
-        const lKey = sub0.personality.listeningKey;
-        sub0.personality.listeningKey = null;
+      if (sub1.personality.listeningKey) {
+        const lKey = sub1.personality.listeningKey;
+        sub1.personality.listeningKey = null;
         if (!isInputGibberish) {
-          if (!sub0.personality.subject0Memory[lKey]) {
-            sub0.personality.subject0Memory[lKey] = {};
+          if (!sub1.personality.subject0Memory[lKey]) {
+            sub1.personality.subject0Memory[lKey] = {};
           }
-          sub0.personality.subject0Memory[lKey][playerText] = (sub0.personality.subject0Memory[lKey][playerText] || 0) + 1;
+          sub1.personality.subject0Memory[lKey][playerText] = (sub1.personality.subject0Memory[lKey][playerText] || 0) + 1;
           try {
-            localStorage.setItem("subject0Memory", JSON.stringify(sub0.personality.subject0Memory));
+            localStorage.setItem("subject1Memory", JSON.stringify(sub1.personality.subject0Memory));
           } catch (e) {}
         }
       }
 
-      // Track Conversation Starters (if no player/npc message for 5 seconds)
+      // Track Conversation Starters
       const now = performance.now();
       const isConversationStarter = (!state.lastChatMessageAt || (now - state.lastChatMessageAt > 5000));
       if (isConversationStarter && !isInputGibberish && normalizedPhrase) {
-        sub0.personality.playerStarters[normalizedPhrase] = (sub0.personality.playerStarters[normalizedPhrase] || 0) + 1;
+        sub1.personality.playerStarters[normalizedPhrase] = (sub1.personality.playerStarters[normalizedPhrase] || 0) + 1;
         try {
-          localStorage.setItem("playerStarters", JSON.stringify(sub0.personality.playerStarters));
+          localStorage.setItem("playerStarters", JSON.stringify(sub1.personality.playerStarters));
         } catch (e) {}
       }
 
       // Gibberish Filter -> Proactive Clarification Request
       if (isInputGibberish) {
         const targetGib = gibberishWords[0];
-        sub0.personality.lastQuestion = targetGib;
-        queueSubject0Reply(`what do u mean by "${targetGib}"?`);
+        sub1.personality.lastQuestion = targetGib;
+        queueSubject1Reply(`what do u mean by "${targetGib}"?`);
         return;
       }
 
       if (!normalizedPhrase) {
-        queueSubject0Reply("...?");
+        queueSubject1Reply("...?");
         return;
       }
 
       // Check direct memory match
-      const pool = sub0.personality.subject0Memory[normalizedPhrase];
+      const pool = sub1.personality.subject0Memory[normalizedPhrase];
       if (pool && Object.keys(pool).length > 0) {
         const options = Object.keys(pool);
         const weights = Object.values(pool);
@@ -7248,7 +7988,7 @@
             break;
           }
         }
-        queueSubject0Reply(chosen);
+        queueSubject1Reply(chosen);
         return;
       }
 
@@ -7261,7 +8001,7 @@
           let foundMatch = false;
           for (let len = phraseTokens.length - segmentIndex; len >= 1; len--) {
             const part = phraseTokens.slice(segmentIndex, segmentIndex + len).join(" ");
-            const partPool = sub0.personality.subject0Memory[part];
+            const partPool = sub1.personality.subject0Memory[part];
             if (partPool && Object.keys(partPool).length > 0) {
               const bestOption = Object.keys(partPool).reduce((a, b) => partPool[a] > partPool[b] ? a : b);
               segments.push(bestOption);
@@ -7274,31 +8014,31 @@
         }
         if (segments.length > 0) {
           const combinedReply = segments.join(". ");
-          queueSubject0Reply(combinedReply);
-          sub0.personality.listeningKey = normalizedPhrase;
+          queueSubject1Reply(combinedReply);
+          sub1.personality.listeningKey = normalizedPhrase;
           return;
         }
       }
 
       // Mirror fallback
-      queueSubject0Reply(playerText);
-      sub0.personality.listeningKey = normalizedPhrase;
+      queueSubject1Reply(playerText);
+      sub1.personality.listeningKey = normalizedPhrase;
     }
 
-    function notifySubject0OfAction(actionName) {
+    function notifySubject1OfAction(actionName) {
       if (state.playerActionCounts[actionName] !== undefined) {
         state.playerActionCounts[actionName]++;
       }
-      const sub0 = roamingNPCs.find(n => n.isSubject0);
-      if (sub0 && !sub0.dead) {
-        const dist = Math.hypot(sub0.x - state.x, sub0.y - state.y);
+      const sub1 = roamingNPCs.find(n => n.isSubject1);
+      if (sub1 && !sub1.dead) {
+        const dist = Math.hypot(sub1.x - state.x, sub1.y - state.y);
         if (dist <= 250) {
-          sub0.personality.learnedRules.push({
+          sub1.personality.learnedRules.push({
             action: actionName,
             time: performance.now()
           });
-          if (sub0.personality.learnedRules.length > 5) {
-            sub0.personality.learnedRules.shift();
+          if (sub1.personality.learnedRules.length > 5) {
+            sub1.personality.learnedRules.shift();
           }
           // Write action to diary
           let diaryMsg = "";
@@ -7314,45 +8054,45 @@
           } else if (actionName === "fighting monsters") {
             diaryMsg = `day ${dayNum}: player fought monsters. they are brave and protect me.`;
           }
-          if (diaryMsg && sub0.personality.diaryEntries) {
-            if (!sub0.personality.diaryEntries.includes(diaryMsg)) {
-              sub0.personality.diaryEntries.push(diaryMsg);
-              if (sub0.personality.diaryEntries.length > 8) {
-                sub0.personality.diaryEntries.shift();
+          if (diaryMsg && sub1.personality.diaryEntries) {
+            if (!sub1.personality.diaryEntries.includes(diaryMsg)) {
+              sub1.personality.diaryEntries.push(diaryMsg);
+              if (sub1.personality.diaryEntries.length > 8) {
+                sub1.personality.diaryEntries.shift();
               }
             }
           }
 
-          // Proactive curiosity: Ask why if we do not know the motive
-          if (!sub0.personality.learnedAnswers[actionName] && !sub0.personality.lastQuestion) {
+          // Proactive curiosity: Ask why Bubu saw you do it
+          if (!sub1.personality.learnedAnswers[actionName] && !sub1.personality.lastQuestion) {
             setTimeout(() => {
-              if (sub0.dead) return;
-              sub0.personality.lastQuestion = actionName;
-              addChatMessage("subject0", `i saw you ${actionName}. why did you do that?`);
-              const dx = state.x - sub0.x;
+              if (sub1.dead) return;
+              sub1.personality.lastQuestion = actionName;
+              addChatMessage("Bubu", `i saw you ${actionName}. why did you do that?`);
+              const dx = state.x - sub1.x;
               if (Math.abs(dx) > 10) {
-                sub0.dir = dx > 0 ? "right" : "left";
+                sub1.dir = dx > 0 ? "right" : "left";
               }
-              sub0.mode = "idle2";
+              sub1.mode = "idle2";
             }, 1000);
-          } else if (sub0.personality.learnedAnswers[actionName]) {
+          } else if (sub1.personality.learnedAnswers[actionName]) {
             setTimeout(() => {
-              if (sub0.dead) return;
-              addChatMessage("subject0", `i know you did ${actionName} ${sub0.personality.learnedAnswers[actionName]}!`);
+              if (sub1.dead) return;
+              addChatMessage("Bubu", `i know you did ${actionName} ${sub1.personality.learnedAnswers[actionName]}!`);
             }, 1200);
           }
         }
       }
     }
 
-    function notifySubject0OfText(text) {
+    function notifySubject1OfText(text) {
       if (!text) return;
-      const sub0 = roamingNPCs.find(n => n.isSubject0);
-      if (!sub0 || sub0.dead) return;
+      const sub1 = roamingNPCs.find(n => n.isSubject1);
+      if (!sub1 || sub1.dead) return;
       
       const words = text.toLowerCase().replace(/[^a-z0-9\s]/g, "").split(/\s+/).filter(w => w.length > 1);
       words.forEach(w => {
-        sub0.personality.vocabulary.add(w);
+        sub1.personality.vocabulary.add(w);
       });
     }
 
@@ -7562,6 +8302,45 @@
 
       for (let i = roamingNPCs.length - 1; i >= 0; i--) {
         const npc = roamingNPCs[i];
+        if (npc.isSubject1) {
+          updateSubject1AI(npc, now, dt);
+          npc.t += dt;
+          continue;
+        }
+
+        const isNight = state.timeOfDay === "night";
+        const isHidingNpc = !npc.isNightMonster && !npc.isSubject1 && !npc.divineAlly && !npc.dead;
+        if (isHidingNpc) {
+          if (isNight) {
+            const dx = npc.x - state.x;
+            const dy = npc.y - state.y;
+            const dist = Math.hypot(dx, dy) || 1;
+            
+            if (npc.isHiddenAtNight) {
+              continue; // Skip all processing for hidden NPCs
+            }
+            
+            if (dist > 400) {
+              npc.isHiddenAtNight = true;
+              npc.mode = "idle";
+              continue;
+            } else {
+              // Run away from player POV
+              const runSpeed = (npc.speed || 55) * 1.5;
+              npc.dir = dx >= 0 ? "right" : "left";
+              npc.mode = "run";
+              npc.x = Math.max(60, Math.min(WORLD_W - 60, npc.x + (dx / dist) * runSpeed * dt));
+              npc.y = Math.max(60, Math.min(WORLD_H - 60, npc.y + (dy / dist) * runSpeed * dt));
+              npc.t += dt;
+              continue;
+            }
+          } else {
+            if (npc.isHiddenAtNight) {
+              npc.isHiddenAtNight = false;
+            }
+          }
+        }
+
         npc.scaleMultiplier = 1.0;
         
         if (!npc.dead) {
@@ -7786,52 +8565,7 @@
           }
         }
         
-        if (npc.isSubject0 && !npc.dead) {
-          const dist = Math.hypot(npc.x - state.x, npc.y - state.y);
-          if (dist <= 350 && !state.chatOpen && !npc.personality.lastQuestion) {
-            const lastChatTime = state.lastChatMessageAt || 0;
-            if (now - lastChatTime > 5000) {
-              state.lastChatMessageAt = now; // Prevent duplicate triggers immediately
-              
-              let starter = "hi";
-              const memoryKeys = Object.keys(npc.personality.subject0Memory);
-              if (memoryKeys.length > 0) {
-                const weights = memoryKeys.map(key => {
-                  const starterCount = npc.personality.playerStarters[key] || 0;
-                  return starterCount > 0 ? starterCount : 0.2;
-                });
-                const totalWeight = weights.reduce((a, b) => a + b, 0);
-                let rand = Math.random() * totalWeight;
-                for (let i = 0; i < memoryKeys.length; i++) {
-                  rand -= weights[i];
-                  if (rand <= 0) {
-                    starter = memoryKeys[i];
-                    break;
-                  }
-                }
-              } else {
-                const vocabArray = Array.from(npc.personality.vocabulary);
-                starter = vocabArray[Math.floor(Math.random() * vocabArray.length)];
-              }
 
-              const dx = state.x - npc.x;
-              if (Math.abs(dx) > 10) {
-                npc.dir = dx > 0 ? "right" : "left";
-              }
-              npc.mode = "idle2";
-              npc.nextDecisionAt = now + 1500;
-
-              // Proactive typing delay simulation
-              const indicator = addTypingIndicator("subject0");
-              const delay = Math.min(2000, Math.max(700, starter.length * 45));
-              setTimeout(() => {
-                if (indicator) indicator.remove();
-                addChatMessage("subject0", starter);
-                npc.personality.listeningKey = normalizePhrase(starter);
-              }, delay);
-            }
-          }
-        }
         
         // Creepy background sounds for Slasher charge/run and Spider skitter
         if (!npc.dead) {
@@ -7938,11 +8672,12 @@
         if (npc.mode === "attack" && npc.damageTarget && !npc.damageDealt) {
           const cfg = roster[npc.base];
           if (cfg && cfg.kind === "forest") {
-            const frames = (forestFrames[npc.base] && forestFrames[npc.base]["attack-" + npc.dir]) || [];
+            const anim = spritesheetsMetadata[npc.base]?.animations["attack-" + npc.dir];
+            const framesLength = anim ? anim.count : 0;
             const fps = (cfg.attackFps || 9) * (npc.animSpeedOverride || 1.0);
             const index = Math.floor(((now - npc.attackStarted) / 1000) * fps);
             const isKnight = ["knight_orange", "knight_green", "knight_blue"].includes(npc.base);
-            const shouldTrigger = isKnight ? (index >= 1) : (frames.length === 0 || index >= frames.length - 1 || now >= npc.attackUntil);
+            const shouldTrigger = isKnight ? (index >= 1) : (framesLength === 0 || index >= framesLength - 1 || now >= npc.attackUntil);
             if (shouldTrigger) {
               npc.damageDealt = true;
               const tTarget = npc.damageTarget;
@@ -8302,37 +9037,7 @@
             npc.nextDecisionAt = now + 600 + Math.random() * 2400;
           } else {
             const rand = Math.random();
-            if (npc.isSubject0) {
-              const totalActions = Object.values(state.playerActionCounts).reduce((a, b) => a + b, 0);
-              if (totalActions > 5 && Math.random() < 0.60) {
-                const roll = Math.random() * totalActions;
-                let current = 0;
-                let chosenAction = "chopping tree";
-                for (const [act, count] of Object.entries(state.playerActionCounts)) {
-                  current += count;
-                  if (roll <= current) {
-                    chosenAction = act;
-                    break;
-                  }
-                }
-                if (chosenAction === "chopping tree" || chosenAction === "fighting monsters") {
-                  npc.mode = "attack";
-                  npc.nextDecisionAt = now + 600;
-                } else {
-                  npc.mode = "idle2";
-                  npc.nextDecisionAt = now + 1200;
-                }
-              } else {
-                const roll = Math.random();
-                if (roll < 0.30) {
-                  npc.mode = "idle2";
-                  npc.nextDecisionAt = now + 400 + Math.random() * 1400;
-                } else {
-                  npc.mode = "idle";
-                  npc.nextDecisionAt = now + 400 + Math.random() * 1400;
-                }
-              }
-            } else if (npc.base === "cutie_sheep" && rand < 0.20) {
+            if (npc.base === "cutie_sheep" && rand < 0.20) {
               npc.mode = "attack";
               npc.nextDecisionAt = now + 800;
             } else if (npc.base === "cutie_sheep" && rand < 0.60) {
@@ -9007,6 +9712,9 @@
       // If another setCurrent was called while we were loading, bail out
       if (token !== setCurrentToken) return;
       state.current = name;
+      // Clear the offscreen canvas cache so stale frames from the old character
+      // don't ghost into the new character's first rendered frames.
+      Object.keys(frameCache).forEach(k => delete frameCache[k]);
       if (cfg.sideView) state.dir = sideFacingDir(state.dir);
       state.attackDir = currentFacingDir();
       state.stopStarted = 0;
@@ -9221,6 +9929,117 @@
       clampCamera();
     }
 
+    function updateStorm(now, dt) {
+      if (!state.rainParticles) state.rainParticles = [];
+      if (state.storm) {
+        if (!stormAudioSource) {
+          startStormAudio();
+        }
+
+        // Compute dynamic wind force based on sine-wave gust simulation
+        const tVal = now * 0.001;
+        const gustEnv = 0.5 + 0.5 * Math.sin(tVal * 0.18); // slow swelling wind envelope (cycles every ~35s)
+        const gustPulse = 0.5 + 0.5 * Math.sin(tVal * 1.3); // rapid gust puffs (cycles every ~5s)
+        const targetWindForce = Math.max(0.08, gustEnv * (0.2 + 0.8 * gustPulse));
+        
+        // Smoothly interpolate current windForce to avoid sudden jumps
+        if (state.windForce === undefined) state.windForce = 0.08;
+        state.windForce += (targetWindForce - state.windForce) * 0.05;
+
+        // Modulate Web Audio lowpass filter & volume directly based on windForce
+        if (audioCtx) {
+          if (stormFilterNode) {
+            // Cutoff moves between 350Hz (low whistle) and 1300Hz (loud gust scream)
+            const targetFreq = 350 + state.windForce * 950;
+            stormFilterNode.frequency.setTargetAtTime(targetFreq, audioCtx.currentTime, 0.22);
+          }
+          if (stormGainNode) {
+            // Volume ranges between 0.02 (faint wind) and 0.26 (heavy gust roar)
+            const targetGain = 0.02 + state.windForce * 0.24;
+            stormGainNode.gain.setTargetAtTime(targetGain, audioCtx.currentTime, 0.22);
+          }
+        }
+        
+        if (!state.nextLightningTime) {
+          state.nextLightningTime = now + 4000 + Math.random() * 6000;
+        }
+        
+        if (now > state.nextLightningTime) {
+          state.nextLightningTime = now + 6000 + Math.random() * 10000; // next flash in 6-16s
+          state.screenShakeUntil = now + 400 + Math.random() * 400;
+          playThunderSound();
+          
+          state.lightningFlashUntil = now + 120;
+          state.lightningFlashIntensity = 0.75;
+          
+          setTimeout(() => {
+            if (state.storm) {
+              state.lightningFlashUntil = performance.now() + 160;
+              state.lightningFlashIntensity = 0.45;
+            }
+          }, 200);
+        }
+
+        // Spawn rain particles in world space near camera
+        if (state.scene === "outside") {
+          const maxParticles = 280; // doubled for denser rain
+          while (state.rainParticles.length < maxParticles) {
+            const spawnX = state.cameraX - 150 + Math.random() * (VIEW_W + 350);
+            const spawnY = state.cameraY - 200 + Math.random() * 120;
+            const targetY = state.cameraY + Math.random() * (VIEW_H + 80);
+            state.rainParticles.push({
+              x: spawnX,
+              y: spawnY,
+              targetY: targetY,
+              speed: 480 + Math.random() * 220,
+              width: 0.8 + Math.random() * 1.4,   // varied stroke width
+              length: 9 + Math.random() * 10,      // varied drop length
+              opacity: 0.45 + Math.random() * 0.45, // varied opacity
+              state: "falling",
+              splashFrame: 0,
+              splashTime: 0
+            });
+          }
+        }
+      } else {
+        if (stormAudioSource) {
+          stopStormAudio();
+        }
+        state.nextLightningTime = 0;
+        
+        if (state.windForce !== undefined && state.windForce > 0.01) {
+          state.windForce += (0 - state.windForce) * 0.08;
+        } else {
+          state.windForce = 0;
+        }
+      }
+
+      // Simulate and update rain particles
+      const activeParticles = [];
+      for (const p of state.rainParticles) {
+        if (p.state === "falling") {
+          p.y += p.speed * dt;
+          p.x -= p.speed * dt * 0.22; // slanted wind
+          
+          if (p.y >= p.targetY) {
+            p.state = "splashing";
+            p.splashTime = now;
+            p.splashFrame = 0;
+            activeParticles.push(p);
+          } else if (p.y < state.cameraY + VIEW_H + 100) {
+            activeParticles.push(p);
+          }
+        } else if (p.state === "splashing") {
+          const elapsed = now - p.splashTime;
+          p.splashFrame = Math.floor(elapsed / 45); // 45ms per frame
+          if (p.splashFrame < 6) {
+            activeParticles.push(p);
+          }
+        }
+      }
+      state.rainParticles = activeParticles;
+    }
+
     function update(now) {
       // FPS calculation
       if (!state.fpsLastTime) {
@@ -9241,6 +10060,7 @@
       const dt = Math.min((now - state.last) / 1000, 0.05);
       state.last = now;
       state.t += dt;
+      updateStorm(now, dt);
 
       // Auto-hide game chat log after 6 seconds of no activity
       const chatLog = document.getElementById("game-chat-log");
@@ -9309,6 +10129,28 @@
         state.dir = dy > 0 ? "front" : "back";
       } else if (dx) {
         state.dir = dx > 0 ? "right" : "left";
+      }
+
+      // Player telemetry recording for Subject 1 AI brain (until Subject 1 is released)
+      if (!state.subject1Released) {
+        if (!state.lastBrainTick) state.lastBrainTick = now;
+        if (now - state.lastBrainTick >= 100) {
+          state.lastBrainTick = now;
+          const brain = state.subject1Brain;
+          if (attacking) brain.attackCount++;
+          if (state.dir) brain.attackDirCount[state.dir] = (brain.attackDirCount[state.dir] || 0) + 1;
+          brain.telemetry.push({
+            x: state.x,
+            y: state.y,
+            dx: dx,
+            dy: dy,
+            dir: state.dir,
+            mode: state.mode,
+            moving: Boolean(moving),
+            attacking: Boolean(attacking)
+          });
+          if (brain.telemetry.length > 500) brain.telemetry.shift();
+        }
       }
       if (attacking) {
         state.stopUntil = 0;
@@ -9436,6 +10278,10 @@
           }
         }
         
+        // Storm rain particles drawn BEFORE the night overlay so they are
+        // correctly darkened by the night gradient (looks natural, not glowing above darkness)
+        drawWorldStorm(now);
+
         // Night shadow overlay & Soft Radial Flashlight (world space)
         if (state.timeOfDay === "night") {
           ctx.save();
@@ -9490,6 +10336,10 @@
         ctx.restore();
       }
       
+      // drawScreenStorm is now called just before the biome/anime color-grade filters
+      // so the storm's gloomy overlay & lightning flash sit underneath those filters,
+      // making the atmosphere feel correctly tinted by the biome colour and night tone.
+
       // Draw typewriter scary announcement (Glitching English/Indo Translation card, no box)
       if (state.announcement && now < state.announcementVisible) {
         ctx.save();
@@ -9628,10 +10478,63 @@
 
       // drawJoystick(); // hidden but still functional
       captureStudySnapshot(now);
+      // Storm screen overlay drawn BEFORE biome/anime filters so the gloomy dark
+      // atmosphere and lightning flash are tinted by the biome colour grade.
+      if (state.storm) drawScreenStorm(now);
       drawBiomeScreenFilter();
       drawAnimeColorGrade();
       drawTransition();
       drawStudyCaptureOverlay(now);
+    }
+
+    function drawWorldStorm(now) {
+      if (state.scene !== "outside" || !state.storm || !state.rainParticles) return;
+      const rainImg = images["assets/Rain effect/rain effect.png"];
+      // Wind angle: 20° slant so rain clearly blows sideways
+      const windAngle = 0.35; // radians ~20 degrees
+      const sinA = Math.sin(windAngle);
+      const cosA = Math.cos(windAngle);
+      ctx.save();
+      for (const p of state.rainParticles) {
+        if (p.state === "falling") {
+          const len = p.length || 10;
+          const op  = p.opacity || 0.65;
+          const w   = p.width  || 1.2;
+          ctx.strokeStyle = `rgba(200, 225, 255, ${op})`;
+          ctx.lineWidth = w;
+          ctx.lineCap = "round";
+          ctx.beginPath();
+          ctx.moveTo(p.x, p.y);
+          // Tail goes up-left along the wind angle
+          ctx.lineTo(p.x - sinA * len, p.y - cosA * len);
+          ctx.stroke();
+        } else if (p.state === "splashing" && rainImg) {
+          ctx.drawImage(
+            rainImg,
+            p.splashFrame * 50, 0, 50, 50,
+            Math.round(p.x - 5), Math.round(p.targetY - 6), 10, 10
+          );
+        }
+      }
+      ctx.restore();
+    }
+
+    function drawScreenStorm(now) {
+      // 1. Gloomy dark atmospheric overlay (affects both inside and outside)
+      ctx.save();
+      const gloomOpacity = state.scene === "interior" ? 0.16 : 0.25;
+      ctx.fillStyle = `rgba(12, 16, 38, ${gloomOpacity})`;
+      ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+      ctx.restore();
+
+      // 2. Lightning screen flash (visible everywhere)
+      if (now < state.lightningFlashUntil) {
+        ctx.save();
+        const flashIntensity = state.lightningFlashIntensity || 0.7;
+        ctx.fillStyle = `rgba(255, 255, 255, ${flashIntensity})`;
+        ctx.fillRect(0, 0, VIEW_W, VIEW_H);
+        ctx.restore();
+      }
     }
 
     function drawTransition() {
@@ -9698,6 +10601,8 @@
     }
 
     async function start() {
+      console.log("🚀 Initializing Ethereal RPG start()...");
+      console.time("Total Start Time");
       initDitherPatterns();
       resizeSceneCanvas();
 
@@ -9708,13 +10613,26 @@
       // Show version on loading title
       document.getElementById("loading-title").textContent = `✨ Ethereal RPG v${APP_VERSION}`;
 
+      loadingSub.textContent = "Loading configuration…";
+      try {
+        const resp = await fetch(assetUrl("assets/spritesheets_metadata.json"));
+        if (resp.ok) {
+          spritesheetsMetadata = await resp.json();
+          console.log(`Loaded metadata for ${Object.keys(spritesheetsMetadata).length} character spritesheets.`);
+        } else {
+          console.error("Failed to load spritesheets_metadata.json");
+        }
+      } catch (err) {
+        console.error("Error loading spritesheets_metadata.json:", err);
+      }
+
+      console.time("Step 1: Collect Srcs");
       // ── Step 1: collect all srcs ──────────────────────────
       function allCharacterSrcs() {
         const srcs = new Set();
         for (const [, cfg] of Object.entries(roster)) {
           if (cfg.kind === "forest") {
-            const paths = getForestFramePaths(cfg.base);
-            Object.values(paths).flat().forEach(s => srcs.add(s));
+            srcs.add(`assets/${cfg.base}/spritesheet.png`);
           } else if (cfg.src) {
             srcs.add(cfg.src);
           }
@@ -9728,16 +10646,20 @@
         const uniquePlants = new Map();
         [...plantSprites, ...biomeTrees, ...interiorSprites,
          ...buildPalette.filter(i => !i.erase), ...buildConnectionSprites]
-          .forEach(item => uniquePlants.set(`${item.name}:${item.count}`, item));
+          .forEach(item => {
+            if (item && item.name) {
+              uniquePlants.set(`${item.name}:${item.count}`, item);
+            }
+          });
         [...uniquePlants.values()].forEach(plant => {
           [plant, ...(plant.variants || [])].forEach(item => {
-            if (item.name && item.name.startsWith("magic_barricade_")) {
+            if (item && item.name && item.name.startsWith("magic_barricade_")) {
               const parts = item.name.split("_");
               const variant = parts[2];
               const dir = parts[3];
               const prefix = dir === "down" ? "D" : dir === "side" ? "S" : "U";
               out.add(`assets/magic_traps/2 Barricades/${prefix}_${variant}.png`);
-            } else {
+            } else if (item && item.name) {
               Array.from({ length: item.count || plant.count || 1 }, (_, i) =>
                 out.add(`assets/plants/${item.name}/frame_${i}.png`)
               );
@@ -9814,36 +10736,52 @@
           return 0;
         });
       })();
+      console.timeEnd("Step 1: Collect Srcs");
       const mapStrips = Math.ceil(WORLD_H / 512);
       const total = allSrcs.length + mapStrips;
+      console.log(`📦 Assets to load: ${allSrcs.length} total, including ${coreSrcs.length} core, ${plantSrcs.length} plants, and ${charSrcs.length} character frames.`);
       let loaded = 0;
+      let lastLogPct = 0;
 
       function onProgress(name) {
         loaded++;
         const pct = Math.round((loaded / total) * 100);
+        if (pct >= lastLogPct + 10) {
+          lastLogPct = Math.floor(pct / 10) * 10;
+          console.log(`⏳ Preloader progress: ${pct}% (${loaded}/${total} loaded)`);
+        }
         loadingBar.style.width = pct + "%";
         loadingPct.textContent = pct + "%";
         const match = name.match(/assets\/([^/]+)\//);
         if (match) loadingSub.textContent = `Loading ${match[1].replace(/_/g, " ")}…`;
       }
 
-      // ── Step 2: load assets in batches ────────────────────
-      const BATCH = 8; // smaller batches = more UI updates on mobile
-      for (let i = 0; i < allSrcs.length; i += BATCH) {
-        const batch = allSrcs.slice(i, i + BATCH);
-        await Promise.all(batch.map(src =>
-          loadImageCached(src).then(() => onProgress(src)).catch(() => onProgress(src))
-        ));
+      console.log("⚡ Starting Step 2: Load assets in parallel...");
+      console.time("Step 2: Load Assets");
+      // ── Step 2: load assets in parallel using a sliding window concurrency pool ──
+      const CONCURRENCY = 48; 
+      let activeIndex = 0;
+      const loadNext = async () => {
+        if (activeIndex >= allSrcs.length) return;
+        const index = activeIndex++;
+        const src = allSrcs[index];
+        try {
+          await loadImageCached(src);
+        } catch(e) {}
+        onProgress(src);
+        await loadNext();
+      };
+      const workers = [];
+      for (let w = 0; w < Math.min(CONCURRENCY, allSrcs.length); w++) {
+        workers.push(loadNext());
       }
+      await Promise.all(workers);
+      console.timeEnd("Step 2: Load Assets");
 
-      // Mark all forest animals as fully loaded
-      for (const [, cfg] of Object.entries(roster)) {
-        if (cfg.kind === "forest") {
-          if (!forestFrames[cfg.base]) forestFrames[cfg.base] = getForestFramePaths(cfg.base);
-          forestFrames[cfg.base].loaded = true;
-        }
-      }
+      // Spritesheets fully loaded and ready
 
+      console.log("🗺️ Starting Step 3: Generating map & setup...");
+      console.time("Step 3: Map & Setup");
       // ── Step 3: skip full-world pre-render — chunks built on demand ──
       loadingSub.textContent = "Generating map…";
       await new Promise(resolve => setTimeout(resolve, 30));
@@ -9864,6 +10802,9 @@
       seedDemoFarm();
       initRoamingNPCs();
       await setCurrent("fox");
+      console.timeEnd("Step 3: Map & Setup");
+      console.timeEnd("Total Start Time");
+      console.log("🎮 Game loop started successfully!");
       requestAnimationFrame(update);
 
       // Fade out loading screen
@@ -9993,6 +10934,23 @@
         playUiClickSound();
       });
     }
+
+    const stormToggleBtn = document.getElementById("toggle-storm-btn");
+    if (stormToggleBtn) {
+      stormToggleBtn.addEventListener("click", () => {
+        state.storm = !state.storm;
+        if (state.storm) {
+          stormToggleBtn.textContent = "⛈️ Storm: ON";
+          stormToggleBtn.style.background = "#d1ffd1";
+          stormToggleBtn.style.color = "#006400";
+        } else {
+          stormToggleBtn.textContent = "⛈️ Storm: OFF";
+          stormToggleBtn.style.background = "#fffcf8";
+          stormToggleBtn.style.color = "#5c4b37";
+        }
+        playUiClickSound();
+      });
+    }
     
     const damageSlider = document.getElementById("player-damage-slider");
     const damageVal = document.getElementById("player-damage-value");
@@ -10011,6 +10969,16 @@
         const val = parseInt(e.target.value, 10);
         state.petChance = val / 100;
         petChanceVal.textContent = `${val}%`;
+      });
+    }
+
+    const tummyWidenSlider = document.getElementById("tummy-widen-slider");
+    const tummyWidenVal = document.getElementById("tummy-widen-value");
+    if (tummyWidenSlider && tummyWidenVal) {
+      tummyWidenSlider.addEventListener("input", (e) => {
+        const val = parseFloat(e.target.value);
+        state.tummyWiden = val;
+        tummyWidenVal.textContent = `${val.toFixed(2)}x`;
       });
     }
 

@@ -36,3 +36,5 @@
 ## August 6, 2026
 - Added windForce decay on storm termination to let trees smoothly settle back upright instead of freezing.
 
+## August 7, 2026
+- Completed high-resolution frame pre-slicing cache system for Bubu & Dudu High-Res to resolve zooming lag while maintaining HD details.
